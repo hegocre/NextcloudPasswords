@@ -21,5 +21,5 @@ jobs:
         run: ./gradlew clean && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v2
         with:
-          name: app-debug.apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: app-universal-debug.apk
+          path: app/build/outputs/apk/debug/app-universal-debug.apk
