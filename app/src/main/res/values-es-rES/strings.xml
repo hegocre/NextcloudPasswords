@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nextcloud Passwords</string>
+    <string name="site_favicon">Icono del sitio</string>
+    <string name="login">Iniciar sesión</string>
+    <string name="server_url">Dirección del servidor</string>
+    <string name="url_cannot_be_empty">La dirección no puede estar vacía</string>
+    <string name="url_must_start_https">La dirección debe comenzar por https://</string>
+    <string name="example">Ejemplo</string>
+    <string name="log_out">Cerrar sesión</string>
+    <string name="are_you_sure_log_out">¿Seguro que desea cerrar sessión?</string>
+    <string name="password">Contraseña</string>
+    <string name="enter_master_password">Introduzca la contraseña</string>
+    <string name="show_password">Mostrar contraseña</string>
+    <string name="passwords">Contraseñas</string>
+    <string name="favorites">Favoritas</string>
+    <string name="folders">Carpetas</string>
+    <string name="password_copied">Contraseña copiada</string>
+    <string name="username_copied">Nombre de usuario copiado</string>
+    <string name="url_copied">Dirección copiada</string>
+    <string name="error_logging_in">Error iniciando sesión</string>
+    <string name="search">Buscar</string>
+    <string name="autofill">Autocompletar</string>
+    <string name="settings">Configuración</string>
+    <string name="autofill_setting_subtitle">Activar el servicio de autocompletar</string>
+    <string name="general">General</string>
+    <string name="show_icons_preference_title">Mostrar iconos</string>
+    <string name="show_icons_preference_subtitle">Mostrar iconos de los sitios web</string>
+    <string name="start_view_preference_title">Vista inicial</string>
+    <string name="client_deauthorized_toast">Demasiados intentos incorrectos. Por favor, vuelva a iniciar sesión</string>
+    <string name="autofill_service">Servicio de autocompletar</string>
+</resources>
