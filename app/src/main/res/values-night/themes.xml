@@ -1,7 +1,4 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Theme.NextcloudPasswords" parent="android:Theme.Material.NoActionBar">
-        <item name="android:statusBarColor">@color/DarkBars</item>
-        <item name="android:navigationBarColor">@color/DarkBars</item>
-    </style>
+    <style name="Theme.NextcloudPasswords" parent="android:Theme.Material.NoActionBar" />
 </resources>

@@ -6,6 +6,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
+import com.hegocre.nextcloudpasswords.ui.theme.NCPTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -54,6 +55,11 @@ class PreferencesManager private constructor(context: Context) {
 
     suspend fun setStartScreen(value: String) = setPreference(PreferenceKeys.START_SCREEN, value)
 
+    fun getUserTheme(): Flow<String> =
+        getPreference(PreferenceKeys.USER_THEME, NCPTheme.System.name)
+
+    suspend fun setUserTheme(value: String) = setPreference(PreferenceKeys.USER_THEME, value)
+
     private fun <T> getPreference(key: Preferences.Key<T>, defaultValue: T): Flow<T> =
         sharedPreferences.data
             .catch { exception ->
@@ -84,6 +90,7 @@ class PreferencesManager private constructor(context: Context) {
         private object PreferenceKeys {
             val SHOW_ICONS = booleanPreferencesKey("SHOW_ICONS")
             val START_SCREEN = stringPreferencesKey("START_SCREEN")
+            val USER_THEME = stringPreferencesKey("USER_THEME")
         }
     }
 }

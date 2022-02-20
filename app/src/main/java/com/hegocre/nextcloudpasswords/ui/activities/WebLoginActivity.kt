@@ -9,14 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.ui.components.LoginWebView
-import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.ui.theme.ThemeProvider
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -77,8 +76,13 @@ fun NCPWebLoginScreen(
     onLoginUrl: (String) -> Unit,
     url: String = ""
 ) {
+    val context = LocalContext.current
+
+    val theme by ThemeProvider.getInstance(context).currentTheme.collectAsState()
+
     val (loading, setLoading) = remember { mutableStateOf(false) }
-    NextcloudPasswordsTheme {
+
+    theme.Theme {
         Scaffold { innerPadding ->
             Box(
                 modifier = Modifier

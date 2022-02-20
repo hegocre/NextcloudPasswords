@@ -20,7 +20,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
-import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.ui.theme.NCPTheme
+import com.hegocre.nextcloudpasswords.ui.theme.ThemeProvider
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,7 +30,11 @@ import kotlinx.coroutines.launch
 fun NCPSettingsScreen(
     onNavigationUp: () -> Unit
 ) {
-    NextcloudPasswordsTheme {
+    val context = LocalContext.current
+
+    val theme by ThemeProvider.getInstance(context).currentTheme.collectAsState()
+
+    theme.Theme {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -49,7 +54,6 @@ fun NCPSettingsScreen(
                 )
             })
         { innerPadding ->
-            val context = LocalContext.current
             val scope = rememberCoroutineScope()
 
             Column(Modifier.padding(innerPadding)) {
@@ -63,6 +67,21 @@ fun NCPSettingsScreen(
                 )
 
                 PreferencesCategory(title = { Text(stringResource(R.string.general)) }) {
+                    val themes = HashMap<String, String>()
+                    NCPTheme.values().forEach { theme ->
+                        themes[theme.name] = stringResource(theme.title)
+                    }
+                    DropdownPreference(
+                        items = themes,
+                        onItemSelected = { selectedTheme ->
+                            scope.launch {
+                                ThemeProvider.getInstance(context).setUserTheme(selectedTheme)
+                            }
+                        },
+                        title = { Text(text = stringResource(id = R.string.app_theme)) },
+                        subtitle = { Text(text = stringResource(id = theme.title)) }
+                    )
+
                     DropdownPreference(
                         items = startViews,
                         onItemSelected = { selectedScreen ->

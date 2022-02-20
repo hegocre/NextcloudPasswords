@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.components.LoginView
-import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.ui.theme.ThemeProvider
 
 class LoginActivity : ComponentActivity() {
 
@@ -44,7 +47,11 @@ fun NCPLoginScreen(
     onLoginSuccess: () -> Unit,
     onLoginFailed: () -> Unit
 ) {
-    NextcloudPasswordsTheme {
+    val context = LocalContext.current
+
+    val theme by ThemeProvider.getInstance(context).currentTheme.collectAsState()
+
+    theme.Theme {
         Scaffold { innerPadding ->
             LoginView(
                 modifier = Modifier
