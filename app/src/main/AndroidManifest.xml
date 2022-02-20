@@ -10,12 +10,14 @@
         tools:targetApi="s" />
 
     <application
-        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:supportsRtl="true"
-        android:theme="@style/Theme.NextcloudPasswords">
+        android:fullBackupContent="@xml/full_backup_content"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:theme="@style/Theme.NextcloudPasswords"
+        tools:ignore="UnusedAttribute">
 
         <activity
             android:name=".ui.activities.MainActivity"

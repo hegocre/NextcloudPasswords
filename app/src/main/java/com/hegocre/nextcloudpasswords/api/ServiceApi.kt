@@ -15,7 +15,7 @@ import javax.net.ssl.SSLHandshakeException
  * [Service API](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Service-Api).
  * This is a Singleton class and will have only one instance.
  *
- * @param server The [Server] where the requests will be madecontroller.
+ * @param server The [Server] where the requests will be made.
  */
 @Suppress("BlockingMethodInNonBlockingContext")
 class ServiceApi private constructor(private val server: Server) {
