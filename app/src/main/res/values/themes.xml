@@ -1,9 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
-    <style name="Theme.NextcloudPasswords" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/LightBars</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:navigationBarColor" tools:targetApi="o_mr1">@color/LightBars</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
-    </style>
+    <style name="Theme.NextcloudPasswords" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

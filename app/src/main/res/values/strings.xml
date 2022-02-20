@@ -28,4 +28,9 @@
     <string name="start_view_preference_title">Start view</string>
     <string name="client_deauthorized_toast">Too many attempts were made. You need to login again.</string>
     <string name="autofill_service">Autofill service</string>
+    <string name="light">Light</string>
+    <string name="from_system">From system</string>
+    <string name="dark">Dark</string>
+    <string name="black">Black</string>
+    <string name="app_theme">App theme</string>
 </resources>

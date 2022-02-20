@@ -29,4 +29,9 @@
     <string name="site_favicon">Icona del lloc</string>
     <string name="favorites">Favorites</string>
     <string name="autofill_service">Servei d\'emplenament automàtic</string>
+    <string name="light">Clar</string>
+    <string name="from_system">Segons el sistema</string>
+    <string name="dark">Fosc</string>
+    <string name="black">Negre</string>
+    <string name="app_theme">Tema de l\'aplicació</string>
 </resources>
