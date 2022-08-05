@@ -69,10 +69,6 @@ fun NCPNavHost(
         navController.navigate("${NCPScreen.Folders.name}/${folder.id}")
     }
 
-    val passwordsListState = rememberLazyListState()
-    val favoritesListState = rememberLazyListState()
-    val foldersListState = rememberLazyListState()
-
     val startDestination by PreferencesManager.getInstance(context).getStartScreen()
         .collectAsState(NCPScreen.Passwords.name, context = Dispatchers.IO)
 
@@ -185,7 +181,6 @@ fun NCPNavHost(
                                                 && it.label.lowercase()
                                             .contains(searchQuery.lowercase())
                                     },
-                                lazyListState = foldersListState,
                                 onPasswordClick = onPasswordClick,
                                 onFolderClick = onFolderClick
                             )

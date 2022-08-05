@@ -70,7 +70,6 @@ fun RefreshListBody(
 fun MixedLazyColumn(
     passwords: List<Password>? = null,
     folders: List<Folder>? = null,
-    lazyListState: LazyListState = rememberLazyListState(),
     onPasswordClick: ((Password) -> Unit)? = null,
     onFolderClick: ((Folder) -> Unit)? = null
 ) {
