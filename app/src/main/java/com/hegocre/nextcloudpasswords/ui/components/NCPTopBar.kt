@@ -2,17 +2,22 @@ package com.hegocre.nextcloudpasswords.ui.components
 
 import android.content.Intent
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -29,9 +34,25 @@ import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.activities.SettingsActivity
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 
+object AppBarDefaults {
+    val TopAppBarElevation = 4.dp
+
+    val BottomAppBarElevation = 8.dp
+
+    val ContentPadding = PaddingValues(
+        start = 4.dp,
+        end = 4.dp
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NCPSearchTopBar(
+    modifier: Modifier = Modifier,
     title: String = stringResource(R.string.app_name),
+    scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        rememberTopAppBarState()
+    ),
     searchQuery: String = "",
     setSearchQuery: (String) -> Unit = {},
     isAutofill: Boolean = false,
@@ -41,7 +62,7 @@ fun NCPSearchTopBar(
     onSearchCloseClick: () -> Unit = {}
 ) {
     Surface(
-        elevation = if (MaterialTheme.colors.isLight) AppBarDefaults.TopAppBarElevation else 0.dp
+        modifier = modifier,
     ) {
         Crossfade(targetState = searchExpanded) { expanded ->
             if (expanded) {
@@ -55,6 +76,7 @@ fun NCPSearchTopBar(
                     title = title,
                     onSearchClick = onSearchClick,
                     onLogoutClick = onLogoutClick,
+                    scrollBehavior = scrollBehavior,
                     showMenu = !isAutofill
                 )
             }
@@ -62,19 +84,20 @@ fun NCPSearchTopBar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TitleAppBar(
     title: String,
     onSearchClick: () -> Unit,
     onLogoutClick: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior,
     showMenu: Boolean
 ) {
     var menuExpanded by rememberSaveable { mutableStateOf(false) }
 
-    TopAppBar(
+    LargeTopAppBar(
         title = { Text(text = title) },
-        backgroundColor = MaterialTheme.colors.background,
-        elevation = 0.dp,
+        scrollBehavior = scrollBehavior,
         actions = {
             IconButton(onClick = onSearchClick) {
                 Icon(
@@ -96,20 +119,26 @@ fun TitleAppBar(
                         onDismissRequest = { menuExpanded = false }
                     ) {
                         val context = LocalContext.current
-                        DropdownMenuItem(onClick = {
-                            val intent = Intent(context, SettingsActivity::class.java)
-                            context.startActivity(intent)
-                            menuExpanded = false
-                        }) {
-                            Text(text = stringResource(id = R.string.settings))
-                        }
+                        DropdownMenuItem(
+                            onClick = {
+                                val intent = Intent(context, SettingsActivity::class.java)
+                                context.startActivity(intent)
+                                menuExpanded = false
+                            },
+                            text = {
+                                Text(text = stringResource(id = R.string.settings))
+                            },
+                        )
 
-                        DropdownMenuItem(onClick = {
-                            onLogoutClick()
-                            menuExpanded = false
-                        }) {
-                            Text(text = stringResource(R.string.log_out))
-                        }
+                        DropdownMenuItem(
+                            onClick = {
+                                onLogoutClick()
+                                menuExpanded = false
+                            },
+                            text = {
+                                Text(text = stringResource(R.string.log_out))
+                            }
+                        )
                     }
                 }
             }
@@ -117,7 +146,7 @@ fun TitleAppBar(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SearchAppBar(
     searchQuery: String,
@@ -127,9 +156,11 @@ fun SearchAppBar(
     val keyboardController = LocalSoftwareKeyboardController.current
     val requester = FocusRequester()
 
-    TopAppBar(
-        elevation = 0.dp,
-        backgroundColor = MaterialTheme.colors.background
+    Row(
+        modifier = Modifier
+            .padding(AppBarDefaults.ContentPadding)
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(AppBarDefaults.TopAppBarElevation)),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
             onClick = onBackPressed
@@ -146,7 +177,7 @@ fun SearchAppBar(
             singleLine = true,
             placeholder = { Text(text = stringResource(R.string.search)) },
             colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = MaterialTheme.colors.background,
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(AppBarDefaults.TopAppBarElevation),
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent
@@ -170,6 +201,7 @@ fun SearchAppBar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(name = "Top bar")
 @Composable
 fun TopBarPreview() {

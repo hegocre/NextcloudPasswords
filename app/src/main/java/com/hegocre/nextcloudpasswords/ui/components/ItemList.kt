@@ -6,18 +6,16 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.twotone.Lock
 import androidx.compose.material.icons.twotone.Security
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,6 +47,7 @@ data class ListDecryptionState<T>(
 fun RefreshListBody(
     isRefreshing: Boolean,
     onRefresh: () -> Unit = {},
+    indicatorPadding: PaddingValues = PaddingValues(all = 0.dp),
     content: @Composable () -> Unit = {}
 ) {
     SwipeRefresh(
@@ -58,9 +57,11 @@ fun RefreshListBody(
             SwipeRefreshIndicator(
                 state = rState,
                 refreshTriggerDistance = refreshTrigger,
-                contentColor = MaterialTheme.colors.primary
+                contentColor = MaterialTheme.colorScheme.primary,
+                backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
             )
-        }
+        },
+        indicatorPadding = indicatorPadding
     ) {
         content()
     }
@@ -71,14 +72,15 @@ fun MixedLazyColumn(
     passwords: List<Password>? = null,
     folders: List<Folder>? = null,
     onPasswordClick: ((Password) -> Unit)? = null,
-    onFolderClick: ((Folder) -> Unit)? = null
+    onFolderClick: ((Folder) -> Unit)? = null,
+    contentPadding: PaddingValues = PaddingValues(all = 0.dp)
 ) {
     val context = LocalContext.current
     val shouldShowIcon by PreferencesManager.getInstance(context).getShowIcons()
         .collectAsState(initial = false, context = Dispatchers.IO)
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        state = lazyListState
+        contentPadding = contentPadding
     ) {
         folders?.let {
             items(items = it) { folder ->
@@ -131,7 +133,11 @@ fun PasswordRow(
                             .padding(all = 8.dp),
                         imageVector = Icons.TwoTone.Lock,
                         contentDescription = stringResource(R.string.site_favicon),
-                        colorFilter = ColorFilter.tint(MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium))
+                        colorFilter = ColorFilter.tint(
+                            MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = ContentAlpha.medium
+                            )
+                        )
                     )
                 } else {
                     imageBitmap?.let {
@@ -158,13 +164,13 @@ fun PasswordRow(
         ) {
             Text(
                 text = password.label,
-                style = MaterialTheme.typography.subtitle1
+                style = MaterialTheme.typography.titleMedium
             )
             if (password.username.isNotBlank()) {
                 Text(
                     text = password.username,
-                    style = MaterialTheme.typography.body2.copy(
-                        color = MaterialTheme.colors.onSurface.copy(
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        color = MaterialTheme.colorScheme.onSurface.copy(
                             alpha = ContentAlpha.medium
                         )
                     )
@@ -179,7 +185,7 @@ fun PasswordRow(
                 modifier = Modifier
                     .size(40.dp)
                     .padding(all = 8.dp),
-                tint = (if (MaterialTheme.colors.isLight) {
+                tint = (if (MaterialTheme.colorScheme.isLight()) {
                     when (password.status) {
                         0 -> Green500
                         1 -> Amber500
@@ -219,7 +225,7 @@ fun FolderRow(
                 .padding(all = 8.dp),
             imageVector = Icons.Filled.Folder,
             contentDescription = stringResource(R.string.site_favicon),
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium))
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface.copy(alpha = ContentAlpha.medium))
         )
 
         Column(
@@ -229,7 +235,7 @@ fun FolderRow(
         ) {
             Text(
                 text = folder.label,
-                style = MaterialTheme.typography.subtitle1
+                style = MaterialTheme.typography.titleMedium
             )
         }
     }

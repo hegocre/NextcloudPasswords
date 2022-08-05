@@ -2,9 +2,9 @@ package com.hegocre.nextcloudpasswords.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,8 +21,8 @@ fun PreferencesCategory(
 ) {
     Column {
         CompositionLocalProvider(
-            LocalContentColor provides MaterialTheme.colors.primary,
-            LocalTextStyle provides MaterialTheme.typography.subtitle1.copy(fontSize = 14.sp)
+            LocalContentColor provides MaterialTheme.colorScheme.primary,
+            LocalTextStyle provides MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp)
         ) {
             Box(
                 modifier = Modifier
@@ -57,8 +57,7 @@ fun SwitchPreference(
         Column(Modifier.weight(1f)) {
             title()
             CompositionLocalProvider(
-                LocalContentAlpha provides ContentAlpha.medium,
-                LocalTextStyle provides MaterialTheme.typography.body1.copy(fontSize = 15.sp)
+                LocalTextStyle provides MaterialTheme.typography.bodySmall
             ) {
                 subtitle?.let {
                     it()
@@ -68,7 +67,7 @@ fun SwitchPreference(
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
-            enabled = enabled
+            enabled = enabled,
         )
     }
 }
@@ -92,8 +91,7 @@ fun DropdownPreference(
         Column(Modifier.weight(1f)) {
             title()
             CompositionLocalProvider(
-                LocalContentAlpha provides ContentAlpha.medium,
-                LocalTextStyle provides MaterialTheme.typography.body1.copy(fontSize = 15.sp)
+                LocalTextStyle provides MaterialTheme.typography.bodySmall
             ) {
                 subtitle?.let {
                     it()
@@ -113,12 +111,15 @@ fun DropdownPreference(
                 onDismissRequest = { dropdownVisible = false },
             ) {
                 items.forEach { entry ->
-                    DropdownMenuItem(onClick = {
-                        onItemSelected(entry.key)
-                        dropdownVisible = false
-                    }) {
-                        Text(text = entry.value)
-                    }
+                    DropdownMenuItem(
+                        onClick = {
+                            onItemSelected(entry.key)
+                            dropdownVisible = false
+                        },
+                        text = {
+                            Text(text = entry.value)
+                        }
+                    )
                 }
             }
         }

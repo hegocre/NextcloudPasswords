@@ -2,16 +2,17 @@ package com.hegocre.nextcloudpasswords.ui.components
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -28,17 +29,18 @@ import com.hegocre.nextcloudpasswords.utils.decryptPasswords
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@ExperimentalMaterialApi
+@ExperimentalMaterial3Api
 @Composable
 fun NCPNavHost(
     navController: NavHostController,
     passwordsViewModel: PasswordsViewModel,
     modifier: Modifier = Modifier,
     searchQuery: String = "",
-    bottomState: ModalBottomSheetState? = null,
+    drawerState: DrawerState? = null,
     searchVisibility: Boolean? = null,
     closeSearch: (() -> Unit)? = null,
-    onPasswordClick: ((Password) -> Unit)? = null
+    onPasswordClick: ((Password) -> Unit)? = null,
+    contentPadding: PaddingValues = PaddingValues(all = 0.dp)
 ) {
     val context = LocalContext.current
 
@@ -79,7 +81,7 @@ fun NCPNavHost(
     ) {
         composable(NCPScreen.Passwords.name) {
             NCPNavHostComposable(
-                bottomSheetState = bottomState,
+                drawerState = drawerState,
                 searchVisibility = searchVisibility,
                 closeSearch = closeSearch
             ) {
@@ -92,7 +94,8 @@ fun NCPNavHost(
                     passwordsDecryptionState.decryptedList != null -> {
                         RefreshListBody(
                             isRefreshing = isRefreshing,
-                            onRefresh = { passwordsViewModel.sync() }
+                            onRefresh = { passwordsViewModel.sync() },
+                            indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
                                 passwords = passwordsDecryptionState.decryptedList
@@ -100,8 +103,8 @@ fun NCPNavHost(
                                         it.label.lowercase().contains(searchQuery.lowercase()) ||
                                                 it.url.lowercase().contains(searchQuery.lowercase())
                                     },
-                                lazyListState = passwordsListState,
-                                onPasswordClick = onPasswordClick
+                                onPasswordClick = onPasswordClick,
+                                contentPadding = contentPadding
                             )
                         }
                     }
@@ -111,7 +114,7 @@ fun NCPNavHost(
 
         composable(NCPScreen.Favorites.name) {
             NCPNavHostComposable(
-                bottomSheetState = bottomState,
+                drawerState = drawerState,
                 searchVisibility = searchVisibility,
                 closeSearch = closeSearch
             ) {
@@ -124,7 +127,8 @@ fun NCPNavHost(
                     passwordsDecryptionState.decryptedList != null -> {
                         RefreshListBody(
                             isRefreshing = isRefreshing,
-                            onRefresh = { passwordsViewModel.sync() }
+                            onRefresh = { passwordsViewModel.sync() },
+                            indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
                                 passwords = passwordsDecryptionState.decryptedList
@@ -135,8 +139,8 @@ fun NCPNavHost(
                                                 it.url.lowercase()
                                                     .contains(searchQuery.lowercase()))
                                     },
-                                lazyListState = favoritesListState,
-                                onPasswordClick = onPasswordClick
+                                onPasswordClick = onPasswordClick,
+                                contentPadding = contentPadding
                             )
                         }
                     }
@@ -146,7 +150,7 @@ fun NCPNavHost(
 
         composable(NCPScreen.Folders.name) {
             NCPNavHostComposable(
-                bottomSheetState = bottomState,
+                drawerState = drawerState,
                 searchVisibility = searchVisibility,
                 closeSearch = closeSearch
             ) {
@@ -164,7 +168,8 @@ fun NCPNavHost(
                             && passwordsDecryptionState.decryptedList != null -> {
                         RefreshListBody(
                             isRefreshing = isRefreshing,
-                            onRefresh = { passwordsViewModel.sync() }
+                            onRefresh = { passwordsViewModel.sync() },
+                            indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
                                 passwords = passwordsDecryptionState.decryptedList
@@ -182,7 +187,8 @@ fun NCPNavHost(
                                             .contains(searchQuery.lowercase())
                                     },
                                 onPasswordClick = onPasswordClick,
-                                onFolderClick = onFolderClick
+                                onFolderClick = onFolderClick,
+                                contentPadding = contentPadding
                             )
                         }
                     }
@@ -201,7 +207,7 @@ fun NCPNavHost(
             val folderUuid =
                 entry.arguments?.getString("folder_uuid") ?: FoldersApi.DEFAULT_FOLDER_UUID
             NCPNavHostComposable(
-                bottomSheetState = bottomState,
+                drawerState = drawerState,
                 searchVisibility = searchVisibility,
                 closeSearch = closeSearch
             ) {
@@ -221,7 +227,8 @@ fun NCPNavHost(
 
                         RefreshListBody(
                             isRefreshing = isRefreshing,
-                            onRefresh = { passwordsViewModel.sync() }
+                            onRefresh = { passwordsViewModel.sync() },
+                            indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
                                 passwords = passwordsDecryptionState.decryptedList
@@ -239,7 +246,8 @@ fun NCPNavHost(
                                             .contains(searchQuery.lowercase())
                                     },
                                 onPasswordClick = onPasswordClick,
-                                onFolderClick = onFolderClick
+                                onFolderClick = onFolderClick,
+                                contentPadding = contentPadding
                             )
                         }
                     }
@@ -249,11 +257,11 @@ fun NCPNavHost(
     }
 }
 
-@ExperimentalMaterialApi
+@ExperimentalMaterial3Api
 @Composable
 fun NCPNavHostComposable(
     modifier: Modifier = Modifier,
-    bottomSheetState: ModalBottomSheetState? = null,
+    drawerState: DrawerState? = null,
     searchVisibility: Boolean? = null,
     closeSearch: (() -> Unit)? = null,
     content: @Composable () -> Unit = { }
@@ -262,9 +270,9 @@ fun NCPNavHostComposable(
         closeSearch?.invoke()
     }
     val scope = rememberCoroutineScope()
-    BackHandler(enabled = bottomSheetState?.isVisible ?: false) {
+    BackHandler(enabled = drawerState?.isOpen ?: false) {
         scope.launch {
-            bottomSheetState?.hide()
+            drawerState?.close()
         }
     }
     Box(modifier = modifier) {

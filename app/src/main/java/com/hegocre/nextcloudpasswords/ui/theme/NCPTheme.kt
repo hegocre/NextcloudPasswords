@@ -2,33 +2,31 @@ package com.hegocre.nextcloudpasswords.ui.theme
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hegocre.nextcloudpasswords.R
 
-private val LightColorPalette = lightColors(
+private val LightColorPalette = lightColorScheme(
     primary = NextcloudBlue500,
-    primaryVariant = NextcloudBlue700,
     secondary = NextcloudBlue500,
-    secondaryVariant = NextcloudBlue700,
+    tertiary = NextcloudBlue700
+
 )
 
-private val DarkColorPalette = darkColors(
+private val DarkColorPalette = darkColorScheme(
     primary = NextcloudBlue200,
-    primaryVariant = NextcloudBlue500,
     secondary = NextcloudBlue200,
-    secondaryVariant = NextcloudBlue500,
+    tertiary = NextcloudBlue500
 )
 
-private val AmoledColorPalette = darkColors(
+private val AmoledColorPalette = darkColorScheme(
     primary = NextcloudBlue200,
-    primaryVariant = NextcloudBlue500,
     secondary = NextcloudBlue200,
-    secondaryVariant = NextcloudBlue500,
+    tertiary = NextcloudBlue500,
     background = Color.Black,
     surface = Color.Black,
 )
@@ -38,7 +36,7 @@ fun NextcloudPasswordsTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colors = lightColors(),
+        colorScheme = lightColorScheme(),
         typography = Typography,
         shapes = Shapes,
         content = content
@@ -50,7 +48,7 @@ private fun NCPThemeContent(
     content: @Composable () -> Unit
 ) {
     val systemController = rememberSystemUiController()
-    systemController.setSystemBarsColor(MaterialTheme.colors.background)
+    systemController.setSystemBarsColor(MaterialTheme.colorScheme.surface)
     content()
 }
 
@@ -61,13 +59,17 @@ enum class NCPTheme(
     System(
         title = R.string.from_system,
         Theme = { content ->
-            val colors = if (isSystemInDarkTheme())
-                DarkColorPalette
-            else
-                LightColorPalette
+            val isDynamicColor =
+                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
+            val colorScheme = when {
+                isDynamicColor && isSystemInDarkTheme() -> dynamicDarkColorScheme(LocalContext.current)
+                isDynamicColor && !isSystemInDarkTheme() -> dynamicLightColorScheme(LocalContext.current)
+                isSystemInDarkTheme() -> DarkColorPalette
+                else -> LightColorPalette
+            }
 
             MaterialTheme(
-                colors = colors,
+                colorScheme = colorScheme,
                 typography = Typography,
                 shapes = Shapes,
                 content = { NCPThemeContent(content) }
@@ -77,8 +79,10 @@ enum class NCPTheme(
     Light(
         title = R.string.light,
         Theme = { content ->
+            val isDynamicColor =
+                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
             MaterialTheme(
-                colors = LightColorPalette,
+                colorScheme = if (isDynamicColor) dynamicLightColorScheme(LocalContext.current) else LightColorPalette,
                 typography = Typography,
                 shapes = Shapes,
                 content = { NCPThemeContent(content) }
@@ -88,8 +92,10 @@ enum class NCPTheme(
     Dark(
         title = R.string.dark,
         Theme = { content ->
+            val isDynamicColor =
+                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
             MaterialTheme(
-                colors = DarkColorPalette,
+                colorScheme = if (isDynamicColor) dynamicDarkColorScheme(LocalContext.current) else DarkColorPalette,
                 typography = Typography,
                 shapes = Shapes,
                 content = { NCPThemeContent(content) }
@@ -100,7 +106,7 @@ enum class NCPTheme(
         title = R.string.black,
         Theme = { content ->
             MaterialTheme(
-                colors = AmoledColorPalette,
+                colorScheme = AmoledColorPalette,
                 typography = Typography,
                 shapes = Shapes,
                 content = { NCPThemeContent(content) }
@@ -120,3 +126,6 @@ enum class NCPTheme(
     }
 
 }
+
+@Composable
+fun ColorScheme.isLight() = this.background.luminance() > 0.5
