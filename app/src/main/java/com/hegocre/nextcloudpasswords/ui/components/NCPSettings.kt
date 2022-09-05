@@ -8,19 +8,21 @@ import android.provider.Settings
 import android.view.autofill.AutofillManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.ui.theme.NCPTheme
 import com.hegocre.nextcloudpasswords.ui.theme.ThemeProvider
+import com.hegocre.nextcloudpasswords.ui.theme.isLight
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,6 +37,12 @@ fun NCPSettingsScreen(
     val theme by ThemeProvider.getInstance(context).currentTheme.collectAsState()
 
     theme.Theme {
+        val systemUiController = rememberSystemUiController()
+        val useDarkIcons = MaterialTheme.colorScheme.isLight()
+        SideEffect {
+            systemUiController.setSystemBarsColor(Color.Transparent, useDarkIcons)
+        }
+
         Scaffold(
             topBar = {
 
@@ -50,8 +58,17 @@ fun NCPSettingsScreen(
                             )
                         }
                     },
+                    windowInsets = WindowInsets.statusBars
                 )
-            })
+            },
+            bottomBar = {
+                Spacer(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .fillMaxWidth()
+                )
+            }
+        )
         { innerPadding ->
             val scope = rememberCoroutineScope()
 

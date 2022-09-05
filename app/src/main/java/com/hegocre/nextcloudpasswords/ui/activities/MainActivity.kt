@@ -6,7 +6,10 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.service.autofill.Dataset
+import android.service.autofill.Field
 import android.service.autofill.FillResponse
+import android.service.autofill.Presentations
+import android.view.autofill.AutofillId
 import android.view.autofill.AutofillManager
 import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
@@ -15,6 +18,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.core.view.WindowCompat
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.data.password.Password
@@ -57,8 +61,14 @@ class MainActivity : ComponentActivity() {
                 && autofillRequested
             ) {
                 { password ->
-                    val structure: AssistStructure? =
-                        intent.getParcelableExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)
+                    val structure = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                        intent.getParcelableExtra(
+                            AutofillManager.EXTRA_ASSIST_STRUCTURE,
+                            AssistStructure::class.java
+                        )
+                    else
+                        @Suppress("DEPRECATION") intent.getParcelableExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)
+
                     if (structure == null) {
                         setResult(Activity.RESULT_CANCELED)
                         finish()
@@ -75,6 +85,8 @@ class MainActivity : ComponentActivity() {
                 logOut()
             }
         }
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             NextcloudPasswordsApp(
@@ -115,42 +127,21 @@ class MainActivity : ComponentActivity() {
     private fun autofillReply(password: Password, structure: AssistStructure) {
         val helper = AssistStructureParser(structure)
 
-        val usernamePresentation =
-            RemoteViews(packageName, android.R.layout.simple_list_item_1).apply {
-                setTextViewText(android.R.id.text1, password.label)
-            }
-        val passwordPresentation =
-            RemoteViews(packageName, android.R.layout.simple_list_item_1).apply {
-                setTextViewText(android.R.id.text1, password.label)
-            }
-
         val fillResponse = FillResponse.Builder()
             .addDataset(Dataset.Builder()
                 .apply {
                     helper.nodes.forEach { node ->
                         if (node.isFocused) {
                             node.autofillId?.let { autofillId ->
-                                setValue(
-                                    autofillId,
-                                    AutofillValue.forText(password.username),
-                                    usernamePresentation
-                                )
+                                addAutofillValue(autofillId, password.label, password.username)
                             }
                         }
                     }
                     helper.usernameAutofillIds.forEach { autofillId ->
-                        setValue(
-                            autofillId,
-                            AutofillValue.forText(password.username),
-                            usernamePresentation
-                        )
+                        addAutofillValue(autofillId, password.label, password.username)
                     }
                     helper.passwordAutofillIds.forEach { autofillId ->
-                        setValue(
-                            autofillId,
-                            AutofillValue.forText(password.password),
-                            passwordPresentation
-                        )
+                        addAutofillValue(autofillId, password.label, password.password)
                     }
                 }
                 .build()
@@ -163,6 +154,34 @@ class MainActivity : ComponentActivity() {
         setResult(Activity.RESULT_OK, replyIntent)
 
         finish()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun Dataset.Builder.addAutofillValue(
+        autofillId: AutofillId,
+        label: String,
+        value: String
+    ) {
+        val presentation =
+            RemoteViews(packageName, android.R.layout.simple_list_item_1).apply {
+                setTextViewText(android.R.id.text1, label)
+            }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val fieldBuilder = Field.Builder()
+            fieldBuilder.setValue(AutofillValue.forText(value))
+            val dialogPresentation = Presentations.Builder()
+                .setMenuPresentation(presentation).build()
+            fieldBuilder.setPresentations(dialogPresentation)
+            setField(autofillId, fieldBuilder.build())
+        } else {
+            @Suppress("DEPRECATION")
+            setValue(
+                autofillId,
+                AutofillValue.forText(value),
+                presentation
+            )
+        }
     }
 }
 

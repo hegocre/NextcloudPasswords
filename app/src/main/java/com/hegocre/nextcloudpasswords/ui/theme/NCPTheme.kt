@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hegocre.nextcloudpasswords.R
 
 private val LightColorPalette = lightColorScheme(
@@ -43,15 +42,6 @@ fun NextcloudPasswordsTheme(
     )
 }
 
-@Composable
-private fun NCPThemeContent(
-    content: @Composable () -> Unit
-) {
-    val systemController = rememberSystemUiController()
-    systemController.setSystemBarsColor(MaterialTheme.colorScheme.surface)
-    content()
-}
-
 enum class NCPTheme(
     @StringRes val title: Int,
     val Theme: @Composable (@Composable () -> Unit) -> Unit
@@ -72,7 +62,7 @@ enum class NCPTheme(
                 colorScheme = colorScheme,
                 typography = Typography,
                 shapes = Shapes,
-                content = { NCPThemeContent(content) }
+                content = content
             )
         }
     ),
@@ -85,7 +75,7 @@ enum class NCPTheme(
                 colorScheme = if (isDynamicColor) dynamicLightColorScheme(LocalContext.current) else LightColorPalette,
                 typography = Typography,
                 shapes = Shapes,
-                content = { NCPThemeContent(content) }
+                content = content
             )
         }
     ),
@@ -98,7 +88,7 @@ enum class NCPTheme(
                 colorScheme = if (isDynamicColor) dynamicDarkColorScheme(LocalContext.current) else DarkColorPalette,
                 typography = Typography,
                 shapes = Shapes,
-                content = { NCPThemeContent(content) }
+                content = content
             )
         }
     ),
@@ -109,7 +99,7 @@ enum class NCPTheme(
                 colorScheme = AmoledColorPalette,
                 typography = Typography,
                 shapes = Shapes,
-                content = { NCPThemeContent(content) }
+                content = content
             )
         }
     );

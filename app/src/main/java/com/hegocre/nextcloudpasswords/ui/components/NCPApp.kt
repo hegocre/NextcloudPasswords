@@ -1,9 +1,6 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
-import androidx.compose.animation.rememberSplineBasedDecay
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
@@ -11,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -19,11 +17,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hegocre.nextcloudpasswords.api.FoldersApi
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.viewmodels.PasswordsViewModel
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.ui.theme.ThemeProvider
+import com.hegocre.nextcloudpasswords.ui.theme.isLight
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -43,6 +43,12 @@ fun NextcloudPasswordsApp(
     val theme by ThemeProvider.getInstance(context).currentTheme.collectAsState()
 
     theme.Theme {
+        val systemUiController = rememberSystemUiController()
+        val useDarkIcons = MaterialTheme.colorScheme.isLight()
+        SideEffect {
+            systemUiController.setSystemBarsColor(Color.Transparent, useDarkIcons)
+        }
+
         val navController = rememberNavController()
         val backstackEntry = navController.currentBackStackEntryAsState()
         val currentScreen = NCPScreen.fromRoute(
@@ -72,18 +78,21 @@ fun NextcloudPasswordsApp(
 
         ModalNavigationDrawer(
             drawerContent = {
-                Column(Modifier.defaultMinSize(minHeight = 5.dp)) {
-                    PasswordItem(
-                        password = passwordsViewModel.visiblePassword.value,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-                    )
+                ModalDrawerSheet(
+                    windowInsets = WindowInsets.systemBars
+                ) {
+                    Column(Modifier.defaultMinSize(minHeight = 5.dp)) {
+                        PasswordItem(
+                            password = passwordsViewModel.visiblePassword.value,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                        )
+                    }
                 }
             },
             drawerState = drawerState,
-            gesturesEnabled = passwordsViewModel.visiblePassword.value != null
+            gesturesEnabled = drawerState.isOpen
         ) {
             val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-                rememberSplineBasedDecay(),
                 rememberTopAppBarState()
             )
 

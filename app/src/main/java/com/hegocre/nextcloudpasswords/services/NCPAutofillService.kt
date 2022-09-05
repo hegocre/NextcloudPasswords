@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.CancellationSignal
 import android.service.autofill.*
-import android.util.Log
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import com.hegocre.nextcloudpasswords.R
@@ -38,9 +37,18 @@ class NCPAutofillService : AutofillService() {
             }
             else -> with(packageManager) {
                 //Get the name of the package (QUERY_ALL_PACKAGES permission needed)
-                Log.d("AUTOFILL", "Package name: ${helper.packageName}")
                 try {
-                    val app = getApplicationInfo(helper.packageName, PackageManager.GET_META_DATA)
+                    val app = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                        getApplicationInfo(
+                            helper.packageName,
+                            PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong())
+                        )
+                    else
+                        @Suppress("DEPRECATION") getApplicationInfo(
+                            helper.packageName,
+                            PackageManager.GET_META_DATA
+                        )
+
                     getApplicationLabel(app).toString()
                 } catch (e: PackageManager.NameNotFoundException) {
                     e.printStackTrace()
@@ -75,13 +83,22 @@ class NCPAutofillService : AutofillService() {
         ).intentSender
 
         if (helper.passwordAutofillIds.isNotEmpty()) {
-            val fillResponse = FillResponse.Builder()
-                .setAuthentication(
-                    helper.allAutofillIds.toTypedArray(),
-                    intentSender,
-                    authPresentation
-                )
-                .build()
+            val fillResponse = FillResponse.Builder().apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                    setAuthentication(
+                        helper.allAutofillIds.toTypedArray(),
+                        intentSender,
+                        Presentations.Builder().setMenuPresentation(authPresentation).build()
+                    )
+                else
+                    @Suppress("DEPRECATION")
+                    setAuthentication(
+                        helper.allAutofillIds.toTypedArray(),
+                        intentSender,
+                        authPresentation
+                    )
+            }.build()
+
 
             callback.onSuccess(fillResponse)
         } else {

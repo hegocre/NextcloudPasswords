@@ -15,7 +15,6 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:supportsRtl="true"
         android:fullBackupContent="@xml/full_backup_content"
-        android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/Theme.NextcloudPasswords"
         tools:ignore="UnusedAttribute">
 

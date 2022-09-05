@@ -3,10 +3,7 @@ package com.hegocre.nextcloudpasswords.ui.components
 import android.content.Intent
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -36,13 +33,6 @@ import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 
 object AppBarDefaults {
     val TopAppBarElevation = 4.dp
-
-    val BottomAppBarElevation = 8.dp
-
-    val ContentPadding = PaddingValues(
-        start = 4.dp,
-        end = 4.dp
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,6 +88,7 @@ fun TitleAppBar(
     LargeTopAppBar(
         title = { Text(text = title) },
         scrollBehavior = scrollBehavior,
+        windowInsets = WindowInsets.statusBars,
         actions = {
             IconButton(onClick = onSearchClick) {
                 Icon(
@@ -156,43 +147,48 @@ fun SearchAppBar(
     val keyboardController = LocalSoftwareKeyboardController.current
     val requester = FocusRequester()
 
-    Row(
-        modifier = Modifier
-            .padding(AppBarDefaults.ContentPadding)
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(AppBarDefaults.TopAppBarElevation)),
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        Modifier.background(MaterialTheme.colorScheme.surfaceColorAtElevation(AppBarDefaults.TopAppBarElevation))
     ) {
-        IconButton(
-            onClick = onBackPressed
+        Spacer(modifier = Modifier.statusBarsPadding())
+        Row(
+            modifier = Modifier.height(64.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "back")
-        }
-        TextField(
-            modifier = Modifier
-                .weight(1f)
-                .focusRequester(requester),
-            value = searchQuery,
-            onValueChange = setSearchQuery,
-            maxLines = 1,
-            singleLine = true,
-            placeholder = { Text(text = stringResource(R.string.search)) },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(AppBarDefaults.TopAppBarElevation),
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            ),
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Search,
-            ),
-            keyboardActions = KeyboardActions(onSearch = {
-                keyboardController?.hide()
-            })
-        )
-        IconButton(
-            onClick = { setSearchQuery("") }
-        ) {
-            Icon(imageVector = Icons.Default.Clear, contentDescription = "clear")
+            IconButton(
+                onClick = onBackPressed
+            ) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "back")
+            }
+            TextField(
+                modifier = Modifier
+                    .weight(1f)
+                    .focusRequester(requester),
+                value = searchQuery,
+                onValueChange = setSearchQuery,
+                maxLines = 1,
+                singleLine = true,
+                placeholder = { Text(text = stringResource(R.string.search)) },
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                        AppBarDefaults.TopAppBarElevation
+                    ),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Search,
+                ),
+                keyboardActions = KeyboardActions(onSearch = {
+                    keyboardController?.hide()
+                })
+            )
+            IconButton(
+                onClick = { setSearchQuery("") }
+            ) {
+                Icon(imageVector = Icons.Default.Clear, contentDescription = "clear")
+            }
         }
     }
 

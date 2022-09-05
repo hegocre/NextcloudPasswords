@@ -1,5 +1,7 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -19,7 +21,8 @@ fun NCPBottomNavigation(
     modifier: Modifier = Modifier
 ) {
     NavigationBar(
-        modifier = modifier
+        modifier = modifier,
+        windowInsets = WindowInsets.navigationBars
     ) {
         allScreens.forEach { screen ->
             NavigationBarItem(
