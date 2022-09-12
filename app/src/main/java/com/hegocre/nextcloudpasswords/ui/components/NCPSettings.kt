@@ -45,8 +45,7 @@ fun NCPSettingsScreen(
 
         Scaffold(
             topBar = {
-
-                SmallTopAppBar(
+                TopAppBar(
                     title = {
                         Text(stringResource(R.string.settings))
                     },
