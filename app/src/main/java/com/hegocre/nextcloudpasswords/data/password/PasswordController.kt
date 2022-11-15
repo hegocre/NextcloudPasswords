@@ -1,7 +1,6 @@
 package com.hegocre.nextcloudpasswords.data.password
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.databases.passworddatabase.PasswordDatabase

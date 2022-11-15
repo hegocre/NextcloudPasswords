@@ -7,19 +7,14 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.ui.components.LoginWebView
-import com.hegocre.nextcloudpasswords.ui.theme.ThemeProvider
-import com.hegocre.nextcloudpasswords.ui.theme.isLight
+import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -83,19 +78,9 @@ fun NCPWebLoginScreen(
     onLoginUrl: (String) -> Unit,
     url: String = ""
 ) {
-    val context = LocalContext.current
-
-    val theme by ThemeProvider.getInstance(context).currentTheme.collectAsState()
-
     val (loading, setLoading) = remember { mutableStateOf(false) }
 
-    theme.Theme {
-        val systemUiController = rememberSystemUiController()
-        val useDarkIcons = MaterialTheme.colorScheme.isLight()
-        SideEffect {
-            systemUiController.setSystemBarsColor(Color.Transparent, useDarkIcons)
-        }
-
+    NextcloudPasswordsTheme {
         Scaffold(
             topBar = {
                 Spacer(

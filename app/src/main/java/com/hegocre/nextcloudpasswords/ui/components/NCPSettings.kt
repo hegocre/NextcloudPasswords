@@ -14,15 +14,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
-import com.hegocre.nextcloudpasswords.ui.theme.NCPTheme
-import com.hegocre.nextcloudpasswords.ui.theme.ThemeProvider
-import com.hegocre.nextcloudpasswords.ui.theme.isLight
+import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,15 +30,7 @@ fun NCPSettingsScreen(
 ) {
     val context = LocalContext.current
 
-    val theme by ThemeProvider.getInstance(context).currentTheme.collectAsState()
-
-    theme.Theme {
-        val systemUiController = rememberSystemUiController()
-        val useDarkIcons = MaterialTheme.colorScheme.isLight()
-        SideEffect {
-            systemUiController.setSystemBarsColor(Color.Transparent, useDarkIcons)
-        }
-
+    NextcloudPasswordsTheme {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -82,21 +70,6 @@ fun NCPSettingsScreen(
                 )
 
                 PreferencesCategory(title = { Text(stringResource(R.string.general)) }) {
-                    val themes = HashMap<String, String>()
-                    NCPTheme.values().forEach { theme ->
-                        themes[theme.name] = stringResource(theme.title)
-                    }
-                    DropdownPreference(
-                        items = themes,
-                        onItemSelected = { selectedTheme ->
-                            scope.launch {
-                                ThemeProvider.getInstance(context).setUserTheme(selectedTheme)
-                            }
-                        },
-                        title = { Text(text = stringResource(id = R.string.app_theme)) },
-                        subtitle = { Text(text = stringResource(id = theme.title)) }
-                    )
-
                     DropdownPreference(
                         items = startViews,
                         onItemSelected = { selectedScreen ->
@@ -118,7 +91,7 @@ fun NCPSettingsScreen(
                     SwitchPreference(
                         checked = showIcons,
                         onCheckedChange = { show ->
-                            scope.launch {
+                            scope.launch(Dispatchers.IO) {
                                 PreferencesManager.getInstance(context).setShowIcons(show)
                             }
                         },

@@ -35,6 +35,7 @@ fun NCPBottomNavigation(
                 label = { Text(text = stringResource(screen.title)) },
                 selected = currentScreen == screen,
                 onClick = { onScreenSelected(screen) },
+                alwaysShowLabel = false,
             )
         }
     }

@@ -8,22 +8,18 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hegocre.nextcloudpasswords.api.FoldersApi
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.viewmodels.PasswordsViewModel
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
-import com.hegocre.nextcloudpasswords.ui.theme.ThemeProvider
-import com.hegocre.nextcloudpasswords.ui.theme.isLight
+import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -38,43 +34,33 @@ fun NextcloudPasswordsApp(
     defaultSearchQuery: String = "",
     onPasswordClick: ((Password) -> Unit)? = null
 ) {
-    val context = LocalContext.current
+    val navController = rememberNavController()
+    val backstackEntry = navController.currentBackStackEntryAsState()
+    val currentScreen = NCPScreen.fromRoute(
+        backstackEntry.value?.destination?.route
+    )
 
-    val theme by ThemeProvider.getInstance(context).currentTheme.collectAsState()
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    theme.Theme {
-        val systemUiController = rememberSystemUiController()
-        val useDarkIcons = MaterialTheme.colorScheme.isLight()
-        SideEffect {
-            systemUiController.setSystemBarsColor(Color.Transparent, useDarkIcons)
+    val needsMasterPassword by passwordsViewModel.needsMasterPassword.collectAsState()
+    val masterPasswordInvalid by passwordsViewModel.masterPasswordInvalid.collectAsState()
+
+    var logOutDialogOpen by rememberSaveable { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    var searchExpanded by rememberSaveable { mutableStateOf(isAutofillRequest) }
+    val (searchQuery, setSearchQuery) = rememberSaveable { mutableStateOf(defaultSearchQuery) }
+
+    val onPwClick: (Password) -> Unit = onPasswordClick ?: { password ->
+        passwordsViewModel.setVisiblePassword(password)
+        keyboardController?.hide()
+        scope.launch {
+            drawerState.open()
         }
-
-        val navController = rememberNavController()
-        val backstackEntry = navController.currentBackStackEntryAsState()
-        val currentScreen = NCPScreen.fromRoute(
-            backstackEntry.value?.destination?.route
-        )
-
-        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-
-        val needsMasterPassword by passwordsViewModel.needsMasterPassword.collectAsState()
-        val masterPasswordInvalid by passwordsViewModel.masterPasswordInvalid.collectAsState()
-
-        var logOutDialogOpen by rememberSaveable { mutableStateOf(false) }
-
-        val scope = rememberCoroutineScope()
-        val keyboardController = LocalSoftwareKeyboardController.current
-
-        var searchExpanded by rememberSaveable { mutableStateOf(isAutofillRequest) }
-        val (searchQuery, setSearchQuery) = rememberSaveable { mutableStateOf(defaultSearchQuery) }
-
-        val onPwClick: (Password) -> Unit = onPasswordClick ?: { password ->
-            passwordsViewModel.setVisiblePassword(password)
-            keyboardController?.hide()
-            scope.launch {
-                drawerState.open()
-            }
-        }
+    }
+    NextcloudPasswordsTheme {
 
         ModalNavigationDrawer(
             drawerContent = {

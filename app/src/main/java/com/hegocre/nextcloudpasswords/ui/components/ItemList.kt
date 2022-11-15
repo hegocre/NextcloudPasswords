@@ -112,6 +112,7 @@ fun PasswordRow(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
+            .height(72.dp)
             .clickable {
                 onPasswordClick?.invoke(password)
             }
@@ -214,6 +215,7 @@ fun FolderRow(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
+            .height(72.dp)
             .clickable {
                 onFolderClick?.invoke(folder)
             }
