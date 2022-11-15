@@ -3,8 +3,10 @@ package com.hegocre.nextcloudpasswords.data.password
 import android.content.Context
 import androidx.lifecycle.LiveData
 import com.hegocre.nextcloudpasswords.api.ApiController
-import com.hegocre.nextcloudpasswords.databases.passworddatabase.PasswordDatabase
+import com.hegocre.nextcloudpasswords.databases.AppDatabase
 import com.hegocre.nextcloudpasswords.utils.Result
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Class used to manage the passwords cache and make requests to the [ApiController] password methods.
@@ -13,7 +15,7 @@ import com.hegocre.nextcloudpasswords.utils.Result
  * @param context Context of the application
  */
 class PasswordController private constructor(context: Context) {
-    private val passwordDatabase = PasswordDatabase.getInstance(context)
+    private val passwordDatabase = AppDatabase.getInstance(context)
     private val apiController = ApiController.getInstance(context)
 
     /**
@@ -21,22 +23,22 @@ class PasswordController private constructor(context: Context) {
      *
      */
     suspend fun syncPasswords() {
-        val result = apiController.listPasswords()
-        if (result is Result.Success) {
-            val savedPasswordsSet = passwordDatabase.passwordDao.fetchAllPasswordsId().toHashSet()
-            for (password in result.data) {
-                val oldRevision = passwordDatabase.passwordDao.getPasswordRevision(password.id)
-                if (oldRevision == null || oldRevision != password.revision) {
-                    passwordDatabase.passwordDao.insertPassword(password)
+        withContext(Dispatchers.IO) {
+            val result = apiController.listPasswords()
+            if (result is Result.Success) {
+                val savedPasswordsSet =
+                    passwordDatabase.passwordDao.fetchAllPasswordsId().toHashSet()
+                for (password in result.data) {
+                    val oldRevision = passwordDatabase.passwordDao.getPasswordRevision(password.id)
+                    if (oldRevision == null || oldRevision != password.revision) {
+                        passwordDatabase.passwordDao.insertPassword(password)
+                    }
+                    savedPasswordsSet.remove(password.id)
                 }
-                savedPasswordsSet.remove(password.id)
+                for (id in savedPasswordsSet) {
+                    passwordDatabase.passwordDao.deletePassword(id)
+                }
             }
-            for (id in savedPasswordsSet) {
-                passwordDatabase.passwordDao.deletePassword(id)
-            }
-            Log.d("PASSWORDS CONTROLLER", "Added ${result.data.size} passwords")
-        } else if (result is Result.Error) {
-            Log.d("PASSWORDS CONTROLLER", "Error ${result.code}")
         }
     }
 

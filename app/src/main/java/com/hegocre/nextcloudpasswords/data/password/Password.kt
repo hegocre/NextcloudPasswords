@@ -8,15 +8,12 @@ import androidx.room.*
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
 import com.hegocre.nextcloudpasswords.data.favicon.FaviconController
 import com.hegocre.nextcloudpasswords.utils.decryptValue
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONException
-import kotlin.coroutines.coroutineContext
 
 /**
  * Data class representing a
@@ -117,21 +114,27 @@ data class Password(
         if (!csEv1Keychain.keys.containsKey(cseKey)) return null
 
         //We can decrypt
-        val url = url.decryptValue(cseKey, csEv1Keychain)
-        val label = label.decryptValue(cseKey, csEv1Keychain)
-        val password = password.decryptValue(cseKey, csEv1Keychain)
-        val username = username.decryptValue(cseKey, csEv1Keychain)
+        val decryptedPassword = withContext(Dispatchers.IO) {
+            val url = url.decryptValue(cseKey, csEv1Keychain)
+            val label = label.decryptValue(cseKey, csEv1Keychain)
+            val password = password.decryptValue(cseKey, csEv1Keychain)
+            val username = username.decryptValue(cseKey, csEv1Keychain)
 
-        return copy(
-            url = url,
-            label = label,
-            password = password,
-            username = username
-        ).apply {
-            CoroutineScope(coroutineContext + Job()).launch {
+            copy(
+                url = url,
+                label = label,
+                password = password,
+                username = username
+            )
+        }
+
+        return decryptedPassword.apply {
+            CoroutineScope(Dispatchers.IO + Job()).launch {
                 loadCachedFavicon(context)
             }
         }
+
+
     }
 
     companion object {

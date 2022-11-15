@@ -83,7 +83,7 @@ fun MixedLazyColumn(
         contentPadding = contentPadding
     ) {
         folders?.let {
-            items(items = it) { folder ->
+            items(items = it, key = { folder -> folder.id }) { folder ->
                 FolderRow(
                     folder = folder,
                     onFolderClick = onFolderClick
@@ -91,7 +91,7 @@ fun MixedLazyColumn(
             }
         }
         passwords?.let {
-            items(items = it) { folder ->
+            items(items = it, key = { password -> password.id }) { folder ->
                 PasswordRow(
                     password = folder,
                     shouldShowIcon = shouldShowIcon,

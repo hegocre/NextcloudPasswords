@@ -74,6 +74,18 @@ fun NCPNavHost(
     val startDestination by PreferencesManager.getInstance(context).getStartScreen()
         .collectAsState(NCPScreen.Passwords.name, context = Dispatchers.IO)
 
+    val filteredPasswordList = remember(passwordsDecryptionState.decryptedList, searchQuery) {
+        passwordsDecryptionState.decryptedList?.filter {
+            it.label.lowercase().contains(searchQuery.lowercase()) ||
+                    it.url.lowercase().contains(searchQuery.lowercase())
+        }
+    }
+    val filteredFolderList = remember(foldersDecryptionState.decryptedList, searchQuery) {
+        foldersDecryptionState.decryptedList?.filter {
+            it.label.lowercase().contains(searchQuery.lowercase())
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -98,11 +110,7 @@ fun NCPNavHost(
                             indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
-                                passwords = passwordsDecryptionState.decryptedList
-                                    ?.filter {
-                                        it.label.lowercase().contains(searchQuery.lowercase()) ||
-                                                it.url.lowercase().contains(searchQuery.lowercase())
-                                    },
+                                passwords = filteredPasswordList,
                                 onPasswordClick = onPasswordClick,
                                 contentPadding = contentPadding
                             )
@@ -113,6 +121,9 @@ fun NCPNavHost(
         }
 
         composable(NCPScreen.Favorites.name) {
+            val filteredFavoritePasswords = remember(filteredPasswordList) {
+                filteredPasswordList?.filter { it.favorite }
+            }
             NCPNavHostComposable(
                 drawerState = drawerState,
                 searchVisibility = searchVisibility,
@@ -131,14 +142,7 @@ fun NCPNavHost(
                             indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
-                                passwords = passwordsDecryptionState.decryptedList
-                                    ?.filter {
-                                        it.favorite
-                                                && (it.label.lowercase()
-                                            .contains(searchQuery.lowercase()) ||
-                                                it.url.lowercase()
-                                                    .contains(searchQuery.lowercase()))
-                                    },
+                                passwords = filteredFavoritePasswords,
                                 onPasswordClick = onPasswordClick,
                                 contentPadding = contentPadding
                             )
@@ -154,6 +158,18 @@ fun NCPNavHost(
                 searchVisibility = searchVisibility,
                 closeSearch = closeSearch
             ) {
+                val filteredPasswordsParentFolder = remember(filteredPasswordList) {
+                    filteredPasswordList?.filter {
+                        it.folder == FoldersApi.DEFAULT_FOLDER_UUID &&
+                                (it.label.lowercase().contains(searchQuery.lowercase()) ||
+                                        it.url.lowercase().contains(searchQuery.lowercase()))
+                    }
+                }
+                val filteredFoldersParentFolder = remember(filteredFolderList) {
+                    filteredFolderList?.filter {
+                        it.parent == FoldersApi.DEFAULT_FOLDER_UUID
+                    }
+                }
                 SideEffect {
                     passwordsViewModel.setVisibleFolder(foldersDecryptionState.decryptedList
                         ?.find { it.id == FoldersApi.DEFAULT_FOLDER_UUID })
@@ -172,20 +188,8 @@ fun NCPNavHost(
                             indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
-                                passwords = passwordsDecryptionState.decryptedList
-                                    ?.filter {
-                                        it.folder == FoldersApi.DEFAULT_FOLDER_UUID
-                                                && (it.label.lowercase()
-                                            .contains(searchQuery.lowercase()) ||
-                                                it.url.lowercase()
-                                                    .contains(searchQuery.lowercase()))
-                                    },
-                                folders = foldersDecryptionState.decryptedList
-                                    ?.filter {
-                                        it.parent == FoldersApi.DEFAULT_FOLDER_UUID
-                                                && it.label.lowercase()
-                                            .contains(searchQuery.lowercase())
-                                    },
+                                passwords = filteredPasswordsParentFolder,
+                                folders = filteredFoldersParentFolder,
                                 onPasswordClick = onPasswordClick,
                                 onFolderClick = onFolderClick,
                                 contentPadding = contentPadding
@@ -206,6 +210,18 @@ fun NCPNavHost(
         ) { entry ->
             val folderUuid =
                 entry.arguments?.getString("folder_uuid") ?: FoldersApi.DEFAULT_FOLDER_UUID
+            val filteredPasswordsSelectedFolder = remember(filteredPasswordList) {
+                filteredPasswordList?.filter {
+                    it.folder == folderUuid &&
+                            (it.label.lowercase().contains(searchQuery.lowercase()) ||
+                                    it.url.lowercase().contains(searchQuery.lowercase()))
+                }
+            }
+            val filteredFoldersSelectedFolder = remember(filteredFolderList) {
+                filteredFolderList?.filter {
+                    it.parent == folderUuid
+                }
+            }
             NCPNavHostComposable(
                 drawerState = drawerState,
                 searchVisibility = searchVisibility,
@@ -231,20 +247,8 @@ fun NCPNavHost(
                             indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
-                                passwords = passwordsDecryptionState.decryptedList
-                                    ?.filter {
-                                        it.folder == folderUuid
-                                                && (it.label.lowercase()
-                                            .contains(searchQuery.lowercase()) ||
-                                                it.url.lowercase()
-                                                    .contains(searchQuery.lowercase()))
-                                    },
-                                folders = foldersDecryptionState.decryptedList
-                                    ?.filter {
-                                        it.parent == folderUuid
-                                                && it.label.lowercase()
-                                            .contains(searchQuery.lowercase())
-                                    },
+                                passwords = filteredPasswordsSelectedFolder,
+                                folders = filteredFoldersSelectedFolder,
                                 onPasswordClick = onPasswordClick,
                                 onFolderClick = onFolderClick,
                                 contentPadding = contentPadding
