@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.hegocre.nextcloudpasswords">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission
@@ -15,7 +14,6 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:supportsRtl="true"
         android:fullBackupContent="@xml/full_backup_content"
-        android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/Theme.NextcloudPasswords"
         tools:ignore="UnusedAttribute">
 

@@ -2,9 +2,10 @@ package com.hegocre.nextcloudpasswords.data.user
 
 import android.content.Context
 import com.hegocre.nextcloudpasswords.api.Server
-import com.hegocre.nextcloudpasswords.databases.folderdatabase.FolderDatabase
-import com.hegocre.nextcloudpasswords.databases.passworddatabase.PasswordDatabase
+import com.hegocre.nextcloudpasswords.databases.AppDatabase
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Class used to manage to log in and log out, as well as providing the current server to the API
@@ -14,8 +15,8 @@ import com.hegocre.nextcloudpasswords.utils.PreferencesManager
  */
 class UserController private constructor(context: Context) {
     private val _preferencesManager = PreferencesManager.getInstance(context)
-    private val passwordDatabase = PasswordDatabase.getInstance(context)
-    private val folderDatabase = FolderDatabase.getInstance(context)
+    private val passwordDatabase = AppDatabase.getInstance(context)
+    private val folderDatabase = AppDatabase.getInstance(context)
 
     val isLoggedIn: Boolean
         get() = _preferencesManager.getLoggedInServer() != null
@@ -41,8 +42,10 @@ class UserController private constructor(context: Context) {
      *
      */
     suspend fun logOut() {
-        passwordDatabase.passwordDao.deleteDatabase()
-        folderDatabase.folderDao.deleteDatabase()
+        withContext(Dispatchers.IO) {
+            passwordDatabase.passwordDao.deleteDatabase()
+            folderDatabase.folderDao.deleteDatabase()
+        }
         with(_preferencesManager) {
             setLoggedInServer(null)
             setLoggedInUser(null)

@@ -4,24 +4,25 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Scaffold
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.core.view.WindowCompat
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.ui.components.LoginWebView
-import com.hegocre.nextcloudpasswords.ui.theme.ThemeProvider
+import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
 class WebLoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         val loginUrl = intent.getStringExtra("login_url")?.let {
             var url = it
@@ -71,19 +72,31 @@ class WebLoginActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NCPWebLoginScreen(
     onLoginUrl: (String) -> Unit,
     url: String = ""
 ) {
-    val context = LocalContext.current
-
-    val theme by ThemeProvider.getInstance(context).currentTheme.collectAsState()
-
     val (loading, setLoading) = remember { mutableStateOf(false) }
 
-    theme.Theme {
-        Scaffold { innerPadding ->
+    NextcloudPasswordsTheme {
+        Scaffold(
+            topBar = {
+                Spacer(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .fillMaxWidth()
+                )
+            },
+            bottomBar = {
+                Spacer(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .fillMaxWidth()
+                )
+            }
+        ) { innerPadding ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()

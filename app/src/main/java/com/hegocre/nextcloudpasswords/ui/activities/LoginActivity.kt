@@ -5,22 +5,22 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Scaffold
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.core.view.WindowCompat
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.components.LoginView
-import com.hegocre.nextcloudpasswords.ui.theme.ThemeProvider
+import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 
 class LoginActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         val loginIntent = Intent(this, WebLoginActivity::class.java)
 
@@ -41,18 +41,30 @@ class LoginActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NCPLoginScreen(
     loginIntent: Intent,
     onLoginSuccess: () -> Unit,
     onLoginFailed: () -> Unit
 ) {
-    val context = LocalContext.current
-
-    val theme by ThemeProvider.getInstance(context).currentTheme.collectAsState()
-
-    theme.Theme {
-        Scaffold { innerPadding ->
+    NextcloudPasswordsTheme {
+        Scaffold(
+            topBar = {
+                Spacer(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .fillMaxWidth()
+                )
+            },
+            bottomBar = {
+                Spacer(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .fillMaxWidth()
+                )
+            }
+        ) { innerPadding ->
             LoginView(
                 modifier = Modifier
                     .padding(innerPadding)

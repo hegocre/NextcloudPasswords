@@ -5,9 +5,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.VpnKey
-import androidx.compose.material.icons.twotone.Favorite
-import androidx.compose.material.icons.twotone.Folder
-import androidx.compose.material.icons.twotone.VpnKey
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.VpnKey
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.hegocre.nextcloudpasswords.R
 
@@ -19,17 +19,17 @@ enum class NCPScreen(
     Passwords(
         title = R.string.passwords,
         selectedIcon = Icons.Filled.VpnKey,
-        unselectedIcon = Icons.TwoTone.VpnKey
+        unselectedIcon = Icons.Outlined.VpnKey
     ),
     Favorites(
         title = R.string.favorites,
         selectedIcon = Icons.Filled.Favorite,
-        unselectedIcon = Icons.TwoTone.Favorite
+        unselectedIcon = Icons.Outlined.FavoriteBorder
     ),
     Folders(
         title = R.string.folders,
         selectedIcon = Icons.Filled.Folder,
-        unselectedIcon = Icons.TwoTone.Folder
+        unselectedIcon = Icons.Outlined.Folder
     );
 
     companion object {

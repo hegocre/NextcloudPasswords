@@ -2,16 +2,17 @@ package com.hegocre.nextcloudpasswords.ui.components
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -28,17 +29,18 @@ import com.hegocre.nextcloudpasswords.utils.decryptPasswords
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@ExperimentalMaterialApi
+@ExperimentalMaterial3Api
 @Composable
 fun NCPNavHost(
     navController: NavHostController,
     passwordsViewModel: PasswordsViewModel,
     modifier: Modifier = Modifier,
     searchQuery: String = "",
-    bottomState: ModalBottomSheetState? = null,
+    drawerState: DrawerState? = null,
     searchVisibility: Boolean? = null,
     closeSearch: (() -> Unit)? = null,
-    onPasswordClick: ((Password) -> Unit)? = null
+    onPasswordClick: ((Password) -> Unit)? = null,
+    contentPadding: PaddingValues = PaddingValues(all = 0.dp)
 ) {
     val context = LocalContext.current
 
@@ -69,12 +71,20 @@ fun NCPNavHost(
         navController.navigate("${NCPScreen.Folders.name}/${folder.id}")
     }
 
-    val passwordsListState = rememberLazyListState()
-    val favoritesListState = rememberLazyListState()
-    val foldersListState = rememberLazyListState()
-
     val startDestination by PreferencesManager.getInstance(context).getStartScreen()
         .collectAsState(NCPScreen.Passwords.name, context = Dispatchers.IO)
+
+    val filteredPasswordList = remember(passwordsDecryptionState.decryptedList, searchQuery) {
+        passwordsDecryptionState.decryptedList?.filter {
+            it.label.lowercase().contains(searchQuery.lowercase()) ||
+                    it.url.lowercase().contains(searchQuery.lowercase())
+        }
+    }
+    val filteredFolderList = remember(foldersDecryptionState.decryptedList, searchQuery) {
+        foldersDecryptionState.decryptedList?.filter {
+            it.label.lowercase().contains(searchQuery.lowercase())
+        }
+    }
 
     NavHost(
         navController = navController,
@@ -83,7 +93,7 @@ fun NCPNavHost(
     ) {
         composable(NCPScreen.Passwords.name) {
             NCPNavHostComposable(
-                bottomSheetState = bottomState,
+                drawerState = drawerState,
                 searchVisibility = searchVisibility,
                 closeSearch = closeSearch
             ) {
@@ -96,16 +106,13 @@ fun NCPNavHost(
                     passwordsDecryptionState.decryptedList != null -> {
                         RefreshListBody(
                             isRefreshing = isRefreshing,
-                            onRefresh = { passwordsViewModel.sync() }
+                            onRefresh = { passwordsViewModel.sync() },
+                            indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
-                                passwords = passwordsDecryptionState.decryptedList
-                                    ?.filter {
-                                        it.label.lowercase().contains(searchQuery.lowercase()) ||
-                                                it.url.lowercase().contains(searchQuery.lowercase())
-                                    },
-                                lazyListState = passwordsListState,
-                                onPasswordClick = onPasswordClick
+                                passwords = filteredPasswordList,
+                                onPasswordClick = onPasswordClick,
+                                contentPadding = contentPadding
                             )
                         }
                     }
@@ -114,8 +121,11 @@ fun NCPNavHost(
         }
 
         composable(NCPScreen.Favorites.name) {
+            val filteredFavoritePasswords = remember(filteredPasswordList) {
+                filteredPasswordList?.filter { it.favorite }
+            }
             NCPNavHostComposable(
-                bottomSheetState = bottomState,
+                drawerState = drawerState,
                 searchVisibility = searchVisibility,
                 closeSearch = closeSearch
             ) {
@@ -128,19 +138,13 @@ fun NCPNavHost(
                     passwordsDecryptionState.decryptedList != null -> {
                         RefreshListBody(
                             isRefreshing = isRefreshing,
-                            onRefresh = { passwordsViewModel.sync() }
+                            onRefresh = { passwordsViewModel.sync() },
+                            indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
-                                passwords = passwordsDecryptionState.decryptedList
-                                    ?.filter {
-                                        it.favorite
-                                                && (it.label.lowercase()
-                                            .contains(searchQuery.lowercase()) ||
-                                                it.url.lowercase()
-                                                    .contains(searchQuery.lowercase()))
-                                    },
-                                lazyListState = favoritesListState,
-                                onPasswordClick = onPasswordClick
+                                passwords = filteredFavoritePasswords,
+                                onPasswordClick = onPasswordClick,
+                                contentPadding = contentPadding
                             )
                         }
                     }
@@ -150,10 +154,22 @@ fun NCPNavHost(
 
         composable(NCPScreen.Folders.name) {
             NCPNavHostComposable(
-                bottomSheetState = bottomState,
+                drawerState = drawerState,
                 searchVisibility = searchVisibility,
                 closeSearch = closeSearch
             ) {
+                val filteredPasswordsParentFolder = remember(filteredPasswordList) {
+                    filteredPasswordList?.filter {
+                        it.folder == FoldersApi.DEFAULT_FOLDER_UUID &&
+                                (it.label.lowercase().contains(searchQuery.lowercase()) ||
+                                        it.url.lowercase().contains(searchQuery.lowercase()))
+                    }
+                }
+                val filteredFoldersParentFolder = remember(filteredFolderList) {
+                    filteredFolderList?.filter {
+                        it.parent == FoldersApi.DEFAULT_FOLDER_UUID
+                    }
+                }
                 SideEffect {
                     passwordsViewModel.setVisibleFolder(foldersDecryptionState.decryptedList
                         ?.find { it.id == FoldersApi.DEFAULT_FOLDER_UUID })
@@ -168,26 +184,15 @@ fun NCPNavHost(
                             && passwordsDecryptionState.decryptedList != null -> {
                         RefreshListBody(
                             isRefreshing = isRefreshing,
-                            onRefresh = { passwordsViewModel.sync() }
+                            onRefresh = { passwordsViewModel.sync() },
+                            indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
-                                passwords = passwordsDecryptionState.decryptedList
-                                    ?.filter {
-                                        it.folder == FoldersApi.DEFAULT_FOLDER_UUID
-                                                && (it.label.lowercase()
-                                            .contains(searchQuery.lowercase()) ||
-                                                it.url.lowercase()
-                                                    .contains(searchQuery.lowercase()))
-                                    },
-                                folders = foldersDecryptionState.decryptedList
-                                    ?.filter {
-                                        it.parent == FoldersApi.DEFAULT_FOLDER_UUID
-                                                && it.label.lowercase()
-                                            .contains(searchQuery.lowercase())
-                                    },
-                                lazyListState = foldersListState,
+                                passwords = filteredPasswordsParentFolder,
+                                folders = filteredFoldersParentFolder,
                                 onPasswordClick = onPasswordClick,
-                                onFolderClick = onFolderClick
+                                onFolderClick = onFolderClick,
+                                contentPadding = contentPadding
                             )
                         }
                     }
@@ -205,8 +210,20 @@ fun NCPNavHost(
         ) { entry ->
             val folderUuid =
                 entry.arguments?.getString("folder_uuid") ?: FoldersApi.DEFAULT_FOLDER_UUID
+            val filteredPasswordsSelectedFolder = remember(filteredPasswordList) {
+                filteredPasswordList?.filter {
+                    it.folder == folderUuid &&
+                            (it.label.lowercase().contains(searchQuery.lowercase()) ||
+                                    it.url.lowercase().contains(searchQuery.lowercase()))
+                }
+            }
+            val filteredFoldersSelectedFolder = remember(filteredFolderList) {
+                filteredFolderList?.filter {
+                    it.parent == folderUuid
+                }
+            }
             NCPNavHostComposable(
-                bottomSheetState = bottomState,
+                drawerState = drawerState,
                 searchVisibility = searchVisibility,
                 closeSearch = closeSearch
             ) {
@@ -226,25 +243,15 @@ fun NCPNavHost(
 
                         RefreshListBody(
                             isRefreshing = isRefreshing,
-                            onRefresh = { passwordsViewModel.sync() }
+                            onRefresh = { passwordsViewModel.sync() },
+                            indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
-                                passwords = passwordsDecryptionState.decryptedList
-                                    ?.filter {
-                                        it.folder == folderUuid
-                                                && (it.label.lowercase()
-                                            .contains(searchQuery.lowercase()) ||
-                                                it.url.lowercase()
-                                                    .contains(searchQuery.lowercase()))
-                                    },
-                                folders = foldersDecryptionState.decryptedList
-                                    ?.filter {
-                                        it.parent == folderUuid
-                                                && it.label.lowercase()
-                                            .contains(searchQuery.lowercase())
-                                    },
+                                passwords = filteredPasswordsSelectedFolder,
+                                folders = filteredFoldersSelectedFolder,
                                 onPasswordClick = onPasswordClick,
-                                onFolderClick = onFolderClick
+                                onFolderClick = onFolderClick,
+                                contentPadding = contentPadding
                             )
                         }
                     }
@@ -254,11 +261,11 @@ fun NCPNavHost(
     }
 }
 
-@ExperimentalMaterialApi
+@ExperimentalMaterial3Api
 @Composable
 fun NCPNavHostComposable(
     modifier: Modifier = Modifier,
-    bottomSheetState: ModalBottomSheetState? = null,
+    drawerState: DrawerState? = null,
     searchVisibility: Boolean? = null,
     closeSearch: (() -> Unit)? = null,
     content: @Composable () -> Unit = { }
@@ -267,9 +274,9 @@ fun NCPNavHostComposable(
         closeSearch?.invoke()
     }
     val scope = rememberCoroutineScope()
-    BackHandler(enabled = bottomSheetState?.isVisible ?: false) {
+    BackHandler(enabled = drawerState?.isOpen ?: false) {
         scope.launch {
-            bottomSheetState?.hide()
+            drawerState?.close()
         }
     }
     Box(modifier = modifier) {

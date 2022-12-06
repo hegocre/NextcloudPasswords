@@ -3,8 +3,10 @@ package com.hegocre.nextcloudpasswords.data.folder
 import android.content.Context
 import androidx.lifecycle.LiveData
 import com.hegocre.nextcloudpasswords.api.ApiController
-import com.hegocre.nextcloudpasswords.databases.folderdatabase.FolderDatabase
+import com.hegocre.nextcloudpasswords.databases.AppDatabase
 import com.hegocre.nextcloudpasswords.utils.Result
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Class used to manage the folders cache and make requests to the [ApiController] folder methods.
@@ -13,7 +15,7 @@ import com.hegocre.nextcloudpasswords.utils.Result
  * @param context Context of the application
  */
 class FolderController private constructor(context: Context) {
-    private val folderDatabase = FolderDatabase.getInstance(context)
+    private val folderDatabase = AppDatabase.getInstance(context)
     private val apiController = ApiController.getInstance(context)
 
     /**
@@ -21,18 +23,20 @@ class FolderController private constructor(context: Context) {
      *
      */
     suspend fun syncFolders() {
-        val result = apiController.listFolders()
-        if (result is Result.Success) {
-            val savedFoldersSet = folderDatabase.folderDao.fetchAllFoldersId().toHashSet()
-            for (folder in result.data) {
-                val oldRevision = folderDatabase.folderDao.getFolderRevision(folder.id)
-                if (oldRevision == null || oldRevision != folder.revision) {
-                    folderDatabase.folderDao.insertFolder(folder)
+        withContext(Dispatchers.IO) {
+            val result = apiController.listFolders()
+            if (result is Result.Success) {
+                val savedFoldersSet = folderDatabase.folderDao.fetchAllFoldersId().toHashSet()
+                for (folder in result.data) {
+                    val oldRevision = folderDatabase.folderDao.getFolderRevision(folder.id)
+                    if (oldRevision == null || oldRevision != folder.revision) {
+                        folderDatabase.folderDao.insertFolder(folder)
+                    }
+                    savedFoldersSet.remove(folder.id)
                 }
-                savedFoldersSet.remove(folder.id)
-            }
-            for (id in savedFoldersSet) {
-                folderDatabase.folderDao.deleteFolder(id)
+                for (id in savedFoldersSet) {
+                    folderDatabase.folderDao.deleteFolder(id)
+                }
             }
         }
     }

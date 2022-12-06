@@ -8,33 +8,29 @@ import android.provider.Settings
 import android.view.autofill.AutofillManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
-import com.hegocre.nextcloudpasswords.ui.theme.NCPTheme
-import com.hegocre.nextcloudpasswords.ui.theme.ThemeProvider
+import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NCPSettingsScreen(
     onNavigationUp: () -> Unit
 ) {
     val context = LocalContext.current
 
-    val theme by ThemeProvider.getInstance(context).currentTheme.collectAsState()
-
-    theme.Theme {
+    NextcloudPasswordsTheme {
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -49,10 +45,17 @@ fun NCPSettingsScreen(
                             )
                         }
                     },
-                    elevation = if (MaterialTheme.colors.isLight) AppBarDefaults.TopAppBarElevation else 0.dp,
-                    backgroundColor = MaterialTheme.colors.background
+                    windowInsets = WindowInsets.statusBars
                 )
-            })
+            },
+            bottomBar = {
+                Spacer(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .fillMaxWidth()
+                )
+            }
+        )
         { innerPadding ->
             val scope = rememberCoroutineScope()
 
@@ -67,21 +70,6 @@ fun NCPSettingsScreen(
                 )
 
                 PreferencesCategory(title = { Text(stringResource(R.string.general)) }) {
-                    val themes = HashMap<String, String>()
-                    NCPTheme.values().forEach { theme ->
-                        themes[theme.name] = stringResource(theme.title)
-                    }
-                    DropdownPreference(
-                        items = themes,
-                        onItemSelected = { selectedTheme ->
-                            scope.launch {
-                                ThemeProvider.getInstance(context).setUserTheme(selectedTheme)
-                            }
-                        },
-                        title = { Text(text = stringResource(id = R.string.app_theme)) },
-                        subtitle = { Text(text = stringResource(id = theme.title)) }
-                    )
-
                     DropdownPreference(
                         items = startViews,
                         onItemSelected = { selectedScreen ->
@@ -103,7 +91,7 @@ fun NCPSettingsScreen(
                     SwitchPreference(
                         checked = showIcons,
                         onCheckedChange = { show ->
-                            scope.launch {
+                            scope.launch(Dispatchers.IO) {
                                 PreferencesManager.getInstance(context).setShowIcons(show)
                             }
                         },

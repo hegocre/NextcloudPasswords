@@ -3,10 +3,10 @@ package com.hegocre.nextcloudpasswords.ui.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -18,6 +18,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.hegocre.nextcloudpasswords.R
+import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 
 @Composable
 fun MasterPasswordDialog(
@@ -34,8 +35,8 @@ fun MasterPasswordDialog(
         onDismissRequest = { onDismissRequest?.invoke() },
     ) {
         Surface(
-            color = MaterialTheme.colors.surface,
-            contentColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface),
+            color = MaterialTheme.colorScheme.surface,
+            contentColor = contentColorFor(backgroundColor = MaterialTheme.colorScheme.surface),
             shape = MaterialTheme.shapes.medium,
         ) {
             Column {
@@ -62,7 +63,7 @@ fun MasterPasswordDialog(
                 )
 
                 CompositionLocalProvider(
-                    LocalContentAlpha provides ContentAlpha.medium
+                    LocalContentColor provides LocalContentColor.current.copy(alpha = ContentAlpha.medium)
                 ) {
                     Row {
                         Checkbox(
@@ -75,7 +76,7 @@ fun MasterPasswordDialog(
                         Text(
                             text = "Save password",
                             modifier = Modifier.align(Alignment.CenterVertically),
-                            style = MaterialTheme.typography.body2
+                            style = MaterialTheme.typography.bodySmall
                         )
                     }
                 }

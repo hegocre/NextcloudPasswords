@@ -2,7 +2,7 @@ package com.hegocre.nextcloudpasswords.data.favicon
 
 import android.content.Context
 import com.hegocre.nextcloudpasswords.api.ApiController
-import com.hegocre.nextcloudpasswords.databases.favicondatabase.FaviconDatabase
+import com.hegocre.nextcloudpasswords.databases.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
  */
 class FaviconController private constructor(context: Context) {
     private val apiController = ApiController.getInstance(context)
-    private val faviconDatabase = FaviconDatabase.getInstance(context)
+    private val appDatabase = AppDatabase.getInstance(context)
 
     /**
      * Return a favicon for the url obtained from the [ApiController].
@@ -28,7 +28,7 @@ class FaviconController private constructor(context: Context) {
         }
 
         if (favicon != null) withContext(Dispatchers.IO) {
-            faviconDatabase.faviconDao.addFavicon(Favicon(url, favicon))
+            appDatabase.faviconDao.addFavicon(Favicon(url, favicon))
         }
 
         return favicon
@@ -41,7 +41,7 @@ class FaviconController private constructor(context: Context) {
      * @return A Bitmap of the favicon.
      */
     suspend fun getCachedFavicon(url: String): ByteArray? =
-        faviconDatabase.faviconDao.getFavicon(url)
+        appDatabase.faviconDao.getFavicon(url)
 
     companion object {
         private var instance: FaviconController? = null

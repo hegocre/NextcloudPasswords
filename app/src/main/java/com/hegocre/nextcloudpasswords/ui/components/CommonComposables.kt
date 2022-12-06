@@ -4,9 +4,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -18,10 +19,11 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun OutlinedTextFieldWithCaption(
     text: String,
@@ -67,15 +69,26 @@ fun OutlinedTextFieldWithCaption(
                 else
                     errorText,
                 style = if (!isError)
-                    MaterialTheme.typography.caption.copy(fontSize = 12.sp)
+                    MaterialTheme.typography.labelSmall
                 else
-                    MaterialTheme.typography.caption.copy(
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colors.error
+                    MaterialTheme.typography.labelSmall.copy(
+                        color = MaterialTheme.colorScheme.error
                     ),
                 modifier = Modifier.padding(start = 4.dp, top = 4.dp)
             )
         }
+    }
+}
+
+@Preview
+@Composable
+fun OutlinedTextFieldPreview() {
+    NextcloudPasswordsTheme {
+        OutlinedTextFieldWithCaption(
+            text = "Hello World",
+            onValueChange = {},
+            captionText = "Caption here"
+        )
     }
 }
 
