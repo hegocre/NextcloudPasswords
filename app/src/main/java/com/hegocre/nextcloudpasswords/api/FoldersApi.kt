@@ -16,7 +16,6 @@ import javax.net.ssl.SSLHandshakeException
  *
  * @property server The [Server] where the requests will be made.
  */
-@Suppress("BlockingMethodInNonBlockingContext")
 class FoldersApi private constructor(private var server: Server) {
 
     /**

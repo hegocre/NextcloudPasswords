@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +30,85 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+
+@Composable
+fun NCPLoginScreen(
+    loginIntent: Intent,
+    onLoginSuccess: () -> Unit,
+    onLoginFailed: () -> Unit
+) {
+    NextcloudPasswordsTheme {
+        Scaffold(
+            topBar = {
+                Spacer(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .fillMaxWidth()
+                )
+            },
+            bottomBar = {
+                Spacer(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .fillMaxWidth()
+                )
+            }
+        ) { innerPadding ->
+            LoginView(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
+                loginIntent = loginIntent,
+                onLoginSuccess = onLoginSuccess,
+                onLoginFailed = onLoginFailed
+            )
+        }
+    }
+}
+
+@Composable
+fun NCPWebLoginScreen(
+    onLoginUrl: (String) -> Unit,
+    url: String = ""
+) {
+    val (loading, setLoading) = remember { mutableStateOf(false) }
+
+    NextcloudPasswordsTheme {
+        Scaffold(
+            topBar = {
+                Spacer(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .fillMaxWidth()
+                )
+            },
+            bottomBar = {
+                Spacer(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .fillMaxWidth()
+                )
+            }
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                LoginWebView(
+                    onLoginUrl = onLoginUrl,
+                    onLoadingChange = setLoading,
+                    url = url
+                )
+                if (loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun LoginView(

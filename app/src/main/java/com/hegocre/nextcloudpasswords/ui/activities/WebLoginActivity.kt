@@ -4,17 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import com.hegocre.nextcloudpasswords.data.user.UserController
-import com.hegocre.nextcloudpasswords.ui.components.LoginWebView
-import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.ui.components.NCPWebLoginScreen
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -69,50 +61,5 @@ class WebLoginActivity : ComponentActivity() {
     companion object {
         private val CRED_REGEX_1 = "nc:.*server:(.*)&user:(.*)&password:(.*)".toRegex()
         private val CRED_REGEX_2 = "nc:.*user:(.*)&password:(.*)&server:(.*)".toRegex()
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun NCPWebLoginScreen(
-    onLoginUrl: (String) -> Unit,
-    url: String = ""
-) {
-    val (loading, setLoading) = remember { mutableStateOf(false) }
-
-    NextcloudPasswordsTheme {
-        Scaffold(
-            topBar = {
-                Spacer(
-                    modifier = Modifier
-                        .statusBarsPadding()
-                        .fillMaxWidth()
-                )
-            },
-            bottomBar = {
-                Spacer(
-                    modifier = Modifier
-                        .statusBarsPadding()
-                        .fillMaxWidth()
-                )
-            }
-        ) { innerPadding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
-                LoginWebView(
-                    onLoginUrl = onLoginUrl,
-                    onLoadingChange = setLoading,
-                    url = url
-                )
-                if (loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-            }
-        }
     }
 }

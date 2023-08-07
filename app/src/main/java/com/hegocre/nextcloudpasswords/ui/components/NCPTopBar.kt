@@ -54,7 +54,7 @@ fun NCPSearchTopBar(
     Surface(
         modifier = modifier,
     ) {
-        Crossfade(targetState = searchExpanded) { expanded ->
+        Crossfade(targetState = searchExpanded, label = "expanded") { expanded ->
             if (expanded) {
                 SearchAppBar(
                     searchQuery = searchQuery,
@@ -137,7 +137,7 @@ fun TitleAppBar(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchAppBar(
     searchQuery: String,
@@ -169,13 +169,13 @@ fun SearchAppBar(
                 maxLines = 1,
                 singleLine = true,
                 placeholder = { Text(text = stringResource(R.string.search)) },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        AppBarDefaults.TopAppBarElevation
-                    ),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
+                    disabledIndicatorColor = Color.Transparent,
                 ),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Search,

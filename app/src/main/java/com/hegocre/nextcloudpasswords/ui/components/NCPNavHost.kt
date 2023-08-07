@@ -5,10 +5,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.*
+import androidx.compose.material3.SheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,7 +43,7 @@ fun NCPNavHost(
     passwordsViewModel: PasswordsViewModel,
     modifier: Modifier = Modifier,
     searchQuery: String = "",
-    drawerState: DrawerState? = null,
+    modalSheetState: SheetState? = null,
     searchVisibility: Boolean? = null,
     closeSearch: (() -> Unit)? = null,
     onPasswordClick: ((Password) -> Unit)? = null,
@@ -93,7 +100,7 @@ fun NCPNavHost(
     ) {
         composable(NCPScreen.Passwords.name) {
             NCPNavHostComposable(
-                drawerState = drawerState,
+                modalSheetState = modalSheetState,
                 searchVisibility = searchVisibility,
                 closeSearch = closeSearch
             ) {
@@ -125,7 +132,7 @@ fun NCPNavHost(
                 filteredPasswordList?.filter { it.favorite }
             }
             NCPNavHostComposable(
-                drawerState = drawerState,
+                modalSheetState = modalSheetState,
                 searchVisibility = searchVisibility,
                 closeSearch = closeSearch
             ) {
@@ -154,7 +161,7 @@ fun NCPNavHost(
 
         composable(NCPScreen.Folders.name) {
             NCPNavHostComposable(
-                drawerState = drawerState,
+                modalSheetState = modalSheetState,
                 searchVisibility = searchVisibility,
                 closeSearch = closeSearch
             ) {
@@ -223,7 +230,7 @@ fun NCPNavHost(
                 }
             }
             NCPNavHostComposable(
-                drawerState = drawerState,
+                modalSheetState = modalSheetState,
                 searchVisibility = searchVisibility,
                 closeSearch = closeSearch
             ) {
@@ -265,7 +272,7 @@ fun NCPNavHost(
 @Composable
 fun NCPNavHostComposable(
     modifier: Modifier = Modifier,
-    drawerState: DrawerState? = null,
+    modalSheetState: SheetState? = null,
     searchVisibility: Boolean? = null,
     closeSearch: (() -> Unit)? = null,
     content: @Composable () -> Unit = { }
@@ -274,9 +281,9 @@ fun NCPNavHostComposable(
         closeSearch?.invoke()
     }
     val scope = rememberCoroutineScope()
-    BackHandler(enabled = drawerState?.isOpen ?: false) {
+    BackHandler(enabled = modalSheetState?.isVisible ?: false) {
         scope.launch {
-            drawerState?.close()
+            modalSheetState?.hide()
         }
     }
     Box(modifier = modifier) {

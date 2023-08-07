@@ -39,6 +39,7 @@ data class ListDecryptionState<T>(
     val isLoading: Boolean = false
 )
 
+@Suppress("deprecation")
 @Composable
 fun RefreshListBody(
     isRefreshing: Boolean,
@@ -98,7 +99,6 @@ fun MixedLazyColumn(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordRow(
     password: Password,
@@ -108,12 +108,12 @@ fun PasswordRow(
 ) {
     ListItem(
         modifier = modifier.clickable { onPasswordClick?.invoke(password) },
-        headlineText = {
+        headlineContent = {
             Text(
                 text = password.label,
             )
         },
-        supportingText = if (password.username.isNotBlank()) {
+        supportingContent = if (password.username.isNotBlank()) {
             {
                 Text(
                     text = password.username,
@@ -155,7 +155,11 @@ fun PasswordRow(
                         password.loadFavicon(context)
                     }
                 }
-                Crossfade(targetState = imageBitmap, animationSpec = tween(250)) { image ->
+                Crossfade(
+                    targetState = imageBitmap,
+                    animationSpec = tween(250),
+                    label = "Icon"
+                ) { image ->
                     if (image == null) {
                         Image(
                             modifier = Modifier
@@ -188,7 +192,6 @@ fun PasswordRow(
         )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FolderRow(
     folder: Folder,
@@ -206,7 +209,7 @@ fun FolderRow(
                     .padding(8.dp)
             )
         },
-        headlineText = {
+        headlineContent = {
             Text(text = folder.label)
         },
         modifier = modifier.clickable { onFolderClick?.invoke(folder) }

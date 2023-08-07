@@ -17,7 +17,6 @@ import javax.net.ssl.SSLHandshakeException
  *
  * @param server The [Server] where the requests will be made.
  */
-@Suppress("BlockingMethodInNonBlockingContext")
 class ServiceApi private constructor(private val server: Server) {
 
     /**
