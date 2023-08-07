@@ -87,7 +87,7 @@ fun PasswordItemContent(
                     imageVector = if (password.favorite)
                         Icons.Filled.Star else Icons.TwoTone.Star,
                     contentDescription = "favorite",
-                    tint = if (MaterialTheme.colorScheme.isLight()) Yellow500 else Yellow200
+                    tint = if (MaterialTheme.colorScheme.isLight()) Amber500 else Amber200
                 )
             }
         }
@@ -115,14 +115,15 @@ fun PasswordItemContent(
                 },
                 trailingIcon = {
                     IconButton(onClick = {
-                        context.copyToClipboard(password.password)
+                        context.copyToClipboard(password.password, isSensitive = true)
                         Toast.makeText(context, toastPasswordText, Toast.LENGTH_SHORT).show()
                     }) {
                         Icon(imageVector = Icons.TwoTone.ContentCopy, contentDescription = "copy")
                     }
                 },
                 onClickText = { showPassword = !showPassword },
-                maxLines = if (showPassword) null else 1
+                maxLines = if (showPassword) null else 1,
+                fontFamily = if (showPassword) FontFamily(Font(R.font.dejavu_sans_mono)) else null
             )
             TextLabel(
                 text = password.url,
@@ -156,7 +157,8 @@ fun TextLabel(
     icon: @Composable () -> Unit = {},
     trailingIcon: @Composable () -> Unit = {},
     onClickText: (() -> Unit)? = null,
-    maxLines: Int? = null
+    maxLines: Int? = null,
+    fontFamily: FontFamily? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -167,6 +169,7 @@ fun TextLabel(
             text = text,
             maxLines = maxLines ?: Int.MAX_VALUE,
             overflow = TextOverflow.Ellipsis,
+            fontFamily = fontFamily,
             modifier = Modifier
                 .padding(vertical = 4.dp, horizontal = 16.dp)
                 .weight(1f)
@@ -174,7 +177,8 @@ fun TextLabel(
                     enabled = onClickText != null,
                     onClick = onClickText ?: {}
                 ),
-        )
+
+            )
         trailingIcon()
     }
 }

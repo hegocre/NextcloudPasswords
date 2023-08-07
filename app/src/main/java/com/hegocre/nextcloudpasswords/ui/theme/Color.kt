@@ -62,9 +62,6 @@ val md_theme_dark_surfaceTint = Color(0xFF9ECAFF)
 val md_theme_dark_outlineVariant = Color(0xFF43474E)
 val md_theme_dark_scrim = Color(0xFF000000)
 
-val Yellow500 = Color(0xFFFFEB3B)
-val Yellow200 = Color(0xFFFFF59D)
-
 val Amber500 = Color(0xFFFFC107)
 val Amber200 = Color(0xFFFFE082)
 
