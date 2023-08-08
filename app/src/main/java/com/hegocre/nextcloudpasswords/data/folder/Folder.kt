@@ -1,6 +1,5 @@
 package com.hegocre.nextcloudpasswords.data.folder
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -23,22 +22,24 @@ import org.json.JSONException
  * @property cseKey UUID of the key used for client side encryption.
  * @property sseType Type of the used server side encryption.
  */
+@Serializable
 @Entity(tableName = "folders", indices = [Index(value = ["id"], unique = true)])
 data class Folder(
     @PrimaryKey
     val id: String,
-    @ColumnInfo(name = "label")
     val label: String,
-    @ColumnInfo(name = "parent")
     val parent: String = FoldersApi.DEFAULT_FOLDER_UUID,
-    @ColumnInfo(name = "revision")
     val revision: String,
-    @ColumnInfo(name = "cseType")
-    val cseType: String = "none",
-    @ColumnInfo(name = "cseKey")
-    val cseKey: String = "",
-    @ColumnInfo(name = "sseType")
-    val sseType: String = "none"
+    val cseType: String,
+    val cseKey: String,
+    val sseType: String,
+    val client: String,
+    val hidden: Boolean,
+    val trashed: Boolean,
+    val favorite: Boolean,
+    val created: Int,
+    val updated: Int,
+    val edited: Int
 ) {
     /**
      * Returns a copy of this object with the encrypted fields decrypted using the keychain.

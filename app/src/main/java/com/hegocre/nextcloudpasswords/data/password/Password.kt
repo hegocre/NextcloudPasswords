@@ -4,16 +4,22 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.room.*
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.Index
+import androidx.room.PrimaryKey
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
 import com.hegocre.nextcloudpasswords.data.favicon.FaviconController
 import com.hegocre.nextcloudpasswords.utils.decryptValue
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.json.JSONArray
-import org.json.JSONException
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 
 /**
  * Data class representing a
@@ -34,32 +40,35 @@ import org.json.JSONException
  * @property status Security status level of the password. See
  * [Security Status](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api#security-status).
  */
+@Serializable
 @Entity(tableName = "passwords", indices = [Index(value = ["id"], unique = true)])
 data class Password(
     @PrimaryKey
     val id: String,
-    @ColumnInfo(name = "label")
     val label: String,
-    @ColumnInfo(name = "username")
     val username: String,
-    @ColumnInfo(name = "password")
     val password: String,
-    @ColumnInfo(name = "url")
     val url: String,
-    @ColumnInfo(name = "revision")
+    val notes: String,
+    val customFields: String,
+    val status: Int,
+    val statusCode: String,
+    val hash: String,
+    val folder: String,
     val revision: String,
-    @ColumnInfo(name = "cseType")
-    val cseType: String = "none",
-    @ColumnInfo(name = "cseKey")
-    val cseKey: String = "",
-    @ColumnInfo(name = "sseType")
-    val sseType: String = "none",
-    @ColumnInfo(name = "favorite")
-    val favorite: Boolean = false,
-    @ColumnInfo(name = "folder")
-    val folder: String = "",
-    @ColumnInfo(name = "status")
-    val status: Int = 3
+    val share: String?,
+    val shared: Boolean,
+    val cseType: String,
+    val cseKey: String,
+    val sseType: String,
+    val client: String,
+    val hidden: Boolean,
+    val trashed: Boolean,
+    val favorite: Boolean,
+    val editable: Boolean,
+    val edited: Int,
+    val created: Int,
+    val updated: Int
 ) {
     @Ignore
     private val _faviconBitmap = MutableStateFlow<ImageBitmap?>(null)
@@ -119,12 +128,16 @@ data class Password(
             val label = label.decryptValue(cseKey, csEv1Keychain)
             val password = password.decryptValue(cseKey, csEv1Keychain)
             val username = username.decryptValue(cseKey, csEv1Keychain)
+            val notes = notes.decryptValue(cseKey, csEv1Keychain)
+            val customFields = customFields.decryptValue(cseKey, csEv1Keychain)
 
             copy(
-                url = url,
                 label = label,
                 password = password,
-                username = username
+                username = username,
+                url = url,
+                notes = notes,
+                customFields = customFields
             )
         }
 

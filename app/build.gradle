@@ -25,6 +25,9 @@ android {
         resourceConfigurations += ['ca', 'es', 'en']
     }
 
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas".toString())
+    }
     buildTypes {
         release {
             minifyEnabled true
