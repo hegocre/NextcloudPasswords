@@ -7,6 +7,7 @@ import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import org.json.JSONObject
 import java.net.SocketTimeoutException
 import javax.net.ssl.SSLHandshakeException
@@ -63,7 +64,9 @@ class PasswordsApi private constructor(private var server: Server) {
                 return Result.Error(Error.API_BAD_RESPONSE)
             }
 
-            Result.Success(Password.listFromJson(body))
+            withContext(Dispatchers.Default) {
+                Result.Success(Json.decodeFromString(body))
+            }
         } catch (e: SocketTimeoutException) {
             Result.Error(Error.API_TIMEOUT)
         }

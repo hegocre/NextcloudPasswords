@@ -6,8 +6,7 @@ import androidx.room.PrimaryKey
 import com.hegocre.nextcloudpasswords.api.FoldersApi
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
 import com.hegocre.nextcloudpasswords.utils.decryptValue
-import org.json.JSONArray
-import org.json.JSONException
+import kotlinx.serialization.Serializable
 
 /**
  * Data class representing a
@@ -63,83 +62,5 @@ data class Folder(
         return copy(
             label = label
         )
-    }
-
-    companion object {
-        /**
-         * Create a list of folders from a JSON object.
-         *
-         * @param data The JSON object to parse.
-         * @return A list of the parsed folders.
-         */
-        fun listFromJson(data: String): List<Folder> {
-            val folderList = ArrayList<Folder>()
-
-            val array = try {
-                JSONArray(data)
-            } catch (ex: JSONException) {
-                JSONArray()
-            }
-
-            for (i in 0 until array.length()) {
-                val obj = array.getJSONObject(i)
-
-                val id = try {
-                    obj.getString("id")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val label = try {
-                    obj.getString("label")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val parent = try {
-                    obj.getString("parent")
-                } catch (ex: JSONException) {
-                    FoldersApi.DEFAULT_FOLDER_UUID
-                }
-
-                val revision = try {
-                    obj.getString("revision")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val cseType = try {
-                    obj.getString("cseType")
-                } catch (ex: JSONException) {
-                    "none"
-                }
-
-                val cseKey = try {
-                    obj.getString("cseKey")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val sseType = try {
-                    obj.getString("sseType")
-                } catch (ex: JSONException) {
-                    "none"
-                }
-
-                folderList.add(
-                    Folder(
-                        id,
-                        label,
-                        parent,
-                        revision,
-                        cseType,
-                        cseKey,
-                        sseType
-                    )
-                )
-            }
-
-            return folderList
-        }
     }
 }
