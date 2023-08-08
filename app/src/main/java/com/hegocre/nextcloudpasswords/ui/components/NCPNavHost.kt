@@ -83,13 +83,13 @@ fun NCPNavHost(
 
     val filteredPasswordList = remember(passwordsDecryptionState.decryptedList, searchQuery) {
         passwordsDecryptionState.decryptedList?.filter {
-            it.label.lowercase().contains(searchQuery.lowercase()) ||
-                    it.url.lowercase().contains(searchQuery.lowercase())
+            !it.hidden && !it.trashed && (it.label.lowercase().contains(searchQuery.lowercase()) ||
+                    it.url.lowercase().contains(searchQuery.lowercase()))
         }
     }
     val filteredFolderList = remember(foldersDecryptionState.decryptedList, searchQuery) {
         foldersDecryptionState.decryptedList?.filter {
-            it.label.lowercase().contains(searchQuery.lowercase())
+            !it.hidden && !it.trashed && it.label.lowercase().contains(searchQuery.lowercase())
         }
     }
 
