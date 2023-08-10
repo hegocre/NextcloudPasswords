@@ -45,7 +45,6 @@ fun MasterPasswordDialog(
     setSavePassword: (Boolean) -> Unit,
     onOkClick: () -> Unit,
     errorText: String = "",
-    onOkClick: () -> Unit,
     onDismissRequest: (() -> Unit)? = null
 ) {
     var showPassword by rememberSaveable { mutableStateOf(false) }
@@ -137,4 +136,28 @@ fun LogOutDialog(
             }
         }
     )
+}
+
+@Preview
+@Composable
+fun MasterPasswordDialogPreview() {
+    NextcloudPasswordsTheme {
+        MasterPasswordDialog(
+            masterPassword = "",
+            setMasterPassword = {},
+            savePassword = false,
+            setSavePassword = {},
+            onOkClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun LogOutDialogPreview() {
+    NextcloudPasswordsTheme {
+        LogOutDialog {
+
+        }
+    }
 }

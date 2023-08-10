@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -34,12 +35,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.ui.theme.Amber200
 import com.hegocre.nextcloudpasswords.ui.theme.Amber500
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
+import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.isLight
 import com.hegocre.nextcloudpasswords.utils.copyToClipboard
 
@@ -183,3 +186,43 @@ fun TextLabel(
     }
 }
 
+@Preview
+@Composable
+fun PasswordItemPreview() {
+    NextcloudPasswordsTheme {
+        Surface {
+            PasswordItem(
+                password = Password(
+                    id = "",
+                    label = "Nextcloud",
+                    username = "john_doe",
+                    password = "secret_value",
+                    url = "https://nextcloud.com/",
+                    notes = "",
+                    customFields = "",
+                    status = 0,
+                    statusCode = "GOOD",
+                    hash = "",
+                    folder = "",
+                    revision = "",
+                    share = null,
+                    shared = false,
+                    cseType = "",
+                    cseKey = "",
+                    sseType = "",
+                    client = "",
+                    hidden = false,
+                    trashed = false,
+                    favorite = true,
+                    editable = true,
+                    edited = 0,
+                    created = 0,
+                    updated = 0
+                ),
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 16.dp)
+            )
+        }
+    }
+}

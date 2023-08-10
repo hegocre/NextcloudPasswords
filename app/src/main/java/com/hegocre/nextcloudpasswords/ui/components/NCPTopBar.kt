@@ -205,3 +205,15 @@ fun TopBarPreview() {
         NCPSearchTopBar()
     }
 }
+
+@Preview
+@Composable
+fun SearchBarPreview() {
+    NextcloudPasswordsTheme {
+        SearchAppBar(
+            searchQuery = "Query",
+            setSearchQuery = {},
+            onBackPressed = {}
+        )
+    }
+}

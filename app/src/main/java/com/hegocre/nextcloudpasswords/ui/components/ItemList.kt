@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
@@ -214,4 +215,66 @@ fun FolderRow(
         },
         modifier = modifier.clickable { onFolderClick?.invoke(folder) }
     )
+}
+
+@Preview
+@Composable
+fun PasswordRowPreview() {
+    NextcloudPasswordsTheme {
+        PasswordRow(
+            password = Password(
+                id = "",
+                label = "Nextcloud",
+                username = "john_doe",
+                password = "secret_value",
+                url = "https://nextcloud.com/",
+                notes = "",
+                customFields = "",
+                status = 0,
+                statusCode = "GOOD",
+                hash = "",
+                folder = "",
+                revision = "",
+                share = null,
+                shared = false,
+                cseType = "",
+                cseKey = "",
+                sseType = "",
+                client = "",
+                hidden = false,
+                trashed = false,
+                favorite = true,
+                editable = true,
+                edited = 0,
+                created = 0,
+                updated = 0
+            ),
+            shouldShowIcon = true
+        )
+    }
+}
+
+@Preview
+@Composable
+fun FolderRowPreview() {
+    NextcloudPasswordsTheme {
+        FolderRow(
+            folder = Folder(
+                id = "",
+                label = "Management",
+                parent = "00000000-0000-0000-0000-000000000000",
+                revision = "",
+                cseType = "",
+                cseKey = "",
+                sseType = "",
+                client = "",
+                hidden = false,
+                trashed = false,
+                favorite = false,
+                created = 0,
+                updated = 0,
+                edited = 0
+            )
+        )
+    }
 }
