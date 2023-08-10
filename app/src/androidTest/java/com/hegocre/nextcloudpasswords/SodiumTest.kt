@@ -2,12 +2,18 @@ package com.hegocre.nextcloudpasswords
 
 import com.goterl.lazysodium.LazySodiumAndroid
 import com.goterl.lazysodium.SodiumAndroid
+import com.goterl.lazysodium.interfaces.AEAD
 import com.goterl.lazysodium.interfaces.Box
 import com.goterl.lazysodium.interfaces.GenericHash
 import com.goterl.lazysodium.interfaces.PwHash
+import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
+import com.hegocre.nextcloudpasswords.utils.LazySodiumUtils
+import com.hegocre.nextcloudpasswords.utils.decryptValue
+import com.hegocre.nextcloudpasswords.utils.encryptValue
+import org.junit.Assert
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.util.*
+import java.util.Locale
 
 class SodiumTest {
 
@@ -51,5 +57,21 @@ class SodiumTest {
 
         val secret = sodium.sodiumBin2Hex(passwordHash)
         assertTrue(secret.lowercase(Locale.getDefault()) == "")
+    }
+
+    @Test
+    fun decryption_isCorrect() {
+        val sodium = LazySodiumUtils.getSodium()
+        val key = sodium.keygen(AEAD.Method.AES256GCM)
+        val csEv1Keychain = CSEv1Keychain(
+            mapOf("test_key" to key.asHexString),
+            "test_key"
+        )
+
+        val testString = "abcdefg_12345678"
+        val encryptedString = testString.encryptValue("test_key", csEv1Keychain)
+        val decryptedString = encryptedString.decryptValue("test_key", csEv1Keychain)
+
+        Assert.assertEquals(testString, decryptedString)
     }
 }
