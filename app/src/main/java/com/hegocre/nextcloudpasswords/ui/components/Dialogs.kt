@@ -1,24 +1,41 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.contentColorFor
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
+import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 
 @Composable
 fun MasterPasswordDialog(
@@ -26,6 +43,7 @@ fun MasterPasswordDialog(
     setMasterPassword: (String) -> Unit,
     savePassword: Boolean,
     setSavePassword: (Boolean) -> Unit,
+    onOkClick: () -> Unit,
     errorText: String = "",
     onOkClick: () -> Unit,
     onDismissRequest: (() -> Unit)? = null
@@ -37,13 +55,11 @@ fun MasterPasswordDialog(
         Surface(
             color = MaterialTheme.colorScheme.surface,
             contentColor = contentColorFor(backgroundColor = MaterialTheme.colorScheme.surface),
-            shape = MaterialTheme.shapes.medium,
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp
         ) {
-            Column {
+            Column(modifier = Modifier.padding(24.dp)) {
                 OutlinedTextFieldWithCaption(
-                    modifier = Modifier
-                        .padding(top = 18.dp)
-                        .padding(horizontal = 24.dp),
                     text = masterPassword,
                     onValueChange = setMasterPassword,
                     visualTransformation = if (showPassword)
@@ -69,13 +85,17 @@ fun MasterPasswordDialog(
                         Checkbox(
                             checked = savePassword,
                             onCheckedChange = setSavePassword,
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically)
-                                .padding(start = 24.dp)
+                            modifier = Modifier.align(Alignment.CenterVertically)
                         )
                         Text(
                             text = "Save password",
-                            modifier = Modifier.align(Alignment.CenterVertically),
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .pointerInput(Unit) {
+                                    detectTapGestures {
+                                        setSavePassword(!savePassword)
+                                    }
+                                },
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -83,9 +103,7 @@ fun MasterPasswordDialog(
 
                 TextButton(
                     onClick = onOkClick,
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(horizontal = 8.dp)
+                    modifier = Modifier.align(Alignment.End)
                 ) {
                     Text(text = stringResource(android.R.string.ok))
                 }
