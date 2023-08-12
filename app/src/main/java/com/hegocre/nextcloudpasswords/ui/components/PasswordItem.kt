@@ -83,11 +83,13 @@ fun PasswordItemContent(
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.weight(1f)
             )
-            IconButton(onClick = onEditPassword) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "edit",
-                )
+            if (password.editable) {
+                IconButton(onClick = onEditPassword) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "edit",
+                    )
+                }
             }
         }
         CompositionLocalProvider(
