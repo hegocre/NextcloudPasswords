@@ -138,6 +138,33 @@ fun LogOutDialog(
     )
 }
 
+@Composable
+fun DeleteElementDialog(
+    onDismissRequest: (() -> Unit)? = null,
+    onConfirmButton: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { onDismissRequest?.invoke() },
+        title = { Text(text = stringResource(R.string.delete)) },
+        text = { Text(text = stringResource(R.string.are_you_sure_delete_element)) },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmButton()
+                    onDismissRequest?.invoke()
+                }
+            ) {
+                Text(text = stringResource(R.string.delete))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDismissRequest?.invoke() }) {
+                Text(text = stringResource(id = android.R.string.cancel))
+            }
+        }
+    )
+}
+
 @Preview
 @Composable
 fun MasterPasswordDialogPreview() {
@@ -157,6 +184,16 @@ fun MasterPasswordDialogPreview() {
 fun LogOutDialogPreview() {
     NextcloudPasswordsTheme {
         LogOutDialog {
+
+        }
+    }
+}
+
+@Preview
+@Composable
+fun DeleteDialogPreview() {
+    NextcloudPasswordsTheme {
+        DeleteElementDialog {
 
         }
     }

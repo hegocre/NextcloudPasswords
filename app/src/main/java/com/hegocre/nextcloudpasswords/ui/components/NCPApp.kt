@@ -3,11 +3,15 @@ package com.hegocre.nextcloudpasswords.ui.components
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
@@ -27,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.FoldersApi
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.viewmodels.PasswordsViewModel
@@ -82,50 +87,68 @@ fun NextcloudPasswordsApp(
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
-                NCPSearchTopBar(
-                    title = when (currentScreen) {
-                        NCPScreen.Passwords, NCPScreen.Favorites -> stringResource(currentScreen.title)
-                        NCPScreen.Folders -> {
-                            passwordsViewModel.visibleFolder.value?.let {
-                                if (it.id == FoldersApi.DEFAULT_FOLDER_UUID) stringResource(
-                                    currentScreen.title
+                if (currentScreen != NCPScreen.Edit) {
+                    NCPSearchTopBar(
+                        title = when (currentScreen) {
+                            NCPScreen.Passwords, NCPScreen.Favorites -> stringResource(currentScreen.title)
+                            NCPScreen.Folders -> {
+                                passwordsViewModel.visibleFolder.value?.let {
+                                    if (it.id == FoldersApi.DEFAULT_FOLDER_UUID) stringResource(
+                                        currentScreen.title
+                                    )
+                                    else it.label
+                                } ?: stringResource(currentScreen.title)
+                            }
+
+                            else -> ""
+                        },
+                        searchQuery = searchQuery,
+                        setSearchQuery = setSearchQuery,
+                        isAutofill = isAutofillRequest,
+                        searchExpanded = searchExpanded,
+                        onSearchClick = { searchExpanded = true },
+                        onSearchCloseClick = {
+                            searchExpanded = false
+                            setSearchQuery("")
+                        },
+                        onLogoutClick = { logOutDialogOpen = true },
+                        scrollBehavior = scrollBehavior
+                    )
+                } else {
+                    TopAppBar(
+                        title = { Text(text = stringResource(id = R.string.edit)) },
+                        navigationIcon = {
+                            IconButton(onClick = { navController.navigateUp() }) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowBack,
+                                    contentDescription = "back"
                                 )
-                                else it.label
-                            } ?: stringResource(currentScreen.title)
+                            }
                         }
-                    },
-                    searchQuery = searchQuery,
-                    setSearchQuery = setSearchQuery,
-                    isAutofill = isAutofillRequest,
-                    searchExpanded = searchExpanded,
-                    onSearchClick = { searchExpanded = true },
-                    onSearchCloseClick = {
-                        searchExpanded = false
-                        setSearchQuery("")
-                    },
-                    onLogoutClick = { logOutDialogOpen = true },
-                    scrollBehavior = scrollBehavior
-                )
+                    )
+                }
             },
             bottomBar = {
-                NCPBottomNavigation(
-                    allScreens = NCPScreen.values().toList(),
-                    currentScreen = currentScreen,
-                    onScreenSelected = { screen ->
-                        navController.navigate(screen.name) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                if (currentScreen != NCPScreen.Edit) {
+                    NCPBottomNavigation(
+                        allScreens = NCPScreen.values().toList().filter { !it.hidden },
+                        currentScreen = currentScreen,
+                        onScreenSelected = { screen ->
+                            navController.navigate(screen.name) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                )
+                        },
+                    )
+                }
             },
             floatingActionButton = {
-                if (!isAutofillRequest) {
+                if (!isAutofillRequest && currentScreen != NCPScreen.Edit) {
                     FloatingActionButton(
-                        onClick = { },
+                        onClick = { navController.navigate("${NCPScreen.Edit.name}/none") },
                     ) {
                         Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
                     }
@@ -184,6 +207,12 @@ fun NextcloudPasswordsApp(
                 ) {
                     PasswordItem(
                         password = passwordsViewModel.visiblePassword.value,
+                        onEditPassword = {
+                            coroutineScope.launch {
+                                modalSheetState.hide()
+                            }
+                            navController.navigate("${NCPScreen.Edit.name}/${passwordsViewModel.visiblePassword.value?.id ?: "none"}")
+                        },
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .padding(bottom = 16.dp)

@@ -1,5 +1,6 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,14 +26,20 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.FoldersApi
 import com.hegocre.nextcloudpasswords.data.folder.Folder
+import com.hegocre.nextcloudpasswords.data.password.DeletedPassword
+import com.hegocre.nextcloudpasswords.data.password.NewPassword
 import com.hegocre.nextcloudpasswords.data.password.Password
+import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.data.viewmodels.PasswordsViewModel
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import com.hegocre.nextcloudpasswords.utils.decryptFolders
 import com.hegocre.nextcloudpasswords.utils.decryptPasswords
+import com.hegocre.nextcloudpasswords.utils.encryptValue
+import com.hegocre.nextcloudpasswords.utils.sha1Hash
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -50,11 +57,13 @@ fun NCPNavHost(
     contentPadding: PaddingValues = PaddingValues(all = 0.dp)
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     val passwords by passwordsViewModel.passwords.observeAsState()
     val folders by passwordsViewModel.folders.observeAsState()
     val keychain by passwordsViewModel.csEv1Keychain.observeAsState()
     val isRefreshing by passwordsViewModel.isRefreshing.collectAsState()
+    val isUpdating by passwordsViewModel.isUpdating.collectAsState()
 
     val passwordsDecryptionState by produceState(
         initialValue = ListDecryptionState(isLoading = true),
@@ -261,6 +270,208 @@ fun NCPNavHost(
                                 contentPadding = contentPadding
                             )
                         }
+                    }
+                }
+            }
+        }
+
+        composable(
+            route = "${NCPScreen.Edit.name}/{password_uuid}",
+            arguments = listOf(
+                navArgument("password_uuid") {
+                    type = NavType.StringType
+                }
+            )
+        ) { entry ->
+            BackHandler(enabled = isUpdating) {
+                // Block back gesture when updating to avoid data loss
+                return@BackHandler
+            }
+
+            val passwordUuid = entry.arguments?.getString("password_uuid")
+            val selectedPassword = remember(filteredPasswordList, passwordUuid) {
+                if (passwordUuid == "none") {
+                    null
+                } else {
+                    filteredPasswordList?.firstOrNull {
+                        it.id == passwordUuid
+                    }
+                }
+            }
+            NCPNavHostComposable(
+                modalSheetState = modalSheetState,
+                searchVisibility = searchVisibility,
+                closeSearch = closeSearch
+            ) {
+                when {
+                    passwordsDecryptionState.isLoading -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+                    }
+
+                    passwordsDecryptionState.decryptedList != null -> {
+                        val editablePasswordState = rememberEditablePasswordState(selectedPassword)
+
+                        EditablePasswordView(
+                            editablePasswordState = editablePasswordState,
+                            onSavePassword = {
+                                if (selectedPassword == null) {
+                                    val newPassword = keychain?.let {
+                                        NewPassword(
+                                            password = editablePasswordState.password.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            label = editablePasswordState.label.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            username = editablePasswordState.username.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            url = editablePasswordState.url.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            notes = editablePasswordState.notes.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            customFields = editablePasswordState.customFields.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            hash = editablePasswordState.password.sha1Hash(),
+                                            cseType = "CSEv1r1",
+                                            cseKey = it.current,
+                                            folder = FoldersApi.DEFAULT_FOLDER_UUID,
+                                            edited = 0,
+                                            hidden = false,
+                                            favorite = editablePasswordState.favorite
+                                        )
+                                    } ?: NewPassword(
+                                        password = editablePasswordState.password,
+                                        label = editablePasswordState.label,
+                                        username = editablePasswordState.username,
+                                        url = editablePasswordState.url,
+                                        notes = editablePasswordState.notes,
+                                        customFields = editablePasswordState.customFields,
+                                        hash = editablePasswordState.password.sha1Hash(),
+                                        cseType = "none",
+                                        cseKey = "",
+                                        folder = FoldersApi.DEFAULT_FOLDER_UUID,
+                                        edited = 0,
+                                        hidden = false,
+                                        favorite = editablePasswordState.favorite
+                                    )
+                                    coroutineScope.launch {
+                                        if (passwordsViewModel.createPassword(newPassword)
+                                                .await()
+                                        ) {
+                                            navController.navigateUp()
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                R.string.password_saving_failed,
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                    }
+                                } else {
+                                    val updatedPassword = keychain?.let {
+                                        UpdatedPassword(
+                                            id = selectedPassword.id,
+                                            revision = selectedPassword.revision,
+                                            password = editablePasswordState.password.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            label = editablePasswordState.label.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            username = editablePasswordState.username.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            url = editablePasswordState.url.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            notes = editablePasswordState.notes.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            customFields = editablePasswordState.customFields.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            hash = editablePasswordState.password.sha1Hash(),
+                                            cseType = "CSEv1r1",
+                                            cseKey = it.current,
+                                            folder = selectedPassword.folder,
+                                            edited = if (editablePasswordState.password == selectedPassword.password) selectedPassword.edited else 0,
+                                            hidden = selectedPassword.hidden,
+                                            favorite = editablePasswordState.favorite
+                                        )
+                                    } ?: UpdatedPassword(
+                                        id = selectedPassword.id,
+                                        revision = selectedPassword.revision,
+                                        password = editablePasswordState.password,
+                                        label = editablePasswordState.label,
+                                        username = editablePasswordState.username,
+                                        url = editablePasswordState.url,
+                                        notes = editablePasswordState.notes,
+                                        customFields = editablePasswordState.customFields,
+                                        hash = editablePasswordState.password.sha1Hash(),
+                                        cseType = "none",
+                                        cseKey = "",
+                                        folder = selectedPassword.folder,
+                                        edited = if (editablePasswordState.password == selectedPassword.password) selectedPassword.edited else 0,
+                                        hidden = selectedPassword.hidden,
+                                        favorite = editablePasswordState.favorite
+                                    )
+                                    coroutineScope.launch {
+                                        if (passwordsViewModel.updatePassword(updatedPassword)
+                                                .await()
+                                        ) {
+                                            navController.navigateUp()
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                R.string.password_saving_failed,
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                    }
+                                }
+                            },
+                            onDeletePassword = if (selectedPassword == null) null
+                            else {
+                                {
+                                    val deletedPassword = DeletedPassword(
+                                        id = selectedPassword.id,
+                                        revision = selectedPassword.revision
+                                    )
+                                    coroutineScope.launch {
+                                        if (passwordsViewModel.deletePassword(deletedPassword)
+                                                .await()
+                                        ) {
+                                            navController.navigateUp()
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                R.string.password_deleting_failed,
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                    }
+                                }
+                            },
+                            isUpdating = isUpdating
+                        )
                     }
                 }
             }

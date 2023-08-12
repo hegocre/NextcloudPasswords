@@ -9,12 +9,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.ContentCopy
 import androidx.compose.material.icons.twotone.Link
 import androidx.compose.material.icons.twotone.Password
-import androidx.compose.material.icons.twotone.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -39,20 +38,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.data.password.Password
-import com.hegocre.nextcloudpasswords.ui.theme.Amber200
-import com.hegocre.nextcloudpasswords.ui.theme.Amber500
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
-import com.hegocre.nextcloudpasswords.ui.theme.isLight
 import com.hegocre.nextcloudpasswords.utils.copyToClipboard
 
 @Composable
 fun PasswordItem(
     password: Password?,
-    modifier: Modifier = Modifier
+    onEditPassword: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     password?.let { pass ->
-        PasswordItemContent(password = pass, modifier = modifier)
+        PasswordItemContent(password = pass, onEditPassword = onEditPassword, modifier = modifier)
     } ?: Text(
         text = stringResource(R.string.password),
         style = MaterialTheme.typography.headlineMedium,
@@ -63,6 +60,7 @@ fun PasswordItem(
 @Composable
 fun PasswordItemContent(
     password: Password,
+    onEditPassword: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -85,12 +83,10 @@ fun PasswordItemContent(
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.weight(1f)
             )
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = onEditPassword) {
                 Icon(
-                    imageVector = if (password.favorite)
-                        Icons.Filled.Star else Icons.TwoTone.Star,
-                    contentDescription = "favorite",
-                    tint = if (MaterialTheme.colorScheme.isLight()) Amber500 else Amber200
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "edit",
                 )
             }
         }
@@ -219,6 +215,7 @@ fun PasswordItemPreview() {
                     created = 0,
                     updated = 0
                 ),
+                onEditPassword = {},
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 16.dp)

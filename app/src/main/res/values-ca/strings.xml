@@ -34,4 +34,14 @@
     <string name="dark">Fosc</string>
     <string name="black">Negre</string>
     <string name="app_theme">Tema de l\'aplicació</string>
+    <string name="save">Desar</string>
+    <string name="edit">Editar</string>
+    <string name="label">Nom</string>
+    <string name="username">Usuari</string>
+    <string name="url">Lloc web</string>
+    <string name="password_saving_failed">No s\'ha pogut desar la contrasenya. Si us plau, intenteu-ho de nou</string>
+    <string name="delete_password">Eliminar contrasenya</string>
+    <string name="password_deleting_failed">No s\'ha pogut eliminar la contrasenya. Si us plau, intenteu-ho de nou</string>
+    <string name="are_you_sure_delete_element">Aquest element serà eliminat. Si us plau, confirmeu aquesta acció</string>
+    <string name="delete">Eliminar</string>
 </resources>

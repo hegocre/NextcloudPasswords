@@ -33,4 +33,14 @@
     <string name="dark">Dark</string>
     <string name="black">Black</string>
     <string name="app_theme">App theme</string>
+    <string name="save">Save</string>
+    <string name="edit">Edit</string>
+    <string name="label">Label</string>
+    <string name="username">Username</string>
+    <string name="url">URL</string>
+    <string name="password_saving_failed">Password saving has failed. Please, try again</string>
+    <string name="delete_password">Delete password</string>
+    <string name="password_deleting_failed">Password deleting has failed. Please, try again</string>
+    <string name="are_you_sure_delete_element">This element will be deleted. Please, confirm this action</string>
+    <string name="delete">Delete</string>
 </resources>
