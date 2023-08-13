@@ -39,6 +39,8 @@ class SessionApi private constructor(private var server: Server) {
                 }
             } catch (ex: SSLHandshakeException) {
                 return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+            } catch (ex: Exception) {
+                return Result.Error(0)
             }
 
             val code = apiResponse.code

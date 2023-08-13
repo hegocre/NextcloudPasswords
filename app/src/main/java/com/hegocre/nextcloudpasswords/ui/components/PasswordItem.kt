@@ -7,13 +7,16 @@ import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.ContentCopy
 import androidx.compose.material.icons.twotone.Link
 import androidx.compose.material.icons.twotone.Password
+import androidx.compose.material.icons.twotone.StickyNote2
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -27,7 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -38,8 +41,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.data.password.Password
+import com.hegocre.nextcloudpasswords.ui.theme.Amber200
+import com.hegocre.nextcloudpasswords.ui.theme.Amber500
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.ui.theme.isLight
 import com.hegocre.nextcloudpasswords.utils.copyToClipboard
 
 @Composable
@@ -67,6 +73,7 @@ fun PasswordItemContent(
     val toastUsernameText = stringResource(R.string.username_copied)
     val toastPasswordText = stringResource(R.string.password_copied)
     val toastUrlText = stringResource(R.string.url_copied)
+    val toastNotesText = stringResource(id = R.string.notes_copied)
 
     var showPassword by rememberSaveable { mutableStateOf(false) }
     SideEffect {
@@ -76,13 +83,22 @@ fun PasswordItemContent(
     Column(modifier = modifier) {
         Row(
             modifier = Modifier.padding(bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = CenterVertically
         ) {
             Text(
                 text = password.label,
                 style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.padding(bottom = 2.dp)
             )
+            if (password.favorite) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = "favorite",
+                    tint = if (MaterialTheme.colorScheme.isLight()) Amber500 else Amber200,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
             if (password.editable) {
                 IconButton(onClick = onEditPassword) {
                     Icon(
@@ -95,20 +111,28 @@ fun PasswordItemContent(
         CompositionLocalProvider(
             LocalContentColor provides LocalContentColor.current.copy(alpha = ContentAlpha.medium)
         ) {
-            TextLabel(
-                text = password.username,
-                icon = {
-                    Icon(imageVector = Icons.TwoTone.AccountCircle, contentDescription = "username")
-                },
-                trailingIcon = {
-                    IconButton(onClick = {
-                        context.copyToClipboard(password.username)
-                        Toast.makeText(context, toastUsernameText, Toast.LENGTH_SHORT).show()
-                    }) {
-                        Icon(imageVector = Icons.TwoTone.ContentCopy, contentDescription = "copy")
+            if (password.username.isNotBlank()) {
+                TextLabel(
+                    text = password.username,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.TwoTone.AccountCircle,
+                            contentDescription = "username"
+                        )
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            context.copyToClipboard(password.username)
+                            Toast.makeText(context, toastUsernameText, Toast.LENGTH_SHORT).show()
+                        }) {
+                            Icon(
+                                imageVector = Icons.TwoTone.ContentCopy,
+                                contentDescription = "copy"
+                            )
+                        }
                     }
-                }
-            )
+                )
+            }
             TextLabel(
                 text = if (showPassword) password.password else "●".repeat(password.password.length),
                 icon = {
@@ -126,27 +150,51 @@ fun PasswordItemContent(
                 maxLines = if (showPassword) null else 1,
                 fontFamily = if (showPassword) FontFamily(Font(R.font.dejavu_sans_mono)) else null
             )
-            TextLabel(
-                text = password.url,
-                icon = {
-                    Icon(imageVector = Icons.TwoTone.Link, contentDescription = "url")
-                },
-                trailingIcon = {
-                    IconButton(onClick = {
-                        context.copyToClipboard(password.url)
-                        Toast.makeText(context, toastUrlText, Toast.LENGTH_SHORT).show()
-                    }) {
-                        Icon(imageVector = Icons.TwoTone.ContentCopy, contentDescription = "copy")
-                    }
-                },
-                onClickText = if (URLUtil.isValidUrl(password.url)) {
-                    {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse(password.url)
-                        context.startActivity(intent)
-                    }
-                } else null
-            )
+            if (password.url.isNotBlank()) {
+                TextLabel(
+                    text = password.url,
+                    icon = {
+                        Icon(imageVector = Icons.TwoTone.Link, contentDescription = "url")
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            context.copyToClipboard(password.url)
+                            Toast.makeText(context, toastUrlText, Toast.LENGTH_SHORT).show()
+                        }) {
+                            Icon(
+                                imageVector = Icons.TwoTone.ContentCopy,
+                                contentDescription = "copy"
+                            )
+                        }
+                    },
+                    onClickText = if (URLUtil.isValidUrl(password.url)) {
+                        {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.data = Uri.parse(password.url)
+                            context.startActivity(intent)
+                        }
+                    } else null
+                )
+            }
+            if (password.notes.isNotBlank()) {
+                TextLabel(
+                    text = password.notes,
+                    icon = {
+                        Icon(imageVector = Icons.TwoTone.StickyNote2, contentDescription = "notes")
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            context.copyToClipboard(password.notes)
+                            Toast.makeText(context, toastNotesText, Toast.LENGTH_SHORT).show()
+                        }) {
+                            Icon(
+                                imageVector = Icons.TwoTone.ContentCopy,
+                                contentDescription = "copy"
+                            )
+                        }
+                    },
+                )
+            }
         }
     }
 }
@@ -162,7 +210,7 @@ fun TextLabel(
     fontFamily: FontFamily? = null,
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = CenterVertically,
         modifier = modifier.padding(vertical = 4.dp, horizontal = 8.dp)
     ) {
         icon()
@@ -196,7 +244,7 @@ fun PasswordItemPreview() {
                     username = "john_doe",
                     password = "secret_value",
                     url = "https://nextcloud.com/",
-                    notes = "",
+                    notes = "This is a note\nIt is very important that this is read by all means",
                     customFields = "",
                     status = 0,
                     statusCode = "GOOD",

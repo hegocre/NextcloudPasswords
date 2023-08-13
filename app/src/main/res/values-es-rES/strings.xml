@@ -44,4 +44,7 @@
     <string name="password_deleting_failed">No se ha podido eliminar la contraseña. Por favor, inténtelo de nuevo</string>
     <string name="are_you_sure_delete_element">Este elemento será eliminado. Por favor, confirme esta acción</string>
     <string name="delete">Eliminar</string>
+    <string name="notes">Notas</string>
+    <string name="notes_copied">Notas copiadas</string>
+    <string name="favorite">Favorita</string>
 </resources>

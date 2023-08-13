@@ -2,6 +2,7 @@ package com.hegocre.nextcloudpasswords.ui.components
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -65,6 +66,7 @@ fun RefreshListBody(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MixedLazyColumn(
     passwords: List<Password>? = null,
@@ -84,7 +86,8 @@ fun MixedLazyColumn(
             items(items = it, key = { folder -> folder.id }) { folder ->
                 FolderRow(
                     folder = folder,
-                    onFolderClick = onFolderClick
+                    onFolderClick = onFolderClick,
+                    modifier = Modifier.animateItemPlacement()
                 )
             }
         }
@@ -93,7 +96,8 @@ fun MixedLazyColumn(
                 PasswordRow(
                     password = folder,
                     shouldShowIcon = shouldShowIcon,
-                    onPasswordClick = onPasswordClick
+                    onPasswordClick = onPasswordClick,
+                    modifier = Modifier.animateItemPlacement()
                 )
             }
         }
