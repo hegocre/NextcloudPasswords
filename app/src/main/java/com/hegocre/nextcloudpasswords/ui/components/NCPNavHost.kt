@@ -3,7 +3,6 @@ package com.hegocre.nextcloudpasswords.ui.components
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,7 +19,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -54,7 +52,6 @@ fun NCPNavHost(
     searchVisibility: Boolean? = null,
     closeSearch: (() -> Unit)? = null,
     onPasswordClick: ((Password) -> Unit)? = null,
-    contentPadding: PaddingValues = PaddingValues(all = 0.dp)
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -123,12 +120,10 @@ fun NCPNavHost(
                         RefreshListBody(
                             isRefreshing = isRefreshing,
                             onRefresh = { passwordsViewModel.sync() },
-                            indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
                                 passwords = filteredPasswordList,
                                 onPasswordClick = onPasswordClick,
-                                contentPadding = contentPadding
                             )
                         }
                     }
@@ -155,12 +150,10 @@ fun NCPNavHost(
                         RefreshListBody(
                             isRefreshing = isRefreshing,
                             onRefresh = { passwordsViewModel.sync() },
-                            indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
                                 passwords = filteredFavoritePasswords,
                                 onPasswordClick = onPasswordClick,
-                                contentPadding = contentPadding
                             )
                         }
                     }
@@ -201,14 +194,12 @@ fun NCPNavHost(
                         RefreshListBody(
                             isRefreshing = isRefreshing,
                             onRefresh = { passwordsViewModel.sync() },
-                            indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
                                 passwords = filteredPasswordsParentFolder,
                                 folders = filteredFoldersParentFolder,
                                 onPasswordClick = onPasswordClick,
                                 onFolderClick = onFolderClick,
-                                contentPadding = contentPadding
                             )
                         }
                     }
@@ -260,14 +251,12 @@ fun NCPNavHost(
                         RefreshListBody(
                             isRefreshing = isRefreshing,
                             onRefresh = { passwordsViewModel.sync() },
-                            indicatorPadding = contentPadding
                         ) {
                             MixedLazyColumn(
                                 passwords = filteredPasswordsSelectedFolder,
                                 folders = filteredFoldersSelectedFolder,
                                 onPasswordClick = onPasswordClick,
                                 onFolderClick = onFolderClick,
-                                contentPadding = contentPadding
                             )
                         }
                     }

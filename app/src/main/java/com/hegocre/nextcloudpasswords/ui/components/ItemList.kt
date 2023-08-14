@@ -5,7 +5,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,11 +16,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.twotone.Lock
 import androidx.compose.material.icons.twotone.Security
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -26,13 +33,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.password.Password
-import com.hegocre.nextcloudpasswords.ui.theme.*
+import com.hegocre.nextcloudpasswords.ui.components.pullrefresh.PullRefreshIndicator
+import com.hegocre.nextcloudpasswords.ui.components.pullrefresh.pullRefresh
+import com.hegocre.nextcloudpasswords.ui.components.pullrefresh.rememberPullRefreshState
+import com.hegocre.nextcloudpasswords.ui.theme.Amber200
+import com.hegocre.nextcloudpasswords.ui.theme.Amber500
+import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
+import com.hegocre.nextcloudpasswords.ui.theme.Green200
+import com.hegocre.nextcloudpasswords.ui.theme.Green500
+import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.ui.theme.Red200
+import com.hegocre.nextcloudpasswords.ui.theme.Red500
+import com.hegocre.nextcloudpasswords.ui.theme.isLight
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 
@@ -41,28 +56,26 @@ data class ListDecryptionState<T>(
     val isLoading: Boolean = false
 )
 
-@Suppress("deprecation")
 @Composable
 fun RefreshListBody(
     isRefreshing: Boolean,
     onRefresh: () -> Unit = {},
-    indicatorPadding: PaddingValues = PaddingValues(all = 0.dp),
     content: @Composable () -> Unit = {}
 ) {
-    SwipeRefresh(
-        state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
-        onRefresh = onRefresh,
-        indicator = { rState, refreshTrigger ->
-            SwipeRefreshIndicator(
-                state = rState,
-                refreshTriggerDistance = refreshTrigger,
-                contentColor = MaterialTheme.colorScheme.primary,
-                backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
-            )
-        },
-        indicatorPadding = indicatorPadding
-    ) {
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = onRefresh
+    )
+
+    Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
         content()
+
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            contentColor = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
 }
 
@@ -73,14 +86,12 @@ fun MixedLazyColumn(
     folders: List<Folder>? = null,
     onPasswordClick: ((Password) -> Unit)? = null,
     onFolderClick: ((Folder) -> Unit)? = null,
-    contentPadding: PaddingValues = PaddingValues(all = 0.dp)
 ) {
     val context = LocalContext.current
     val shouldShowIcon by PreferencesManager.getInstance(context).getShowIcons()
         .collectAsState(initial = false, context = Dispatchers.IO)
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = contentPadding
     ) {
         folders?.let {
             items(items = it, key = { folder -> folder.id }) { folder ->
