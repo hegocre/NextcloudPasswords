@@ -187,8 +187,7 @@ fun PasswordItemContent(
                             }
                         },
                         onClickText = { showPassword = !showPassword },
-                        maxLines = if (showPassword) null else 1,
-                        fontFamily = if (showPassword) FontFamily(Font(R.font.dejavu_sans_mono)) else null
+                        fontFamily = FontFamily(Font(R.font.dejavu_sans_mono))
                     )
                 }
 
@@ -298,8 +297,7 @@ fun PasswordItemContent(
                                     },
 
                                     onClickText = { showSecret = !showSecret },
-                                    maxLines = if (showSecret) null else 1,
-                                    fontFamily = if (showSecret) FontFamily(Font(R.font.dejavu_sans_mono)) else null
+                                    fontFamily = FontFamily(Font(R.font.dejavu_sans_mono))
                                 )
                             }
 
