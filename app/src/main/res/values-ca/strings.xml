@@ -11,9 +11,6 @@
     <string name="autofill">Emplenament automàtic</string>
     <string name="search">Cerca</string>
     <string name="error_logging_in">Error inciant sessió</string>
-    <string name="url_copied">Adreça copiat</string>
-    <string name="username_copied">Nom d\'usuari copiat</string>
-    <string name="password_copied">Contrasenya copiada</string>
     <string name="folders">Carpetes</string>
     <string name="passwords">Contrasenyes</string>
     <string name="show_password">Mostrar contrasenya</string>
@@ -45,6 +42,6 @@
     <string name="are_you_sure_delete_element">Aquest element serà eliminat. Si us plau, confirmeu aquesta acció</string>
     <string name="delete">Eliminar</string>
     <string name="notes">Notes</string>
-    <string name="notes_copied">Notes copiades</string>
+    <string name="copied">%s copiat</string>
     <string name="favorite">Favorita</string>
 </resources>

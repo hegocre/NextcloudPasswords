@@ -15,9 +15,6 @@
     <string name="passwords">Contraseñas</string>
     <string name="favorites">Favoritas</string>
     <string name="folders">Carpetas</string>
-    <string name="password_copied">Contraseña copiada</string>
-    <string name="username_copied">Nombre de usuario copiado</string>
-    <string name="url_copied">Dirección copiada</string>
     <string name="error_logging_in">Error iniciando sesión</string>
     <string name="search">Buscar</string>
     <string name="autofill">Autocompletar</string>
@@ -45,6 +42,6 @@
     <string name="are_you_sure_delete_element">Este elemento será eliminado. Por favor, confirme esta acción</string>
     <string name="delete">Eliminar</string>
     <string name="notes">Notas</string>
-    <string name="notes_copied">Notas copiadas</string>
+    <string name="copied">%s copiado</string>
     <string name="favorite">Favorita</string>
 </resources>

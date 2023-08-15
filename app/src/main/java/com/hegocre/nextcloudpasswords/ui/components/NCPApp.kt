@@ -213,9 +213,7 @@ fun NextcloudPasswordsApp(
                             }
                             navController.navigate("${NCPScreen.Edit.name}/${passwordsViewModel.visiblePassword.value?.id ?: "none"}")
                         },
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(bottom = 16.dp)
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }
             }

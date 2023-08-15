@@ -14,9 +14,6 @@
     <string name="passwords">Passwords</string>
     <string name="favorites">Favorites</string>
     <string name="folders">Folders</string>
-    <string name="password_copied">Password copied</string>
-    <string name="username_copied">Username copied</string>
-    <string name="url_copied">URL copied</string>
     <string name="error_logging_in">Error logging in</string>
     <string name="search">Search</string>
     <string name="autofill">Autofill</string>
@@ -44,6 +41,6 @@
     <string name="are_you_sure_delete_element">This element will be deleted. Please, confirm this action</string>
     <string name="delete">Delete</string>
     <string name="notes">Notes</string>
-    <string name="notes_copied">Notes copied</string>
+    <string name="copied">%s copied</string>
     <string name="favorite">Favorite</string>
 </resources>
