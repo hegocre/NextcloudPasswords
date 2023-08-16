@@ -46,7 +46,6 @@ import org.commonmark.node.FencedCodeBlock
 import org.commonmark.node.HardLineBreak
 import org.commonmark.node.Heading
 import org.commonmark.node.Image
-import org.commonmark.node.IndentedCodeBlock
 import org.commonmark.node.Link
 import org.commonmark.node.ListBlock
 import org.commonmark.node.Node
@@ -54,7 +53,6 @@ import org.commonmark.node.OrderedList
 import org.commonmark.node.Paragraph
 import org.commonmark.node.StrongEmphasis
 import org.commonmark.node.Text
-import org.commonmark.node.ThematicBreak
 
 private const val TAG_URL = "url"
 private const val TAG_IMAGE_URL = "imageUrl"
@@ -209,26 +207,14 @@ fun MDFencedCodeBlock(fencedCodeBlock: FencedCodeBlock, modifier: Modifier = Mod
 }
 
 @Composable
-fun MDIndentedCodeBlock(indentedCodeBlock: IndentedCodeBlock, modifier: Modifier = Modifier) {
-    // Ignored
-}
-
-@Composable
-fun MDThematicBreak(thematicBreak: ThematicBreak, modifier: Modifier = Modifier) {
-    //Ignored
-}
-
-@Composable
 fun MDBlockChildren(parent: Node) {
     var child = parent.firstChild
     while (child != null) {
         when (child) {
             is BlockQuote -> MDBlockQuote(child)
-            is ThematicBreak -> MDThematicBreak(child)
             is Heading -> MDHeading(child)
             is Paragraph -> MDParagraph(child)
             is FencedCodeBlock -> MDFencedCodeBlock(child)
-            is IndentedCodeBlock -> MDIndentedCodeBlock(child)
             is Image -> MDImage(child)
             is BulletList -> MDBulletList(child)
             is OrderedList -> MDOrderedList(child)
