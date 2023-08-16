@@ -2,7 +2,6 @@ package com.hegocre.nextcloudpasswords.ui.components
 
 import android.content.Intent
 import android.net.Uri
-import android.webkit.URLUtil
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -52,6 +51,7 @@ import com.hegocre.nextcloudpasswords.ui.theme.Amber500
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.isLight
 import com.hegocre.nextcloudpasswords.utils.copyToClipboard
+import com.hegocre.nextcloudpasswords.utils.isValidURL
 import kotlinx.serialization.json.Json
 import org.commonmark.node.Document
 import org.commonmark.parser.Parser
@@ -212,7 +212,7 @@ fun PasswordItemContent(
                                 )
                             }
                         },
-                        onClickText = if (URLUtil.isValidUrl(password.url)) {
+                        onClickText = if (password.url.isValidURL()) {
                             {
                                 val intent = Intent(Intent.ACTION_VIEW)
                                 intent.data = Uri.parse(password.url)
@@ -322,7 +322,7 @@ fun PasswordItemContent(
                                         )
                                     }
                                 },
-                                onClickText = if (URLUtil.isValidUrl(customField.value)) {
+                                onClickText = if (customField.value.isValidURL()) {
                                     {
                                         val intent = Intent(Intent.ACTION_VIEW)
                                         intent.data = Uri.parse(customField.value)

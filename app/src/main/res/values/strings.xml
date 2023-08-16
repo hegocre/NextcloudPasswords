@@ -43,4 +43,12 @@
     <string name="notes">Notes</string>
     <string name="copied">%s copied</string>
     <string name="favorite">Favorite</string>
+    <string name="add_custom_field">New custom field</string>
+    <string name="field_type">Field type</string>
+    <string name="text">Text</string>
+    <string name="email">Email</string>
+    <string name="secret">Secret</string>
+    <string name="field_cannot_be_empty">This field cannot be empty</string>
+    <string name="enter_valid_url">Enter a valid URL</string>
+    <string name="enter_valid_email">Enter a valid email</string>
 </resources>

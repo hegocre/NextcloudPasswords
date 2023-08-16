@@ -44,4 +44,12 @@
     <string name="notes">Notes</string>
     <string name="copied">%s copiat</string>
     <string name="favorite">Favorita</string>
+    <string name="add_custom_field">Nou camp personalitzat</string>
+    <string name="field_type">Tipus de camp</string>
+    <string name="text">Text</string>
+    <string name="email">Correu electrònic</string>
+    <string name="secret">Secret</string>
+    <string name="field_cannot_be_empty">Aquest camp no pot estar buit</string>
+    <string name="enter_valid_url">Introdueixi un URL vàlid</string>
+    <string name="enter_valid_email">Introdueixi un correu electrònic vàlid</string>
 </resources>

@@ -57,6 +57,29 @@ class EditablePasswordState(originalPassword: Password?) {
     var customFields by mutableStateOf(originalPassword?.customFields ?: "")
     var favorite by mutableStateOf(originalPassword?.favorite ?: false)
 
+    fun isValid(): Boolean {
+        if (label.isBlank())
+            return false
+        if (password.isBlank())
+            return false
+        if (!url.isValidURL())
+            return false
+        for (customField in customFields) {
+            when (customField.type) {
+                CustomField.TYPE_URL -> {
+                    if (!customField.value.isValidURL())
+                        return false
+                }
+
+                CustomField.TYPE_EMAIL -> {
+                    if (!customField.value.isValidEmail())
+                        return false
+                }
+            }
+        }
+        return true
+    }
+
     companion object {
         val Saver: Saver<EditablePasswordState, *> = listSaver(
             save = {
