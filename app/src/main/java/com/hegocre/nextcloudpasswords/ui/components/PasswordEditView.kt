@@ -1,6 +1,6 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -33,6 +35,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -41,12 +44,17 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
+import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.ui.theme.Amber200
 import com.hegocre.nextcloudpasswords.ui.theme.Amber500
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.isLight
+import com.hegocre.nextcloudpasswords.utils.isValidEmail
+import com.hegocre.nextcloudpasswords.utils.isValidURL
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class EditablePasswordState(originalPassword: Password?) {
     var password by mutableStateOf(originalPassword?.password ?: "")
@@ -54,7 +62,9 @@ class EditablePasswordState(originalPassword: Password?) {
     var username by mutableStateOf(originalPassword?.username ?: "")
     var url by mutableStateOf(originalPassword?.url ?: "")
     var notes by mutableStateOf(originalPassword?.notes ?: "")
-    var customFields by mutableStateOf(originalPassword?.customFields ?: "")
+    var customFields =
+        Json.decodeFromString<List<CustomField>>(originalPassword?.customFields ?: "[]")
+            .toMutableStateList()
     var favorite by mutableStateOf(originalPassword?.favorite ?: false)
 
     fun isValid(): Boolean {
@@ -85,7 +95,7 @@ class EditablePasswordState(originalPassword: Password?) {
             save = {
                 listOf(
                     it.password, it.label, it.username, it.url,
-                    it.notes, it.customFields, it.favorite.toString()
+                    it.notes, Json.encodeToString(it.customFields.toList()), it.favorite.toString()
                 )
             },
             restore = {
@@ -95,7 +105,8 @@ class EditablePasswordState(originalPassword: Password?) {
                     username = it[2]
                     url = it[3]
                     notes = it[4]
-                    customFields = it[5]
+                    customFields =
+                        Json.decodeFromString<List<CustomField>>(it[5]).toMutableStateList()
                     favorite = it[6].toBooleanStrictOrNull() ?: false
                 }
             }
@@ -109,6 +120,7 @@ fun rememberEditablePasswordState(password: Password? = null): EditablePasswordS
         EditablePasswordState(password)
     }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EditablePasswordView(
     editablePasswordState: EditablePasswordState,
@@ -116,163 +128,326 @@ fun EditablePasswordView(
     onSavePassword: () -> Unit,
     onDeletePassword: (() -> Unit)? = null
 ) {
-    Column(
+    var showDeleteDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var showAddCustomFieldDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var showFieldErrors by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+
+    LazyColumn(
         modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(all = 16.dp),
+            .padding(horizontal = 16.dp),
     ) {
-        Button(
-            onClick = { editablePasswordState.favorite = !editablePasswordState.favorite },
-            modifier = Modifier.padding(bottom = 16.dp),
-            colors = if (editablePasswordState.favorite) ButtonDefaults.filledTonalButtonColors(
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                containerColor = (if (MaterialTheme.colorScheme.isLight()) Amber500 else Amber200)
-                    .copy(alpha = 0.3f)
-            )
-            else ButtonDefaults.textButtonColors(
-                contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.80f),
-                containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-            ),
-        ) {
-            Icon(imageVector = Icons.Default.Star, contentDescription = null)
-            Text(
-                text = stringResource(id = R.string.favorite),
-                modifier = Modifier.padding(horizontal = 8.dp)
+        item(key = "top_spacer") { Spacer(modifier = Modifier.width(16.dp)) }
+
+        item(key = "favorite_button") {
+            Button(
+                onClick = { editablePasswordState.favorite = !editablePasswordState.favorite },
+                modifier = Modifier.padding(bottom = 16.dp),
+                colors = if (editablePasswordState.favorite) ButtonDefaults.filledTonalButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    containerColor = (if (MaterialTheme.colorScheme.isLight()) Amber500 else Amber200)
+                        .copy(alpha = 0.3f)
+                )
+                else ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.80f),
+                    containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                ),
+            ) {
+                Icon(imageVector = Icons.Default.Star, contentDescription = null)
+                Text(
+                    text = stringResource(id = R.string.favorite),
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
+        }
+
+        item(key = "password_label") {
+            OutlinedTextField(
+                value = editablePasswordState.label,
+                onValueChange = { newText -> editablePasswordState.label = newText },
+                label = { Text(text = stringResource(id = R.string.label)) },
+                singleLine = true,
+                maxLines = 1,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                isError = showFieldErrors && editablePasswordState.label.isBlank(),
+                supportingText = if (showFieldErrors && editablePasswordState.label.isBlank()) {
+                    {
+                        Text(text = stringResource(id = R.string.field_cannot_be_empty))
+                    }
+                } else null
             )
         }
 
-        OutlinedTextField(
-            value = editablePasswordState.label,
-            onValueChange = { newText -> editablePasswordState.label = newText },
-            label = { Text(text = stringResource(id = R.string.label)) },
-            singleLine = true,
-            maxLines = 1,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
-
-        OutlinedTextField(
-            value = editablePasswordState.username,
-            onValueChange = { newText -> editablePasswordState.username = newText },
-            label = { Text(text = stringResource(id = R.string.username)) },
-            singleLine = true,
-            maxLines = 1,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
-
-        var showPassword by rememberSaveable {
-            mutableStateOf(false)
+        item(key = "password_username") {
+            OutlinedTextField(
+                value = editablePasswordState.username,
+                onValueChange = { newText -> editablePasswordState.username = newText },
+                label = { Text(text = stringResource(id = R.string.username)) },
+                singleLine = true,
+                maxLines = 1,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
         }
 
-        OutlinedTextField(
-            value = editablePasswordState.password,
-            onValueChange = { newText -> editablePasswordState.password = newText },
-            label = { Text(text = stringResource(id = R.string.password)) },
-            singleLine = true,
-            maxLines = 1,
-            trailingIcon = {
-                Row {
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(
-                            imageVector = Icons.Default.Casino,
-                            contentDescription = "generate random"
-                        )
-                    }
 
-                    IconButton(onClick = { showPassword = !showPassword }) {
-                        Icon(
-                            imageVector = if (showPassword)
-                                Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                            contentDescription = stringResource(R.string.show_password)
-                        )
-                    }
-                }
-            },
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
-            visualTransformation = if (showPassword)
-                VisualTransformation.None else PasswordVisualTransformation(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-        )
-
-        OutlinedTextField(
-            value = editablePasswordState.url,
-            onValueChange = { newText -> editablePasswordState.url = newText },
-            label = { Text(text = stringResource(id = R.string.url)) },
-            singleLine = true,
-            maxLines = 1,
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
-
-        OutlinedTextField(
-            value = editablePasswordState.notes,
-            onValueChange = { newText -> editablePasswordState.notes = newText },
-            label = { Text(text = stringResource(id = R.string.notes)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp)
-        )
-
-        Button(
-            onClick = onSavePassword,
-            content = {
-                if (isUpdating) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary,
-                        strokeWidth = 2.dp,
-                        modifier = Modifier.size(16.dp)
-                    )
-                } else {
-                    Text(text = stringResource(id = R.string.save))
-                }
-            },
-            enabled = !isUpdating,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        if (onDeletePassword != null) {
-            var showDeleteDialog by rememberSaveable {
+        item(key = "password_password") {
+            var showPassword by rememberSaveable {
                 mutableStateOf(false)
             }
 
-            if (!isUpdating) {
-                Button(
-                    onClick = { showDeleteDialog = true },
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error,
-                        disabledContentColor = MaterialTheme.colorScheme.error.copy(alpha = ContentAlpha.medium)
-                    ),
-                    content = {
-                        Text(text = stringResource(id = R.string.delete_password))
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                )
+            OutlinedTextField(
+                value = editablePasswordState.password,
+                onValueChange = { newText -> editablePasswordState.password = newText },
+                label = { Text(text = stringResource(id = R.string.password)) },
+                singleLine = true,
+                maxLines = 1,
+                trailingIcon = {
+                    Row {
+                        IconButton(onClick = { /*TODO*/ }) {
+                            Icon(
+                                imageVector = Icons.Default.Casino,
+                                contentDescription = "generate random"
+                            )
+                        }
+
+                        IconButton(onClick = { showPassword = !showPassword }) {
+                            Icon(
+                                imageVector = if (showPassword)
+                                    Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                contentDescription = stringResource(R.string.show_password)
+                            )
+                        }
+                    }
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
+                visualTransformation = if (showPassword)
+                    VisualTransformation.None else PasswordVisualTransformation(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                isError = showFieldErrors && editablePasswordState.password.isBlank(),
+                supportingText = if (showFieldErrors && editablePasswordState.password.isBlank()) {
+                    {
+                        Text(text = stringResource(id = R.string.field_cannot_be_empty))
+                    }
+                } else null
+            )
+        }
+
+        item(key = "password_url") {
+            OutlinedTextField(
+                value = editablePasswordState.url,
+                onValueChange = { newText -> editablePasswordState.url = newText },
+                label = { Text(text = stringResource(id = R.string.url)) },
+                singleLine = true,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                isError = showFieldErrors && !editablePasswordState.url.isValidURL(),
+                supportingText = if (showFieldErrors && !editablePasswordState.url.isValidURL()) {
+                    {
+                        Text(text = stringResource(id = R.string.enter_valid_url))
+                    }
+                } else null
+            )
+        }
+
+        itemsIndexed(
+            items = editablePasswordState.customFields,
+            key = { _, field -> "password_${field.label}" }) { index, customField ->
+            var showValue by rememberSaveable {
+                mutableStateOf(customField.type != CustomField.TYPE_SECRET)
             }
 
-            if (showDeleteDialog) {
-                DeleteElementDialog(
-                    onConfirmButton = {
-                        showDeleteDialog = false
-                        onDeletePassword()
-                    },
-                    onDismissRequest = {
-                        showDeleteDialog = false
+            OutlinedTextField(
+                value = customField.value,
+                onValueChange = { newText ->
+                    val newElement = editablePasswordState.customFields[index].copy(value = newText)
+                    editablePasswordState.customFields.removeAt(index)
+                    editablePasswordState.customFields.add(index, newElement)
+                },
+                label = { Text(text = customField.label) },
+                singleLine = true,
+                maxLines = 1,
+                trailingIcon = {
+                    Row {
+                        if (customField.type == CustomField.TYPE_SECRET) {
+                            IconButton(onClick = { showValue = !showValue }) {
+                                Icon(
+                                    imageVector = if (showValue)
+                                        Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                    contentDescription = stringResource(R.string.show_password)
+                                )
+                            }
+                        }
+
+                        IconButton(onClick = { editablePasswordState.customFields.removeAt(index) }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.delete)
+                            )
+                        }
                     }
-                )
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = when (customField.type) {
+                        CustomField.TYPE_SECRET -> KeyboardType.Password
+                        CustomField.TYPE_EMAIL -> KeyboardType.Email
+                        CustomField.TYPE_URL -> KeyboardType.Uri
+                        else -> KeyboardType.Text
+                    }
+                ),
+                visualTransformation = if (showValue)
+                    VisualTransformation.None else PasswordVisualTransformation(),
+                modifier = Modifier
+                    .animateItemPlacement()
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                isError = when (customField.type) {
+                    CustomField.TYPE_URL -> showFieldErrors && !customField.value.isValidURL()
+                    CustomField.TYPE_EMAIL -> showFieldErrors && !customField.value.isValidEmail()
+                    else -> false
+                },
+                supportingText = when (customField.type) {
+                    CustomField.TYPE_URL -> {
+                        if (showFieldErrors && !customField.value.isValidURL()) {
+                            {
+                                Text(text = stringResource(id = R.string.enter_valid_url))
+                            }
+                        } else null
+                    }
+
+                    CustomField.TYPE_EMAIL -> {
+                        if (showFieldErrors && !customField.value.isValidEmail()) {
+                            {
+                                Text(text = stringResource(id = R.string.enter_valid_email))
+                            }
+                        } else null
+                    }
+
+                    else -> null
+                },
+            )
+
+        }
+
+        item(key = "password_notes") {
+            OutlinedTextField(
+                value = editablePasswordState.notes,
+                onValueChange = { newText -> editablePasswordState.notes = newText },
+                label = { Text(text = stringResource(id = R.string.notes)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp)
+            )
+        }
+
+        item(key = "custom_field_add") {
+            Button(
+                onClick = { showAddCustomFieldDialog = true },
+                content = {
+                    Text(text = stringResource(id = R.string.add_custom_field))
+                },
+                colors = ButtonDefaults.filledTonalButtonColors(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+        }
+
+        item(key = "password_save") {
+            Button(
+                onClick = {
+                    if (!editablePasswordState.isValid()) {
+                        showFieldErrors = true
+                    } else {
+                        onSavePassword()
+                    }
+                },
+                content = {
+                    if (isUpdating) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    } else {
+                        Text(text = stringResource(id = R.string.save))
+                    }
+                },
+                enabled = !isUpdating,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        if (onDeletePassword != null) {
+            item(key = "password_delete") {
+                if (!isUpdating) {
+                    Button(
+                        onClick = { showDeleteDialog = true },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error,
+                            disabledContentColor = MaterialTheme.colorScheme.error.copy(alpha = ContentAlpha.medium)
+                        ),
+                        content = {
+                            Text(text = stringResource(id = R.string.delete_password))
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.ime))
+        item(key = "bottom_spacer") {
+            Spacer(
+                modifier = Modifier
+                    .windowInsetsBottomHeight(WindowInsets.ime)
+                    .padding(bottom = 16.dp)
+            )
+        }
 
+    }
+
+    if (showDeleteDialog) {
+        DeleteElementDialog(
+            onConfirmButton = {
+                showDeleteDialog = false
+                onDeletePassword?.invoke()
+            },
+            onDismissRequest = {
+                showDeleteDialog = false
+            }
+        )
+    }
+
+    if (showAddCustomFieldDialog) {
+        AddCustomFieldDialog(
+            onAddClick = { type, label ->
+                editablePasswordState.customFields.add(
+                    CustomField(
+                        type = type, label = label, value = ""
+                    )
+                )
+                showAddCustomFieldDialog = false
+            },
+            onDismissRequest = {
+                showAddCustomFieldDialog = false
+            }
+        )
     }
 }
 
@@ -282,7 +457,22 @@ fun PasswordEditPreview() {
     NextcloudPasswordsTheme {
         Surface {
             EditablePasswordView(
-                editablePasswordState = rememberEditablePasswordState(),
+                editablePasswordState = rememberEditablePasswordState().apply {
+                    customFields.add(
+                        CustomField(
+                            type = CustomField.TYPE_TEXT,
+                            label = "Custom field 1",
+                            value = ""
+                        )
+                    )
+                    customFields.add(
+                        CustomField(
+                            type = CustomField.TYPE_SECRET,
+                            label = "Custom field 2",
+                            value = ""
+                        )
+                    )
+                },
                 isUpdating = false,
                 onSavePassword = { },
                 onDeletePassword = {}

@@ -43,6 +43,8 @@ import com.hegocre.nextcloudpasswords.utils.encryptValue
 import com.hegocre.nextcloudpasswords.utils.sha1Hash
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @ExperimentalMaterial3Api
 @Composable
@@ -310,6 +312,9 @@ fun NCPNavHost(
                         EditablePasswordView(
                             editablePasswordState = editablePasswordState,
                             onSavePassword = {
+                                val customFields =
+                                    Json.encodeToString(editablePasswordState.customFields.toList())
+
                                 if (selectedPassword == null) {
                                     val newPassword = keychain?.let {
                                         NewPassword(
@@ -333,7 +338,7 @@ fun NCPNavHost(
                                                 it.current,
                                                 it
                                             ),
-                                            customFields = editablePasswordState.customFields.encryptValue(
+                                            customFields = customFields.encryptValue(
                                                 it.current,
                                                 it
                                             ),
@@ -351,7 +356,7 @@ fun NCPNavHost(
                                         username = editablePasswordState.username,
                                         url = editablePasswordState.url,
                                         notes = editablePasswordState.notes,
-                                        customFields = editablePasswordState.customFields,
+                                        customFields = customFields,
                                         hash = editablePasswordState.password.sha1Hash(),
                                         cseType = "none",
                                         cseKey = "",
@@ -398,7 +403,7 @@ fun NCPNavHost(
                                                 it.current,
                                                 it
                                             ),
-                                            customFields = editablePasswordState.customFields.encryptValue(
+                                            customFields = customFields.encryptValue(
                                                 it.current,
                                                 it
                                             ),
@@ -418,7 +423,7 @@ fun NCPNavHost(
                                         username = editablePasswordState.username,
                                         url = editablePasswordState.url,
                                         notes = editablePasswordState.notes,
-                                        customFields = editablePasswordState.customFields,
+                                        customFields = customFields,
                                         hash = editablePasswordState.password.sha1Hash(),
                                         cseType = "none",
                                         cseKey = "",
