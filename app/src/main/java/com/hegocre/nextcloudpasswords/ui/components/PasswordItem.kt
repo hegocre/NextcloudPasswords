@@ -1,5 +1,7 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import android.content.ActivityNotFoundException
+import android.webkit.URLUtil
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -50,7 +52,6 @@ import com.hegocre.nextcloudpasswords.ui.theme.Amber500
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.isLight
 import com.hegocre.nextcloudpasswords.utils.copyToClipboard
-import com.hegocre.nextcloudpasswords.utils.isValidURL
 import kotlinx.serialization.json.Json
 import org.commonmark.node.Document
 import org.commonmark.parser.Parser
@@ -78,6 +79,8 @@ fun PasswordItemContent(
 ) {
     val context = LocalContext.current
     val copiedText = stringResource(R.string.copied)
+
+    val uriHandler = LocalUriHandler.current
 
     val customFields by remember {
         derivedStateOf {
@@ -211,11 +214,29 @@ fun PasswordItemContent(
                                 )
                             }
                         },
-                        onClickText = if (password.url.isValidURL()) {
+                        onClickText = if (URLUtil.isValidUrl(password.url)) {
                             {
-                                val intent = Intent(Intent.ACTION_VIEW)
-                                intent.data = Uri.parse(password.url)
-                                context.startActivity(intent)
+                                try {
+                                    uriHandler.openUri(password.url)
+                                } catch (ex: ActivityNotFoundException) {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.could_not_open_url,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        } else if (URLUtil.isValidUrl("https://${password.url}")) {
+                            {
+                                try {
+                                    uriHandler.openUri("https://${password.url}")
+                                } catch (ex: ActivityNotFoundException) {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.could_not_open_url,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
                             }
                         } else null
                     )
@@ -321,11 +342,29 @@ fun PasswordItemContent(
                                         )
                                     }
                                 },
-                                onClickText = if (customField.value.isValidURL()) {
+                                onClickText = if (URLUtil.isValidUrl(customField.value)) {
                                     {
-                                        val intent = Intent(Intent.ACTION_VIEW)
-                                        intent.data = Uri.parse(customField.value)
-                                        context.startActivity(intent)
+                                        try {
+                                            uriHandler.openUri(customField.value)
+                                        } catch (ex: ActivityNotFoundException) {
+                                            Toast.makeText(
+                                                context,
+                                                R.string.could_not_open_url,
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                    }
+                                } else if (URLUtil.isValidUrl("https://${customField.value}")) {
+                                    {
+                                        try {
+                                            uriHandler.openUri("https://${customField.value}")
+                                        } catch (ex: ActivityNotFoundException) {
+                                            Toast.makeText(
+                                                context,
+                                                R.string.could_not_open_url,
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
                                     }
                                 } else null
                             )

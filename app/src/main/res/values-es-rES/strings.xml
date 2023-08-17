@@ -54,4 +54,5 @@
     <string name="enter_valid_email">Introduzca un correo electrónico válido</string>
     <string name="could_not_generate_password">No se ha podido generar la contraseña</string>
     <string name="custom_field_exists">El campo personalizado ya existe</string>
+    <string name="could_not_open_url">No se ha podido abrir el URL</string>
 </resources>
