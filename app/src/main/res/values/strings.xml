@@ -52,4 +52,5 @@
     <string name="enter_valid_url">Enter a valid URL</string>
     <string name="enter_valid_email">Enter a valid email</string>
     <string name="could_not_generate_password">Could not generate password</string>
+    <string name="custom_field_exists">Custom field already exists</string>
 </resources>

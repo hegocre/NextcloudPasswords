@@ -478,12 +478,16 @@ fun EditablePasswordView(
     if (showAddCustomFieldDialog) {
         AddCustomFieldDialog(
             onAddClick = { type, label ->
-                editablePasswordState.customFields.add(
-                    CustomField(
-                        type = type, label = label, value = ""
+                if (editablePasswordState.customFields.any { it.label == label }) {
+                    Toast.makeText(context, R.string.custom_field_exists, Toast.LENGTH_LONG).show()
+                } else {
+                    editablePasswordState.customFields.add(
+                        CustomField(
+                            type = type, label = label, value = ""
+                        )
                     )
-                )
-                showAddCustomFieldDialog = false
+                    showAddCustomFieldDialog = false
+                }
             },
             onDismissRequest = {
                 showAddCustomFieldDialog = false

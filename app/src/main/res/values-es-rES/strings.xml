@@ -53,4 +53,5 @@
     <string name="enter_valid_url">Introduzca un URL válido</string>
     <string name="enter_valid_email">Introduzca un correo electrónico válido</string>
     <string name="could_not_generate_password">No se ha podido generar la contraseña</string>
+    <string name="custom_field_exists">El campo personalizado ya existe</string>
 </resources>
