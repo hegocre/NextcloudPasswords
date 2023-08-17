@@ -117,7 +117,7 @@ fun TitleAppBar(
             IconButton(onClick = onSearchClick) {
                 Icon(
                     imageVector = Icons.Outlined.Search,
-                    contentDescription = "Search"
+                    contentDescription = stringResource(id = R.string.search)
                 )
             }
             if (showMenu) {
@@ -125,7 +125,7 @@ fun TitleAppBar(
                     IconButton(onClick = { menuExpanded = true }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More"
+                            contentDescription = stringResource(id = R.string.menu)
                         )
                     }
                     DropdownMenu(
@@ -197,7 +197,10 @@ fun SearchAppBar(
             IconButton(
                 onClick = onBackPressed
             ) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "back")
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = stringResource(id = R.string.back)
+                )
             }
             TextField(
                 modifier = Modifier
@@ -226,7 +229,10 @@ fun SearchAppBar(
             IconButton(
                 onClick = { setSearchQuery("") }
             ) {
-                Icon(imageVector = Icons.Default.Clear, contentDescription = "clear")
+                Icon(
+                    imageVector = Icons.Default.Clear,
+                    contentDescription = stringResource(id = R.string.clear_query)
+                )
             }
         }
     }

@@ -64,4 +64,12 @@
     <string name="help_suggestions">Ayuda y sugerimientos</string>
     <string name="authors">Autor</string>
     <string name="website">Sitio web</string>
+    <string name="security_status">Estado de seguridad</string>
+    <string name="folder_icon">Icono de la carpeta</string>
+    <string name="new_password">Nueva contraseña</string>
+    <string name="menu">Menú</string>
+    <string name="clear_query">Limpiar los terminos de búsqueda</string>
+    <string name="generate_password">Generar contraseña</string>
+    <string name="copy_value">Copiar valor</string>
+    <string name="more_options">Más opciones</string>
 </resources>

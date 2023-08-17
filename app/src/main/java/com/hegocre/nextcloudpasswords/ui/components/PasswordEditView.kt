@@ -168,7 +168,10 @@ fun EditablePasswordView(
                     containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
                 ),
             ) {
-                Icon(imageVector = Icons.Default.Star, contentDescription = null)
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = stringResource(id = R.string.favorite)
+                )
                 Text(
                     text = stringResource(id = R.string.favorite),
                     modifier = Modifier.padding(horizontal = 8.dp)
@@ -261,7 +264,7 @@ fun EditablePasswordView(
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Casino,
-                                    contentDescription = "generate random"
+                                    contentDescription = stringResource(id = R.string.generate_password)
                                 )
                             }
                         }
