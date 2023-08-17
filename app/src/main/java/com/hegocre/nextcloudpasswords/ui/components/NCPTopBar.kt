@@ -150,6 +150,18 @@ fun TitleAppBar(
 
                         DropdownMenuItem(
                             onClick = {
+                                val intent = Intent("com.hegocre.nextcloudpasswords.action.about")
+                                    .setPackage(context.packageName)
+                                context.startActivity(intent)
+                                menuExpanded = false
+                            },
+                            text = {
+                                Text(text = stringResource(id = R.string.about))
+                            },
+                        )
+
+                        DropdownMenuItem(
+                            onClick = {
                                 onLogoutClick()
                                 menuExpanded = false
                             },

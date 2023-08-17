@@ -24,6 +24,11 @@ android {
         }
 
         resourceConfigurations += ['ca', 'es', 'en']
+
+        applicationVariants.configureEach { variant ->
+            variant.resValue "string", "version_name", variant.versionName
+            variant.resValue "string", "version_code", variant.versionCode.toString()
+        }
     }
 
     ksp {

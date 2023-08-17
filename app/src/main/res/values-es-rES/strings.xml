@@ -55,4 +55,13 @@
     <string name="could_not_generate_password">No se ha podido generar la contraseña</string>
     <string name="custom_field_exists">El campo personalizado ya existe</string>
     <string name="could_not_open_url">No se ha podido abrir el URL</string>
+    <string name="about">Información</string>
+    <string name="back">Atrás</string>
+    <string name="version">Versión</string>
+    <string name="source_code">Código fuente</string>
+    <string name="privacy_policy">Política de privacidad</string>
+    <string name="licenses">Licencias</string>
+    <string name="help_suggestions">Ayuda y sugerimientos</string>
+    <string name="authors">Autor</string>
+    <string name="website">Sitio web</string>
 </resources>

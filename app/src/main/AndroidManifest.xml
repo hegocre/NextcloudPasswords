@@ -43,7 +43,20 @@
         </activity>
         <activity
             android:name=".ui.activities.SettingsActivity"
-            android:exported="true" />
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.hegocre.nextcloudpasswords.action.settings" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.activities.AboutActivity"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.hegocre.nextcloudpasswords.action.about" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <service
             android:name=".services.NCPAutofillService"

@@ -54,4 +54,13 @@
     <string name="could_not_generate_password">Could not generate password</string>
     <string name="custom_field_exists">Custom field already exists</string>
     <string name="could_not_open_url">Could not open URL</string>
+    <string name="about">About</string>
+    <string name="back">Back</string>
+    <string name="version">Version</string>
+    <string name="source_code">Source code</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="licenses">Licenses</string>
+    <string name="help_suggestions">Help and suggestions</string>
+    <string name="authors">Author</string>
+    <string name="website">Website</string>
 </resources>
