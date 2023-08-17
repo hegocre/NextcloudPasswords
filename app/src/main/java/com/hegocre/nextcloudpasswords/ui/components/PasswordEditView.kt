@@ -1,7 +1,6 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
 import android.widget.Toast
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -127,7 +126,6 @@ fun rememberEditablePasswordState(password: Password? = null): EditablePasswordS
         EditablePasswordState(password)
     }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EditablePasswordView(
     editablePasswordState: EditablePasswordState,
@@ -353,7 +351,6 @@ fun EditablePasswordView(
                 visualTransformation = if (showValue)
                     VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier
-                    .animateItemPlacement()
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 isError = when (customField.type) {
