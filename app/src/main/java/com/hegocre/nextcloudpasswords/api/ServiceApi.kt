@@ -1,10 +1,13 @@
 package com.hegocre.nextcloudpasswords.api
 
+import android.util.Log
+import com.hegocre.nextcloudpasswords.data.password.GeneratedPassword
 import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import java.net.MalformedURLException
 import java.net.SocketTimeoutException
 import java.net.URL
@@ -17,7 +20,6 @@ import javax.net.ssl.SSLHandshakeException
  *
  * @param server The [Server] where the requests will be made.
  */
-@Suppress("BlockingMethodInNonBlockingContext")
 class ServiceApi private constructor(private val server: Server) {
 
     /**
@@ -65,8 +67,48 @@ class ServiceApi private constructor(private val server: Server) {
 
     }
 
+    /**
+     * Sends a request to the api to obtain a generated password using user settings.
+     *
+     * @return A result with the password as aString if success, and an error code otherwise.
+     */
+    suspend fun password(sessionCode: String?): Result<String> {
+        return try {
+            val apiResponse = try {
+                withContext(Dispatchers.IO) {
+                    OkHttpRequest.getInstance().get(
+                        sUrl = server.url + PASSWORD_URL,
+                        sessionCode = sessionCode,
+                        username = server.username,
+                        password = server.password
+                    )
+                }
+            } catch (ex: SSLHandshakeException) {
+                return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+            }
+
+            val code = apiResponse.code
+            val body = apiResponse.body?.string()
+            withContext(Dispatchers.IO) {
+                apiResponse.close()
+            }
+
+            if (code != 200 || body == null) {
+                Log.d("SERVICE API", "Code response $code")
+                return Result.Error(Error.API_BAD_RESPONSE)
+            }
+
+            withContext(Dispatchers.Default) {
+                Result.Success(Json.decodeFromString<GeneratedPassword>(body).password)
+            }
+        } catch (e: SocketTimeoutException) {
+            Result.Error(Error.API_TIMEOUT)
+        }
+    }
+
     companion object {
         private const val FAVICON_URL = "/index.php/apps/passwords/api/1.0/service/favicon/%s/%d"
+        private const val PASSWORD_URL = "/index.php/apps/passwords/api/1.0/service/password"
 
         private var instance: ServiceApi? = null
 

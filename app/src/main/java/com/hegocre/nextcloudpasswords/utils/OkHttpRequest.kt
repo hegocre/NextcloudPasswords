@@ -1,8 +1,12 @@
 package com.hegocre.nextcloudpasswords.utils
 
-import okhttp3.*
+import okhttp3.Credentials
+import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URL
@@ -67,6 +71,72 @@ class OkHttpRequest private constructor() {
             .url(url)
             .header("OCS-APIRequest", "true")
             .post(formBody)
+
+        if (username != null && password != null) {
+            requestBuilder.addHeader("Authorization", Credentials.basic(username, password))
+        }
+
+        if (sessionCode != null) {
+            requestBuilder.addHeader("x-api-session", sessionCode)
+        }
+
+        val request = requestBuilder.build()
+
+        return client.newCall(request).execute()
+    }
+
+    @Throws(
+        MalformedURLException::class,
+        IllegalArgumentException::class,
+        IOException::class,
+        IllegalStateException::class
+    )
+    fun patch(
+        sUrl: String, sessionCode: String? = null,
+        body: String, mediaType: MediaType?,
+        username: String? = null, password: String? = null
+    ): Response {
+        val formBody = body.toRequestBody(mediaType)
+
+        val url = URL(sUrl)
+
+        val requestBuilder = Request.Builder()
+            .url(url)
+            .header("OCS-APIRequest", "true")
+            .patch(formBody)
+
+        if (username != null && password != null) {
+            requestBuilder.addHeader("Authorization", Credentials.basic(username, password))
+        }
+
+        if (sessionCode != null) {
+            requestBuilder.addHeader("x-api-session", sessionCode)
+        }
+
+        val request = requestBuilder.build()
+
+        return client.newCall(request).execute()
+    }
+
+    @Throws(
+        MalformedURLException::class,
+        IllegalArgumentException::class,
+        IOException::class,
+        IllegalStateException::class
+    )
+    fun delete(
+        sUrl: String, sessionCode: String? = null,
+        body: String, mediaType: MediaType?,
+        username: String? = null, password: String? = null
+    ): Response {
+        val formBody = body.toRequestBody(mediaType)
+
+        val url = URL(sUrl)
+
+        val requestBuilder = Request.Builder()
+            .url(url)
+            .header("OCS-APIRequest", "true")
+            .delete(formBody)
 
         if (username != null && password != null) {
             requestBuilder.addHeader("Authorization", Credentials.basic(username, password))

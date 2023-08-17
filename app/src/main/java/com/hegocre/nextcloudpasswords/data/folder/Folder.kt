@@ -1,14 +1,12 @@
 package com.hegocre.nextcloudpasswords.data.folder
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.hegocre.nextcloudpasswords.api.FoldersApi
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
 import com.hegocre.nextcloudpasswords.utils.decryptValue
-import org.json.JSONArray
-import org.json.JSONException
+import kotlinx.serialization.Serializable
 
 /**
  * Data class representing a
@@ -22,23 +20,32 @@ import org.json.JSONException
  * @property cseType Type of the used server side encryption.
  * @property cseKey UUID of the key used for client side encryption.
  * @property sseType Type of the used server side encryption.
+ * @property client Name of the client which created this revision.
+ * @property hidden Hides the folder in list / find actions.
+ * @property trashed True if the folder is in the trash.
+ * @property favorite True if the user has marked the folder as favorite.
+ * @property created Unix timestamp when the folder was created.
+ * @property updated Unix timestamp when the folder was updated.
+ * @property edited Unix timestamp when the user last changed the folder name.
  */
+@Serializable
 @Entity(tableName = "folders", indices = [Index(value = ["id"], unique = true)])
 data class Folder(
     @PrimaryKey
     val id: String,
-    @ColumnInfo(name = "label")
     val label: String,
-    @ColumnInfo(name = "parent")
     val parent: String = FoldersApi.DEFAULT_FOLDER_UUID,
-    @ColumnInfo(name = "revision")
     val revision: String,
-    @ColumnInfo(name = "cseType")
-    val cseType: String = "none",
-    @ColumnInfo(name = "cseKey")
-    val cseKey: String = "",
-    @ColumnInfo(name = "sseType")
-    val sseType: String = "none"
+    val cseType: String,
+    val cseKey: String,
+    val sseType: String,
+    val client: String,
+    val hidden: Boolean,
+    val trashed: Boolean,
+    val favorite: Boolean,
+    val created: Int,
+    val updated: Int,
+    val edited: Int
 ) {
     /**
      * Returns a copy of this object with the encrypted fields decrypted using the keychain.
@@ -62,83 +69,5 @@ data class Folder(
         return copy(
             label = label
         )
-    }
-
-    companion object {
-        /**
-         * Create a list of folders from a JSON object.
-         *
-         * @param data The JSON object to parse.
-         * @return A list of the parsed folders.
-         */
-        fun listFromJson(data: String): List<Folder> {
-            val folderList = ArrayList<Folder>()
-
-            val array = try {
-                JSONArray(data)
-            } catch (ex: JSONException) {
-                JSONArray()
-            }
-
-            for (i in 0 until array.length()) {
-                val obj = array.getJSONObject(i)
-
-                val id = try {
-                    obj.getString("id")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val label = try {
-                    obj.getString("label")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val parent = try {
-                    obj.getString("parent")
-                } catch (ex: JSONException) {
-                    FoldersApi.DEFAULT_FOLDER_UUID
-                }
-
-                val revision = try {
-                    obj.getString("revision")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val cseType = try {
-                    obj.getString("cseType")
-                } catch (ex: JSONException) {
-                    "none"
-                }
-
-                val cseKey = try {
-                    obj.getString("cseKey")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val sseType = try {
-                    obj.getString("sseType")
-                } catch (ex: JSONException) {
-                    "none"
-                }
-
-                folderList.add(
-                    Folder(
-                        id,
-                        label,
-                        parent,
-                        revision,
-                        cseType,
-                        cseKey,
-                        sseType
-                    )
-                )
-            }
-
-            return folderList
-        }
     }
 }

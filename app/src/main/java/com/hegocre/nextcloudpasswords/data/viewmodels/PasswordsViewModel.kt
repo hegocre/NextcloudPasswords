@@ -2,7 +2,10 @@ package com.hegocre.nextcloudpasswords.data.viewmodels
 
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
 import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeClientDeauthorizedException
@@ -11,13 +14,18 @@ import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMa
 import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengePasswordException
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.folder.FolderController
+import com.hegocre.nextcloudpasswords.data.password.DeletedPassword
+import com.hegocre.nextcloudpasswords.data.password.NewPassword
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.password.PasswordController
+import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class PasswordsViewModel(application: Application) : AndroidViewModel(application) {
     private val preferencesManager = PreferencesManager.getInstance(application)
@@ -29,6 +37,11 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean>
         get() = _isRefreshing.asStateFlow()
+
+
+    private val _isUpdating = MutableStateFlow(false)
+    val isUpdating: StateFlow<Boolean>
+        get() = _isUpdating.asStateFlow()
 
     private val _needsMasterPassword = MutableStateFlow(false)
     val needsMasterPassword: StateFlow<Boolean>
@@ -126,6 +139,51 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun setVisibleFolder(folder: Folder?) {
         visibleFolder.value = folder
+    }
+
+    suspend fun createPassword(newPassword: NewPassword): Deferred<Boolean> {
+        return viewModelScope.async {
+            _isUpdating.value = true
+            if (!apiController.createPassword(newPassword)) {
+                _isUpdating.value = false
+                return@async false
+            }
+            sync()
+            _isUpdating.value = false
+            true
+        }
+    }
+
+    suspend fun updatePassword(updatedPassword: UpdatedPassword): Deferred<Boolean> {
+        return viewModelScope.async {
+            _isUpdating.value = true
+            if (!apiController.updatePassword(updatedPassword)) {
+                _isUpdating.value = false
+                return@async false
+            }
+            sync()
+            _isUpdating.value = false
+            true
+        }
+    }
+
+    suspend fun deletePassword(deletedPassword: DeletedPassword): Deferred<Boolean> {
+        return viewModelScope.async {
+            _isUpdating.value = true
+            if (!apiController.deletePassword(deletedPassword)) {
+                _isUpdating.value = false
+                return@async false
+            }
+            sync()
+            _isUpdating.value = false
+            true
+        }
+    }
+
+    suspend fun generatePassword(): Deferred<String?> {
+        return viewModelScope.async {
+            return@async apiController.generatePassword()
+        }
     }
 
     override fun onCleared() {

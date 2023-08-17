@@ -4,10 +4,10 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
 import com.hegocre.nextcloudpasswords.data.password.Password
-import com.hegocre.nextcloudpasswords.databases.passworddatabase.PasswordDatabase
+import com.hegocre.nextcloudpasswords.databases.AppDatabase
 import com.hegocre.nextcloudpasswords.databases.passworddatabase.PasswordDatabaseDao
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -22,35 +22,54 @@ class PasswordDatabaseTest {
     val instantExecutorRUle: TestRule = InstantTaskExecutorRule()
 
     private lateinit var passwordDatabaseDao: PasswordDatabaseDao
-    private lateinit var passwordDatabase: PasswordDatabase
+    private lateinit var database: AppDatabase
 
     @Before
     fun createDb() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
 
-        passwordDatabase = Room.inMemoryDatabaseBuilder(context, PasswordDatabase::class.java)
+        database = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        passwordDatabaseDao = passwordDatabase.passwordDao
+        passwordDatabaseDao = database.passwordDao
     }
 
     @After
     @Throws(IOException::class)
     fun closeDb() {
-        passwordDatabase.close()
+        database.close()
     }
 
     @ExperimentalCoroutinesApi
     @Test
     @Throws(Exception::class)
-    fun insertAndGet() = runBlockingTest {
+    fun insertAndGet() = runTest {
         val password = Password(
             id = "",
-            label = "GitHub",
-            username = "hegocre",
-            password = "helloWorld",
-            url = "",
-            revision = ""
+            label = "Nextcloud",
+            username = "john_doe",
+            password = "secret_value",
+            url = "https://nextcloud.com/",
+            notes = "",
+            customFields = "",
+            status = 0,
+            statusCode = "GOOD",
+            hash = "",
+            folder = "",
+            revision = "",
+            share = null,
+            shared = false,
+            cseType = "",
+            cseKey = "",
+            sseType = "",
+            client = "",
+            hidden = false,
+            trashed = false,
+            favorite = true,
+            editable = true,
+            edited = 0,
+            created = 0,
+            updated = 0
         )
 
         passwordDatabaseDao.insertPassword(password)

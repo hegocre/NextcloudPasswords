@@ -4,20 +4,26 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.room.*
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.Index
+import androidx.room.PrimaryKey
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
 import com.hegocre.nextcloudpasswords.data.favicon.FaviconController
 import com.hegocre.nextcloudpasswords.utils.decryptValue
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.json.JSONArray
-import org.json.JSONException
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 
 /**
  * Data class representing a
- * [Folder Object](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api#the-password-object)
+ * [Password Object](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api#the-password-object)
  * and containing all its information.
  *
  * @property id The UUID of the password.
@@ -25,41 +31,59 @@ import org.json.JSONException
  * @property username Username associated with the password.
  * @property password The actual password.
  * @property url Url of the website.
+ * @property notes Notes for the password. Can be formatted with Markdown.
+ * @property customFields Custom fields created by the user. (See
+ * [custom fields](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api#custom-fields)).
+ * @property status Security status level of the password. (See
+ * [Security Status](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api#security-status)).
+ * @property statusCode Specific code for the current security status. (See
+ * [Security Status](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api#security-status)).
+ * @property hash SHA1 hash of the password.
+ * @property folder UUID of the current folder of the password.
  * @property revision UUID of the current revision.
+ * @property share UUID of the share if the password was shared by someone else with the user.
+ * @property shared True if the password is shared with other users.
  * @property cseType Type of the used server side encryption.
  * @property cseKey UUID of the key used for client side encryption.
  * @property sseType Type of the used server side encryption.
+ * @property client Name of the client which created this revision.
+ * @property hidden Hides the password in list / find actions.
+ * @property trashed True if the password is in the trash.
  * @property favorite True if the user has marked the password as favorite.
- * @property folder UUID of the current folder of the password.
- * @property status Security status level of the password. See
- * [Security Status](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api#security-status).
+ * @property editable Specifies if the encrypted properties can be changed. Might be false for shared passwords.
+ * @property edited Unix timestamp when the user last changed the password.
+ * @property created Unix timestamp when the password was created.
+ * @property updated Unix timestamp when the password was updated.
  */
+@Serializable
 @Entity(tableName = "passwords", indices = [Index(value = ["id"], unique = true)])
 data class Password(
     @PrimaryKey
     val id: String,
-    @ColumnInfo(name = "label")
     val label: String,
-    @ColumnInfo(name = "username")
     val username: String,
-    @ColumnInfo(name = "password")
     val password: String,
-    @ColumnInfo(name = "url")
     val url: String,
-    @ColumnInfo(name = "revision")
+    val notes: String,
+    val customFields: String,
+    val status: Int,
+    val statusCode: String,
+    val hash: String,
+    val folder: String,
     val revision: String,
-    @ColumnInfo(name = "cseType")
-    val cseType: String = "none",
-    @ColumnInfo(name = "cseKey")
-    val cseKey: String = "",
-    @ColumnInfo(name = "sseType")
-    val sseType: String = "none",
-    @ColumnInfo(name = "favorite")
-    val favorite: Boolean = false,
-    @ColumnInfo(name = "folder")
-    val folder: String = "",
-    @ColumnInfo(name = "status")
-    val status: Int = 3
+    val share: String?,
+    val shared: Boolean,
+    val cseType: String,
+    val cseKey: String,
+    val sseType: String,
+    val client: String,
+    val hidden: Boolean,
+    val trashed: Boolean,
+    val favorite: Boolean,
+    val editable: Boolean,
+    val edited: Int,
+    val created: Int,
+    val updated: Int
 ) {
     @Ignore
     private val _faviconBitmap = MutableStateFlow<ImageBitmap?>(null)
@@ -119,12 +143,16 @@ data class Password(
             val label = label.decryptValue(cseKey, csEv1Keychain)
             val password = password.decryptValue(cseKey, csEv1Keychain)
             val username = username.decryptValue(cseKey, csEv1Keychain)
+            val notes = notes.decryptValue(cseKey, csEv1Keychain)
+            val customFields = customFields.decryptValue(cseKey, csEv1Keychain)
 
             copy(
-                url = url,
                 label = label,
                 password = password,
-                username = username
+                username = username,
+                url = url,
+                notes = notes,
+                customFields = customFields
             )
         }
 
@@ -135,118 +163,5 @@ data class Password(
         }
 
 
-    }
-
-    companion object {
-        /**
-         * Create a list of passwords from a JSON object.
-         *
-         * @param data The JSON object to parse.
-         * @return A list of the parsed passwords.
-         */
-        fun listFromJson(data: String): List<Password> {
-            val passwordList = ArrayList<Password>()
-
-            val array = try {
-                JSONArray(data)
-            } catch (ex: JSONException) {
-                JSONArray()
-            }
-
-            for (i in 0 until array.length()) {
-                val obj = array.getJSONObject(i)
-
-                val id = try {
-                    obj.getString("id")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val label = try {
-                    obj.getString("label")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val username = try {
-                    obj.getString("username")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val password = try {
-                    obj.getString("password")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val url = try {
-                    obj.getString("url")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val revision = try {
-                    obj.getString("revision")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val cseType = try {
-                    obj.getString("cseType")
-                } catch (ex: JSONException) {
-                    "none"
-                }
-
-                val cseKey = try {
-                    obj.getString("cseKey")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val sseType = try {
-                    obj.getString("sseType")
-                } catch (ex: JSONException) {
-                    "none"
-                }
-
-                val favorite = try {
-                    obj.getBoolean("favorite")
-                } catch (ex: JSONException) {
-                    false
-                }
-
-                val folder = try {
-                    obj.getString("folder")
-                } catch (ex: JSONException) {
-                    ""
-                }
-
-                val status = try {
-                    obj.getInt("status")
-                } catch (ex: JSONException) {
-                    3
-                }
-
-                passwordList.add(
-                    Password(
-                        id = id,
-                        label = label,
-                        username = username,
-                        password = password,
-                        url = url,
-                        revision = revision,
-                        cseType = cseType,
-                        cseKey = cseKey,
-                        sseType = sseType,
-                        favorite = favorite,
-                        folder = folder,
-                        status = status
-                    )
-                )
-            }
-
-            return passwordList
-        }
     }
 }

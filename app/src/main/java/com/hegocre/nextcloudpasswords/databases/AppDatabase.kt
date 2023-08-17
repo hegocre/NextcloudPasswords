@@ -13,8 +13,7 @@ import com.hegocre.nextcloudpasswords.databases.passworddatabase.PasswordDatabas
 
 @Database(
     entities = [Favicon::class, Folder::class, Password::class],
-    version = 1,
-    exportSchema = false
+    version = 2,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract val faviconDao: FaviconDatabaseDao

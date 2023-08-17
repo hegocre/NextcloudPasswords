@@ -7,7 +7,10 @@ import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
 import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyInvalidException
 import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyNeededException
 import com.hegocre.nextcloudpasswords.data.folder.Folder
+import com.hegocre.nextcloudpasswords.data.password.DeletedPassword
+import com.hegocre.nextcloudpasswords.data.password.NewPassword
 import com.hegocre.nextcloudpasswords.data.password.Password
+import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
@@ -190,6 +193,57 @@ class ApiController private constructor(context: Context) {
                 Log.d("API Controller", "Error ${result.code} requesting favicon")
             null
         }
+    }
+
+    /**
+     * Creates a new password via the [PasswordsApi] class. This can only be called when a
+     * session is open, otherwise an error is thrown.
+     *
+     * @param newPassword [NewPassword] object to be created.
+     * @return A boolean stating whether the password was successfully created.
+     */
+    suspend fun createPassword(newPassword: NewPassword): Boolean {
+        if (!_sessionOpen.value) return false
+        val result = passwordsApi.create(newPassword, sessionCode)
+        return result is Result.Success
+    }
+
+    /**
+     * Updates an existing password via the [PasswordsApi] class. This can only be called when a
+     * session is open, otherwise an error is thrown.
+     *
+     * @param updatedPassword [UpdatedPassword] object to be updated.
+     * @return A boolean stating whether the password was successfully updated.
+     */
+    suspend fun updatePassword(updatedPassword: UpdatedPassword): Boolean {
+        if (!_sessionOpen.value) return false
+        val result = passwordsApi.update(updatedPassword, sessionCode)
+        return result is Result.Success
+    }
+
+    /**
+     * Deletes an existing password via the [PasswordsApi] class. This can only be called when a
+     * session is open, otherwise an error is thrown.
+     *
+     * @param deletedPassword [DeletedPassword] object to be deleted.
+     * @return A boolean stating whether the password was successfully deleted.
+     */
+    suspend fun deletePassword(deletedPassword: DeletedPassword): Boolean {
+        if (!_sessionOpen.value) return false
+        val result = passwordsApi.delete(deletedPassword, sessionCode)
+        return result is Result.Success
+    }
+
+    /**
+     * Generates a random password using user's settings. This can only be called when a
+     * session is open, otherwise an error is thrown.
+     *
+     * @return A string with the generated password, or null if there was an error.
+     */
+    suspend fun generatePassword(): String? {
+        if (!_sessionOpen.value) return null
+        val result = serviceApi.password(sessionCode)
+        return if (result is Result.Success) result.data else null
     }
 
     companion object {

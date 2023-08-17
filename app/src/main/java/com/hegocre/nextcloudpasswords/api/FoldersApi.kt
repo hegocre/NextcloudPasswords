@@ -6,6 +6,7 @@ import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import java.net.SocketTimeoutException
 import javax.net.ssl.SSLHandshakeException
 
@@ -16,7 +17,6 @@ import javax.net.ssl.SSLHandshakeException
  *
  * @property server The [Server] where the requests will be made.
  */
-@Suppress("BlockingMethodInNonBlockingContext")
 class FoldersApi private constructor(private var server: Server) {
 
     /**
@@ -51,7 +51,9 @@ class FoldersApi private constructor(private var server: Server) {
 
             if (code != 200 || body == null) return Result.Error(Error.API_BAD_RESPONSE)
 
-            Result.Success(Folder.listFromJson(body))
+            withContext(Dispatchers.Default) {
+                Result.Success(Json.decodeFromString(body))
+            }
         } catch (e: SocketTimeoutException) {
             Result.Error(Error.API_TIMEOUT)
         }

@@ -46,7 +46,7 @@ fun NCPBottomNavigation(
 fun NCPBottomNavigationPreview() {
     NextcloudPasswordsTheme {
         NCPBottomNavigation(
-            allScreens = NCPScreen.values().toList(),
+            allScreens = NCPScreen.values().toList().filter { !it.hidden },
             currentScreen = NCPScreen.Passwords,
             onScreenSelected = {}
         )
