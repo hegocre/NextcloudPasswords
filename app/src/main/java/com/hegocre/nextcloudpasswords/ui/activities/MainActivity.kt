@@ -118,7 +118,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun login() {
-        val intent = Intent(this, LoginActivity::class.java)
+        val intent = Intent("com.hegocre.nextcloudpasswords.action.login")
+            .setPackage(packageName)
         startActivity(intent)
         finish()
     }

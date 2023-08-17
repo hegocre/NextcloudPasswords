@@ -107,7 +107,7 @@ fun PasswordItemContent(
             if (password.favorite) {
                 Icon(
                     imageVector = Icons.Default.Star,
-                    contentDescription = "favorite",
+                    contentDescription = stringResource(id = R.string.favorite),
                     tint = if (MaterialTheme.colorScheme.isLight()) Amber500 else Amber200,
                     modifier = Modifier.padding(start = 10.dp)
                 )
@@ -117,7 +117,7 @@ fun PasswordItemContent(
                 IconButton(onClick = onEditPassword) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = "edit",
+                        contentDescription = stringResource(id = R.string.edit),
                     )
                 }
             }
@@ -133,7 +133,7 @@ fun PasswordItemContent(
                         icon = {
                             Icon(
                                 imageVector = Icons.TwoTone.AccountCircle,
-                                contentDescription = "username"
+                                contentDescription = stringResource(id = R.string.username)
                             )
                         },
                         trailingIcon = {
@@ -147,7 +147,7 @@ fun PasswordItemContent(
                             }) {
                                 Icon(
                                     imageVector = Icons.TwoTone.ContentCopy,
-                                    contentDescription = "copy"
+                                    contentDescription = stringResource(id = R.string.copy_value)
                                 )
                             }
                         }
@@ -166,7 +166,7 @@ fun PasswordItemContent(
                     icon = {
                         Icon(
                             imageVector = Icons.TwoTone.Password,
-                            contentDescription = "password"
+                            contentDescription = stringResource(id = R.string.password)
                         )
                     },
                     trailingIcon = {
@@ -180,7 +180,7 @@ fun PasswordItemContent(
                         }) {
                             Icon(
                                 imageVector = Icons.TwoTone.ContentCopy,
-                                contentDescription = "copy"
+                                contentDescription = stringResource(id = R.string.copy_value)
                             )
                         }
                     },
@@ -197,7 +197,10 @@ fun PasswordItemContent(
                         text = password.url,
                         label = urlLabel,
                         icon = {
-                            Icon(imageVector = Icons.TwoTone.Link, contentDescription = "url")
+                            Icon(
+                                imageVector = Icons.TwoTone.Link,
+                                contentDescription = stringResource(id = R.string.url)
+                            )
                         },
                         trailingIcon = {
                             IconButton(onClick = {
@@ -210,7 +213,7 @@ fun PasswordItemContent(
                             }) {
                                 Icon(
                                     imageVector = Icons.TwoTone.ContentCopy,
-                                    contentDescription = "copy"
+                                    contentDescription = stringResource(id = R.string.copy_value)
                                 )
                             }
                         },
@@ -256,12 +259,12 @@ fun PasswordItemContent(
                                     if (customField.type == CustomField.TYPE_TEXT) {
                                         Icon(
                                             imageVector = Icons.TwoTone.Info,
-                                            contentDescription = "text"
+                                            contentDescription = stringResource(id = R.string.text)
                                         )
                                     } else {
                                         Icon(
                                             imageVector = Icons.TwoTone.AlternateEmail,
-                                            contentDescription = "email"
+                                            contentDescription = stringResource(id = R.string.email)
                                         )
                                     }
                                 },
@@ -276,7 +279,7 @@ fun PasswordItemContent(
                                     }) {
                                         Icon(
                                             imageVector = Icons.TwoTone.ContentCopy,
-                                            contentDescription = "copy"
+                                            contentDescription = stringResource(id = R.string.copy_value)
                                         )
                                     }
                                 }
@@ -293,7 +296,7 @@ fun PasswordItemContent(
                                 icon = {
                                     Icon(
                                         imageVector = Icons.TwoTone.Shield,
-                                        contentDescription = "secret"
+                                        contentDescription = stringResource(id = R.string.secret)
                                     )
                                 },
                                 trailingIcon = {
@@ -307,7 +310,7 @@ fun PasswordItemContent(
                                     }) {
                                         Icon(
                                             imageVector = Icons.TwoTone.ContentCopy,
-                                            contentDescription = "copy"
+                                            contentDescription = stringResource(id = R.string.copy_value)
                                         )
                                     }
                                 },
@@ -324,7 +327,7 @@ fun PasswordItemContent(
                                 icon = {
                                     Icon(
                                         imageVector = Icons.TwoTone.Link,
-                                        contentDescription = "url"
+                                        contentDescription = stringResource(id = R.string.url)
                                     )
                                 },
                                 trailingIcon = {
@@ -338,7 +341,7 @@ fun PasswordItemContent(
                                     }) {
                                         Icon(
                                             imageVector = Icons.TwoTone.ContentCopy,
-                                            contentDescription = "copy"
+                                            contentDescription = stringResource(id = R.string.copy_value)
                                         )
                                     }
                                 },

@@ -3,7 +3,14 @@ package com.hegocre.nextcloudpasswords.ui.components
 import android.content.Intent
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -11,9 +18,27 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -28,7 +53,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
-import com.hegocre.nextcloudpasswords.ui.activities.SettingsActivity
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 
 object AppBarDefaults {
@@ -93,7 +117,7 @@ fun TitleAppBar(
             IconButton(onClick = onSearchClick) {
                 Icon(
                     imageVector = Icons.Outlined.Search,
-                    contentDescription = "Search"
+                    contentDescription = stringResource(id = R.string.search)
                 )
             }
             if (showMenu) {
@@ -101,7 +125,7 @@ fun TitleAppBar(
                     IconButton(onClick = { menuExpanded = true }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More"
+                            contentDescription = stringResource(id = R.string.menu)
                         )
                     }
                     DropdownMenu(
@@ -110,14 +134,29 @@ fun TitleAppBar(
                         onDismissRequest = { menuExpanded = false }
                     ) {
                         val context = LocalContext.current
+
                         DropdownMenuItem(
                             onClick = {
-                                val intent = Intent(context, SettingsActivity::class.java)
+                                val intent =
+                                    Intent("com.hegocre.nextcloudpasswords.action.settings")
+                                        .setPackage(context.packageName)
                                 context.startActivity(intent)
                                 menuExpanded = false
                             },
                             text = {
                                 Text(text = stringResource(id = R.string.settings))
+                            },
+                        )
+
+                        DropdownMenuItem(
+                            onClick = {
+                                val intent = Intent("com.hegocre.nextcloudpasswords.action.about")
+                                    .setPackage(context.packageName)
+                                context.startActivity(intent)
+                                menuExpanded = false
+                            },
+                            text = {
+                                Text(text = stringResource(id = R.string.about))
                             },
                         )
 
@@ -158,7 +197,10 @@ fun SearchAppBar(
             IconButton(
                 onClick = onBackPressed
             ) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "back")
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = stringResource(id = R.string.back)
+                )
             }
             TextField(
                 modifier = Modifier
@@ -187,7 +229,10 @@ fun SearchAppBar(
             IconButton(
                 onClick = { setSearchQuery("") }
             ) {
-                Icon(imageVector = Icons.Default.Clear, contentDescription = "clear")
+                Icon(
+                    imageVector = Icons.Default.Clear,
+                    contentDescription = stringResource(id = R.string.clear_query)
+                )
             }
         }
     }

@@ -121,7 +121,7 @@ fun NextcloudPasswordsApp(
                             IconButton(onClick = { navController.navigateUp() }) {
                                 Icon(
                                     imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "back"
+                                    contentDescription = stringResource(id = R.string.back)
                                 )
                             }
                         }
@@ -150,7 +150,10 @@ fun NextcloudPasswordsApp(
                     FloatingActionButton(
                         onClick = { navController.navigate("${NCPScreen.Edit.name}/none") },
                     ) {
-                        Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = stringResource(id = R.string.new_password)
+                        )
                     }
                 }
             }

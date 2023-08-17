@@ -55,4 +55,21 @@
     <string name="could_not_generate_password">No s\'ha pogut generar la contrasenya</string>
     <string name="custom_field_exists">El camp personalitzat ja existeix</string>
     <string name="could_not_open_url">No s\'ha pogut obrir l\'URL</string>
+    <string name="about">Informació</string>
+    <string name="back">Enrere</string>
+    <string name="version">Versió</string>
+    <string name="source_code">Codi font</string>
+    <string name="privacy_policy">Política de privadesa</string>
+    <string name="licenses">Llicències</string>
+    <string name="help_suggestions">Ajuda i suggeriments</string>
+    <string name="authors">Autor</string>
+    <string name="website">Lloc web</string>
+    <string name="security_status">Estat de seguretat</string>
+    <string name="folder_icon">Icona de la carpeta</string>
+    <string name="new_password">Nova contrasenya</string>
+    <string name="menu">Menú</string>
+    <string name="clear_query">Netejar els termes de cerca</string>
+    <string name="generate_password">Generar contrasenya</string>
+    <string name="copy_value">Copiar valor</string>
+    <string name="more_options">Més opcions</string>
 </resources>

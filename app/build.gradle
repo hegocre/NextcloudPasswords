@@ -16,7 +16,7 @@ android {
         minSdk 24
         targetSdk 34
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -24,6 +24,11 @@ android {
         }
 
         resourceConfigurations += ['ca', 'es', 'en']
+
+        applicationVariants.configureEach { variant ->
+            variant.resValue "string", "version_name", variant.versionName
+            variant.resValue "string", "version_code", variant.versionCode.toString()
+        }
     }
 
     ksp {

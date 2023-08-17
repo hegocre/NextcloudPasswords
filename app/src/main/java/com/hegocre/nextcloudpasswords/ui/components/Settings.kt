@@ -26,10 +26,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 
 @Composable
@@ -120,7 +122,7 @@ fun DropdownPreference(
             IconButton(onClick = { dropdownVisible = true }) {
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "More"
+                    contentDescription = stringResource(id = R.string.more_options)
                 )
             }
             DropdownMenu(
