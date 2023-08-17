@@ -180,6 +180,12 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    suspend fun generatePassword(): Deferred<String?> {
+        return viewModelScope.async {
+            return@async apiController.generatePassword()
+        }
+    }
+
     override fun onCleared() {
         apiController
         super.onCleared()

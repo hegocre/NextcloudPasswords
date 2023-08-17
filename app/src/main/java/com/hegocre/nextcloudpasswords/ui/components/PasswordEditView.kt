@@ -1,5 +1,6 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,12 +32,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -53,8 +57,11 @@ import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.isLight
 import com.hegocre.nextcloudpasswords.utils.isValidEmail
 import com.hegocre.nextcloudpasswords.utils.isValidURL
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.reflect.KSuspendFunction0
 
 class EditablePasswordState(originalPassword: Password?) {
     var password by mutableStateOf(originalPassword?.password ?: "")
@@ -125,9 +132,13 @@ fun rememberEditablePasswordState(password: Password? = null): EditablePasswordS
 fun EditablePasswordView(
     editablePasswordState: EditablePasswordState,
     isUpdating: Boolean,
+    onGeneratePassword: KSuspendFunction0<Deferred<String?>>?,
     onSavePassword: () -> Unit,
     onDeletePassword: (() -> Unit)? = null
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
     var showDeleteDialog by rememberSaveable {
         mutableStateOf(false)
     }
@@ -212,11 +223,16 @@ fun EditablePasswordView(
                 singleLine = true,
                 maxLines = 1,
                 trailingIcon = {
-                    Row {
-                        IconButton(onClick = { /*TODO*/ }) {
-                            Icon(
-                                imageVector = Icons.Default.Casino,
-                                contentDescription = "generate random"
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        var isGenerating by rememberSaveable {
+                            mutableStateOf(false)
+                        }
+
+                        if (isGenerating) {
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
 
@@ -227,6 +243,31 @@ fun EditablePasswordView(
                                 contentDescription = stringResource(R.string.show_password)
                             )
                         }
+
+                        if (onGeneratePassword != null) {
+                            IconButton(onClick = {
+                                coroutineScope.launch {
+                                    isGenerating = true
+                                    val generatedPassword = onGeneratePassword().await()
+                                    if (generatedPassword == null) {
+                                        Toast.makeText(
+                                            context,
+                                            R.string.could_not_generate_password,
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    } else {
+                                        editablePasswordState.password = generatedPassword
+                                    }
+                                    isGenerating = false
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Casino,
+                                    contentDescription = "generate random"
+                                )
+                            }
+                        }
+
                     }
                 },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
@@ -475,7 +516,8 @@ fun PasswordEditPreview() {
                 },
                 isUpdating = false,
                 onSavePassword = { },
-                onDeletePassword = {}
+                onDeletePassword = { },
+                onGeneratePassword = null
             )
         }
     }

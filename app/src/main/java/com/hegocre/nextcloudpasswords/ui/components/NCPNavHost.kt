@@ -469,7 +469,8 @@ fun NCPNavHost(
                                     }
                                 }
                             },
-                            isUpdating = isUpdating
+                            isUpdating = isUpdating,
+                            onGeneratePassword = passwordsViewModel::generatePassword
                         )
                     }
                 }

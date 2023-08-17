@@ -52,4 +52,5 @@
     <string name="field_cannot_be_empty">Aquest camp no pot estar buit</string>
     <string name="enter_valid_url">Introdueixi un URL vàlid</string>
     <string name="enter_valid_email">Introdueixi un correu electrònic vàlid</string>
+    <string name="could_not_generate_password">No s\'ha pogut generar la contrasenya</string>
 </resources>

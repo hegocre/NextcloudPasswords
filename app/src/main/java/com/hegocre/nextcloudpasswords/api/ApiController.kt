@@ -234,6 +234,12 @@ class ApiController private constructor(context: Context) {
         return result is Result.Success
     }
 
+    suspend fun generatePassword(): String? {
+        if (!_sessionOpen.value) return null
+        val result = serviceApi.password(sessionCode)
+        return if (result is Result.Success) result.data else null
+    }
+
     companion object {
         private var instance: ApiController? = null
 
