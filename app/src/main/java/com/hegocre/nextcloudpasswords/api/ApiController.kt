@@ -234,6 +234,12 @@ class ApiController private constructor(context: Context) {
         return result is Result.Success
     }
 
+    /**
+     * Generates a random password using user's settings. This can only be called when a
+     * session is open, otherwise an error is thrown.
+     *
+     * @return A string with the generated password, or null if there was an error.
+     */
     suspend fun generatePassword(): String? {
         if (!_sessionOpen.value) return null
         val result = serviceApi.password(sessionCode)

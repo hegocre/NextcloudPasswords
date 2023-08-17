@@ -67,6 +67,14 @@ class PasswordsApi private constructor(private var server: Server) {
         }
     }
 
+    /**
+     * Sends a request to the api to create a new password. If the user uses CSE, the
+     * password needs to be encrypted.
+     *
+     * @param newPassword The [NewPassword] object of the created password.
+     * @param sessionCode Code of the current session, only needed if CSE enabled.
+     * @return A result if success, or an error code otherwise
+     */
     suspend fun create(
         newPassword: NewPassword,
         sessionCode: String? = null
@@ -106,6 +114,14 @@ class PasswordsApi private constructor(private var server: Server) {
         }
     }
 
+    /**
+     * Sends a request to the api to update a password. If the user uses CSE, the
+     * password needs to be encrypted.
+     *
+     * @param updatedPassword The [UpdatedPassword] object of the edited password.
+     * @param sessionCode Code of the current session, only needed if CSE enabled.
+     * @return A result if success, or an error code otherwise
+     */
     suspend fun update(
         updatedPassword: UpdatedPassword,
         sessionCode: String? = null
@@ -145,6 +161,13 @@ class PasswordsApi private constructor(private var server: Server) {
         }
     }
 
+    /**
+     * Sends a request to the api to delete a password.
+     *
+     * @param deletedPassword The [DeletedPassword] object of the password to be deleted.
+     * @param sessionCode Code of the current session, only needed if CSE enabled.
+     * @return A result if success, or an error code otherwise
+     */
     suspend fun delete(
         deletedPassword: DeletedPassword,
         sessionCode: String? = null

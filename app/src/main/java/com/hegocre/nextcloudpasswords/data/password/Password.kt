@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * Data class representing a
- * [Folder Object](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api#the-password-object)
+ * [Password Object](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api#the-password-object)
  * and containing all its information.
  *
  * @property id The UUID of the password.
@@ -31,14 +31,29 @@ import kotlinx.serialization.Serializable
  * @property username Username associated with the password.
  * @property password The actual password.
  * @property url Url of the website.
+ * @property notes Notes for the password. Can be formatted with Markdown.
+ * @property customFields Custom fields created by the user. (See
+ * [custom fields](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api#custom-fields)).
+ * @property status Security status level of the password. (See
+ * [Security Status](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api#security-status)).
+ * @property statusCode Specific code for the current security status. (See
+ * [Security Status](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api#security-status)).
+ * @property hash SHA1 hash of the password.
+ * @property folder UUID of the current folder of the password.
  * @property revision UUID of the current revision.
+ * @property share UUID of the share if the password was shared by someone else with the user.
+ * @property shared True if the password is shared with other users.
  * @property cseType Type of the used server side encryption.
  * @property cseKey UUID of the key used for client side encryption.
  * @property sseType Type of the used server side encryption.
+ * @property client Name of the client which created this revision.
+ * @property hidden Hides the password in list / find actions.
+ * @property trashed True if the password is in the trash.
  * @property favorite True if the user has marked the password as favorite.
- * @property folder UUID of the current folder of the password.
- * @property status Security status level of the password. See
- * [Security Status](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api#security-status).
+ * @property editable Specifies if the encrypted properties can be changed. Might be false for shared passwords.
+ * @property edited Unix timestamp when the user last changed the password.
+ * @property created Unix timestamp when the password was created.
+ * @property updated Unix timestamp when the password was updated.
  */
 @Serializable
 @Entity(tableName = "passwords", indices = [Index(value = ["id"], unique = true)])

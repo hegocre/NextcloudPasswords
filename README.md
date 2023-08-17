@@ -1,7 +1,5 @@
 # Nextcloud Passwords
 
-**WARNING:** *This app is still in progress, and thus some features like password editing or creation are not done yet.*
-
 This app connects to a Nextcloud server with Passwords App installed, and displays its content on a user-friendly UI. It also acts as an AutoFill service to make logging in on Android devices easier.
 
 ## Screenshots

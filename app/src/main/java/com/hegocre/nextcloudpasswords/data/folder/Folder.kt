@@ -20,6 +20,13 @@ import kotlinx.serialization.Serializable
  * @property cseType Type of the used server side encryption.
  * @property cseKey UUID of the key used for client side encryption.
  * @property sseType Type of the used server side encryption.
+ * @property client Name of the client which created this revision.
+ * @property hidden Hides the folder in list / find actions.
+ * @property trashed True if the folder is in the trash.
+ * @property favorite True if the user has marked the folder as favorite.
+ * @property created Unix timestamp when the folder was created.
+ * @property updated Unix timestamp when the folder was updated.
+ * @property edited Unix timestamp when the user last changed the folder name.
  */
 @Serializable
 @Entity(tableName = "folders", indices = [Index(value = ["id"], unique = true)])
