@@ -1,7 +1,5 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
-import android.content.Intent
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -36,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -340,7 +339,7 @@ fun PasswordItemContent(
                     val notesLabel = stringResource(id = R.string.notes)
 
                     PasswordMarkdownField(
-                        markdown = password.notes,
+                        markdown = password.notes.replace("\n", "\n\n"),
                         modifier = Modifier
                             .padding(top = 8.dp)
                             .padding(horizontal = 4.dp),
@@ -424,7 +423,7 @@ fun PasswordItemPreview() {
                     url = "https://nextcloud.com/",
                     notes = "# This is a note\n\nIt is very important that this is read by all __means__\n\n" +
                             "## Subsection \n\n This is also important.\n\n" +
-                            "## Another subsection\n\n### Even deeper\n\n Some text\n\n",
+                            "## Another subsection\n\n### Even deeper\n\n Some text\nSome more text",
                     customFields = "",
                     status = 0,
                     statusCode = "GOOD",
