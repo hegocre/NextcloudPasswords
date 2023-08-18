@@ -300,17 +300,18 @@ fun NCPNavHost(
                 closeSearch = closeSearch
             ) {
                 when {
-                    passwordsDecryptionState.isLoading -> {
+                    passwordsDecryptionState.isLoading || foldersDecryptionState.isLoading -> {
                         Box(modifier = Modifier.fillMaxSize()) {
                             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                         }
                     }
 
-                    passwordsDecryptionState.decryptedList != null -> {
+                    passwordsDecryptionState.decryptedList != null && foldersDecryptionState.decryptedList != null -> {
                         val editablePasswordState = rememberEditablePasswordState(selectedPassword)
 
                         EditablePasswordView(
                             editablePasswordState = editablePasswordState,
+                            folders = foldersDecryptionState.decryptedList ?: listOf(),
                             onSavePassword = {
                                 val customFields =
                                     Json.encodeToString(editablePasswordState.customFields.toList())
@@ -345,7 +346,7 @@ fun NCPNavHost(
                                             hash = editablePasswordState.password.sha1Hash(),
                                             cseType = "CSEv1r1",
                                             cseKey = it.current,
-                                            folder = FoldersApi.DEFAULT_FOLDER_UUID,
+                                            folder = editablePasswordState.folder,
                                             edited = 0,
                                             hidden = false,
                                             favorite = editablePasswordState.favorite
@@ -360,7 +361,7 @@ fun NCPNavHost(
                                         hash = editablePasswordState.password.sha1Hash(),
                                         cseType = "none",
                                         cseKey = "",
-                                        folder = FoldersApi.DEFAULT_FOLDER_UUID,
+                                        folder = editablePasswordState.folder,
                                         edited = 0,
                                         hidden = false,
                                         favorite = editablePasswordState.favorite
@@ -410,7 +411,7 @@ fun NCPNavHost(
                                             hash = editablePasswordState.password.sha1Hash(),
                                             cseType = "CSEv1r1",
                                             cseKey = it.current,
-                                            folder = selectedPassword.folder,
+                                            folder = editablePasswordState.folder,
                                             edited = if (editablePasswordState.password == selectedPassword.password) selectedPassword.edited else 0,
                                             hidden = selectedPassword.hidden,
                                             favorite = editablePasswordState.favorite
@@ -427,7 +428,7 @@ fun NCPNavHost(
                                         hash = editablePasswordState.password.sha1Hash(),
                                         cseType = "none",
                                         cseKey = "",
-                                        folder = selectedPassword.folder,
+                                        folder = editablePasswordState.folder,
                                         edited = if (editablePasswordState.password == selectedPassword.password) selectedPassword.edited else 0,
                                         hidden = selectedPassword.hidden,
                                         favorite = editablePasswordState.favorite

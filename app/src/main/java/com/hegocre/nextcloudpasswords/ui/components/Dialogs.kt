@@ -1,12 +1,19 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -17,6 +24,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -33,6 +41,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,6 +51,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.hegocre.nextcloudpasswords.R
+import com.hegocre.nextcloudpasswords.api.FoldersApi
+import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
@@ -281,6 +292,104 @@ fun AddCustomFieldDialog(
                         .padding(horizontal = 0.dp)
                 ) {
                     Text(text = stringResource(android.R.string.ok))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SelectFolderDialog(
+    folders: List<Folder>,
+    currentFolder: String,
+    onSelectClick: (String) -> Unit,
+    onDismissRequest: (() -> Unit)? = null
+) {
+    val (selectedFolder, setSelectedFolder) = remember { mutableStateOf(currentFolder) }
+    val filteredFolders = remember(folders, selectedFolder) {
+        folders.filter {
+            it.parent == selectedFolder
+        }
+    }
+
+    Dialog(
+        onDismissRequest = { onDismissRequest?.invoke() },
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            contentColor = contentColorFor(backgroundColor = MaterialTheme.colorScheme.surface),
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+        ) {
+            Column(modifier = Modifier.padding(all = 24.dp)) {
+                Text(
+                    text = if (selectedFolder == FoldersApi.DEFAULT_FOLDER_UUID) {
+                        stringResource(id = R.string.home)
+                    } else {
+                        folders.firstOrNull { it.id == selectedFolder }?.label
+                            ?: stringResource(id = R.string.home)
+                    },
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        if (selectedFolder != FoldersApi.DEFAULT_FOLDER_UUID) {
+                            item(key = "parent_folder") {
+                                ListItem(
+                                    leadingContent = {
+                                        Image(
+                                            imageVector = Icons.Filled.Folder,
+                                            contentDescription = stringResource(R.string.folder_icon),
+                                            colorFilter = ColorFilter.tint(
+                                                MaterialTheme.colorScheme.onSurface.copy(
+                                                    alpha = ContentAlpha.medium
+                                                )
+                                            ),
+                                            modifier = Modifier
+                                                .size(45.dp)
+                                                .padding(8.dp)
+                                        )
+                                    },
+                                    headlineContent = {
+                                        Text(text = "..")
+                                    },
+                                    modifier = Modifier.clickable {
+                                        setSelectedFolder(
+                                            folders.firstOrNull { it.id == selectedFolder }?.parent
+                                                ?: FoldersApi.DEFAULT_FOLDER_UUID
+                                        )
+                                    }
+                                )
+                            }
+                        }
+
+                        items(items = filteredFolders, key = { folder -> folder.id }) { folder ->
+                            FolderRow(
+                                folder = folder,
+                                onFolderClick = {
+                                    setSelectedFolder(folder.id)
+                                },
+                            )
+                        }
+                    }
+                }
+
+                TextButton(
+                    onClick = {
+                        onSelectClick(selectedFolder)
+                    },
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(horizontal = 0.dp)
+                ) {
+                    Text(text = stringResource(R.string.select))
                 }
             }
         }
