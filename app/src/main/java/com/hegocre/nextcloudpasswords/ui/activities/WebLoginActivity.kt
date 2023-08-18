@@ -19,7 +19,7 @@ class WebLoginActivity : ComponentActivity() {
         val loginUrl = intent.getStringExtra("login_url")?.let {
             var url = it
             if (it.last() != '/') url += '/'
-            "$url/index.php/login/flow"
+            "${url}index.php/login/flow"
         } ?: ""
 
         setContent {

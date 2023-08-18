@@ -22,7 +22,7 @@ class LoginActivity : ComponentActivity() {
             NCPLoginScreen(
                 loginIntent = loginIntent,
                 onLoginSuccess = {
-                    val intent = Intent("android.intent.action.MAIN")
+                    val intent = Intent("com.hegocre.nextcloudpasswords.action.main")
                         .setPackage(packageName)
                     startActivity(intent)
                     finish()
