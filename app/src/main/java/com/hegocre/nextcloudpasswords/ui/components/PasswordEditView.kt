@@ -113,8 +113,8 @@ class EditablePasswordState(originalPassword: Password?) {
         val Saver: Saver<EditablePasswordState, *> = listSaver(
             save = {
                 listOf(
-                    it.password, it.label, it.username, it.url,
-                    it.notes, Json.encodeToString(it.customFields.toList()), it.favorite.toString()
+                    it.password, it.label, it.username, it.url, it.notes,
+                    it.folder, Json.encodeToString(it.customFields.toList()), it.favorite.toString()
                 )
             },
             restore = {
@@ -124,6 +124,7 @@ class EditablePasswordState(originalPassword: Password?) {
                     username = it[2]
                     url = it[3]
                     notes = it[4]
+                    folder = it[5]
                     customFields =
                         Json.decodeFromString<List<CustomField>>(it[5]).toMutableStateList()
                     favorite = it[6].toBooleanStrictOrNull() ?: false
