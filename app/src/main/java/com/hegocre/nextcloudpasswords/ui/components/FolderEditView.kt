@@ -167,7 +167,7 @@ fun EditableFolderView(
                             ?: stringResource(id = R.string.home)
                     },
                     onValueChange = { },
-                    label = { Text(text = stringResource(id = R.string.folder)) },
+                    label = { Text(text = stringResource(id = R.string.parent_folder)) },
                     singleLine = true,
                     maxLines = 1,
                     modifier = Modifier

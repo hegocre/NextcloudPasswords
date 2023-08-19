@@ -80,4 +80,5 @@
     <string name="folder_saving_failed">No s\'ha pogut desar la carpeta. Si us plau, intenteu-ho de nou</string>
     <string name="folder_deleting_failed">No s\'ha pogut eliminar la carpeta. Si us plau, intenteu-ho de nou</string>
     <string name="delete_folder">Eliminar carpeta</string>
+    <string name="parent_folder">Carpeta superior</string>
 </resources>

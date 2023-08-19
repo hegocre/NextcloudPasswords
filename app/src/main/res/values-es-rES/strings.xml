@@ -80,4 +80,5 @@
     <string name="folder_saving_failed">No se ha podido guardar la carpeta. Por favor, inténtelo de nuevo</string>
     <string name="folder_deleting_failed">No se ha podido eliminar la carpeta. Por favor, inténtelo de nuevo</string>
     <string name="delete_folder">Eliminar carpeta</string>
+    <string name="parent_folder">Carpeta superior</string>
 </resources>
