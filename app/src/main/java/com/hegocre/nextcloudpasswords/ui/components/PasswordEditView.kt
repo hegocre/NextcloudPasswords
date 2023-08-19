@@ -165,16 +165,15 @@ fun EditablePasswordView(
     }
 
 
-    LazyColumn(
-        modifier = Modifier
-            .padding(horizontal = 16.dp),
-    ) {
+    LazyColumn {
         item(key = "top_spacer") { Spacer(modifier = Modifier.width(16.dp)) }
 
         item(key = "favorite_button") {
             Button(
                 onClick = { editablePasswordState.favorite = !editablePasswordState.favorite },
-                modifier = Modifier.padding(bottom = 16.dp),
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp),
                 colors = if (editablePasswordState.favorite) ButtonDefaults.filledTonalButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurface,
                     containerColor = (if (MaterialTheme.colorScheme.isLight()) Amber500 else Amber200)
@@ -205,7 +204,8 @@ fun EditablePasswordView(
                 maxLines = 1,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp),
                 isError = showFieldErrors && editablePasswordState.label.isBlank(),
                 supportingText = if (showFieldErrors && editablePasswordState.label.isBlank()) {
                     {
@@ -225,6 +225,7 @@ fun EditablePasswordView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp)
             )
         }
 
@@ -293,7 +294,8 @@ fun EditablePasswordView(
                     VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp),
                 isError = showFieldErrors && editablePasswordState.password.isBlank(),
                 supportingText = if (showFieldErrors && editablePasswordState.password.isBlank()) {
                     {
@@ -313,7 +315,8 @@ fun EditablePasswordView(
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp),
                 isError = showFieldErrors && !editablePasswordState.url.isValidURL(),
                 supportingText = if (showFieldErrors && !editablePasswordState.url.isValidURL()) {
                     {
@@ -344,7 +347,8 @@ fun EditablePasswordView(
                     maxLines = 1,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp),
+                        .padding(bottom = 16.dp)
+                        .padding(horizontal = 16.dp),
                     interactionSource = remember { MutableInteractionSource() }
                         .also { mutableInteractionSource ->
                             LaunchedEffect(key1 = mutableInteractionSource) {
@@ -409,7 +413,8 @@ fun EditablePasswordView(
                     VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp),
                 isError = when (customField.type) {
                     CustomField.TYPE_URL -> showFieldErrors && !customField.value.isValidURL()
                     CustomField.TYPE_EMAIL -> showFieldErrors && !customField.value.isValidEmail()
@@ -446,6 +451,7 @@ fun EditablePasswordView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 24.dp)
+                    .padding(horizontal = 16.dp)
             )
         }
 
@@ -459,6 +465,7 @@ fun EditablePasswordView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
+                    .padding(horizontal = 16.dp)
             )
         }
 
@@ -483,7 +490,9 @@ fun EditablePasswordView(
                     }
                 },
                 enabled = !isUpdating,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
             )
         }
 
@@ -502,6 +511,7 @@ fun EditablePasswordView(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp)
+                            .padding(horizontal = 16.dp)
                     )
                 }
             }
