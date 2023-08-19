@@ -6,7 +6,10 @@ import androidx.lifecycle.MutableLiveData
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
 import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyInvalidException
 import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyNeededException
+import com.hegocre.nextcloudpasswords.data.folder.DeletedFolder
 import com.hegocre.nextcloudpasswords.data.folder.Folder
+import com.hegocre.nextcloudpasswords.data.folder.NewFolder
+import com.hegocre.nextcloudpasswords.data.folder.UpdatedFolder
 import com.hegocre.nextcloudpasswords.data.password.DeletedPassword
 import com.hegocre.nextcloudpasswords.data.password.NewPassword
 import com.hegocre.nextcloudpasswords.data.password.Password
@@ -244,6 +247,45 @@ class ApiController private constructor(context: Context) {
         if (!_sessionOpen.value) return null
         val result = serviceApi.password(sessionCode)
         return if (result is Result.Success) result.data else null
+    }
+
+    /**
+     * Creates a new folder via the [FoldersApi] class. This can only be called when a
+     * session is open, otherwise an error is thrown.
+     *
+     * @param newFolder [NewFolder] object to be created.
+     * @return A boolean stating whether the folder was successfully created.
+     */
+    suspend fun createFolder(newFolder: NewFolder): Boolean {
+        if (!_sessionOpen.value) return false
+        val result = foldersApi.create(newFolder, sessionCode)
+        return result is Result.Success
+    }
+
+    /**
+     * Updates an existing folder via the [FoldersApi] class. This can only be called when a
+     * session is open, otherwise an error is thrown.
+     *
+     * @param updatedFolder [UpdatedFolder] object to be updated.
+     * @return A boolean stating whether the folder was successfully updated.
+     */
+    suspend fun updateFolder(updatedFolder: UpdatedFolder): Boolean {
+        if (!_sessionOpen.value) return false
+        val result = foldersApi.update(updatedFolder, sessionCode)
+        return result is Result.Success
+    }
+
+    /**
+     * Deletes an existing folder via the [FoldersApi] class. This can only be called when a
+     * session is open, otherwise an error is thrown.
+     *
+     * @param deletedFolder [DeletedFolder] object to be deleted.
+     * @return A boolean stating whether the folder was successfully deleted.
+     */
+    suspend fun deleteFolder(deletedFolder: DeletedFolder): Boolean {
+        if (!_sessionOpen.value) return false
+        val result = foldersApi.delete(deletedFolder, sessionCode)
+        return result is Result.Success
     }
 
     companion object {

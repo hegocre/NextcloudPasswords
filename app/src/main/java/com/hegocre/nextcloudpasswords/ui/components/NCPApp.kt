@@ -64,7 +64,8 @@ fun NextcloudPasswordsApp(
     val needsMasterPassword by passwordsViewModel.needsMasterPassword.collectAsState()
     val masterPasswordInvalid by passwordsViewModel.masterPasswordInvalid.collectAsState()
 
-    var logOutDialogOpen by rememberSaveable { mutableStateOf(false) }
+    var showLogOutDialog by rememberSaveable { mutableStateOf(false) }
+    var showAddElementDialog by rememberSaveable { mutableStateOf(false) }
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -87,7 +88,7 @@ fun NextcloudPasswordsApp(
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
-                if (currentScreen != NCPScreen.Edit) {
+                if (currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit) {
                     NCPSearchTopBar(
                         title = when (currentScreen) {
                             NCPScreen.Passwords, NCPScreen.Favorites -> stringResource(currentScreen.title)
@@ -110,12 +111,12 @@ fun NextcloudPasswordsApp(
                             searchExpanded = false
                             setSearchQuery("")
                         },
-                        onLogoutClick = { logOutDialogOpen = true },
+                        onLogoutClick = { showLogOutDialog = true },
                         scrollBehavior = scrollBehavior
                     )
                 } else {
                     TopAppBar(
-                        title = { Text(text = stringResource(id = R.string.edit)) },
+                        title = { Text(text = stringResource(id = currentScreen.title)) },
                         navigationIcon = {
                             IconButton(onClick = { navController.navigateUp() }) {
                                 Icon(
@@ -128,7 +129,7 @@ fun NextcloudPasswordsApp(
                 }
             },
             bottomBar = {
-                if (currentScreen != NCPScreen.Edit) {
+                if (currentScreen != NCPScreen.PasswordEdit) {
                     NCPBottomNavigation(
                         allScreens = NCPScreen.values().toList().filter { !it.hidden },
                         currentScreen = currentScreen,
@@ -145,9 +146,9 @@ fun NextcloudPasswordsApp(
                 }
             },
             floatingActionButton = {
-                if (!isAutofillRequest && currentScreen != NCPScreen.Edit) {
+                if (!isAutofillRequest && currentScreen != NCPScreen.PasswordEdit) {
                     FloatingActionButton(
-                        onClick = { navController.navigate("${NCPScreen.Edit.name}/none") },
+                        onClick = { showAddElementDialog = true },
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Add,
@@ -171,10 +172,26 @@ fun NextcloudPasswordsApp(
                 },
             )
 
-            if (logOutDialogOpen) {
+            if (showLogOutDialog) {
                 LogOutDialog(
-                    onDismissRequest = { logOutDialogOpen = false },
+                    onDismissRequest = { showLogOutDialog = false },
                     onConfirmButton = onLogOut
+                )
+            }
+
+            if (showAddElementDialog) {
+                AddElementDialog(
+                    onPasswordAdd = {
+                        navController.navigate("${NCPScreen.PasswordEdit.name}/none")
+                        showAddElementDialog = false
+                    },
+                    onFolderAdd = {
+                        navController.navigate("${NCPScreen.FolderEdit.name}/none")
+                        showAddElementDialog = false
+                    },
+                    onDismissRequest = {
+                        showAddElementDialog = false
+                    }
                 )
             }
 
@@ -213,7 +230,7 @@ fun NextcloudPasswordsApp(
                             coroutineScope.launch {
                                 modalSheetState.hide()
                             }
-                            navController.navigate("${NCPScreen.Edit.name}/${passwordsViewModel.visiblePassword.value?.id ?: "none"}")
+                            navController.navigate("${NCPScreen.PasswordEdit.name}/${passwordsViewModel.visiblePassword.value?.id ?: "none"}")
                         },
                         modifier = Modifier.padding(bottom = 16.dp)
                     )

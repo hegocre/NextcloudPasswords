@@ -28,7 +28,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.FoldersApi
+import com.hegocre.nextcloudpasswords.data.folder.DeletedFolder
 import com.hegocre.nextcloudpasswords.data.folder.Folder
+import com.hegocre.nextcloudpasswords.data.folder.NewFolder
+import com.hegocre.nextcloudpasswords.data.folder.UpdatedFolder
 import com.hegocre.nextcloudpasswords.data.password.DeletedPassword
 import com.hegocre.nextcloudpasswords.data.password.NewPassword
 import com.hegocre.nextcloudpasswords.data.password.Password
@@ -130,6 +133,9 @@ fun NCPNavHost(
                             MixedLazyColumn(
                                 passwords = filteredPasswordList,
                                 onPasswordClick = onPasswordClick,
+                                onPasswordLongClick = {
+                                    navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
+                                }
                             )
                         }
                     }
@@ -160,6 +166,9 @@ fun NCPNavHost(
                             MixedLazyColumn(
                                 passwords = filteredFavoritePasswords,
                                 onPasswordClick = onPasswordClick,
+                                onPasswordLongClick = {
+                                    navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
+                                }
                             )
                         }
                     }
@@ -205,7 +214,13 @@ fun NCPNavHost(
                                 passwords = filteredPasswordsParentFolder,
                                 folders = filteredFoldersParentFolder,
                                 onPasswordClick = onPasswordClick,
+                                onPasswordLongClick = {
+                                    navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
+                                },
                                 onFolderClick = onFolderClick,
+                                onFolderLongClick = {
+                                    navController.navigate("${NCPScreen.FolderEdit.name}/${it.id}")
+                                }
                             )
                         }
                     }
@@ -262,7 +277,13 @@ fun NCPNavHost(
                                 passwords = filteredPasswordsSelectedFolder,
                                 folders = filteredFoldersSelectedFolder,
                                 onPasswordClick = onPasswordClick,
+                                onPasswordLongClick = {
+                                    navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
+                                },
                                 onFolderClick = onFolderClick,
+                                onFolderLongClick = {
+                                    navController.navigate("${NCPScreen.FolderEdit.name}/${it.id}")
+                                }
                             )
                         }
                     }
@@ -271,7 +292,7 @@ fun NCPNavHost(
         }
 
         composable(
-            route = "${NCPScreen.Edit.name}/{password_uuid}",
+            route = "${NCPScreen.PasswordEdit.name}/{password_uuid}",
             arguments = listOf(
                 navArgument("password_uuid") {
                     type = NavType.StringType
@@ -284,11 +305,11 @@ fun NCPNavHost(
             }
 
             val passwordUuid = entry.arguments?.getString("password_uuid")
-            val selectedPassword = remember(filteredPasswordList, passwordUuid) {
+            val selectedPassword = remember(passwordsDecryptionState.decryptedList, passwordUuid) {
                 if (passwordUuid == "none") {
                     null
                 } else {
-                    filteredPasswordList?.firstOrNull {
+                    passwordsDecryptionState.decryptedList?.firstOrNull {
                         it.id == passwordUuid
                     }
                 }
@@ -471,6 +492,155 @@ fun NCPNavHost(
                             },
                             isUpdating = isUpdating,
                             onGeneratePassword = passwordsViewModel::generatePassword
+                        )
+                    }
+                }
+            }
+        }
+
+        composable(
+            route = "${NCPScreen.FolderEdit.name}/{folder_uuid}",
+            arguments = listOf(
+                navArgument("folder_uuid") {
+                    type = NavType.StringType
+                }
+            )
+        ) { entry ->
+            BackHandler(enabled = isUpdating) {
+                // Block back gesture when updating to avoid data loss
+                return@BackHandler
+            }
+
+            val folderUuid = entry.arguments?.getString("folder_uuid")
+            val selectedFolder = remember(foldersDecryptionState.decryptedList, folderUuid) {
+                if (folderUuid == "none") {
+                    null
+                } else {
+                    foldersDecryptionState.decryptedList?.firstOrNull {
+                        it.id == folderUuid
+                    }
+                }
+            }
+            NCPNavHostComposable(
+                modalSheetState = modalSheetState,
+                searchVisibility = searchVisibility,
+                closeSearch = closeSearch
+            ) {
+                when {
+                    foldersDecryptionState.isLoading -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+                    }
+
+                    foldersDecryptionState.decryptedList != null -> {
+                        val editableFolderState = rememberEditableFolderState(selectedFolder)
+
+                        EditableFolderView(
+                            editableFolderState = editableFolderState,
+                            folders = foldersDecryptionState.decryptedList ?: listOf(),
+                            onSaveFolder = {
+                                if (selectedFolder == null) {
+                                    val newFolder = keychain?.let {
+                                        NewFolder(
+                                            label = editableFolderState.label.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            cseType = "CSEv1r1",
+                                            cseKey = it.current,
+                                            parent = editableFolderState.parent,
+                                            edited = 0,
+                                            hidden = false,
+                                            favorite = editableFolderState.favorite
+                                        )
+                                    } ?: NewFolder(
+                                        label = editableFolderState.label,
+                                        cseType = "none",
+                                        cseKey = "",
+                                        parent = editableFolderState.parent,
+                                        edited = 0,
+                                        hidden = false,
+                                        favorite = editableFolderState.favorite
+                                    )
+                                    coroutineScope.launch {
+                                        if (passwordsViewModel.createFolder(newFolder)
+                                                .await()
+                                        ) {
+                                            navController.navigateUp()
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                R.string.folder_saving_failed,
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                    }
+                                } else {
+                                    val updatedFolder = keychain?.let {
+                                        UpdatedFolder(
+                                            id = selectedFolder.id,
+                                            revision = selectedFolder.revision,
+                                            label = editableFolderState.label.encryptValue(
+                                                it.current,
+                                                it
+                                            ),
+                                            cseType = "CSEv1r1",
+                                            cseKey = it.current,
+                                            parent = editableFolderState.parent,
+                                            edited = if (editableFolderState.label == selectedFolder.label) selectedFolder.edited else 0,
+                                            hidden = selectedFolder.hidden,
+                                            favorite = editableFolderState.favorite
+                                        )
+                                    } ?: UpdatedFolder(
+                                        id = selectedFolder.id,
+                                        revision = selectedFolder.revision,
+                                        label = editableFolderState.label,
+                                        cseType = "none",
+                                        cseKey = "",
+                                        parent = editableFolderState.parent,
+                                        edited = if (editableFolderState.label == selectedFolder.label) selectedFolder.edited else 0,
+                                        hidden = selectedFolder.hidden,
+                                        favorite = editableFolderState.favorite
+                                    )
+                                    coroutineScope.launch {
+                                        if (passwordsViewModel.updateFolder(updatedFolder)
+                                                .await()
+                                        ) {
+                                            navController.navigateUp()
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                R.string.folder_saving_failed,
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                    }
+                                }
+                            },
+                            onDeleteFolder = if (selectedFolder == null) null
+                            else {
+                                {
+                                    val deletedFolder = DeletedFolder(
+                                        id = selectedFolder.id,
+                                        revision = selectedFolder.revision
+                                    )
+                                    coroutineScope.launch {
+                                        if (passwordsViewModel.deleteFolder(deletedFolder)
+                                                .await()
+                                        ) {
+                                            navController.navigateUp()
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                R.string.folder_deleting_failed,
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                    }
+                                }
+                            },
+                            isUpdating = isUpdating,
                         )
                     }
                 }

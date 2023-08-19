@@ -32,7 +32,7 @@
     <string name="black">Negre</string>
     <string name="app_theme">Tema de l\'aplicació</string>
     <string name="save">Desar</string>
-    <string name="edit">Editar</string>
+    <string name="edit_password">Editar contrasenya</string>
     <string name="label">Nom</string>
     <string name="username">Usuari</string>
     <string name="url">Lloc web</string>
@@ -75,4 +75,9 @@
     <string name="home">Inici</string>
     <string name="folder">Carpeta</string>
     <string name="select">Seleccionar</string>
+    <string name="create">Crear</string>
+    <string name="edit_folder">Editar carpeta</string>
+    <string name="folder_saving_failed">No s\'ha pogut desar la carpeta. Si us plau, intenteu-ho de nou</string>
+    <string name="folder_deleting_failed">No s\'ha pogut eliminar la carpeta. Si us plau, intenteu-ho de nou</string>
+    <string name="delete_folder">Eliminar carpeta</string>
 </resources>

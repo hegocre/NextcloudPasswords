@@ -32,7 +32,7 @@
     <string name="black">Negro</string>
     <string name="app_theme">Tema de la aplicación</string>
     <string name="save">Guardar</string>
-    <string name="edit">Editar</string>
+    <string name="edit_password">Editar contraseña</string>
     <string name="label">Nombre</string>
     <string name="username">Usuario</string>
     <string name="url">Sitio web</string>
@@ -75,4 +75,9 @@
     <string name="home">Inicio</string>
     <string name="folder">Carpeta</string>
     <string name="select">Seleccionar</string>
+    <string name="create">Crear</string>
+    <string name="edit_folder">Editar carpeta</string>
+    <string name="folder_saving_failed">No se ha podido guardar la carpeta. Por favor, inténtelo de nuevo</string>
+    <string name="folder_deleting_failed">No se ha podido eliminar la carpeta. Por favor, inténtelo de nuevo</string>
+    <string name="delete_folder">Eliminar carpeta</string>
 </resources>

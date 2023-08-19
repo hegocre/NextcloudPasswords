@@ -403,6 +403,52 @@ fun SelectFolderDialog(
     }
 }
 
+@Composable
+fun AddElementDialog(
+    onPasswordAdd: () -> Unit,
+    onFolderAdd: () -> Unit,
+    onDismissRequest: (() -> Unit)? = null
+) {
+    Dialog(
+        onDismissRequest = { onDismissRequest?.invoke() },
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            contentColor = contentColorFor(backgroundColor = MaterialTheme.colorScheme.surface),
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+        ) {
+            Column(modifier = Modifier.padding(vertical = 24.dp)) {
+                Text(
+                    text = stringResource(id = R.string.create),
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .padding(horizontal = 24.dp)
+                )
+
+                ListItem(
+                    headlineContent = {
+                        Text(text = stringResource(id = R.string.password))
+                    },
+                    modifier = Modifier
+                        .clickable(onClick = onPasswordAdd)
+                        .padding(horizontal = 8.dp)
+                )
+
+                ListItem(
+                    headlineContent = {
+                        Text(text = stringResource(id = R.string.folder))
+                    },
+                    modifier = Modifier
+                        .clickable(onClick = onFolderAdd)
+                        .padding(horizontal = 8.dp)
+                )
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 fun MasterPasswordDialogPreview() {
@@ -442,5 +488,13 @@ fun DeleteDialogPreview() {
 fun AddFieldDialogPreview() {
     NextcloudPasswordsTheme {
         AddCustomFieldDialog(onAddClick = { _, _ -> })
+    }
+}
+
+@Preview
+@Composable
+fun AddElementDialogPreview() {
+    NextcloudPasswordsTheme {
+        AddElementDialog({}, {})
     }
 }
