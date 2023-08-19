@@ -11,7 +11,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -194,10 +194,6 @@ fun NCPNavHost(
                         it.parent == FoldersApi.DEFAULT_FOLDER_UUID
                     }
                 }
-                SideEffect {
-                    passwordsViewModel.setVisibleFolder(foldersDecryptionState.decryptedList
-                        ?.find { it.id == FoldersApi.DEFAULT_FOLDER_UUID })
-                }
                 when {
                     foldersDecryptionState.isLoading || passwordsDecryptionState.isLoading -> {
                         Box(modifier = Modifier.fillMaxSize()) {
@@ -262,10 +258,15 @@ fun NCPNavHost(
                         }
                     }
                     passwordsDecryptionState.decryptedList != null -> {
-                        SideEffect {
+                        DisposableEffect(folderUuid) {
                             if (foldersDecryptionState.decryptedList?.isEmpty() == false) {
                                 passwordsViewModel.setVisibleFolder(foldersDecryptionState.decryptedList
                                     ?.firstOrNull { it.id == folderUuid })
+                            }
+                            onDispose {
+                                if (passwordsViewModel.visibleFolder.value?.id == folderUuid) {
+                                    passwordsViewModel.setVisibleFolder(null)
+                                }
                             }
                         }
 
@@ -327,7 +328,12 @@ fun NCPNavHost(
                     }
 
                     passwordsDecryptionState.decryptedList != null && foldersDecryptionState.decryptedList != null -> {
-                        val editablePasswordState = rememberEditablePasswordState(selectedPassword)
+                        val editablePasswordState =
+                            rememberEditablePasswordState(selectedPassword).apply {
+                                if (selectedPassword == null) {
+                                    folder = passwordsViewModel.visibleFolder.value?.id ?: folder
+                                }
+                            }
 
                         EditablePasswordView(
                             editablePasswordState = editablePasswordState,
@@ -534,7 +540,12 @@ fun NCPNavHost(
                     }
 
                     foldersDecryptionState.decryptedList != null -> {
-                        val editableFolderState = rememberEditableFolderState(selectedFolder)
+                        val editableFolderState =
+                            rememberEditableFolderState(selectedFolder).apply {
+                                if (selectedFolder == null) {
+                                    parent = passwordsViewModel.visibleFolder.value?.id ?: parent
+                                }
+                            }
 
                         EditableFolderView(
                             editableFolderState = editableFolderState,
