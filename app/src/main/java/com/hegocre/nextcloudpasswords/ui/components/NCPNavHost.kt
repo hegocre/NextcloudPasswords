@@ -11,7 +11,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -248,10 +247,10 @@ fun NCPNavHost(
                         }
                     }
                     passwordsDecryptionState.decryptedList != null -> {
-                        LaunchedEffect(folderUuid, passwordsDecryptionState) {
+                        SideEffect {
                             if (foldersDecryptionState.decryptedList?.isEmpty() == false) {
                                 passwordsViewModel.setVisibleFolder(foldersDecryptionState.decryptedList
-                                    ?.find { it.id == folderUuid })
+                                    ?.firstOrNull { it.id == folderUuid })
                             }
                         }
 

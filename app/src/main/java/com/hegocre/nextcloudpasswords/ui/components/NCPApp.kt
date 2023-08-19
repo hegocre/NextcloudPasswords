@@ -93,13 +93,12 @@ fun NextcloudPasswordsApp(
                             NCPScreen.Passwords, NCPScreen.Favorites -> stringResource(currentScreen.title)
                             NCPScreen.Folders -> {
                                 passwordsViewModel.visibleFolder.value?.let {
-                                    if (it.id == FoldersApi.DEFAULT_FOLDER_UUID) stringResource(
-                                        currentScreen.title
-                                    )
-                                    else it.label
+                                    if (it.id == FoldersApi.DEFAULT_FOLDER_UUID)
+                                        stringResource(currentScreen.title)
+                                    else
+                                        it.label
                                 } ?: stringResource(currentScreen.title)
                             }
-
                             else -> ""
                         },
                         searchQuery = searchQuery,
