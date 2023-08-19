@@ -305,11 +305,17 @@ fun SelectFolderDialog(
     onSelectClick: (String) -> Unit,
     onDismissRequest: (() -> Unit)? = null
 ) {
-    val (selectedFolder, setSelectedFolder) = remember { mutableStateOf(currentFolder) }
-    val filteredFolders = remember(folders, selectedFolder) {
+    val (selectedFolderId, setSelectedFolderId) = remember { mutableStateOf(currentFolder) }
+    val filteredFolders = remember(folders, selectedFolderId) {
         folders.filter {
-            it.parent == selectedFolder
+            it.parent == selectedFolderId
         }
+    }
+    val selectedFolder = remember(folders, selectedFolderId) {
+        folders.firstOrNull { it.id == selectedFolderId }
+    }
+    val parentFolder = remember(selectedFolder) {
+        folders.firstOrNull { it.id == selectedFolder?.parent }
     }
 
     Dialog(
@@ -321,16 +327,17 @@ fun SelectFolderDialog(
             shape = MaterialTheme.shapes.extraLarge,
             tonalElevation = 6.dp,
         ) {
-            Column(modifier = Modifier.padding(all = 24.dp)) {
+            Column(modifier = Modifier.padding(vertical = 24.dp)) {
                 Text(
-                    text = if (selectedFolder == FoldersApi.DEFAULT_FOLDER_UUID) {
+                    text = if (selectedFolderId == FoldersApi.DEFAULT_FOLDER_UUID) {
                         stringResource(id = R.string.home)
                     } else {
-                        folders.firstOrNull { it.id == selectedFolder }?.label
-                            ?: stringResource(id = R.string.home)
+                        selectedFolder?.label ?: stringResource(id = R.string.home)
                     },
                     style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .padding(horizontal = 24.dp)
                 )
 
                 Column(
@@ -340,8 +347,8 @@ fun SelectFolderDialog(
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        if (selectedFolder != FoldersApi.DEFAULT_FOLDER_UUID) {
-                            item(key = "parent_folder") {
+                        if (selectedFolderId != FoldersApi.DEFAULT_FOLDER_UUID) {
+                            item(key = "parent_${parentFolder?.id ?: FoldersApi.DEFAULT_FOLDER_UUID}") {
                                 ListItem(
                                     leadingContent = {
                                         Image(
@@ -361,9 +368,8 @@ fun SelectFolderDialog(
                                         Text(text = "..")
                                     },
                                     modifier = Modifier.clickable {
-                                        setSelectedFolder(
-                                            folders.firstOrNull { it.id == selectedFolder }?.parent
-                                                ?: FoldersApi.DEFAULT_FOLDER_UUID
+                                        setSelectedFolderId(
+                                            parentFolder?.id ?: FoldersApi.DEFAULT_FOLDER_UUID
                                         )
                                     }
                                 )
@@ -374,8 +380,9 @@ fun SelectFolderDialog(
                             FolderRow(
                                 folder = folder,
                                 onFolderClick = {
-                                    setSelectedFolder(folder.id)
+                                    setSelectedFolderId(folder.id)
                                 },
+                                modifier = Modifier
                             )
                         }
                     }
@@ -383,11 +390,11 @@ fun SelectFolderDialog(
 
                 TextButton(
                     onClick = {
-                        onSelectClick(selectedFolder)
+                        onSelectClick(selectedFolderId)
                     },
                     modifier = Modifier
                         .align(Alignment.End)
-                        .padding(horizontal = 0.dp)
+                        .padding(horizontal = 24.dp)
                 ) {
                     Text(text = stringResource(R.string.select))
                 }
