@@ -12,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -202,6 +203,11 @@ fun NCPNavHost(
                     }
                     foldersDecryptionState.decryptedList != null
                             && passwordsDecryptionState.decryptedList != null -> {
+
+                        LaunchedEffect(Unit) {
+                            passwordsViewModel.setVisibleFolder(null)
+                        }
+
                         RefreshListBody(
                             isRefreshing = isRefreshing,
                             onRefresh = { passwordsViewModel.sync() },
