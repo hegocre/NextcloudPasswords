@@ -1,6 +1,8 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
 import android.widget.Toast
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -13,6 +15,8 @@ import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Delete
@@ -26,11 +30,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
@@ -39,7 +47,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -47,6 +57,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
+import com.hegocre.nextcloudpasswords.api.FoldersApi
+import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.ui.theme.Amber200
@@ -68,6 +80,7 @@ class EditablePasswordState(originalPassword: Password?) {
     var username by mutableStateOf(originalPassword?.username ?: "")
     var url by mutableStateOf(originalPassword?.url ?: "")
     var notes by mutableStateOf(originalPassword?.notes ?: "")
+    var folder by mutableStateOf(originalPassword?.folder ?: FoldersApi.DEFAULT_FOLDER_UUID)
     var customFields =
         Json.decodeFromString<List<CustomField>>(originalPassword?.customFields ?: "[]")
             .toMutableStateList()
@@ -100,8 +113,8 @@ class EditablePasswordState(originalPassword: Password?) {
         val Saver: Saver<EditablePasswordState, *> = listSaver(
             save = {
                 listOf(
-                    it.password, it.label, it.username, it.url,
-                    it.notes, Json.encodeToString(it.customFields.toList()), it.favorite.toString()
+                    it.password, it.label, it.username, it.url, it.notes,
+                    it.folder, Json.encodeToString(it.customFields.toList()), it.favorite.toString()
                 )
             },
             restore = {
@@ -111,6 +124,7 @@ class EditablePasswordState(originalPassword: Password?) {
                     username = it[2]
                     url = it[3]
                     notes = it[4]
+                    folder = it[5]
                     customFields =
                         Json.decodeFromString<List<CustomField>>(it[5]).toMutableStateList()
                     favorite = it[6].toBooleanStrictOrNull() ?: false
@@ -129,6 +143,7 @@ fun rememberEditablePasswordState(password: Password? = null): EditablePasswordS
 @Composable
 fun EditablePasswordView(
     editablePasswordState: EditablePasswordState,
+    folders: List<Folder>,
     isUpdating: Boolean,
     onGeneratePassword: KSuspendFunction0<Deferred<String?>>?,
     onSavePassword: () -> Unit,
@@ -143,21 +158,23 @@ fun EditablePasswordView(
     var showAddCustomFieldDialog by rememberSaveable {
         mutableStateOf(false)
     }
+    var showFolderDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
     var showFieldErrors by rememberSaveable {
         mutableStateOf(false)
     }
 
 
-    LazyColumn(
-        modifier = Modifier
-            .padding(horizontal = 16.dp),
-    ) {
+    LazyColumn {
         item(key = "top_spacer") { Spacer(modifier = Modifier.width(16.dp)) }
 
         item(key = "favorite_button") {
             Button(
                 onClick = { editablePasswordState.favorite = !editablePasswordState.favorite },
-                modifier = Modifier.padding(bottom = 16.dp),
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp),
                 colors = if (editablePasswordState.favorite) ButtonDefaults.filledTonalButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurface,
                     containerColor = (if (MaterialTheme.colorScheme.isLight()) Amber500 else Amber200)
@@ -188,7 +205,8 @@ fun EditablePasswordView(
                 maxLines = 1,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp),
                 isError = showFieldErrors && editablePasswordState.label.isBlank(),
                 supportingText = if (showFieldErrors && editablePasswordState.label.isBlank()) {
                     {
@@ -208,6 +226,7 @@ fun EditablePasswordView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp)
             )
         }
 
@@ -276,7 +295,8 @@ fun EditablePasswordView(
                     VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp),
                 isError = showFieldErrors && editablePasswordState.password.isBlank(),
                 supportingText = if (showFieldErrors && editablePasswordState.password.isBlank()) {
                     {
@@ -296,7 +316,8 @@ fun EditablePasswordView(
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp),
                 isError = showFieldErrors && !editablePasswordState.url.isValidURL(),
                 supportingText = if (showFieldErrors && !editablePasswordState.url.isValidURL()) {
                     {
@@ -306,9 +327,47 @@ fun EditablePasswordView(
             )
         }
 
+        item(key = "password_folder") {
+            CompositionLocalProvider(
+                LocalTextSelectionColors provides TextSelectionColors(
+                    Color.Transparent,
+                    Color.Transparent
+                ),
+                LocalTextInputService provides null
+            ) {
+                OutlinedTextField(
+                    value = if (editablePasswordState.folder == FoldersApi.DEFAULT_FOLDER_UUID) {
+                        stringResource(id = R.string.home)
+                    } else {
+                        folders.firstOrNull { it.id == editablePasswordState.folder }?.label
+                            ?: stringResource(id = R.string.home)
+                    },
+                    onValueChange = { },
+                    label = { Text(text = stringResource(id = R.string.folder)) },
+                    singleLine = true,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                        .padding(horizontal = 16.dp),
+                    interactionSource = remember { MutableInteractionSource() }
+                        .also { mutableInteractionSource ->
+                            LaunchedEffect(key1 = mutableInteractionSource) {
+                                mutableInteractionSource.interactions.collect {
+                                    if (it is PressInteraction.Release) {
+                                        showFolderDialog = true
+                                    }
+                                }
+                            }
+                        },
+                    colors = OutlinedTextFieldDefaults.colors(cursorColor = Color.Unspecified)
+                )
+            }
+        }
+
         itemsIndexed(
             items = editablePasswordState.customFields,
-            key = { _, field -> "password_${field.label}" }) { index, customField ->
+            key = { _, field -> "password_custom_${field.label}" }) { index, customField ->
             var showValue by rememberSaveable {
                 mutableStateOf(customField.type != CustomField.TYPE_SECRET)
             }
@@ -355,7 +414,8 @@ fun EditablePasswordView(
                     VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp),
                 isError = when (customField.type) {
                     CustomField.TYPE_URL -> showFieldErrors && !customField.value.isValidURL()
                     CustomField.TYPE_EMAIL -> showFieldErrors && !customField.value.isValidEmail()
@@ -392,6 +452,7 @@ fun EditablePasswordView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 24.dp)
+                    .padding(horizontal = 16.dp)
             )
         }
 
@@ -405,6 +466,7 @@ fun EditablePasswordView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
+                    .padding(horizontal = 16.dp)
             )
         }
 
@@ -429,7 +491,9 @@ fun EditablePasswordView(
                     }
                 },
                 enabled = !isUpdating,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
             )
         }
 
@@ -448,6 +512,7 @@ fun EditablePasswordView(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp)
+                            .padding(horizontal = 16.dp)
                     )
                 }
             }
@@ -494,6 +559,20 @@ fun EditablePasswordView(
             }
         )
     }
+
+    if (showFolderDialog) {
+        SelectFolderDialog(
+            folders = folders,
+            currentFolder = editablePasswordState.folder,
+            onSelectClick = { folder ->
+                editablePasswordState.folder = folder
+                showFolderDialog = false
+            },
+            onDismissRequest = {
+                showFolderDialog = false
+            }
+        )
+    }
 }
 
 @Preview
@@ -518,6 +597,7 @@ fun PasswordEditPreview() {
                         )
                     )
                 },
+                folders = listOf(),
                 isUpdating = false,
                 onSavePassword = { },
                 onDeletePassword = { },

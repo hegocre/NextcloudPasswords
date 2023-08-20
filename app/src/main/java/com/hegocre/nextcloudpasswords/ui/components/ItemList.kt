@@ -4,7 +4,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -79,13 +79,14 @@ fun RefreshListBody(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MixedLazyColumn(
     passwords: List<Password>? = null,
     folders: List<Folder>? = null,
     onPasswordClick: ((Password) -> Unit)? = null,
+    onPasswordLongClick: ((Password) -> Unit)? = null,
     onFolderClick: ((Folder) -> Unit)? = null,
+    onFolderLongClick: ((Folder) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val shouldShowIcon by PreferencesManager.getInstance(context).getShowIcons()
@@ -98,7 +99,7 @@ fun MixedLazyColumn(
                 FolderRow(
                     folder = folder,
                     onFolderClick = onFolderClick,
-                    modifier = Modifier.animateItemPlacement()
+                    onFolderLongClick = onFolderLongClick
                 )
             }
         }
@@ -108,22 +109,32 @@ fun MixedLazyColumn(
                     password = folder,
                     shouldShowIcon = shouldShowIcon,
                     onPasswordClick = onPasswordClick,
-                    modifier = Modifier.animateItemPlacement()
+                    onPasswordLongClick = onPasswordLongClick
                 )
             }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PasswordRow(
     password: Password,
     modifier: Modifier = Modifier,
     shouldShowIcon: Boolean = false,
-    onPasswordClick: ((Password) -> Unit)? = null
+    onPasswordClick: ((Password) -> Unit)? = null,
+    onPasswordLongClick: ((Password) -> Unit)? = null,
 ) {
     ListItem(
-        modifier = modifier.clickable { onPasswordClick?.invoke(password) },
+        modifier = modifier
+            .combinedClickable(
+                onClick = {
+                    onPasswordClick?.invoke(password)
+                },
+                onLongClick = {
+                    onPasswordLongClick?.invoke(password)
+                }
+            ),
         headlineContent = {
             Text(
                 text = password.label,
@@ -208,11 +219,13 @@ fun PasswordRow(
         )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FolderRow(
     folder: Folder,
     modifier: Modifier = Modifier,
-    onFolderClick: ((Folder) -> Unit)? = null
+    onFolderClick: ((Folder) -> Unit)? = null,
+    onFolderLongClick: ((Folder) -> Unit)? = null,
 ) {
     ListItem(
         leadingContent = {
@@ -228,7 +241,15 @@ fun FolderRow(
         headlineContent = {
             Text(text = folder.label)
         },
-        modifier = modifier.clickable { onFolderClick?.invoke(folder) }
+        modifier = modifier
+            .combinedClickable(
+                onClick = {
+                    onFolderClick?.invoke(folder)
+                },
+                onLongClick = {
+                    onFolderLongClick?.invoke(folder)
+                }
+            )
     )
 }
 

@@ -31,7 +31,7 @@
     <string name="black">Black</string>
     <string name="app_theme">App theme</string>
     <string name="save">Save</string>
-    <string name="edit">Edit</string>
+    <string name="edit_password">Edit password</string>
     <string name="label">Label</string>
     <string name="username">Username</string>
     <string name="url">URL</string>
@@ -71,4 +71,13 @@
     <string name="generate_password">Generate password</string>
     <string name="copy_value">Copy value</string>
     <string name="more_options">More options</string>
+    <string name="home">Home</string>
+    <string name="folder">Folder</string>
+    <string name="select">Select</string>
+    <string name="create">Create</string>
+    <string name="edit_folder">Edit folder</string>
+    <string name="folder_saving_failed">Folder saving has failed. Please, try again</string>
+    <string name="folder_deleting_failed">Folder deleting has failed. Please, try again</string>
+    <string name="delete_folder">Delete folder</string>
+    <string name="parent_folder">Parent folder</string>
 </resources>

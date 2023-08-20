@@ -1,11 +1,15 @@
 package com.hegocre.nextcloudpasswords.api
 
+import com.hegocre.nextcloudpasswords.data.folder.DeletedFolder
 import com.hegocre.nextcloudpasswords.data.folder.Folder
+import com.hegocre.nextcloudpasswords.data.folder.NewFolder
+import com.hegocre.nextcloudpasswords.data.folder.UpdatedFolder
 import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.SocketTimeoutException
 import javax.net.ssl.SSLHandshakeException
@@ -59,8 +63,145 @@ class FoldersApi private constructor(private var server: Server) {
         }
     }
 
+    /**
+     * Sends a request to the api to create a new folder. If the user uses CSE, the
+     * folder needs to be encrypted.
+     *
+     * @param newFolder The [NewFolder] object of the created folder.
+     * @param sessionCode Code of the current session, only needed if CSE enabled.
+     * @return A result if success, or an error code otherwise
+     */
+    suspend fun create(
+        newFolder: NewFolder,
+        sessionCode: String? = null
+    ): Result<Unit> {
+        return try {
+            val apiResponse = try {
+                withContext(Dispatchers.IO) {
+                    OkHttpRequest.getInstance().post(
+                        sUrl = server.url + CREATE_URL,
+                        sessionCode = sessionCode,
+                        body = Json.encodeToString(newFolder),
+                        mediaType = OkHttpRequest.JSON,
+                        username = server.username,
+                        password = server.password
+                    )
+                }
+            } catch (ex: SSLHandshakeException) {
+                return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+            }
+
+            val code = apiResponse.code
+            withContext(Dispatchers.IO) {
+                apiResponse.close()
+            }
+
+            if (code != 201) {
+                return Result.Error(Error.API_BAD_RESPONSE)
+            }
+
+            withContext(Dispatchers.Default) {
+                Result.Success(Unit)
+            }
+        } catch (e: SocketTimeoutException) {
+            Result.Error(Error.API_TIMEOUT)
+        }
+    }
+
+    /**
+     * Sends a request to the api to update a folder. If the user uses CSE, the
+     * folder needs to be encrypted.
+     *
+     * @param updatedFolder The [UpdatedFolder] object of the edited folder.
+     * @param sessionCode Code of the current session, only needed if CSE enabled.
+     * @return A result if success, or an error code otherwise
+     */
+    suspend fun update(
+        updatedFolder: UpdatedFolder,
+        sessionCode: String? = null
+    ): Result<Unit> {
+        return try {
+            val apiResponse = try {
+                withContext(Dispatchers.IO) {
+                    OkHttpRequest.getInstance().patch(
+                        sUrl = server.url + UPDATE_URL,
+                        sessionCode = sessionCode,
+                        body = Json.encodeToString(updatedFolder),
+                        mediaType = OkHttpRequest.JSON,
+                        username = server.username,
+                        password = server.password
+                    )
+                }
+            } catch (ex: SSLHandshakeException) {
+                return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+            }
+
+            val code = apiResponse.code
+            withContext(Dispatchers.IO) {
+                apiResponse.close()
+            }
+
+            if (code != 200) {
+                return Result.Error(Error.API_BAD_RESPONSE)
+            }
+
+            withContext(Dispatchers.Default) {
+                Result.Success(Unit)
+            }
+        } catch (e: SocketTimeoutException) {
+            Result.Error(Error.API_TIMEOUT)
+        }
+    }
+
+    /**
+     * Sends a request to the api to delete a folder.
+     *
+     * @param deletedFolder The [DeletedFolder] object of the folder to be deleted.
+     * @param sessionCode Code of the current session, only needed if CSE enabled.
+     * @return A result if success, or an error code otherwise
+     */
+    suspend fun delete(
+        deletedFolder: DeletedFolder,
+        sessionCode: String? = null
+    ): Result<Unit> {
+        return try {
+            val apiResponse = try {
+                withContext(Dispatchers.IO) {
+                    OkHttpRequest.getInstance().delete(
+                        sUrl = server.url + DELETE_URL,
+                        sessionCode = sessionCode,
+                        body = Json.encodeToString(deletedFolder),
+                        mediaType = OkHttpRequest.JSON,
+                        username = server.username,
+                        password = server.password
+                    )
+                }
+            } catch (ex: SSLHandshakeException) {
+                return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+            }
+
+            val code = apiResponse.code
+            withContext(Dispatchers.IO) {
+                apiResponse.close()
+            }
+
+            if (code != 200) {
+                return Result.Error(Error.API_BAD_RESPONSE)
+            }
+
+            withContext(Dispatchers.Default) {
+                Result.Success(Unit)
+            }
+        } catch (e: SocketTimeoutException) {
+            Result.Error(Error.API_TIMEOUT)
+        }
+    }
+
     companion object {
         private const val LIST_URL = "/index.php/apps/passwords/api/1.0/folder/list"
+        private const val CREATE_URL = "/index.php/apps/passwords/api/1.0/folder/create"
+        private const val UPDATE_URL = "/index.php/apps/passwords/api/1.0/folder/update"
+        private const val DELETE_URL = "/index.php/apps/passwords/api/1.0/folder/delete"
         const val DEFAULT_FOLDER_UUID = "00000000-0000-0000-0000-000000000000"
 
         private var instance: FoldersApi? = null

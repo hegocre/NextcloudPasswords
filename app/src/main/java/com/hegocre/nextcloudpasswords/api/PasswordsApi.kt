@@ -1,6 +1,5 @@
 package com.hegocre.nextcloudpasswords.api
 
-import android.util.Log
 import com.hegocre.nextcloudpasswords.data.password.DeletedPassword
 import com.hegocre.nextcloudpasswords.data.password.NewPassword
 import com.hegocre.nextcloudpasswords.data.password.Password
@@ -55,7 +54,6 @@ class PasswordsApi private constructor(private var server: Server) {
             }
 
             if (code != 200 || body == null) {
-                Log.d("PASSWORDS API", "Code response $code")
                 return Result.Error(Error.API_BAD_RESPONSE)
             }
 
@@ -96,13 +94,11 @@ class PasswordsApi private constructor(private var server: Server) {
             }
 
             val code = apiResponse.code
-            val body = apiResponse.body?.string()
             withContext(Dispatchers.IO) {
                 apiResponse.close()
             }
 
             if (code != 201) {
-                Log.e("Create code", "$code: $body")
                 return Result.Error(Error.API_BAD_RESPONSE)
             }
 
@@ -143,13 +139,11 @@ class PasswordsApi private constructor(private var server: Server) {
             }
 
             val code = apiResponse.code
-            val body = apiResponse.body?.string()
             withContext(Dispatchers.IO) {
                 apiResponse.close()
             }
 
             if (code != 200) {
-                Log.e("Update code", "$code: $body")
                 return Result.Error(Error.API_BAD_RESPONSE)
             }
 
@@ -189,13 +183,11 @@ class PasswordsApi private constructor(private var server: Server) {
             }
 
             val code = apiResponse.code
-            val body = apiResponse.body?.string()
             withContext(Dispatchers.IO) {
                 apiResponse.close()
             }
 
             if (code != 200) {
-                Log.e("Update code", "$code: $body")
                 return Result.Error(Error.API_BAD_RESPONSE)
             }
 

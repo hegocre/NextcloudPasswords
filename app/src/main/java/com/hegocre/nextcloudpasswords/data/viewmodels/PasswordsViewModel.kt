@@ -12,8 +12,11 @@ import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeCl
 import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyInvalidException
 import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyNeededException
 import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengePasswordException
+import com.hegocre.nextcloudpasswords.data.folder.DeletedFolder
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.folder.FolderController
+import com.hegocre.nextcloudpasswords.data.folder.NewFolder
+import com.hegocre.nextcloudpasswords.data.folder.UpdatedFolder
 import com.hegocre.nextcloudpasswords.data.password.DeletedPassword
 import com.hegocre.nextcloudpasswords.data.password.NewPassword
 import com.hegocre.nextcloudpasswords.data.password.Password
@@ -183,6 +186,45 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
     suspend fun generatePassword(): Deferred<String?> {
         return viewModelScope.async {
             return@async apiController.generatePassword()
+        }
+    }
+
+    suspend fun createFolder(newFolder: NewFolder): Deferred<Boolean> {
+        return viewModelScope.async {
+            _isUpdating.value = true
+            if (!apiController.createFolder(newFolder)) {
+                _isUpdating.value = false
+                return@async false
+            }
+            sync()
+            _isUpdating.value = false
+            true
+        }
+    }
+
+    suspend fun updateFolder(updatedFolder: UpdatedFolder): Deferred<Boolean> {
+        return viewModelScope.async {
+            _isUpdating.value = true
+            if (!apiController.updateFolder(updatedFolder)) {
+                _isUpdating.value = false
+                return@async false
+            }
+            sync()
+            _isUpdating.value = false
+            true
+        }
+    }
+
+    suspend fun deleteFolder(deletedFolder: DeletedFolder): Deferred<Boolean> {
+        return viewModelScope.async {
+            _isUpdating.value = true
+            if (!apiController.deleteFolder(deletedFolder)) {
+                _isUpdating.value = false
+                return@async false
+            }
+            sync()
+            _isUpdating.value = false
+            true
         }
     }
 

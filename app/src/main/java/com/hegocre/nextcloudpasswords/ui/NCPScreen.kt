@@ -33,8 +33,14 @@ enum class NCPScreen(
         selectedIcon = Icons.Filled.Folder,
         unselectedIcon = Icons.Outlined.Folder
     ),
-    Edit(
-        title = R.string.edit,
+    PasswordEdit(
+        title = R.string.edit_password,
+        selectedIcon = Icons.Default.Edit,
+        unselectedIcon = Icons.Default.Edit,
+        hidden = true
+    ),
+    FolderEdit(
+        title = R.string.edit_folder,
         selectedIcon = Icons.Default.Edit,
         unselectedIcon = Icons.Default.Edit,
         hidden = true
@@ -46,7 +52,8 @@ enum class NCPScreen(
                 Passwords.name -> Passwords
                 Favorites.name -> Favorites
                 Folders.name -> Folders
-                Edit.name -> Edit
+                PasswordEdit.name -> PasswordEdit
+                FolderEdit.name -> FolderEdit
                 null -> Passwords
                 else -> throw IllegalArgumentException("Route $route is not recognized.")
             }
