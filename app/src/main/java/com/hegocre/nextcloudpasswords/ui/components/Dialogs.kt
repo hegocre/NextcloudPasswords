@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
@@ -34,6 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +43,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
@@ -67,6 +71,8 @@ fun MasterPasswordDialog(
     errorText: String = "",
     onDismissRequest: (() -> Unit)? = null
 ) {
+    val requester = FocusRequester()
+
     var showPassword by rememberSaveable { mutableStateOf(false) }
     Dialog(
         onDismissRequest = { onDismissRequest?.invoke() },
@@ -94,7 +100,8 @@ fun MasterPasswordDialog(
                             )
                         }
                     },
-                    errorText = errorText
+                    errorText = errorText,
+                    modifier = Modifier.focusRequester(requester)
                 )
 
                 CompositionLocalProvider(
@@ -128,6 +135,10 @@ fun MasterPasswordDialog(
                 }
             }
         }
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        requester.requestFocus()
     }
 }
 
@@ -449,6 +460,90 @@ fun AddElementDialog(
     }
 }
 
+@Composable
+fun InputPasscodeDialog(
+    title: String,
+    onInputPasscode: (String) -> Unit,
+    onDismissRequest: (() -> Unit)? = null
+) {
+    val requester = FocusRequester()
+
+    var showPasscode by rememberSaveable { mutableStateOf(false) }
+    val (passcode, setPasscode) = remember { mutableStateOf("") }
+
+    var showEmptyError by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    Dialog(
+        onDismissRequest = { onDismissRequest?.invoke() },
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            contentColor = contentColorFor(backgroundColor = MaterialTheme.colorScheme.surface),
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+        ) {
+            Column(modifier = Modifier.padding(all = 24.dp)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                OutlinedTextField(
+                    modifier = Modifier
+                        .padding(bottom = 16.dp, top = 8.dp)
+                        .focusRequester(requester),
+                    value = passcode,
+                    onValueChange = { newPasscode ->
+                        if (newPasscode.length <= 4) {
+                            setPasscode(newPasscode)
+                        }
+                    },
+                    singleLine = true,
+                    maxLines = 1,
+                    label = { Text(text = stringResource(id = R.string.passcode)) },
+                    isError = showEmptyError && passcode.isBlank(),
+                    supportingText = { Text(text = "${passcode.length}/4") },
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                    trailingIcon = {
+                        IconButton(onClick = { showPasscode = !showPasscode }) {
+                            Icon(
+                                imageVector = if (showPasscode)
+                                    Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                contentDescription = stringResource(R.string.show_password)
+                            )
+                        }
+                    },
+                    visualTransformation = if (showPasscode)
+                        VisualTransformation.None else PasswordVisualTransformation(),
+                )
+
+
+                TextButton(
+                    onClick = {
+                        if (passcode.length != 4 || passcode.toIntOrNull() == null) {
+                            showEmptyError = true
+                        } else {
+                            onInputPasscode(passcode)
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(horizontal = 0.dp)
+                ) {
+                    Text(text = stringResource(android.R.string.ok))
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        requester.requestFocus()
+    }
+}
+
 @Preview
 @Composable
 fun MasterPasswordDialogPreview() {
@@ -496,5 +591,13 @@ fun AddFieldDialogPreview() {
 fun AddElementDialogPreview() {
     NextcloudPasswordsTheme {
         AddElementDialog({}, {})
+    }
+}
+
+@Preview
+@Composable
+fun InputPasscodePreview() {
+    NextcloudPasswordsTheme {
+        InputPasscodeDialog(title = "Input passcode", onInputPasscode = {})
     }
 }

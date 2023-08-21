@@ -6,8 +6,11 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.view.autofill.AutofillManager
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -29,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -115,6 +119,127 @@ fun NCPSettingsScreen(
                         title = { Text(stringResource(R.string.show_icons_preference_title)) },
                         subtitle = { Text(stringResource(R.string.show_icons_preference_subtitle)) }
                     )
+                }
+
+                PreferencesCategory(title = { Text(text = stringResource(id = R.string.security)) }) {
+                    val hasAppLock by PreferencesManager.getInstance(context).getHasAppLock()
+                        .collectAsState(false)
+                    val hasBiometricAppLock by PreferencesManager.getInstance(context)
+                        .getHasBiometricAppLock().collectAsState(false)
+                    val canUseBiometrics = remember {
+                        BiometricManager.from(context)
+                            .canAuthenticate(BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
+                    }
+
+                    var showCreatePasscodeDialog by rememberSaveable {
+                        mutableStateOf(false)
+                    }
+                    var showConfirmPasscodeDialog by rememberSaveable {
+                        mutableStateOf(false)
+                    }
+                    var showDeletePasscodeDialog by rememberSaveable {
+                        mutableStateOf(false)
+                    }
+                    var firstPasscode by rememberSaveable {
+                        mutableStateOf("")
+                    }
+
+                    SwitchPreference(
+                        checked = hasAppLock,
+                        onCheckedChange = { enabled ->
+                            if (enabled) {
+                                showCreatePasscodeDialog = true
+                            } else {
+                                showDeletePasscodeDialog = true
+                            }
+                        },
+                        title = { Text(text = stringResource(id = R.string.app_lock_settings_title)) },
+                        subtitle = { Text(text = stringResource(id = R.string.app_lock_settings_subtitle)) }
+                    )
+
+                    if (hasAppLock && canUseBiometrics) {
+                        SwitchPreference(
+                            checked = hasBiometricAppLock,
+                            onCheckedChange = { enabled ->
+                                scope.launch {
+                                    PreferencesManager.getInstance(context)
+                                        .setHasBiometricAppLock(enabled)
+                                }
+                            },
+                            title = { Text(text = stringResource(id = R.string.biometric_unlock_settings_title)) },
+                            subtitle = { Text(text = stringResource(id = R.string.biometric_unlock_settings_subtitle)) }
+                        )
+                    }
+
+                    if (showCreatePasscodeDialog) {
+                        InputPasscodeDialog(
+                            title = stringResource(id = R.string.input_passcode),
+                            onInputPasscode = {
+                                firstPasscode = it
+                                showCreatePasscodeDialog = false
+                                showConfirmPasscodeDialog = true
+                            },
+                            onDismissRequest = {
+                                showCreatePasscodeDialog = false
+                            }
+                        )
+                    }
+
+                    if (showConfirmPasscodeDialog) {
+                        InputPasscodeDialog(
+                            title = stringResource(id = R.string.confirm_passcode),
+                            onInputPasscode = { secondPasscode ->
+                                if (firstPasscode != secondPasscode) {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.passcodes_dont_match,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                } else {
+                                    scope.launch {
+                                        with(PreferencesManager.getInstance(context)) {
+                                            setAppLockPasscode(secondPasscode)
+                                            setHasAppLock(true)
+                                        }
+                                    }
+                                }
+                                showConfirmPasscodeDialog = false
+                            },
+                            onDismissRequest = {
+                                showConfirmPasscodeDialog = false
+                                firstPasscode = ""
+                            }
+                        )
+                    }
+
+                    if (showDeletePasscodeDialog) {
+                        InputPasscodeDialog(
+                            title = stringResource(id = R.string.input_passcode),
+                            onInputPasscode = { passcode ->
+                                scope.launch {
+                                    with(PreferencesManager.getInstance(context)) {
+                                        val currentPasscode = getAppLockPasscode()
+
+                                        if (currentPasscode == passcode) {
+                                            setHasAppLock(false)
+                                            setAppLockPasscode(null)
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                R.string.incorrect_code,
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+
+                                    }
+                                }
+                                showDeletePasscodeDialog = false
+                            },
+                            onDismissRequest = {
+                                showDeletePasscodeDialog = false
+                            }
+                        )
+                    }
                 }
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

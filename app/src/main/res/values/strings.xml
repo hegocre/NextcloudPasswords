@@ -80,4 +80,15 @@
     <string name="folder_deleting_failed">Folder deleting has failed. Please, try again</string>
     <string name="delete_folder">Delete folder</string>
     <string name="parent_folder">Parent folder</string>
+    <string name="security">Security</string>
+    <string name="app_lock_settings_title">App lock</string>
+    <string name="app_lock_settings_subtitle">Lock the app with a passcode</string>
+    <string name="biometric_unlock_settings_title">Biometric unlock</string>
+    <string name="biometric_unlock_settings_subtitle">Allow unlocking the app with device biometrics</string>
+    <string name="unlock_app">Unlock app</string>
+    <string name="incorrect_code">Incorrect code</string>
+    <string name="passcode">Passcode</string>
+    <string name="input_passcode">Input passcode</string>
+    <string name="confirm_passcode">Confirm passcode</string>
+    <string name="passcodes_dont_match">Passcodes don\'t match</string>
 </resources>

@@ -37,6 +37,10 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         it.value = preferencesManager.getMasterPassword()
     }
 
+    private var _isLocked = MutableStateFlow(true)
+    val isLocked: StateFlow<Boolean>
+        get() = _isLocked.asStateFlow()
+
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean>
         get() = _isRefreshing.asStateFlow()
@@ -77,6 +81,19 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
     init {
         if (!apiController.sessionOpen.value)
             openSession(masterPassword.value)
+    }
+
+    fun checkPasscode(passcode: String): Deferred<Boolean> {
+        return viewModelScope.async {
+            val correctPasscode = preferencesManager.getAppLockPasscode() ?: "0000"
+            passcode == correctPasscode
+        }
+    }
+
+    fun disableLock() {
+        viewModelScope.launch {
+            _isLocked.emit(false)
+        }
     }
 
     private fun openSession(password: String?, saveKeychain: Boolean = false) {

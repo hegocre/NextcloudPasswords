@@ -34,7 +34,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -237,7 +237,7 @@ fun SearchAppBar(
         }
     }
 
-    SideEffect {
+    LaunchedEffect(key1 = Unit) {
         requester.requestFocus()
     }
 }

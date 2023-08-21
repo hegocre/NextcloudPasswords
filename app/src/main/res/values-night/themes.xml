@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.NextcloudPasswords" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.NextcloudPasswords" parent="Theme.AppCompat.NoActionBar">
         <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
     </style>
 </resources>
