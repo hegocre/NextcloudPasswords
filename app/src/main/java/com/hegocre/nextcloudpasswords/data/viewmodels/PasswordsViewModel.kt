@@ -22,6 +22,7 @@ import com.hegocre.nextcloudpasswords.data.password.NewPassword
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.password.PasswordController
 import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
+import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -65,8 +66,12 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
     private val apiController = ApiController.getInstance(application)
 
     private val sessionOpen = apiController.sessionOpen
+
     val csEv1Keychain: LiveData<CSEv1Keychain?>
         get() = apiController.csEv1Keychain
+
+    val serverSettings: LiveData<ServerSettings>
+        get() = apiController.serverSettings
 
     val passwords: LiveData<List<Password>>
         get() = PasswordController.getInstance(getApplication()).getPasswords()

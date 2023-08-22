@@ -19,6 +19,8 @@ import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import com.hegocre.nextcloudpasswords.utils.Result
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,19 +42,42 @@ class ApiController private constructor(context: Context) {
     private val foldersApi = FoldersApi.getInstance(server)
     private val sessionApi = SessionApi.getInstance(server)
     private val serviceApi = ServiceApi.getInstance(server)
+    private val settingsApi = SettingsApi.getInstance(server)
 
     private var sessionCode: String? = null
 
-    var csEv1Keychain: MutableLiveData<CSEv1Keychain?> = MutableLiveData<CSEv1Keychain?>(
+    val csEv1Keychain = MutableLiveData(
         preferencesManager.getCSEv1Keychain()?.let { csEv1KeychainJson ->
             CSEv1Keychain.fromJson(csEv1KeychainJson)
         }
     )
-        private set
+
+    val serverSettings = MutableLiveData(
+        preferencesManager.getServerSettings()
+    )
 
     private val _sessionOpen = MutableStateFlow(false)
     val sessionOpen: StateFlow<Boolean>
         get() = _sessionOpen.asStateFlow()
+
+    init {
+        CoroutineScope(Dispatchers.IO).launch {
+            var gotSettings = false
+            while (!gotSettings) {
+                val result = settingsApi.get()
+                if (result is Result.Success) {
+                    val settings = result.data
+                    serverSettings.postValue(settings)
+                    preferencesManager.setServerSettings(settings)
+                    Log.i("ServerSettings", "Got server settings")
+                    gotSettings = true
+                } else {
+                    Log.e("ServerSettings", "Error getting server settings")
+                    delay(5000L)
+                }
+            }
+        }
+    }
 
     /**
      * Requests and opens a session via the [SessionApi] class.

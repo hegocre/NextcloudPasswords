@@ -9,10 +9,13 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.io.IOException
 
 class PreferencesManager private constructor(context: Context) {
@@ -62,6 +65,16 @@ class PreferencesManager private constructor(context: Context) {
     fun getCSEv1Keychain(): String? = _encryptedSharedPrefs.getString("CSE_V1_KEYCHAIN", null)
     fun setCSEv1Keychain(value: String?): Boolean =
         _encryptedSharedPrefs.edit().putString("CSE_V1_KEYCHAIN", value).commit()
+
+    fun getServerSettings(): ServerSettings =
+        _encryptedSharedPrefs.getString("SERVER_SETTINGS", null)?.let {
+            Json.decodeFromString(it)
+        } ?: ServerSettings()
+
+    fun setServerSettings(value: ServerSettings?): Boolean =
+        _encryptedSharedPrefs.edit().putString("SERVER_SETTINGS", value?.let {
+            Json.encodeToString(it)
+        }).commit()
 
     fun getShowIcons(): Flow<Boolean> = getPreference(PreferenceKeys.SHOW_ICONS, false)
     suspend fun setShowIcons(value: Boolean) = setPreference(PreferenceKeys.SHOW_ICONS, value)
