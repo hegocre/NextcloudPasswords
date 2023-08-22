@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.coroutines.coroutineContext
 
 /**
  * Class with methods used to interact with [the API](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api)
@@ -62,19 +61,28 @@ class ApiController private constructor(context: Context) {
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
-            var gotSettings = false
-            while (!gotSettings) {
-                val result = settingsApi.get()
-                if (result is Result.Success) {
-                    val settings = result.data
-                    serverSettings.postValue(settings)
-                    preferencesManager.setServerSettings(settings)
-                    Log.i("ServerSettings", "Got server settings")
-                    gotSettings = true
-                } else {
-                    Log.e("ServerSettings", "Error getting server settings")
-                    delay(5000L)
-                }
+            val result = settingsApi.get()
+            while (result !is Result.Success) {
+                Log.e("ServerSettings", "Error getting server settings")
+                delay(5000L)
+            }
+            Log.i("ServerSettings", "Got server settings")
+            val settings = result.data
+            serverSettings.postValue(settings)
+            preferencesManager.setServerSettings(settings)
+
+            var keepAliveDelay = (settings.sessionLifetime * 3 / 4 * 1000).toLong()
+            while (true) {
+                sessionCode?.let {
+                    delay(keepAliveDelay)
+                    keepAliveDelay = if (sessionApi.keepAlive(it)) {
+                        Log.i("KeepAlive", "Successfully sent keep alive request")
+                        (settings.sessionLifetime * 3 / 4 * 1000).toLong()
+                    } else {
+                        Log.e("KeepAlive", "Error sending keep alive request")
+                        5000L
+                    }
+                } ?: delay(5000L)
             }
         }
     }
@@ -157,11 +165,6 @@ class ApiController private constructor(context: Context) {
             }
         }
         sessionCode = openedSession.first
-
-        // Send keep alive request on background
-        CoroutineScope(coroutineContext).launch {
-            sessionCode?.let { sessionApi.keepAlive(it) }
-        }
 
         _sessionOpen.emit(true)
         return true
