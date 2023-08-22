@@ -1,9 +1,9 @@
 package com.hegocre.nextcloudpasswords.utils
 
 import android.content.Context
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
-import com.hegocre.nextcloudpasswords.R
 
 // 1
 private val biometricsIgnoredErrors = listOf(
@@ -15,13 +15,17 @@ private val biometricsIgnoredErrors = listOf(
 
 fun showBiometricPrompt(
     context: Context,
+    title: String,
+    description: String,
     onBiometricUnlock: () -> Unit,
     onBiometricFailed: (() -> Unit)? = null,
     onBiometricError: (() -> Unit)? = null
 ) {
     // 2
     val promptInfo = BiometricPrompt.PromptInfo.Builder()
-        .setTitle(context.getString(R.string.unlock_app))
+        .setTitle(title)
+        .setDescription(description)
+        .setAllowedAuthenticators(BIOMETRIC_STRONG)
         .setNegativeButtonText(context.getString(android.R.string.cancel))
         .build()
 

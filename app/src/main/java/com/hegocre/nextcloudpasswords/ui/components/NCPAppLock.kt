@@ -90,6 +90,8 @@ fun NextcloudPasswordsAppLock(
         ) {
             showBiometricPrompt(
                 context = context,
+                title = context.getString(R.string.biometric_prompt_title),
+                description = context.getString(R.string.biometric_prompt_description),
                 onBiometricUnlock = onCorrectPasscode
             )
         }
@@ -106,7 +108,7 @@ fun NextcloudPasswordsAppLock(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = if (!isError)
-                            stringResource(id = R.string.unlock_app)
+                            stringResource(id = R.string.input_passcode)
                         else
                             stringResource(id = R.string.incorrect_code),
                     )
