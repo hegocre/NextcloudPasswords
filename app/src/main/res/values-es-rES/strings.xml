@@ -81,4 +81,16 @@
     <string name="folder_deleting_failed">No se ha podido eliminar la carpeta. Por favor, inténtelo de nuevo</string>
     <string name="delete_folder">Eliminar carpeta</string>
     <string name="parent_folder">Carpeta superior</string>
+    <string name="security">Seguridad</string>
+    <string name="app_lock_settings_title">Bloqueo de aplicación</string>
+    <string name="app_lock_settings_subtitle">Bloquear el acceso a la aplicación con un código</string>
+    <string name="biometric_unlock_settings_title">Desbloqueo biométrico</string>
+    <string name="biometric_unlock_settings_subtitle">Permitir desbloquear la aplicación con credenciales biométricas</string>
+    <string name="incorrect_code">Código incorrecto</string>
+    <string name="passcode">Código</string>
+    <string name="input_passcode">Introduzca el código</string>
+    <string name="confirm_passcode">Confirme el código</string>
+    <string name="passcodes_dont_match">Los códigos no coinciden</string>
+    <string name="biometric_prompt_description">Por favor, verifique su identidad para acceder a las contraseñas</string>
+    <string name="biometric_prompt_title">Autenticación biométrica</string>
 </resources>

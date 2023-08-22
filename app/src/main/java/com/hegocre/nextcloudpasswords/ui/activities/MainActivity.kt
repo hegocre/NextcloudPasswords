@@ -14,11 +14,14 @@ import android.view.autofill.AutofillManager
 import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.Crossfade
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
+import androidx.fragment.app.FragmentActivity
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.data.password.Password
@@ -26,13 +29,15 @@ import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.data.viewmodels.PasswordsViewModel
 import com.hegocre.nextcloudpasswords.services.NCPAutofillService
 import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsApp
+import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsAppLock
 import com.hegocre.nextcloudpasswords.utils.AssistStructureParser
+import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,13 +94,29 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            NextcloudPasswordsApp(
-                passwordsViewModel = passwordsViewModel,
-                onLogOut = { logOut() },
-                onPasswordClick = onPasswordClick,
-                isAutofillRequest = autofillRequested,
-                defaultSearchQuery = autofillSearchQuery
-            )
+            val hasAppLock by PreferencesManager.getInstance(this).getHasAppLock()
+                .collectAsState(null)
+            val isLocked by passwordsViewModel.isLocked.collectAsState()
+
+            hasAppLock?.let {
+                Crossfade(targetState = it && isLocked, label = "locked") { locked ->
+                    if (locked) {
+                        NextcloudPasswordsAppLock(
+                            onCheckPasscode = passwordsViewModel::checkPasscode,
+                            onCorrectPasscode = passwordsViewModel::disableLock
+                        )
+                    } else {
+                        passwordsViewModel.disableLock()
+                        NextcloudPasswordsApp(
+                            passwordsViewModel = passwordsViewModel,
+                            onLogOut = { logOut() },
+                            onPasswordClick = onPasswordClick,
+                            isAutofillRequest = autofillRequested,
+                            defaultSearchQuery = autofillSearchQuery
+                        )
+                    }
+                }
+            }
         }
     }
 

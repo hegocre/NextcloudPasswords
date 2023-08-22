@@ -1,7 +1,11 @@
 package com.hegocre.nextcloudpasswords.utils
 
 import android.content.Context
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
@@ -25,6 +29,19 @@ class PreferencesManager private constructor(context: Context) {
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
     }
+
+    fun getHasAppLock(): Flow<Boolean> = getPreference(PreferenceKeys.HAS_APP_LOCK, false)
+    suspend fun setHasAppLock(value: Boolean) = setPreference(PreferenceKeys.HAS_APP_LOCK, value)
+
+    fun getHasBiometricAppLock(): Flow<Boolean> =
+        getPreference(PreferenceKeys.HAS_BIOMETRIC_APP_LOCK, false)
+
+    suspend fun setHasBiometricAppLock(value: Boolean) =
+        setPreference(PreferenceKeys.HAS_BIOMETRIC_APP_LOCK, value)
+
+    fun getAppLockPasscode(): String? = _encryptedSharedPrefs.getString("APP_LOCK_PASSCODE", null)
+    fun setAppLockPasscode(value: String?): Boolean =
+        _encryptedSharedPrefs.edit().putString("APP_LOCK_PASSCODE", value).commit()
 
     fun getLoggedInServer(): String? = _encryptedSharedPrefs.getString("LOGGED_IN_SERVER", null)
     fun setLoggedInServer(value: String?): Boolean =
@@ -84,6 +101,8 @@ class PreferencesManager private constructor(context: Context) {
         private object PreferenceKeys {
             val SHOW_ICONS = booleanPreferencesKey("SHOW_ICONS")
             val START_SCREEN = stringPreferencesKey("START_SCREEN")
+            val HAS_APP_LOCK = booleanPreferencesKey("HAS_APP_LOCK")
+            val HAS_BIOMETRIC_APP_LOCK = booleanPreferencesKey("HAS_BIOMETRIC_APP_LOCK")
         }
     }
 }
