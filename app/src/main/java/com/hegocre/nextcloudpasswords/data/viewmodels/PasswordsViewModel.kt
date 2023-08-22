@@ -8,10 +8,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeClientDeauthorizedException
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyInvalidException
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyNeededException
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengePasswordException
+import com.hegocre.nextcloudpasswords.api.exceptions.ClientDeauthorizedException
+import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyInvalidException
+import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyNeededException
+import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengePasswordException
 import com.hegocre.nextcloudpasswords.data.folder.DeletedFolder
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.folder.FolderController
@@ -106,7 +106,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                 }
             } catch (ex: PWDv1ChallengeMasterKeyNeededException) {
                 _needsMasterPassword.emit(true)
-            } catch (ex: PWDv1ChallengeClientDeauthorizedException) {
+            } catch (ex: ClientDeauthorizedException) {
                 _clientDeauthorized.postValue(true)
             } catch (ex: Exception) {
                 when (ex) {
@@ -115,6 +115,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                         _masterPasswordInvalid.emit(true)
                         preferencesManager.setMasterPassword(null)
                     }
+
                     else -> {
                         ex.printStackTrace()
                     }

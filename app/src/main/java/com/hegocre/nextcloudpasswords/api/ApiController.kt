@@ -4,8 +4,8 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyInvalidException
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyNeededException
+import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyInvalidException
+import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyNeededException
 import com.hegocre.nextcloudpasswords.data.folder.DeletedFolder
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.folder.NewFolder

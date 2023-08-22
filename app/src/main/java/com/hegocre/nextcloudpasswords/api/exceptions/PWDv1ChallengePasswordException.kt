@@ -1,3 +1,3 @@
-package com.hegocre.nextcloudpasswords.api.encryption.exceptions
+package com.hegocre.nextcloudpasswords.api.exceptions
 
 class PWDv1ChallengePasswordException(message: String) : Exception(message)

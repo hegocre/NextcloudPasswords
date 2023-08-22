@@ -1,8 +1,8 @@
 package com.hegocre.nextcloudpasswords.api
 
 import com.hegocre.nextcloudpasswords.api.encryption.PWDv1Challenge
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeClientDeauthorizedException
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyInvalidException
+import com.hegocre.nextcloudpasswords.api.exceptions.ClientDeauthorizedException
+import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyInvalidException
 import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.Result
@@ -50,6 +50,9 @@ class SessionApi private constructor(private var server: Server) {
                 apiResponse.close()
             }
 
+            if (code == 403 || code == 401)
+                throw ClientDeauthorizedException()
+
             if (code == 200) {
                 Result.Success(PWDv1Challenge.fromJson(body ?: "{}"))
             } else Result.Error(Error.API_BAD_RESPONSE)
@@ -68,7 +71,7 @@ class SessionApi private constructor(private var server: Server) {
      * @return Result with a pair with the session code and the encrypted keychain JSON if success,
      * or an error code otherwise.
      * @throws PWDv1ChallengeMasterKeyInvalidException If a master key was provided, but is not valid.
-     * @throws PWDv1ChallengeClientDeauthorizedException If too many incorrect attempts were made and
+     * @throws ClientDeauthorizedException If too many incorrect attempts were made and
      * the client has been deauthorized.
      */
     suspend fun openSession(solvedChallenge: String): Result<Pair<String, String>> {
@@ -104,7 +107,7 @@ class SessionApi private constructor(private var server: Server) {
                 throw PWDv1ChallengeMasterKeyInvalidException()
 
             if (code == 403)
-                throw PWDv1ChallengeClientDeauthorizedException()
+                throw ClientDeauthorizedException()
 
             if (xSessionCode == null || body == null || code != 200)
                 return Result.Error(Error.API_BAD_RESPONSE)

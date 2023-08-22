@@ -5,7 +5,7 @@
     <string name="show_icons_preference_title">Mostrar icones</string>
     <string name="show_icons_preference_subtitle">Mostrar les icones dels llocs web</string>
     <string name="start_view_preference_title">Vista inicial</string>
-    <string name="client_deauthorized_toast">Massa intents incorrectes. Si us plau, inicieu sessió de nou.</string>
+    <string name="client_deauthorized_toast">El client ha estat desautoritzat. Si us plau, inicieu sessió de nou.</string>
     <string name="autofill_setting_subtitle">Activar el servei d\'emplenament automàtic</string>
     <string name="settings">Configuració</string>
     <string name="autofill">Emplenament automàtic</string>

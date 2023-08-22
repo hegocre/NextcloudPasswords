@@ -24,7 +24,7 @@
     <string name="show_icons_preference_title">Mostrar iconos</string>
     <string name="show_icons_preference_subtitle">Mostrar iconos de los sitios web</string>
     <string name="start_view_preference_title">Vista inicial</string>
-    <string name="client_deauthorized_toast">Demasiados intentos incorrectos. Por favor, vuelva a iniciar sesión</string>
+    <string name="client_deauthorized_toast">El cliente ha sido desautorizado. Por favor, vuelva a iniciar sesión</string>
     <string name="autofill_service">Servicio de autocompletar</string>
     <string name="light">Claro</string>
     <string name="from_system">Seg´un el sistema</string>
