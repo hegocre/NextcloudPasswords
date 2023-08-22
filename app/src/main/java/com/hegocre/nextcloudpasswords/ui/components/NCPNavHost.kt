@@ -37,6 +37,7 @@ import com.hegocre.nextcloudpasswords.data.password.DeletedPassword
 import com.hegocre.nextcloudpasswords.data.password.NewPassword
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
+import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.data.viewmodels.PasswordsViewModel
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
@@ -69,6 +70,7 @@ fun NCPNavHost(
     val keychain by passwordsViewModel.csEv1Keychain.observeAsState()
     val isRefreshing by passwordsViewModel.isRefreshing.collectAsState()
     val isUpdating by passwordsViewModel.isUpdating.collectAsState()
+    val serverSettings by passwordsViewModel.serverSettings.observeAsState(initial = ServerSettings())
 
     val passwordsDecryptionState by produceState(
         initialValue = ListDecryptionState(isLoading = true),
@@ -375,7 +377,8 @@ fun NCPNavHost(
                                                 it.current,
                                                 it
                                             ),
-                                            hash = editablePasswordState.password.sha1Hash(),
+                                            hash = editablePasswordState.password.sha1Hash()
+                                                .take(serverSettings.passwordSecurityHash),
                                             cseType = "CSEv1r1",
                                             cseKey = it.current,
                                             folder = editablePasswordState.folder,
@@ -390,7 +393,8 @@ fun NCPNavHost(
                                         url = editablePasswordState.url,
                                         notes = editablePasswordState.notes,
                                         customFields = customFields,
-                                        hash = editablePasswordState.password.sha1Hash(),
+                                        hash = editablePasswordState.password.sha1Hash()
+                                            .take(serverSettings.passwordSecurityHash),
                                         cseType = "none",
                                         cseKey = "",
                                         folder = editablePasswordState.folder,
@@ -440,7 +444,8 @@ fun NCPNavHost(
                                                 it.current,
                                                 it
                                             ),
-                                            hash = editablePasswordState.password.sha1Hash(),
+                                            hash = editablePasswordState.password.sha1Hash()
+                                                .take(serverSettings.passwordSecurityHash),
                                             cseType = "CSEv1r1",
                                             cseKey = it.current,
                                             folder = editablePasswordState.folder,
@@ -457,7 +462,8 @@ fun NCPNavHost(
                                         url = editablePasswordState.url,
                                         notes = editablePasswordState.notes,
                                         customFields = customFields,
-                                        hash = editablePasswordState.password.sha1Hash(),
+                                        hash = editablePasswordState.password.sha1Hash()
+                                            .take(serverSettings.passwordSecurityHash),
                                         cseType = "none",
                                         cseKey = "",
                                         folder = editablePasswordState.folder,
