@@ -59,8 +59,8 @@ import org.commonmark.parser.Parser
 @Composable
 fun PasswordItem(
     password: Password?,
-    onEditPassword: () -> Unit,
     modifier: Modifier = Modifier,
+    onEditPassword: (() -> Unit)? = null,
 ) {
     password?.let { pass ->
         PasswordItemContent(password = pass, onEditPassword = onEditPassword, modifier = modifier)
@@ -74,7 +74,7 @@ fun PasswordItem(
 @Composable
 fun PasswordItemContent(
     password: Password,
-    onEditPassword: () -> Unit,
+    onEditPassword: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -114,11 +114,13 @@ fun PasswordItemContent(
             }
             Spacer(modifier = Modifier.weight(1f))
             if (password.editable) {
-                IconButton(onClick = onEditPassword) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = stringResource(id = R.string.edit_password),
-                    )
+                onEditPassword?.let {
+                    IconButton(onClick = it) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = stringResource(id = R.string.edit_password),
+                        )
+                    }
                 }
             }
         }

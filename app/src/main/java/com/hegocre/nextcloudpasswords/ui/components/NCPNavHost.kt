@@ -71,6 +71,7 @@ fun NCPNavHost(
     val isRefreshing by passwordsViewModel.isRefreshing.collectAsState()
     val isUpdating by passwordsViewModel.isUpdating.collectAsState()
     val serverSettings by passwordsViewModel.serverSettings.observeAsState(initial = ServerSettings())
+    val sessionOpen by passwordsViewModel.sessionOpen.collectAsState()
 
     val passwordsDecryptionState by produceState(
         initialValue = ListDecryptionState(isLoading = true),
@@ -137,7 +138,8 @@ fun NCPNavHost(
                                 passwords = filteredPasswordList,
                                 onPasswordClick = onPasswordClick,
                                 onPasswordLongClick = {
-                                    navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
+                                    if (sessionOpen)
+                                        navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
                                 }
                             )
                         }
@@ -170,7 +172,8 @@ fun NCPNavHost(
                                 passwords = filteredFavoritePasswords,
                                 onPasswordClick = onPasswordClick,
                                 onPasswordLongClick = {
-                                    navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
+                                    if (sessionOpen)
+                                        navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
                                 }
                             )
                         }
@@ -219,11 +222,13 @@ fun NCPNavHost(
                                 folders = filteredFoldersParentFolder,
                                 onPasswordClick = onPasswordClick,
                                 onPasswordLongClick = {
-                                    navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
+                                    if (sessionOpen)
+                                        navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
                                 },
                                 onFolderClick = onFolderClick,
                                 onFolderLongClick = {
-                                    navController.navigate("${NCPScreen.FolderEdit.name}/${it.id}")
+                                    if (sessionOpen)
+                                        navController.navigate("${NCPScreen.FolderEdit.name}/${it.id}")
                                 }
                             )
                         }
@@ -287,11 +292,13 @@ fun NCPNavHost(
                                 folders = filteredFoldersSelectedFolder,
                                 onPasswordClick = onPasswordClick,
                                 onPasswordLongClick = {
-                                    navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
+                                    if (sessionOpen)
+                                        navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
                                 },
                                 onFolderClick = onFolderClick,
                                 onFolderLongClick = {
-                                    navController.navigate("${NCPScreen.FolderEdit.name}/${it.id}")
+                                    if (sessionOpen)
+                                        navController.navigate("${NCPScreen.FolderEdit.name}/${it.id}")
                                 }
                             )
                         }

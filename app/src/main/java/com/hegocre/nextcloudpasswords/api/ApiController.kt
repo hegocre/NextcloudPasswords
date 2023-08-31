@@ -80,6 +80,8 @@ class ApiController private constructor(context: Context) {
                         (settings.sessionLifetime * 3 / 4 * 1000).toLong()
                     } else {
                         Log.e("KeepAlive", "Error sending keep alive request")
+                        _sessionOpen.emit(false)
+                        sessionCode = null
                         5000L
                     }
                 } ?: delay(5000L)
@@ -193,7 +195,7 @@ class ApiController private constructor(context: Context) {
      * @return A result with the list of passwords if success, or an error code otherwise.
      */
     suspend fun listPasswords(): Result<List<Password>> {
-        if (!_sessionOpen.value) return Result.Error(Error.API_NO_SESSION)
+        if (!sessionOpen.value) return Result.Error(Error.API_NO_SESSION)
         return passwordsApi.list(sessionCode)
     }
 
@@ -204,7 +206,7 @@ class ApiController private constructor(context: Context) {
      * @return A result with the list of folders if success, or an error code otherwise.
      */
     suspend fun listFolders(): Result<List<Folder>> {
-        if (!_sessionOpen.value) return Result.Error(Error.API_NO_SESSION)
+        if (!sessionOpen.value) return Result.Error(Error.API_NO_SESSION)
         return foldersApi.list(sessionCode)
     }
 
@@ -234,7 +236,7 @@ class ApiController private constructor(context: Context) {
      * @return A boolean stating whether the password was successfully created.
      */
     suspend fun createPassword(newPassword: NewPassword): Boolean {
-        if (!_sessionOpen.value) return false
+        if (!sessionOpen.value) return false
         val result = passwordsApi.create(newPassword, sessionCode)
         return result is Result.Success
     }
@@ -247,7 +249,7 @@ class ApiController private constructor(context: Context) {
      * @return A boolean stating whether the password was successfully updated.
      */
     suspend fun updatePassword(updatedPassword: UpdatedPassword): Boolean {
-        if (!_sessionOpen.value) return false
+        if (!sessionOpen.value) return false
         val result = passwordsApi.update(updatedPassword, sessionCode)
         return result is Result.Success
     }
@@ -260,7 +262,7 @@ class ApiController private constructor(context: Context) {
      * @return A boolean stating whether the password was successfully deleted.
      */
     suspend fun deletePassword(deletedPassword: DeletedPassword): Boolean {
-        if (!_sessionOpen.value) return false
+        if (!sessionOpen.value) return false
         val result = passwordsApi.delete(deletedPassword, sessionCode)
         return result is Result.Success
     }
@@ -272,7 +274,7 @@ class ApiController private constructor(context: Context) {
      * @return A string with the generated password, or null if there was an error.
      */
     suspend fun generatePassword(): String? {
-        if (!_sessionOpen.value) return null
+        if (!sessionOpen.value) return null
         val result = serviceApi.password(sessionCode)
         return if (result is Result.Success) result.data else null
     }
@@ -285,7 +287,7 @@ class ApiController private constructor(context: Context) {
      * @return A boolean stating whether the folder was successfully created.
      */
     suspend fun createFolder(newFolder: NewFolder): Boolean {
-        if (!_sessionOpen.value) return false
+        if (!sessionOpen.value) return false
         val result = foldersApi.create(newFolder, sessionCode)
         return result is Result.Success
     }
@@ -298,7 +300,7 @@ class ApiController private constructor(context: Context) {
      * @return A boolean stating whether the folder was successfully updated.
      */
     suspend fun updateFolder(updatedFolder: UpdatedFolder): Boolean {
-        if (!_sessionOpen.value) return false
+        if (!sessionOpen.value) return false
         val result = foldersApi.update(updatedFolder, sessionCode)
         return result is Result.Success
     }
@@ -311,7 +313,7 @@ class ApiController private constructor(context: Context) {
      * @return A boolean stating whether the folder was successfully deleted.
      */
     suspend fun deleteFolder(deletedFolder: DeletedFolder): Boolean {
-        if (!_sessionOpen.value) return false
+        if (!sessionOpen.value) return false
         val result = foldersApi.delete(deletedFolder, sessionCode)
         return result is Result.Success
     }

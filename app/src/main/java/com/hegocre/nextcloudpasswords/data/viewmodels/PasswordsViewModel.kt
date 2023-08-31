@@ -65,7 +65,12 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val apiController = ApiController.getInstance(application)
 
-    private val sessionOpen = apiController.sessionOpen
+    val sessionOpen
+        get() = apiController.sessionOpen
+
+    private val _showSessionOpenError = MutableStateFlow(false)
+    val showSessionOpenError: StateFlow<Boolean>
+        get() = _showSessionOpenError.asStateFlow()
 
     val csEv1Keychain: LiveData<CSEv1Keychain?>
         get() = apiController.csEv1Keychain
@@ -84,7 +89,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         private set
 
     init {
-        if (!apiController.sessionOpen.value)
+        if (!sessionOpen.value)
             openSession(masterPassword.value)
     }
 
@@ -107,8 +112,10 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
             try {
                 if (apiController.openSession(password, saveKeychain)) {
                     sync()
+                    _showSessionOpenError.emit(true)
                     return@launch
                 }
+                _showSessionOpenError.emit(true)
             } catch (ex: PWDv1ChallengeMasterKeyNeededException) {
                 _needsMasterPassword.emit(true)
             } catch (ex: ClientDeauthorizedException) {
@@ -120,8 +127,8 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                         _masterPasswordInvalid.emit(true)
                         preferencesManager.setMasterPassword(null)
                     }
-
                     else -> {
+                        _showSessionOpenError.emit(true)
                         ex.printStackTrace()
                     }
                 }

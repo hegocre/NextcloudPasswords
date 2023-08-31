@@ -93,4 +93,5 @@
     <string name="passcodes_dont_match">Els codis no coincideixen</string>
     <string name="biometric_prompt_description">Si us plau, verifiqui la seva identitat per accedir a les contrasenyes</string>
     <string name="biometric_prompt_title">Autenticació biomètrica</string>
+    <string name="cannot_connect_to_server">No s\'ha pogut connectar al servidor. Si usplau, refresqui i intenti-ho de nou.</string>
 </resources>

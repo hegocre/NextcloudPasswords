@@ -93,4 +93,5 @@
     <string name="passcodes_dont_match">Los códigos no coinciden</string>
     <string name="biometric_prompt_description">Por favor, verifique su identidad para acceder a las contraseñas</string>
     <string name="biometric_prompt_title">Autenticación biométrica</string>
+    <string name="cannot_connect_to_server">No de ha podido conectar al servidor. Por favor, actualize e inténtelo de nuevo.</string>
 </resources>
