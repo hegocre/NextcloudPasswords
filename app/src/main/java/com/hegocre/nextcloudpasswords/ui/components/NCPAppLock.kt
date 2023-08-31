@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Backspace
+import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -60,10 +62,15 @@ fun NextcloudPasswordsAppLock(
     var isError by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val hasBiometricAppLock by if (isPreview) remember { mutableStateOf(false) }
+    val hasBiometricAppLock by if (isPreview) remember { mutableStateOf(true) }
     else PreferencesManager.getInstance(context).getHasBiometricAppLock().collectAsState(
         initial = false
     )
+    val canAuthenticateBiometric = if (isPreview) remember { true }
+    else remember {
+        BiometricManager.from(context)
+            .canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
+    }
 
     LaunchedEffect(key1 = inputPassword) {
         if (inputPassword.length == 4) {
@@ -84,10 +91,7 @@ fun NextcloudPasswordsAppLock(
     }
 
     LaunchedEffect(key1 = hasBiometricAppLock) {
-        if (hasBiometricAppLock &&
-            BiometricManager.from(context)
-                .canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
-        ) {
+        if (hasBiometricAppLock && canAuthenticateBiometric) {
             showBiometricPrompt(
                 context = context,
                 title = context.getString(R.string.biometric_prompt_title),
@@ -209,12 +213,35 @@ fun NextcloudPasswordsAppLock(
                     }
 
                     Row {
-                        Spacer(
-                            modifier = Modifier
-                                .padding(AppLockDefaults.DIGIT_PADDING)
-                                .height(AppLockDefaults.DIGIT_SIZE)
-                                .width(AppLockDefaults.DIGIT_SIZE)
-                        )
+                        if (hasBiometricAppLock && canAuthenticateBiometric) {
+                            FilledTonalIconButton(
+                                onClick = {
+                                    showBiometricPrompt(
+                                        context = context,
+                                        title = context.getString(R.string.biometric_prompt_title),
+                                        description = context.getString(R.string.biometric_prompt_description),
+                                        onBiometricUnlock = onCorrectPasscode
+                                    )
+                                },
+                                modifier = Modifier
+                                    .padding(AppLockDefaults.DIGIT_PADDING)
+                                    .height(AppLockDefaults.DIGIT_SIZE)
+                                    .width(AppLockDefaults.DIGIT_SIZE)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Fingerprint,
+                                    contentDescription = stringResource(id = R.string.biometric_unlock_settings_title),
+                                    modifier = Modifier.size(35.dp)
+                                )
+                            }
+                        } else {
+                            Spacer(
+                                modifier = Modifier
+                                    .padding(AppLockDefaults.DIGIT_PADDING)
+                                    .height(AppLockDefaults.DIGIT_SIZE)
+                                    .width(AppLockDefaults.DIGIT_SIZE)
+                            )
+                        }
 
                         KeyboardNumber(
                             number = "0",
@@ -223,7 +250,7 @@ fun NextcloudPasswordsAppLock(
                             }
                         )
 
-                        if (inputPassword.isNotBlank()) {
+                        if (isPreview || inputPassword.isNotBlank()) {
                             FilledTonalIconButton(
                                 onClick = {
                                     setInputPassword(inputPassword.dropLast(1))
@@ -235,7 +262,8 @@ fun NextcloudPasswordsAppLock(
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.Backspace,
-                                    contentDescription = stringResource(id = R.string.delete)
+                                    contentDescription = stringResource(id = R.string.delete),
+                                    modifier = Modifier.size(25.dp)
                                 )
                             }
                         } else {
