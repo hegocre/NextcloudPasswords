@@ -66,7 +66,10 @@ fun SwitchPreference(
             .padding(vertical = 12.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(Modifier.weight(1f)) {
+        Column(
+            Modifier
+                .weight(1f)
+                .padding(end = 12.dp)) {
             title()
             CompositionLocalProvider(
                 LocalTextStyle provides MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
@@ -158,7 +161,7 @@ fun PreferencesPreview() {
                         checked = true,
                         onCheckedChange = {},
                         title = { Text(text = "Biometric unlock") },
-                        subtitle = { Text(text = "Unlock the app with biometric credentials") }
+                        subtitle = { Text(text = "Unlock the app with biometric credentials such as fingerprint or face") }
                     )
                 }
 

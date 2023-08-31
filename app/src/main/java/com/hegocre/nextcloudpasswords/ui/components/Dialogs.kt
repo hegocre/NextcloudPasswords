@@ -6,9 +6,11 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -500,7 +502,7 @@ fun InputPasscodeDialog(
                         .focusRequester(requester),
                     value = passcode,
                     onValueChange = { newPasscode ->
-                        if (newPasscode.length <= 4) {
+                        if (newPasscode.length <= 4 && newPasscode.toIntOrNull() != null) {
                             setPasscode(newPasscode)
                         }
                     },
@@ -577,22 +579,27 @@ fun ListPreferenceDialog(
                     }
                 }
 
-                LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .fillMaxWidth()
+                ) {
                     items(items = options.keys.toList(), key = { it }) { option ->
-                        ListItem(
-                            headlineContent = {
-                                Text(text = options.getOrDefault(option, ""))
-                            },
-                            leadingContent = {
-                                RadioButton(
-                                    selected = option == selectedOption,
-                                    onClick = { onSelectOption(option) })
-                            },
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .clickable {
                                     onSelectOption(option)
                                 }
-                        )
+                                .padding(vertical = 4.dp, horizontal = 12.dp)
+                        ) {
+                            RadioButton(
+                                selected = option == selectedOption,
+                                onClick = { onSelectOption(option) }
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = options.getOrDefault(option, ""))
+                        }
                     }
                 }
             }
