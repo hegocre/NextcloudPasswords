@@ -36,16 +36,12 @@ class ServiceApi private constructor(private val server: Server) {
         }
 
         return try {
-            val apiResponse = try {
-                withContext(Dispatchers.IO) {
-                    OkHttpRequest.getInstance().get(
-                        sUrl = server.url + String.format(FAVICON_URL, domain, 256),
-                        username = server.username,
-                        password = server.password
-                    )
-                }
-            } catch (ex: SSLHandshakeException) {
-                return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+            val apiResponse = withContext(Dispatchers.IO) {
+                OkHttpRequest.getInstance().get(
+                    sUrl = server.url + String.format(FAVICON_URL, domain, 256),
+                    username = server.username,
+                    password = server.password
+                )
             }
 
             val code = apiResponse.code
@@ -63,6 +59,10 @@ class ServiceApi private constructor(private val server: Server) {
 
         } catch (e: SocketTimeoutException) {
             Result.Error(Error.API_TIMEOUT)
+        } catch (ex: SSLHandshakeException) {
+            Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+        } catch (ex: Exception) {
+            Result.Error(Error.UNKNOWN)
         }
 
     }
@@ -74,17 +74,13 @@ class ServiceApi private constructor(private val server: Server) {
      */
     suspend fun password(sessionCode: String?): Result<String> {
         return try {
-            val apiResponse = try {
-                withContext(Dispatchers.IO) {
-                    OkHttpRequest.getInstance().get(
-                        sUrl = server.url + PASSWORD_URL,
-                        sessionCode = sessionCode,
-                        username = server.username,
-                        password = server.password
-                    )
-                }
-            } catch (ex: SSLHandshakeException) {
-                return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+            val apiResponse = withContext(Dispatchers.IO) {
+                OkHttpRequest.getInstance().get(
+                    sUrl = server.url + PASSWORD_URL,
+                    sessionCode = sessionCode,
+                    username = server.username,
+                    password = server.password
+                )
             }
 
             val code = apiResponse.code
@@ -103,6 +99,10 @@ class ServiceApi private constructor(private val server: Server) {
             }
         } catch (e: SocketTimeoutException) {
             Result.Error(Error.API_TIMEOUT)
+        } catch (ex: SSLHandshakeException) {
+            Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+        } catch (ex: Exception) {
+            Result.Error(Error.UNKNOWN)
         }
     }
 

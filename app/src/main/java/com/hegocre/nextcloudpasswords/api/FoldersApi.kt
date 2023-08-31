@@ -34,18 +34,15 @@ class FoldersApi private constructor(private var server: Server) {
         sessionCode: String? = null
     ): Result<List<Folder>> {
         return try {
-            val apiResponse = try {
-                withContext(Dispatchers.IO) {
-                    OkHttpRequest.getInstance().get(
-                        sUrl = server.url + LIST_URL,
-                        sessionCode = sessionCode,
-                        username = server.username,
-                        password = server.password
-                    )
-                }
-            } catch (ex: SSLHandshakeException) {
-                return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+            val apiResponse = withContext(Dispatchers.IO) {
+                OkHttpRequest.getInstance().get(
+                    sUrl = server.url + LIST_URL,
+                    sessionCode = sessionCode,
+                    username = server.username,
+                    password = server.password
+                )
             }
+
 
             val code = apiResponse.code
             val body = apiResponse.body?.string()
@@ -60,6 +57,10 @@ class FoldersApi private constructor(private var server: Server) {
             }
         } catch (e: SocketTimeoutException) {
             Result.Error(Error.API_TIMEOUT)
+        } catch (ex: SSLHandshakeException) {
+            Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+        } catch (ex: Exception) {
+            Result.Error(Error.UNKNOWN)
         }
     }
 
@@ -76,19 +77,15 @@ class FoldersApi private constructor(private var server: Server) {
         sessionCode: String? = null
     ): Result<Unit> {
         return try {
-            val apiResponse = try {
-                withContext(Dispatchers.IO) {
-                    OkHttpRequest.getInstance().post(
-                        sUrl = server.url + CREATE_URL,
-                        sessionCode = sessionCode,
-                        body = Json.encodeToString(newFolder),
-                        mediaType = OkHttpRequest.JSON,
-                        username = server.username,
-                        password = server.password
-                    )
-                }
-            } catch (ex: SSLHandshakeException) {
-                return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+            val apiResponse = withContext(Dispatchers.IO) {
+                OkHttpRequest.getInstance().post(
+                    sUrl = server.url + CREATE_URL,
+                    sessionCode = sessionCode,
+                    body = Json.encodeToString(newFolder),
+                    mediaType = OkHttpRequest.JSON,
+                    username = server.username,
+                    password = server.password
+                )
             }
 
             val code = apiResponse.code
@@ -105,6 +102,10 @@ class FoldersApi private constructor(private var server: Server) {
             }
         } catch (e: SocketTimeoutException) {
             Result.Error(Error.API_TIMEOUT)
+        } catch (ex: SSLHandshakeException) {
+            Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+        } catch (ex: Exception) {
+            Result.Error(Error.UNKNOWN)
         }
     }
 
@@ -121,19 +122,15 @@ class FoldersApi private constructor(private var server: Server) {
         sessionCode: String? = null
     ): Result<Unit> {
         return try {
-            val apiResponse = try {
-                withContext(Dispatchers.IO) {
-                    OkHttpRequest.getInstance().patch(
-                        sUrl = server.url + UPDATE_URL,
-                        sessionCode = sessionCode,
-                        body = Json.encodeToString(updatedFolder),
-                        mediaType = OkHttpRequest.JSON,
-                        username = server.username,
-                        password = server.password
-                    )
-                }
-            } catch (ex: SSLHandshakeException) {
-                return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+            val apiResponse = withContext(Dispatchers.IO) {
+                OkHttpRequest.getInstance().patch(
+                    sUrl = server.url + UPDATE_URL,
+                    sessionCode = sessionCode,
+                    body = Json.encodeToString(updatedFolder),
+                    mediaType = OkHttpRequest.JSON,
+                    username = server.username,
+                    password = server.password
+                )
             }
 
             val code = apiResponse.code
@@ -150,6 +147,10 @@ class FoldersApi private constructor(private var server: Server) {
             }
         } catch (e: SocketTimeoutException) {
             Result.Error(Error.API_TIMEOUT)
+        } catch (ex: SSLHandshakeException) {
+            Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+        } catch (ex: Exception) {
+            Result.Error(Error.UNKNOWN)
         }
     }
 
@@ -165,19 +166,15 @@ class FoldersApi private constructor(private var server: Server) {
         sessionCode: String? = null
     ): Result<Unit> {
         return try {
-            val apiResponse = try {
-                withContext(Dispatchers.IO) {
-                    OkHttpRequest.getInstance().delete(
-                        sUrl = server.url + DELETE_URL,
-                        sessionCode = sessionCode,
-                        body = Json.encodeToString(deletedFolder),
-                        mediaType = OkHttpRequest.JSON,
-                        username = server.username,
-                        password = server.password
-                    )
-                }
-            } catch (ex: SSLHandshakeException) {
-                return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+            val apiResponse = withContext(Dispatchers.IO) {
+                OkHttpRequest.getInstance().delete(
+                    sUrl = server.url + DELETE_URL,
+                    sessionCode = sessionCode,
+                    body = Json.encodeToString(deletedFolder),
+                    mediaType = OkHttpRequest.JSON,
+                    username = server.username,
+                    password = server.password
+                )
             }
 
             val code = apiResponse.code
@@ -194,6 +191,10 @@ class FoldersApi private constructor(private var server: Server) {
             }
         } catch (e: SocketTimeoutException) {
             Result.Error(Error.API_TIMEOUT)
+        } catch (ex: SSLHandshakeException) {
+            Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+        } catch (ex: Exception) {
+            Result.Error(Error.UNKNOWN)
         }
     }
 

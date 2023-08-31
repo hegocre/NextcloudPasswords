@@ -19,18 +19,14 @@ class SettingsApi private constructor(private val server: Server) {
      */
     suspend fun get(): Result<ServerSettings> {
         return try {
-            val apiResponse = try {
-                withContext(Dispatchers.IO) {
-                    OkHttpRequest.getInstance().post(
-                        sUrl = server.url + GET_URL,
-                        body = ServerSettings.getRequestBody(),
-                        mediaType = OkHttpRequest.JSON,
-                        username = server.username,
-                        password = server.password,
-                    )
-                }
-            } catch (ex: SSLHandshakeException) {
-                return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+            val apiResponse = withContext(Dispatchers.IO) {
+                OkHttpRequest.getInstance().post(
+                    sUrl = server.url + GET_URL,
+                    body = ServerSettings.getRequestBody(),
+                    mediaType = OkHttpRequest.JSON,
+                    username = server.username,
+                    password = server.password,
+                )
             }
 
             val code = apiResponse.code
@@ -48,6 +44,10 @@ class SettingsApi private constructor(private val server: Server) {
 
         } catch (e: SocketTimeoutException) {
             Result.Error(Error.API_TIMEOUT)
+        } catch (ex: SSLHandshakeException) {
+            Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+        } catch (ex: Exception) {
+            Result.Error(Error.UNKNOWN)
         }
 
     }
