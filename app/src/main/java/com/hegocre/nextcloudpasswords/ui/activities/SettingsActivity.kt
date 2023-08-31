@@ -1,12 +1,12 @@
 package com.hegocre.nextcloudpasswords.ui.activities
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
+import androidx.fragment.app.FragmentActivity
 import com.hegocre.nextcloudpasswords.ui.components.NCPSettingsScreen
 
-class SettingsActivity : ComponentActivity() {
+class SettingsActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
