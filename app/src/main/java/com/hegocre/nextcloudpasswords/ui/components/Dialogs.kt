@@ -502,7 +502,9 @@ fun InputPasscodeDialog(
                         .focusRequester(requester),
                     value = passcode,
                     onValueChange = { newPasscode ->
-                        if (newPasscode.length <= 4 && newPasscode.toIntOrNull() != null) {
+                        if (newPasscode.length <= 4 &&
+                            (newPasscode.toIntOrNull() != null || newPasscode.isEmpty())
+                        ) {
                             setPasscode(newPasscode)
                         }
                     },
@@ -588,6 +590,7 @@ fun ListPreferenceDialog(
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .clickable {
                                     onSelectOption(option)
                                 }
