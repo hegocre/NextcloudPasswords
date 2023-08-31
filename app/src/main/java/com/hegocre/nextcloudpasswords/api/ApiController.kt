@@ -61,10 +61,11 @@ class ApiController private constructor(context: Context) {
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
-            val result = settingsApi.get()
+            var result = settingsApi.get()
             while (result !is Result.Success) {
                 Log.e("ServerSettings", "Error getting server settings")
                 delay(5000L)
+                result = settingsApi.get()
             }
             Log.i("ServerSettings", "Got server settings")
             val settings = result.data
