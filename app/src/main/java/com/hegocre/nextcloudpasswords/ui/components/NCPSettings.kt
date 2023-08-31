@@ -91,7 +91,7 @@ fun NCPSettingsScreen(
                 )
 
                 PreferencesCategory(title = { Text(stringResource(R.string.general)) }) {
-                    DropdownPreference(
+                    ListPreference(
                         items = startViews,
                         onItemSelected = { selectedScreen ->
                             scope.launch {
@@ -100,11 +100,7 @@ fun NCPSettingsScreen(
                             }
                         },
                         title = { Text(text = stringResource(id = R.string.start_view_preference_title)) },
-                        subtitle = {
-                            Text(
-                                text = startViews[selectedScreen] ?: NCPScreen.Passwords.name
-                            )
-                        }
+                        selectedItem = selectedScreen
                     )
 
                     val showIcons by PreferencesManager.getInstance(context).getShowIcons()
