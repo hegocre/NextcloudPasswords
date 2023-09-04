@@ -15,6 +15,7 @@
         android:supportsRtl="true"
         android:fullBackupContent="@xml/full_backup_content"
         android:theme="@style/Theme.NextcloudPasswords"
+        android:localeConfig="@xml/locales_config"
         tools:ignore="UnusedAttribute">
 
         <activity
