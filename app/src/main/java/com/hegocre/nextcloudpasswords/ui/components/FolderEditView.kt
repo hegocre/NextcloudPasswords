@@ -4,8 +4,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -240,7 +242,7 @@ fun EditableFolderView(
         item(key = "bottom_spacer") {
             Spacer(
                 modifier = Modifier
-                    .windowInsetsBottomHeight(WindowInsets.ime)
+                    .windowInsetsBottomHeight(WindowInsets.ime.add(WindowInsets.navigationBars))
                     .padding(bottom = 16.dp)
             )
         }
