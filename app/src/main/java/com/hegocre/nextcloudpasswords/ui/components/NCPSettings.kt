@@ -41,6 +41,7 @@ import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
+import com.hegocre.nextcloudpasswords.utils.showBiometricPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -91,7 +92,7 @@ fun NCPSettingsScreen(
                 )
 
                 PreferencesCategory(title = { Text(stringResource(R.string.general)) }) {
-                    DropdownPreference(
+                    ListPreference(
                         items = startViews,
                         onItemSelected = { selectedScreen ->
                             scope.launch {
@@ -100,11 +101,7 @@ fun NCPSettingsScreen(
                             }
                         },
                         title = { Text(text = stringResource(id = R.string.start_view_preference_title)) },
-                        subtitle = {
-                            Text(
-                                text = startViews[selectedScreen] ?: NCPScreen.Passwords.name
-                            )
-                        }
+                        selectedItem = selectedScreen
                     )
 
                     val showIcons by PreferencesManager.getInstance(context).getShowIcons()
@@ -161,10 +158,18 @@ fun NCPSettingsScreen(
                         SwitchPreference(
                             checked = hasBiometricAppLock,
                             onCheckedChange = { enabled ->
-                                scope.launch {
-                                    PreferencesManager.getInstance(context)
-                                        .setHasBiometricAppLock(enabled)
-                                }
+                                showBiometricPrompt(
+                                    context = context,
+                                    title = context.getString(R.string.biometric_prompt_title),
+                                    description = context.getString(R.string.biometric_prompt_description),
+                                    onBiometricUnlock = {
+                                        scope.launch {
+                                            PreferencesManager.getInstance(context)
+                                                .setHasBiometricAppLock(enabled)
+                                        }
+                                    }
+                                )
+
                             },
                             title = { Text(text = stringResource(id = R.string.biometric_unlock_settings_title)) },
                             subtitle = { Text(text = stringResource(id = R.string.biometric_unlock_settings_subtitle)) }

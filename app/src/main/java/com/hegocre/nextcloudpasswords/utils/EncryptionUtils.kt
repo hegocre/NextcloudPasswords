@@ -4,7 +4,7 @@ import android.content.Context
 import com.goterl.lazysodium.interfaces.SecretBox
 import com.goterl.lazysodium.utils.Key
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.SodiumDecryptionException
+import com.hegocre.nextcloudpasswords.api.exceptions.SodiumDecryptionException
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.password.Password
 import kotlinx.coroutines.Dispatchers

@@ -3,7 +3,7 @@ package com.hegocre.nextcloudpasswords.api.encryption
 import com.goterl.lazysodium.interfaces.Box
 import com.goterl.lazysodium.interfaces.PwHash
 import com.goterl.lazysodium.interfaces.SecretBox
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.SodiumDecryptionException
+import com.hegocre.nextcloudpasswords.api.exceptions.SodiumDecryptionException
 import com.hegocre.nextcloudpasswords.utils.LazySodiumUtils
 import okio.internal.commonToUtf8String
 import org.json.JSONException

@@ -3,9 +3,9 @@ package com.hegocre.nextcloudpasswords.api.encryption
 import com.goterl.lazysodium.interfaces.Box
 import com.goterl.lazysodium.interfaces.GenericHash
 import com.goterl.lazysodium.interfaces.PwHash
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyNeededException
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengePasswordException
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.SodiumDecryptionException
+import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyNeededException
+import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengePasswordException
+import com.hegocre.nextcloudpasswords.api.exceptions.SodiumDecryptionException
 import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.LazySodiumUtils
 import com.hegocre.nextcloudpasswords.utils.Result

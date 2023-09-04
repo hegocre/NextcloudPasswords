@@ -3,11 +3,14 @@ package com.hegocre.nextcloudpasswords.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -27,8 +30,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -497,7 +502,9 @@ fun InputPasscodeDialog(
                         .focusRequester(requester),
                     value = passcode,
                     onValueChange = { newPasscode ->
-                        if (newPasscode.length <= 4) {
+                        if (newPasscode.length <= 4 &&
+                            (newPasscode.toIntOrNull() != null || newPasscode.isEmpty())
+                        ) {
                             setPasscode(newPasscode)
                         }
                     },
@@ -541,6 +548,65 @@ fun InputPasscodeDialog(
 
     LaunchedEffect(key1 = Unit) {
         requester.requestFocus()
+    }
+}
+
+@Composable
+fun ListPreferenceDialog(
+    title: (@Composable () -> Unit),
+    options: Map<String, String>,
+    selectedOption: String,
+    onSelectOption: (String) -> Unit,
+    onDismissRequest: (() -> Unit)? = null
+) {
+    Dialog(
+        onDismissRequest = { onDismissRequest?.invoke() },
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            contentColor = contentColorFor(backgroundColor = MaterialTheme.colorScheme.surface),
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+        ) {
+            Column(modifier = Modifier.padding(vertical = 24.dp)) {
+                Box(
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .padding(horizontal = 24.dp)
+                ) {
+                    CompositionLocalProvider(
+                        LocalTextStyle provides MaterialTheme.typography.headlineSmall
+                    ) {
+                        title()
+                    }
+                }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .fillMaxWidth()
+                ) {
+                    items(items = options.keys.toList(), key = { it }) { option ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onSelectOption(option)
+                                }
+                                .padding(vertical = 4.dp, horizontal = 12.dp)
+                        ) {
+                            RadioButton(
+                                selected = option == selectedOption,
+                                onClick = { onSelectOption(option) }
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = options.getOrDefault(option, ""))
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -599,5 +665,22 @@ fun AddElementDialogPreview() {
 fun InputPasscodePreview() {
     NextcloudPasswordsTheme {
         InputPasscodeDialog(title = "Input passcode", onInputPasscode = {})
+    }
+}
+
+@Preview
+@Composable
+fun ListPreferenceDialogPreview() {
+    NextcloudPasswordsTheme {
+        ListPreferenceDialog(
+            title = { Text("Language") },
+            options = mapOf(
+                "ES" to "Spanish",
+                "EN" to "English",
+                "CA" to "Catalan"
+            ),
+            selectedOption = "CA",
+            onSelectOption = {}
+        )
     }
 }

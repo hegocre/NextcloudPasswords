@@ -1,5 +1,15 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -8,8 +18,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -25,8 +37,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -63,6 +77,10 @@ fun NextcloudPasswordsApp(
 
     val needsMasterPassword by passwordsViewModel.needsMasterPassword.collectAsState()
     val masterPasswordInvalid by passwordsViewModel.masterPasswordInvalid.collectAsState()
+
+    val sessionOpen by passwordsViewModel.sessionOpen.collectAsState()
+    val showSessionOpenError by passwordsViewModel.showSessionOpenError.collectAsState()
+    val isRefreshing by passwordsViewModel.isRefreshing.collectAsState()
 
     var showLogOutDialog by rememberSaveable { mutableStateOf(false) }
     var showAddElementDialog by rememberSaveable { mutableStateOf(false) }
@@ -129,24 +147,53 @@ fun NextcloudPasswordsApp(
                 }
             },
             bottomBar = {
-                if (currentScreen != NCPScreen.PasswordEdit) {
-                    NCPBottomNavigation(
-                        allScreens = NCPScreen.values().toList().filter { !it.hidden },
-                        currentScreen = currentScreen,
-                        onScreenSelected = { screen ->
-                            navController.navigate(screen.name) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                Column {
+                    AnimatedVisibility(visible = !sessionOpen && showSessionOpenError && !isRefreshing) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.errorContainer,
+                            modifier = Modifier.clickable { (passwordsViewModel.sync()) }
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.cannot_connect_to_server),
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            )
+                        }
+                    }
+                    val navigationHeight =
+                        WindowInsets.navigationBars.getBottom(LocalDensity.current)
+                    AnimatedVisibility(
+                        visible = currentScreen != NCPScreen.PasswordEdit
+                                && currentScreen != NCPScreen.FolderEdit,
+                        enter = slideInVertically(initialOffsetY = { (it + navigationHeight) }),
+                        exit = slideOutVertically(targetOffsetY = { (it + navigationHeight) })
+                    ) {
+                        NCPBottomNavigation(
+                            allScreens = NCPScreen.entries.filter { !it.hidden },
+                            currentScreen = currentScreen,
+                            onScreenSelected = { screen ->
+                                navController.navigate(screen.name) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                    )
+                            },
+                        )
+                    }
                 }
             },
             floatingActionButton = {
-                if (!isAutofillRequest && currentScreen != NCPScreen.PasswordEdit) {
+                AnimatedVisibility(
+                    visible = !isAutofillRequest && currentScreen != NCPScreen.PasswordEdit &&
+                            currentScreen != NCPScreen.FolderEdit && sessionOpen,
+                    enter = scaleIn(),
+                    exit = scaleOut(),
+                ) {
                     FloatingActionButton(
                         onClick = { showAddElementDialog = true },
                     ) {
@@ -226,12 +273,14 @@ fun NextcloudPasswordsApp(
                 ) {
                     PasswordItem(
                         password = passwordsViewModel.visiblePassword.value,
-                        onEditPassword = {
-                            coroutineScope.launch {
-                                modalSheetState.hide()
+                        onEditPassword = if (sessionOpen) {
+                            {
+                                coroutineScope.launch {
+                                    modalSheetState.hide()
+                                }
+                                navController.navigate("${NCPScreen.PasswordEdit.name}/${passwordsViewModel.visiblePassword.value?.id ?: "none"}")
                             }
-                            navController.navigate("${NCPScreen.PasswordEdit.name}/${passwordsViewModel.visiblePassword.value?.id ?: "none"}")
-                        },
+                        } else null,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }

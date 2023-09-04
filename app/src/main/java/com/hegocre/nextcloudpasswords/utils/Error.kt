@@ -7,4 +7,6 @@ object Error {
     const val API_NO_SESSION = 10003
 
     const val SSL_HANDSHAKE_EXCEPTION = 20000
+
+    const val UNKNOWN = -1
 }

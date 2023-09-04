@@ -8,10 +8,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeClientDeauthorizedException
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyInvalidException
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyNeededException
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengePasswordException
+import com.hegocre.nextcloudpasswords.api.exceptions.ClientDeauthorizedException
+import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyInvalidException
+import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyNeededException
+import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengePasswordException
 import com.hegocre.nextcloudpasswords.data.folder.DeletedFolder
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.folder.FolderController
@@ -22,6 +22,7 @@ import com.hegocre.nextcloudpasswords.data.password.NewPassword
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.password.PasswordController
 import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
+import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -64,9 +65,18 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val apiController = ApiController.getInstance(application)
 
-    private val sessionOpen = apiController.sessionOpen
+    val sessionOpen
+        get() = apiController.sessionOpen
+
+    private val _showSessionOpenError = MutableStateFlow(false)
+    val showSessionOpenError: StateFlow<Boolean>
+        get() = _showSessionOpenError.asStateFlow()
+
     val csEv1Keychain: LiveData<CSEv1Keychain?>
         get() = apiController.csEv1Keychain
+
+    val serverSettings: LiveData<ServerSettings>
+        get() = apiController.serverSettings
 
     val passwords: LiveData<List<Password>>
         get() = PasswordController.getInstance(getApplication()).getPasswords()
@@ -79,7 +89,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         private set
 
     init {
-        if (!apiController.sessionOpen.value)
+        if (!sessionOpen.value)
             openSession(masterPassword.value)
     }
 
@@ -102,11 +112,13 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
             try {
                 if (apiController.openSession(password, saveKeychain)) {
                     sync()
+                    _showSessionOpenError.emit(true)
                     return@launch
                 }
+                _showSessionOpenError.emit(true)
             } catch (ex: PWDv1ChallengeMasterKeyNeededException) {
                 _needsMasterPassword.emit(true)
-            } catch (ex: PWDv1ChallengeClientDeauthorizedException) {
+            } catch (ex: ClientDeauthorizedException) {
                 _clientDeauthorized.postValue(true)
             } catch (ex: Exception) {
                 when (ex) {
@@ -116,6 +128,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                         preferencesManager.setMasterPassword(null)
                     }
                     else -> {
+                        _showSessionOpenError.emit(true)
                         ex.printStackTrace()
                     }
                 }

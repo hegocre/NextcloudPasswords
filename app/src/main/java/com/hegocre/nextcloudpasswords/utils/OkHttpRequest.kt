@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit
  */
 class OkHttpRequest private constructor() {
     private val client = OkHttpClient.Builder()
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(15, TimeUnit.SECONDS)
+        .writeTimeout(20, TimeUnit.SECONDS)
         .build()
 
     @Throws(

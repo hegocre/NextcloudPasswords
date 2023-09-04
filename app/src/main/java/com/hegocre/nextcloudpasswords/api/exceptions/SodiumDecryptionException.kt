@@ -1,3 +1,3 @@
-package com.hegocre.nextcloudpasswords.api.encryption.exceptions
+package com.hegocre.nextcloudpasswords.api.exceptions
 
 class SodiumDecryptionException(message: String) : Exception(message)

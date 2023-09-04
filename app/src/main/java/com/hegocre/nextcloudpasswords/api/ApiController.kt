@@ -4,8 +4,8 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyInvalidException
-import com.hegocre.nextcloudpasswords.api.encryption.exceptions.PWDv1ChallengeMasterKeyNeededException
+import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyInvalidException
+import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyNeededException
 import com.hegocre.nextcloudpasswords.data.folder.DeletedFolder
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.folder.NewFolder
@@ -19,11 +19,12 @@ import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import com.hegocre.nextcloudpasswords.utils.Result
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.coroutines.coroutineContext
 
 /**
  * Class with methods used to interact with [the API](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api)
@@ -40,19 +41,54 @@ class ApiController private constructor(context: Context) {
     private val foldersApi = FoldersApi.getInstance(server)
     private val sessionApi = SessionApi.getInstance(server)
     private val serviceApi = ServiceApi.getInstance(server)
+    private val settingsApi = SettingsApi.getInstance(server)
 
     private var sessionCode: String? = null
 
-    var csEv1Keychain: MutableLiveData<CSEv1Keychain?> = MutableLiveData<CSEv1Keychain?>(
+    val csEv1Keychain = MutableLiveData(
         preferencesManager.getCSEv1Keychain()?.let { csEv1KeychainJson ->
             CSEv1Keychain.fromJson(csEv1KeychainJson)
         }
     )
-        private set
+
+    val serverSettings = MutableLiveData(
+        preferencesManager.getServerSettings()
+    )
 
     private val _sessionOpen = MutableStateFlow(false)
     val sessionOpen: StateFlow<Boolean>
         get() = _sessionOpen.asStateFlow()
+
+    init {
+        CoroutineScope(Dispatchers.IO).launch {
+            var result = settingsApi.get()
+            while (result !is Result.Success) {
+                Log.e("ServerSettings", "Error getting server settings")
+                delay(5000L)
+                result = settingsApi.get()
+            }
+            Log.i("ServerSettings", "Got server settings")
+            val settings = result.data
+            serverSettings.postValue(settings)
+            preferencesManager.setServerSettings(settings)
+
+            var keepAliveDelay = (settings.sessionLifetime * 3 / 4 * 1000).toLong()
+            while (true) {
+                sessionCode?.let {
+                    delay(keepAliveDelay)
+                    keepAliveDelay = if (sessionApi.keepAlive(it)) {
+                        Log.i("KeepAlive", "Successfully sent keep alive request")
+                        (settings.sessionLifetime * 3 / 4 * 1000).toLong()
+                    } else {
+                        Log.e("KeepAlive", "Error sending keep alive request")
+                        _sessionOpen.emit(false)
+                        sessionCode = null
+                        5000L
+                    }
+                } ?: delay(5000L)
+            }
+        }
+    }
 
     /**
      * Requests and opens a session via the [SessionApi] class.
@@ -133,11 +169,6 @@ class ApiController private constructor(context: Context) {
         }
         sessionCode = openedSession.first
 
-        // Send keep alive request on background
-        CoroutineScope(coroutineContext).launch {
-            sessionCode?.let { sessionApi.keepAlive(it) }
-        }
-
         _sessionOpen.emit(true)
         return true
     }
@@ -165,7 +196,7 @@ class ApiController private constructor(context: Context) {
      * @return A result with the list of passwords if success, or an error code otherwise.
      */
     suspend fun listPasswords(): Result<List<Password>> {
-        if (!_sessionOpen.value) return Result.Error(Error.API_NO_SESSION)
+        if (!sessionOpen.value) return Result.Error(Error.API_NO_SESSION)
         return passwordsApi.list(sessionCode)
     }
 
@@ -176,7 +207,7 @@ class ApiController private constructor(context: Context) {
      * @return A result with the list of folders if success, or an error code otherwise.
      */
     suspend fun listFolders(): Result<List<Folder>> {
-        if (!_sessionOpen.value) return Result.Error(Error.API_NO_SESSION)
+        if (!sessionOpen.value) return Result.Error(Error.API_NO_SESSION)
         return foldersApi.list(sessionCode)
     }
 
@@ -206,7 +237,7 @@ class ApiController private constructor(context: Context) {
      * @return A boolean stating whether the password was successfully created.
      */
     suspend fun createPassword(newPassword: NewPassword): Boolean {
-        if (!_sessionOpen.value) return false
+        if (!sessionOpen.value) return false
         val result = passwordsApi.create(newPassword, sessionCode)
         return result is Result.Success
     }
@@ -219,7 +250,7 @@ class ApiController private constructor(context: Context) {
      * @return A boolean stating whether the password was successfully updated.
      */
     suspend fun updatePassword(updatedPassword: UpdatedPassword): Boolean {
-        if (!_sessionOpen.value) return false
+        if (!sessionOpen.value) return false
         val result = passwordsApi.update(updatedPassword, sessionCode)
         return result is Result.Success
     }
@@ -232,7 +263,7 @@ class ApiController private constructor(context: Context) {
      * @return A boolean stating whether the password was successfully deleted.
      */
     suspend fun deletePassword(deletedPassword: DeletedPassword): Boolean {
-        if (!_sessionOpen.value) return false
+        if (!sessionOpen.value) return false
         val result = passwordsApi.delete(deletedPassword, sessionCode)
         return result is Result.Success
     }
@@ -244,7 +275,7 @@ class ApiController private constructor(context: Context) {
      * @return A string with the generated password, or null if there was an error.
      */
     suspend fun generatePassword(): String? {
-        if (!_sessionOpen.value) return null
+        if (!sessionOpen.value) return null
         val result = serviceApi.password(sessionCode)
         return if (result is Result.Success) result.data else null
     }
@@ -257,7 +288,7 @@ class ApiController private constructor(context: Context) {
      * @return A boolean stating whether the folder was successfully created.
      */
     suspend fun createFolder(newFolder: NewFolder): Boolean {
-        if (!_sessionOpen.value) return false
+        if (!sessionOpen.value) return false
         val result = foldersApi.create(newFolder, sessionCode)
         return result is Result.Success
     }
@@ -270,7 +301,7 @@ class ApiController private constructor(context: Context) {
      * @return A boolean stating whether the folder was successfully updated.
      */
     suspend fun updateFolder(updatedFolder: UpdatedFolder): Boolean {
-        if (!_sessionOpen.value) return false
+        if (!sessionOpen.value) return false
         val result = foldersApi.update(updatedFolder, sessionCode)
         return result is Result.Success
     }
@@ -283,7 +314,7 @@ class ApiController private constructor(context: Context) {
      * @return A boolean stating whether the folder was successfully deleted.
      */
     suspend fun deleteFolder(deletedFolder: DeletedFolder): Boolean {
-        if (!_sessionOpen.value) return false
+        if (!sessionOpen.value) return false
         val result = foldersApi.delete(deletedFolder, sessionCode)
         return result is Result.Success
     }
