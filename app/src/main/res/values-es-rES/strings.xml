@@ -26,11 +26,6 @@
     <string name="start_view_preference_title">Vista inicial</string>
     <string name="client_deauthorized_toast">El cliente ha sido desautorizado. Por favor, vuelva a iniciar sesión</string>
     <string name="autofill_service">Servicio de autocompletar</string>
-    <string name="light">Claro</string>
-    <string name="from_system">Seg´un el sistema</string>
-    <string name="dark">Oscuro</string>
-    <string name="black">Negro</string>
-    <string name="app_theme">Tema de la aplicación</string>
     <string name="save">Guardar</string>
     <string name="edit_password">Editar contraseña</string>
     <string name="label">Nombre</string>
@@ -71,7 +66,6 @@
     <string name="clear_query">Limpiar los terminos de búsqueda</string>
     <string name="generate_password">Generar contraseña</string>
     <string name="copy_value">Copiar valor</string>
-    <string name="more_options">Más opciones</string>
     <string name="home">Inicio</string>
     <string name="folder">Carpeta</string>
     <string name="select">Seleccionar</string>
@@ -93,5 +87,5 @@
     <string name="passcodes_dont_match">Los códigos no coinciden</string>
     <string name="biometric_prompt_description">Por favor, verifique su identidad para acceder a las contraseñas</string>
     <string name="biometric_prompt_title">Autenticación biométrica</string>
-    <string name="cannot_connect_to_server">No de ha podido conectar al servidor. Por favor, actualize e inténtelo de nuevo.</string>
+    <string name="cannot_connect_to_server">No se ha podido conectar al servidor. Pulse para intentarlo de nuevo.</string>
 </resources>
