@@ -63,11 +63,9 @@ import com.hegocre.nextcloudpasswords.api.FoldersApi
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.Password
-import com.hegocre.nextcloudpasswords.ui.theme.Amber200
-import com.hegocre.nextcloudpasswords.ui.theme.Amber500
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
-import com.hegocre.nextcloudpasswords.ui.theme.isLight
+import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
 import com.hegocre.nextcloudpasswords.utils.isValidEmail
 import com.hegocre.nextcloudpasswords.utils.isValidURL
 import kotlinx.coroutines.Deferred
@@ -179,8 +177,7 @@ fun EditablePasswordView(
                     .padding(horizontal = 16.dp),
                 colors = if (editablePasswordState.favorite) ButtonDefaults.filledTonalButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurface,
-                    containerColor = (if (MaterialTheme.colorScheme.isLight()) Amber500 else Amber200)
-                        .copy(alpha = 0.3f)
+                    containerColor = MaterialTheme.colorScheme.favoriteColor.copy(alpha = 0.3f)
                 )
                 else ButtonDefaults.textButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.80f),

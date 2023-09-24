@@ -45,11 +45,9 @@ import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.FoldersApi
 import com.hegocre.nextcloudpasswords.data.folder.Folder
-import com.hegocre.nextcloudpasswords.ui.theme.Amber200
-import com.hegocre.nextcloudpasswords.ui.theme.Amber500
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
-import com.hegocre.nextcloudpasswords.ui.theme.isLight
+import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
 
 class EditableFolderState(originalFolder: Folder?) {
     var label by mutableStateOf(originalFolder?.label ?: "")
@@ -114,8 +112,7 @@ fun EditableFolderView(
                     .padding(horizontal = 16.dp),
                 colors = if (editableFolderState.favorite) ButtonDefaults.filledTonalButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurface,
-                    containerColor = (if (MaterialTheme.colorScheme.isLight()) Amber500 else Amber200)
-                        .copy(alpha = 0.3f)
+                    containerColor = MaterialTheme.colorScheme.favoriteColor.copy(alpha = 0.3f)
                 )
                 else ButtonDefaults.textButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.80f),

@@ -128,3 +128,23 @@ fun NextcloudPasswordsTheme(
 }
 
 fun ColorScheme.isLight() = this.background.luminance() > 0.5
+
+val ColorScheme.favoriteColor: Color
+    get() {
+        return if (isLight()) Amber500 else Amber200
+    }
+
+val ColorScheme.statusGood: Color
+    get() {
+        return if (isLight()) Green500 else Green200
+    }
+
+val ColorScheme.statusWeak: Color
+    get() {
+        return if (isLight()) Amber500 else Amber200
+    }
+
+val ColorScheme.statusBreached: Color
+    get() {
+        return if (isLight()) Red500 else Red200
+    }

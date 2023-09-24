@@ -52,10 +52,8 @@ import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.ui.components.markdown.MDDocument
-import com.hegocre.nextcloudpasswords.ui.theme.Amber200
-import com.hegocre.nextcloudpasswords.ui.theme.Amber500
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
-import com.hegocre.nextcloudpasswords.ui.theme.isLight
+import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
 import com.hegocre.nextcloudpasswords.utils.copyToClipboard
 import kotlinx.serialization.json.Json
 import org.commonmark.node.Document
@@ -119,7 +117,7 @@ fun PasswordItemContent(
                             contentDescription = stringResource(
                                 id = R.string.favorite
                             ),
-                            tint = if (MaterialTheme.colorScheme.isLight()) Amber500 else Amber200
+                            tint = MaterialTheme.colorScheme.favoriteColor
                         )
                     }
                 )
