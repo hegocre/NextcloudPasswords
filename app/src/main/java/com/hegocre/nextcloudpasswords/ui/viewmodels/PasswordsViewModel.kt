@@ -1,4 +1,4 @@
-package com.hegocre.nextcloudpasswords.data.viewmodels
+package com.hegocre.nextcloudpasswords.ui.viewmodels
 
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
