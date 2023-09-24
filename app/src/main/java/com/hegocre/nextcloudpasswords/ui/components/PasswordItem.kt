@@ -6,10 +6,11 @@ import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.twotone.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,6 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,10 +52,8 @@ import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.ui.components.markdown.MDDocument
-import com.hegocre.nextcloudpasswords.ui.theme.Amber200
-import com.hegocre.nextcloudpasswords.ui.theme.Amber500
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
-import com.hegocre.nextcloudpasswords.ui.theme.isLight
+import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
 import com.hegocre.nextcloudpasswords.utils.copyToClipboard
 import kotlinx.serialization.json.Json
 import org.commonmark.node.Document
@@ -99,20 +102,40 @@ fun PasswordItemContent(
                 .padding(horizontal = 16.dp),
             verticalAlignment = CenterVertically
         ) {
-            Text(
-                text = password.label,
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 2.dp)
-            )
-            if (password.favorite) {
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = stringResource(id = R.string.favorite),
-                    tint = if (MaterialTheme.colorScheme.isLight()) Amber500 else Amber200,
-                    modifier = Modifier.padding(start = 10.dp)
+            val favoriteInlineContent = mapOf(
+                Pair(
+                    "favorite",
+                    InlineTextContent(
+                        placeholder = Placeholder(
+                            width = LocalTextStyle.current.fontSize,
+                            height = LocalTextStyle.current.fontSize,
+                            placeholderVerticalAlign = PlaceholderVerticalAlign.Center
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = stringResource(
+                                id = R.string.favorite
+                            ),
+                            tint = MaterialTheme.colorScheme.favoriteColor
+                        )
+                    }
                 )
-            }
-            Spacer(modifier = Modifier.weight(1f))
+            )
+            Text(
+                text = buildAnnotatedString {
+                    append(password.label)
+                    if (password.favorite) {
+                        append(" ")
+                        appendInlineContent("favorite")
+                    }
+                },
+                inlineContent = favoriteInlineContent,
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier
+                    .padding(bottom = 2.dp)
+                    .weight(1f)
+            )
             if (password.editable) {
                 onEditPassword?.let {
                     IconButton(onClick = it) {
@@ -461,7 +484,7 @@ fun PasswordItemPreview() {
             PasswordItem(
                 password = Password(
                     id = "",
-                    label = "Nextcloud",
+                    label = "Nextcloud with a really long label",
                     username = "john_doe",
                     password = "secret_value",
                     url = "https://nextcloud.com/",

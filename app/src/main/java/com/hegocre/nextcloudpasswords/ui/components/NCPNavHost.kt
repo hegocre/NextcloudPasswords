@@ -38,8 +38,8 @@ import com.hegocre.nextcloudpasswords.data.password.NewPassword
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
-import com.hegocre.nextcloudpasswords.data.viewmodels.PasswordsViewModel
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
+import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import com.hegocre.nextcloudpasswords.utils.decryptFolders
 import com.hegocre.nextcloudpasswords.utils.decryptPasswords

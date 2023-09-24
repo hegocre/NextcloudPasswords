@@ -39,15 +39,11 @@ import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.ui.components.pullrefresh.PullRefreshIndicator
 import com.hegocre.nextcloudpasswords.ui.components.pullrefresh.pullRefresh
 import com.hegocre.nextcloudpasswords.ui.components.pullrefresh.rememberPullRefreshState
-import com.hegocre.nextcloudpasswords.ui.theme.Amber200
-import com.hegocre.nextcloudpasswords.ui.theme.Amber500
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
-import com.hegocre.nextcloudpasswords.ui.theme.Green200
-import com.hegocre.nextcloudpasswords.ui.theme.Green500
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
-import com.hegocre.nextcloudpasswords.ui.theme.Red200
-import com.hegocre.nextcloudpasswords.ui.theme.Red500
-import com.hegocre.nextcloudpasswords.ui.theme.isLight
+import com.hegocre.nextcloudpasswords.ui.theme.statusBreached
+import com.hegocre.nextcloudpasswords.ui.theme.statusGood
+import com.hegocre.nextcloudpasswords.ui.theme.statusWeak
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 
@@ -155,20 +151,11 @@ fun PasswordRow(
                     modifier = Modifier
                         .size(40.dp)
                         .padding(all = 8.dp),
-                    tint = (if (MaterialTheme.colorScheme.isLight()) {
-                        when (password.status) {
-                            0 -> Green500
-                            1 -> Amber500
-                            2 -> Red500
-                            else -> Color.Unspecified
-                        }
-                    } else {
-                        when (password.status) {
-                            0 -> Green200
-                            1 -> Amber200
-                            2 -> Red200
-                            else -> Color.Unspecified
-                        }
+                    tint = (when (password.status) {
+                        0 -> MaterialTheme.colorScheme.statusGood
+                        1 -> MaterialTheme.colorScheme.statusWeak
+                        2 -> MaterialTheme.colorScheme.statusBreached
+                        else -> Color.Unspecified
                     })
                 )
             }
