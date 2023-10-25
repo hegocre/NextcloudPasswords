@@ -5,7 +5,13 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.CancellationSignal
-import android.service.autofill.*
+import android.service.autofill.AutofillService
+import android.service.autofill.FillCallback
+import android.service.autofill.FillRequest
+import android.service.autofill.FillResponse
+import android.service.autofill.Presentations
+import android.service.autofill.SaveCallback
+import android.service.autofill.SaveRequest
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import com.hegocre.nextcloudpasswords.R
@@ -32,9 +38,10 @@ class NCPAutofillService : AutofillService() {
 
         val searchHint: String? = when {
             // If the structure contains a domain, use that (probably a web browser)
-            helper.webDomain != null -> {
+            helper.webDomain != null && helper.webDomain != "localhost" -> {
                 helper.webDomain
             }
+
             else -> with(packageManager) {
                 //Get the name of the package (QUERY_ALL_PACKAGES permission needed)
                 try {
@@ -44,7 +51,7 @@ class NCPAutofillService : AutofillService() {
                             PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong())
                         )
                     else
-                        @Suppress("DEPRECATION") getApplicationInfo(
+                        getApplicationInfo(
                             helper.packageName,
                             PackageManager.GET_META_DATA
                         )
