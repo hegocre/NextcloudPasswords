@@ -101,8 +101,7 @@ fun NCPNavHost(
 
     val filteredPasswordList = remember(passwordsDecryptionState.decryptedList, searchQuery) {
         passwordsDecryptionState.decryptedList?.filter {
-            !it.hidden && !it.trashed && (it.label.lowercase().contains(searchQuery.lowercase()) ||
-                    it.url.lowercase().contains(searchQuery.lowercase()))
+            !it.hidden && !it.trashed && it.matches(searchQuery)
         }
     }
     val filteredFolderList = remember(foldersDecryptionState.decryptedList, searchQuery) {
@@ -191,9 +190,7 @@ fun NCPNavHost(
             ) {
                 val filteredPasswordsParentFolder = remember(filteredPasswordList) {
                     filteredPasswordList?.filter {
-                        it.folder == FoldersApi.DEFAULT_FOLDER_UUID &&
-                                (it.label.lowercase().contains(searchQuery.lowercase()) ||
-                                        it.url.lowercase().contains(searchQuery.lowercase()))
+                        it.folder == FoldersApi.DEFAULT_FOLDER_UUID
                     }
                 }
                 val filteredFoldersParentFolder = remember(filteredFolderList) {
@@ -250,9 +247,7 @@ fun NCPNavHost(
                 entry.arguments?.getString("folder_uuid") ?: FoldersApi.DEFAULT_FOLDER_UUID
             val filteredPasswordsSelectedFolder = remember(filteredPasswordList) {
                 filteredPasswordList?.filter {
-                    it.folder == folderUuid &&
-                            (it.label.lowercase().contains(searchQuery.lowercase()) ||
-                                    it.url.lowercase().contains(searchQuery.lowercase()))
+                    it.folder == folderUuid
                 }
             }
             val filteredFoldersSelectedFolder = remember(filteredFolderList) {
