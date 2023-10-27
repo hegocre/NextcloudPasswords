@@ -210,6 +210,7 @@ fun NextcloudPasswordsApp(
                 navController = navController,
                 passwordsViewModel = passwordsViewModel,
                 searchQuery = searchQuery,
+                isAutofillRequest = isAutofillRequest,
                 modalSheetState = modalSheetState,
                 onPasswordClick = onPwClick,
                 searchVisibility = searchExpanded,

@@ -2,6 +2,7 @@ package com.hegocre.nextcloudpasswords.data.password
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.room.Entity
@@ -163,5 +164,19 @@ data class Password(
         }
 
 
+    }
+
+    fun matches(query: String): Boolean {
+        if (label.lowercase().contains(query.lowercase())) {
+            return true
+        }
+        if (url.lowercase().contains(query.lowercase())) {
+            return true
+        }
+
+        val queryDomain = Uri.parse(query).host?.removePrefix("www.")
+            ?: Uri.parse("https://$query").host?.removePrefix("www.") ?: return false
+
+        return url.lowercase().contains(queryDomain.lowercase())
     }
 }
