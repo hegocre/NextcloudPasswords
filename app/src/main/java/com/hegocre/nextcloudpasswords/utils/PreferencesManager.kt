@@ -76,6 +76,12 @@ class PreferencesManager private constructor(context: Context) {
             Json.encodeToString(it)
         }).commit()
 
+    fun getSkipCertificateValidation(): Boolean =
+        _encryptedSharedPrefs.getBoolean("SKIP_CERTIFICATE_VALIDATION", false)
+
+    fun setSkipCertificateValidation(value: Boolean): Boolean =
+        _encryptedSharedPrefs.edit().putBoolean("SKIP_CERTIFICATE_VALIDATION", value).commit()
+
     fun getShowIcons(): Flow<Boolean> = getPreference(PreferenceKeys.SHOW_ICONS, false)
     suspend fun setShowIcons(value: Boolean) = setPreference(PreferenceKeys.SHOW_ICONS, value)
 

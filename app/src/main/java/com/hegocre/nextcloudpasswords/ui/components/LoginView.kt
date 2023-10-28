@@ -3,8 +3,10 @@ package com.hegocre.nextcloudpasswords.ui.components
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.net.http.SslError
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.SslErrorHandler
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -14,18 +16,21 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -35,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 
 @Composable
 fun NCPLoginScreen(
@@ -184,9 +190,56 @@ fun NCPWebLoginScreen(
     url: String = ""
 ) {
     NextcloudPasswordsTheme {
+        val context = LocalContext.current
+
+        var showTlsDialog by rememberSaveable { mutableStateOf(false) }
+
+        var skipTlsValidation by rememberSaveable { mutableStateOf(false) }
+
         val (title, setTitle) = rememberSaveable {
             mutableStateOf(url)
         }
+
+        val webViewClient = remember(skipTlsValidation) {
+            object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+                    request?.url.toString().let { url ->
+                        setTitle(url)
+                        if (url.startsWith("nc://")) {
+                            //Login credentials captured, clear all login data
+                            view?.clearCache(true)
+                            view?.clearFormData()
+                            view?.clearHistory()
+                            view?.visibility = View.GONE
+                            if (skipTlsValidation) {
+                                PreferencesManager.getInstance(context)
+                                    .setSkipCertificateValidation(true)
+                            }
+                            onLoginUrl(url)
+                        } else view?.loadUrl(url, mapOf("OCS-APIREQUEST" to "true"))
+                    }
+                    return false
+                }
+
+                @SuppressLint("WebViewClientOnReceivedSslError")
+                override fun onReceivedSslError(
+                    view: WebView?,
+                    handler: SslErrorHandler?,
+                    error: SslError?
+                ) {
+                    if (skipTlsValidation) {
+                        handler?.proceed()
+                    } else {
+                        showTlsDialog = true
+                        super.onReceivedSslError(view, handler, error)
+                    }
+                }
+            }
+        }
+
         val (loadingProgress, setLoadingProgress) = remember { mutableIntStateOf(0) }
 
         Scaffold(
@@ -226,26 +279,6 @@ fun NCPWebLoginScreen(
 
                             this.webChromeClient = webChromeClient
 
-                            val webViewClient = object : WebViewClient() {
-                                override fun shouldOverrideUrlLoading(
-                                    view: WebView?,
-                                    request: WebResourceRequest?
-                                ): Boolean {
-                                    request?.url.toString().let { url ->
-                                        setTitle(url)
-                                        if (url.startsWith("nc://")) {
-                                            //Login credentials captured, clear all login data
-                                            clearCache(true)
-                                            clearFormData()
-                                            clearHistory()
-                                            visibility = View.GONE
-                                            onLoginUrl(url)
-                                        } else view?.loadUrl(url, mapOf("OCS-APIREQUEST" to "true"))
-                                    }
-                                    return false
-                                }
-                            }
-
                             this.webViewClient = webViewClient
 
                             settings.domStorageEnabled = true
@@ -256,6 +289,7 @@ fun NCPWebLoginScreen(
                         }
                     },
                     update = {
+                        it.webViewClient = webViewClient
                         it.loadUrl(url, mapOf("OCS-APIREQUEST" to "true"))
                     },
                 )
@@ -265,6 +299,33 @@ fun NCPWebLoginScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+            }
+
+            if (showTlsDialog) {
+                AlertDialog(
+                    onDismissRequest = { showTlsDialog = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                skipTlsValidation = true
+                                showTlsDialog = false
+                            }
+                        ) {
+                            Text(text = stringResource(id = android.R.string.ok))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                showTlsDialog = false
+                            }
+                        ) {
+                            Text(text = stringResource(id = android.R.string.cancel))
+                        }
+                    },
+                    title = { Text(stringResource(id = R.string.invalid_certificate)) },
+                    text = { Text(text = stringResource(id = R.string.invalid_certificate_dialog_text)) }
+                )
             }
         }
     }

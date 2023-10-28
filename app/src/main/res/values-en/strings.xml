@@ -87,4 +87,6 @@
     <string name="biometric_prompt_description">Please, verify your identity to access the passwords</string>
     <string name="biometric_prompt_title">Biometric authentication</string>
     <string name="cannot_connect_to_server">Cannot connect to server. Tap to retry.</string>
+    <string name="invalid_certificate">Invalid certificate</string>
+    <string name="invalid_certificate_dialog_text">The HTTPS certificate is invalid. Do you want to proceed?</string>
 </resources>
