@@ -21,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -105,7 +106,7 @@ fun LoginView(
     )
 
     Box(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         LoginCard(
@@ -134,6 +135,15 @@ fun LoginView(
                     }
                 }
             }
+        )
+
+        Text(
+            text = "v${stringResource(id = R.string.version_name)} (${stringResource(id = R.string.version_code)})",
+            fontSize = 12.sp,
+            color = LocalContentColor.current.copy(alpha = 0.7f),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .windowInsetsBottomHeight(WindowInsets.navigationBars)
         )
     }
 }
