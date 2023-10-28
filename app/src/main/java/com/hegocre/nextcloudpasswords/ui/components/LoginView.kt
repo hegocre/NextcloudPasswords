@@ -15,7 +15,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -109,42 +111,48 @@ fun LoginView(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        LoginCard(
-            text = urlText,
-            onTextChange = setUrlText,
-            errorText = errorText,
-            onLoginButtonClick = {
-                when {
-                    urlText.isBlank() -> {
-                        errorText = errorMessages[0]
-                    }
-                    urlText.startsWith("http://") -> {
-                        errorText = errorMessages[1]
-                    }
-                    else -> {
-                        errorText = ""
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.verticalScroll(rememberScrollState())
+        ) {
+            LoginCard(
+                text = urlText,
+                onTextChange = setUrlText,
+                errorText = errorText,
+                onLoginButtonClick = {
+                    when {
+                        urlText.isBlank() -> {
+                            errorText = errorMessages[0]
+                        }
 
-                        if (!urlText.startsWith("https://"))
-                            setUrlText(String.format("https://%s", urlText))
+                        urlText.startsWith("http://") -> {
+                            errorText = errorMessages[1]
+                        }
 
-                        loginIntent.putExtra(
-                            "login_url",
-                            if (urlText.startsWith("https://")) urlText else "https://$urlText"
-                        )
-                        launchLoginWebView.launch(loginIntent)
+                        else -> {
+                            errorText = ""
+
+                            if (!urlText.startsWith("https://"))
+                                setUrlText(String.format("https://%s", urlText))
+
+                            loginIntent.putExtra(
+                                "login_url",
+                                if (urlText.startsWith("https://")) urlText else "https://$urlText"
+                            )
+                            launchLoginWebView.launch(loginIntent)
+                        }
                     }
                 }
-            }
-        )
+            )
 
-        Text(
-            text = "v${stringResource(id = R.string.version_name)} (${stringResource(id = R.string.version_code)})",
-            fontSize = 12.sp,
-            color = LocalContentColor.current.copy(alpha = 0.7f),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .windowInsetsBottomHeight(WindowInsets.navigationBars)
-        )
+            Text(
+                text = "v${stringResource(id = R.string.version_name)} (${stringResource(id = R.string.version_code)})",
+                fontSize = 12.sp,
+                color = LocalContentColor.current.copy(alpha = 0.7f),
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+
     }
 }
 
