@@ -38,24 +38,21 @@ class OkHttpRequest private constructor() {
         object : X509TrustManager {
             @SuppressLint("TrustAllX509TrustManager")
             override fun checkClientTrusted(p0: Array<out X509Certificate>?, p1: String?) {
-
             }
 
             @SuppressLint("TrustAllX509TrustManager")
             override fun checkServerTrusted(p0: Array<out X509Certificate>?, p1: String?) {
-
             }
 
-            override fun getAcceptedIssuers(): Array<X509Certificate> {
-                return arrayOf()
-            }
-
+            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
         }
         val sslContext = SSLContext.getInstance("SSL")
         sslContext.init(null, arrayOf(insecureTrustManager), java.security.SecureRandom())
         insecureClient = OkHttpClient.Builder()
             .readTimeout(15, TimeUnit.SECONDS)
             .writeTimeout(20, TimeUnit.SECONDS)
+            .sslSocketFactory(sslContext.socketFactory, insecureTrustManager)
+            .hostnameVerifier { _, _ -> true }
             .build()
     }
 
