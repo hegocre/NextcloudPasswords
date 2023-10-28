@@ -2,7 +2,7 @@
 buildscript {
     ext {
         kotlin_version = '1.9.10'
-        room_version = '2.5.2'
+        room_version = '2.6.0'
         ksp_version = '1.0.13'
     }
     repositories {
