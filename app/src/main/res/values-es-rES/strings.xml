@@ -88,4 +88,6 @@
     <string name="biometric_prompt_description">Por favor, verifique su identidad para acceder a las contraseñas</string>
     <string name="biometric_prompt_title">Autenticación biométrica</string>
     <string name="cannot_connect_to_server">No se ha podido conectar al servidor. Pulse para intentarlo de nuevo.</string>
+    <string name="invalid_certificate">Certificado inválido</string>
+    <string name="invalid_certificate_dialog_text">El certificado HTTPS es inválido. Desea proceder con la conexión?</string>
 </resources>

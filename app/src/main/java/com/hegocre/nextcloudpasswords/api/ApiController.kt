@@ -16,6 +16,7 @@ import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.utils.Error
+import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import com.hegocre.nextcloudpasswords.utils.Result
 import kotlinx.coroutines.CoroutineScope
@@ -88,6 +89,8 @@ class ApiController private constructor(context: Context) {
                 } ?: delay(5000L)
             }
         }
+        OkHttpRequest.getInstance().allowInsecureRequests =
+            preferencesManager.getSkipCertificateValidation()
     }
 
     /**
