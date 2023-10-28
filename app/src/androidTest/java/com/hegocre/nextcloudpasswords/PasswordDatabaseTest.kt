@@ -6,7 +6,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.databases.AppDatabase
 import com.hegocre.nextcloudpasswords.databases.passworddatabase.PasswordDatabaseDao
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -40,7 +39,6 @@ class PasswordDatabaseTest {
         database.close()
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     @Throws(Exception::class)
     fun insertAndGet() = runTest {
