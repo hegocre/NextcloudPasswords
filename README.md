@@ -16,6 +16,7 @@ devices easier.
 - Edit and create passwords, including custom fields
 - Edit and create folders
 - Show site icons, with cache to minimize data usage (optional)
+- Supports self-signed certificates
 - App lock screen with both passcode and biometric authentication
 - Autofill service (Android 8.0 or higher)
 - Uses the latest technologies like Kotlin and Jetpack Compose
