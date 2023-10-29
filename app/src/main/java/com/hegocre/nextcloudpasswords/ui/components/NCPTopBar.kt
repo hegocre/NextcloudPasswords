@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import kotlinx.coroutines.job
 
 object AppBarDefaults {
     val TopAppBarElevation = 4.dp
@@ -238,7 +239,9 @@ fun SearchAppBar(
     }
 
     LaunchedEffect(key1 = Unit) {
-        requester.requestFocus()
+        coroutineContext.job.invokeOnCompletion {
+            requester.requestFocus()
+        }
     }
 }
 

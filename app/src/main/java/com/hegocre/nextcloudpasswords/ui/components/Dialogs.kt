@@ -65,6 +65,7 @@ import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import kotlinx.coroutines.job
 
 @Composable
 fun MasterPasswordDialog(
@@ -76,7 +77,7 @@ fun MasterPasswordDialog(
     errorText: String = "",
     onDismissRequest: (() -> Unit)? = null
 ) {
-    val requester = FocusRequester()
+    val requester = remember { FocusRequester() }
 
     var showPassword by rememberSaveable { mutableStateOf(false) }
     Dialog(
@@ -143,7 +144,9 @@ fun MasterPasswordDialog(
     }
 
     LaunchedEffect(key1 = Unit) {
-        requester.requestFocus()
+        coroutineContext.job.invokeOnCompletion {
+            requester.requestFocus()
+        }
     }
 }
 
@@ -547,7 +550,9 @@ fun InputPasscodeDialog(
     }
 
     LaunchedEffect(key1 = Unit) {
-        requester.requestFocus()
+        coroutineContext.job.invokeOnCompletion {
+            requester.requestFocus()
+        }
     }
 }
 
