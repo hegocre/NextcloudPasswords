@@ -6,9 +6,9 @@ devices easier.
 
 ## Screenshots
 
-| ![Light app lock view](/screenshots/screenshot1light.png) | ![Light password list view](/screenshots/screenshot2light.png) | ![Light password detail view](/screenshots/screenshot3light.png) | ![Light password edit view](/screenshots/screenshot4light.png) |
-|-----------------------------------------------------------|----------------------------------------------------------------|------------------------------------------------------------------|----------------------------------------------------------------|
-| ![Dark app lock view](/screenshots/screenshot1dark.png)   | ![Dark password list view](/screenshots/screenshot2dark.png)   | ![Dark password detail view](/screenshots/screenshot3dark.png)   | ![Dark password edit view](/screenshots/screenshot4dark.png)   |
+| ![Light app lock view](/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png) | ![Light password list view](/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png) | ![Light password detail view](/fastlane/metadata/android/en-US/images/phoneScreenshots/3.png) | ![Light password edit view](/fastlane/metadata/android/en-US/images/phoneScreenshots/4.png) |
+|----------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| ![Dark app lock view](/fastlane/metadata/android/en-US/images/phoneScreenshots/5.png)  | ![Dark password list view](/fastlane/metadata/android/en-US/images/phoneScreenshots/6.png)  | ![Dark password detail view](/fastlane/metadata/android/en-US/images/phoneScreenshots/7.png)  | ![Dark password edit view](/fastlane/metadata/android/en-US/images/phoneScreenshots/8.png)  |
 
 ## Features
 
