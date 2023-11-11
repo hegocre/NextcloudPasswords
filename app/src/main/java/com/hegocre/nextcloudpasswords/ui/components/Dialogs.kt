@@ -90,6 +90,14 @@ fun MasterPasswordDialog(
             tonalElevation = 6.dp
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
+                LaunchedEffect(key1 = Unit) {
+                    coroutineContext.job.invokeOnCompletion {
+                        if (it?.cause == null) {
+                            requester.requestFocus()
+                        }
+                    }
+                }
+
                 OutlinedTextFieldWithCaption(
                     text = masterPassword,
                     onValueChange = setMasterPassword,
@@ -140,12 +148,6 @@ fun MasterPasswordDialog(
                     Text(text = stringResource(android.R.string.ok))
                 }
             }
-        }
-    }
-
-    LaunchedEffect(key1 = Unit) {
-        coroutineContext.job.invokeOnCompletion {
-            requester.requestFocus()
         }
     }
 }
@@ -474,7 +476,7 @@ fun InputPasscodeDialog(
     onInputPasscode: (String) -> Unit,
     onDismissRequest: (() -> Unit)? = null
 ) {
-    val requester = FocusRequester()
+    val requester = remember { FocusRequester() }
 
     var showPasscode by rememberSaveable { mutableStateOf(false) }
     val (passcode, setPasscode) = remember { mutableStateOf("") }
@@ -498,6 +500,14 @@ fun InputPasscodeDialog(
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
+
+                LaunchedEffect(key1 = Unit) {
+                    coroutineContext.job.invokeOnCompletion {
+                        if (it?.cause == null) {
+                            requester.requestFocus()
+                        }
+                    }
+                }
 
                 OutlinedTextField(
                     modifier = Modifier
@@ -546,12 +556,6 @@ fun InputPasscodeDialog(
                     Text(text = stringResource(android.R.string.ok))
                 }
             }
-        }
-    }
-
-    LaunchedEffect(key1 = Unit) {
-        coroutineContext.job.invokeOnCompletion {
-            requester.requestFocus()
         }
     }
 }

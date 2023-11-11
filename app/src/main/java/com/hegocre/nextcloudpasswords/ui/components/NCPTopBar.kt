@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -185,7 +186,7 @@ fun SearchAppBar(
     onBackPressed: () -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val requester = FocusRequester()
+    val requester = remember { FocusRequester() }
 
     Column(
         Modifier.background(MaterialTheme.colorScheme.surfaceColorAtElevation(AppBarDefaults.TopAppBarElevation))
@@ -203,6 +204,15 @@ fun SearchAppBar(
                     contentDescription = stringResource(id = R.string.back)
                 )
             }
+
+            LaunchedEffect(key1 = Unit) {
+                coroutineContext.job.invokeOnCompletion {
+                    if (it?.cause == null) {
+                        requester.requestFocus()
+                    }
+                }
+            }
+
             TextField(
                 modifier = Modifier
                     .weight(1f)
@@ -235,12 +245,6 @@ fun SearchAppBar(
                     contentDescription = stringResource(id = R.string.clear_query)
                 )
             }
-        }
-    }
-
-    LaunchedEffect(key1 = Unit) {
-        coroutineContext.job.invokeOnCompletion {
-            requester.requestFocus()
         }
     }
 }
