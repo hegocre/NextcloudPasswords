@@ -126,8 +126,8 @@ class EditablePasswordState(originalPassword: Password?) {
                     notes = it[4]
                     folder = it[5]
                     customFields =
-                        Json.decodeFromString<List<CustomField>>(it[5]).toMutableStateList()
-                    favorite = it[6].toBooleanStrictOrNull() ?: false
+                        Json.decodeFromString<List<CustomField>>(it[6]).toMutableStateList()
+                    favorite = it[7].toBooleanStrictOrNull() ?: false
                 }
             }
         )
