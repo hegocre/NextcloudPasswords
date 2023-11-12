@@ -15,9 +15,6 @@ import androidx.annotation.RequiresApi
  */
 @RequiresApi(Build.VERSION_CODES.O)
 class AssistStructureParser(assistStructure: AssistStructure) {
-    val nodes = mutableListOf<AssistStructure.ViewNode>()
-
-    val allAutofillIds = mutableListOf<AutofillId>()
     val usernameAutofillIds = mutableListOf<AutofillId>()
     val passwordAutofillIds = mutableListOf<AutofillId>()
 
@@ -42,10 +39,10 @@ class AssistStructureParser(assistStructure: AssistStructure) {
      * @param node The node to parse.
      */
     private fun parseNode(node: AssistStructure.ViewNode) {
-        nodes.add(node)
+        //nodes.add(node)
 
         node.autofillId?.let { autofillId ->
-            allAutofillIds.add(autofillId)
+            //allAutofillIds.add(autofillId)
             val fieldType = getFieldType(node)
             if (fieldType != null) {
                 if (fieldType == FIELD_TYPE_USERNAME)
@@ -74,9 +71,8 @@ class AssistStructureParser(assistStructure: AssistStructure) {
      * @return The determined field type.
      */
     private fun getFieldType(node: AssistStructure.ViewNode): Int? {
-        //Determine field type, first by autofill hint. If there are no hints, try with html attributes.
-        //If no html, try with input type (may sometimes work wrong)
         if (node.autofillType == View.AUTOFILL_TYPE_TEXT) {
+            // Get by autofill hint
             node.autofillHints?.forEach { hint ->
                 if (hint == View.AUTOFILL_HINT_USERNAME || hint == View.AUTOFILL_HINT_EMAIL_ADDRESS) {
                     return FIELD_TYPE_USERNAME
@@ -84,7 +80,12 @@ class AssistStructureParser(assistStructure: AssistStructure) {
                     return FIELD_TYPE_PASSWORD
                 }
             }
-            if (node.hasAttribute("type", "mail") ||
+
+            // Get by HTML attributes
+            if (node.hasAttribute("type", "email") ||
+                node.hasAttribute("type", "tel") ||
+                node.hasAttribute("type", "text") ||
+                node.hasAttribute("name", "email") ||
                 node.hasAttribute("name", "mail") ||
                 node.hasAttribute("name", "user") ||
                 node.hasAttribute("name", "username")
@@ -94,11 +95,15 @@ class AssistStructureParser(assistStructure: AssistStructure) {
             if (node.hasAttribute("type", "password")) {
                 return FIELD_TYPE_PASSWORD
             }
+
+
             if (node.hint?.lowercase()?.contains("user") == true ||
                 node.hint?.lowercase()?.contains("mail") == true
             ) {
                 return FIELD_TYPE_USERNAME
             }
+
+            // Get by field type
             if (node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_PASSWORD) ||
                 node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) ||
                 node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD)

@@ -59,19 +59,6 @@ object AutofillHelper {
         val helper = AssistStructureParser(assistStructure)
         return Dataset.Builder()
             .apply {
-                helper.nodes.forEach { node ->
-                    if (node.isFocused) {
-                        node.autofillId?.let { autofillId ->
-                            addInlineAutofillValue(
-                                context,
-                                autofillId,
-                                password?.label,
-                                password?.username,
-                                inlinePresentationSpec
-                            )
-                        }
-                    }
-                }
                 helper.usernameAutofillIds.forEach { autofillId ->
                     addInlineAutofillValue(
                         context,
@@ -105,13 +92,6 @@ object AutofillHelper {
     ): Dataset {
         val helper = AssistStructureParser(assistStructure)
         return Dataset.Builder().apply {
-            helper.nodes.forEach { node ->
-                if (node.isFocused) {
-                    node.autofillId?.let { autofillId ->
-                        addAutofillValue(context, autofillId, password?.label, password?.username)
-                    }
-                }
-            }
             helper.usernameAutofillIds.forEach { autofillId ->
                 addAutofillValue(context, autofillId, password?.label, password?.username)
             }
