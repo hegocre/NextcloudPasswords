@@ -89,12 +89,12 @@ class NCPAutofillService : AutofillService() {
             PendingIntent.FLAG_CANCEL_CURRENT
         }
 
-        val pendingIntent = PendingIntent.getActivity(
+        val intentSender = PendingIntent.getActivity(
             this,
             1001,
             authIntent,
             intentFlags
-        )
+        ).intentSender
 
         if (helper.passwordAutofillIds.isNotEmpty()) {
             val fillResponse = FillResponse.Builder().apply {
@@ -105,7 +105,7 @@ class NCPAutofillService : AutofillService() {
                             null,
                             structure,
                             inlineSuggestionsRequest?.inlinePresentationSpecs?.first(),
-                            pendingIntent.intentSender
+                            intentSender
                         )
                     )
                 } else {
@@ -115,7 +115,7 @@ class NCPAutofillService : AutofillService() {
                             null,
                             structure,
                             null,
-                            pendingIntent.intentSender
+                            intentSender
                         )
                     )
                 }

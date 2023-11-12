@@ -39,10 +39,7 @@ class AssistStructureParser(assistStructure: AssistStructure) {
      * @param node The node to parse.
      */
     private fun parseNode(node: AssistStructure.ViewNode) {
-        //nodes.add(node)
-
         node.autofillId?.let { autofillId ->
-            //allAutofillIds.add(autofillId)
             val fieldType = getFieldType(node)
             if (fieldType != null) {
                 if (fieldType == FIELD_TYPE_USERNAME)
