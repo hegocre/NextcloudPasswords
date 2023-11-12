@@ -1,9 +1,8 @@
-package com.hegocre.nextcloudpasswords.utils
+package com.hegocre.nextcloudpasswords.services.autofill
 
 import android.app.assist.AssistStructure
 import android.os.Build
 import android.text.InputType
-import android.util.Log
 import android.view.View
 import android.view.autofill.AutofillId
 import androidx.annotation.RequiresApi
@@ -80,10 +79,8 @@ class AssistStructureParser(assistStructure: AssistStructure) {
         if (node.autofillType == View.AUTOFILL_TYPE_TEXT) {
             node.autofillHints?.forEach { hint ->
                 if (hint == View.AUTOFILL_HINT_USERNAME || hint == View.AUTOFILL_HINT_EMAIL_ADDRESS) {
-                    Log.d("AUTOFILL", "Found autofill hint username")
                     return FIELD_TYPE_USERNAME
                 } else if (hint == View.AUTOFILL_HINT_PASSWORD) {
-                    Log.d("AUTOFILL", "Found autofill hint password")
                     return FIELD_TYPE_PASSWORD
                 }
             }
@@ -92,25 +89,20 @@ class AssistStructureParser(assistStructure: AssistStructure) {
                 node.hasAttribute("name", "user") ||
                 node.hasAttribute("name", "username")
             ) {
-                Log.d("AUTOFILL", "Found autofill attribute username")
                 return FIELD_TYPE_USERNAME
             }
             if (node.hasAttribute("type", "password")) {
-                Log.d("AUTOFILL", "Found autofill attribute password")
                 return FIELD_TYPE_PASSWORD
             }
             if (node.hint?.lowercase()?.contains("user") == true ||
                 node.hint?.lowercase()?.contains("mail") == true
             ) {
-                Log.d("AUTOFILL", "Found autofill field username")
                 return FIELD_TYPE_USERNAME
             }
-            Log.d("AUTOFILL", "Input type = ${node.inputType}")
             if (node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_PASSWORD) ||
                 node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) ||
                 node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD)
             ) {
-                Log.d("AUTOFILL", "Found autofill field password")
                 return FIELD_TYPE_PASSWORD
             }
         }

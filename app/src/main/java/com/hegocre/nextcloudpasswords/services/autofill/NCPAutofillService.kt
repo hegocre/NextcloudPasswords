@@ -1,5 +1,6 @@
-package com.hegocre.nextcloudpasswords.services
+package com.hegocre.nextcloudpasswords.services.autofill
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,17 +10,16 @@ import android.service.autofill.AutofillService
 import android.service.autofill.FillCallback
 import android.service.autofill.FillRequest
 import android.service.autofill.FillResponse
-import android.service.autofill.Presentations
 import android.service.autofill.SaveCallback
 import android.service.autofill.SaveRequest
-import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
-import com.hegocre.nextcloudpasswords.R
+import com.hegocre.nextcloudpasswords.data.user.UserController
+import com.hegocre.nextcloudpasswords.data.user.UserException
 import com.hegocre.nextcloudpasswords.ui.activities.MainActivity
-import com.hegocre.nextcloudpasswords.utils.AssistStructureParser
 
 @RequiresApi(Build.VERSION_CODES.O)
 class NCPAutofillService : AutofillService() {
+    @SuppressLint("RestrictedApi")
     override fun onFillRequest(
         request: FillRequest,
         cancellationSignal: CancellationSignal,
@@ -35,6 +35,17 @@ class NCPAutofillService : AutofillService() {
             callback.onSuccess(null)
             return
         }
+        try {
+            UserController.getInstance(applicationContext).getServer()
+        } catch (e: UserException) {
+            // User not logged in, cannot fill request
+            callback.onSuccess(null)
+            return
+        }
+
+        val inlineSuggestionsRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            request.inlineSuggestionsRequest
+        } else null
 
         val searchHint: String? = when {
             // If the structure contains a domain, use that (probably a web browser)
@@ -64,10 +75,6 @@ class NCPAutofillService : AutofillService() {
             }
         }
 
-        val authPresentation = RemoteViews(packageName, R.layout.password_list_item).apply {
-            setTextViewText(R.id.text, getString(R.string.app_name))
-        }
-
         // Intent to open MainActivity and provide a response to the request
         val authIntent = Intent(this, MainActivity::class.java).apply {
             putExtra(AUTOFILL_REQUEST, true)
@@ -82,28 +89,36 @@ class NCPAutofillService : AutofillService() {
             PendingIntent.FLAG_CANCEL_CURRENT
         }
 
-        val intentSender = PendingIntent.getActivity(
+        val pendingIntent = PendingIntent.getActivity(
             this,
             1001,
             authIntent,
             intentFlags
-        ).intentSender
+        )
 
         if (helper.passwordAutofillIds.isNotEmpty()) {
             val fillResponse = FillResponse.Builder().apply {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                    setAuthentication(
-                        helper.allAutofillIds.toTypedArray(),
-                        intentSender,
-                        Presentations.Builder().setMenuPresentation(authPresentation).build()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    addDataset(
+                        AutofillHelper.buildDataset(
+                            applicationContext,
+                            null,
+                            structure,
+                            inlineSuggestionsRequest?.inlinePresentationSpecs?.first(),
+                            pendingIntent.intentSender
+                        )
                     )
-                else
-                    @Suppress("DEPRECATION")
-                    setAuthentication(
-                        helper.allAutofillIds.toTypedArray(),
-                        intentSender,
-                        authPresentation
+                } else {
+                    addDataset(
+                        AutofillHelper.buildDataset(
+                            applicationContext,
+                            null,
+                            structure,
+                            null,
+                            pendingIntent.intentSender
+                        )
                     )
+                }
             }.build()
 
 

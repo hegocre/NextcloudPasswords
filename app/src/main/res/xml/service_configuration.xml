@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <autofill-service xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:targetApi="p"
-    android:settingsActivity="com.hegocre.nextcloudpasswords.ui.activities.SettingsActivity">
+    android:settingsActivity="com.hegocre.nextcloudpasswords.ui.activities.SettingsActivity"
+    android:supportsInlineSuggestions="true"
+    tools:targetApi="r">
 
     <compatibility-package
         android:name="alook.browser"
