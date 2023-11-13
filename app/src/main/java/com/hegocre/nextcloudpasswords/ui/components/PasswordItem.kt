@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
@@ -272,9 +272,9 @@ fun PasswordItemContent(
             }
 
             if (customFields.isNotEmpty()) {
-                items(
+                itemsIndexed(
                     items = customFields,
-                    key = { "${password.id}_${it.label}" }) { customField ->
+                    key = { index, field -> "${index}_${password.id}_${field.label}" }) {_, customField ->
                     when (customField.type) {
                         CustomField.TYPE_TEXT, CustomField.TYPE_EMAIL -> {
                             PasswordTextField(
