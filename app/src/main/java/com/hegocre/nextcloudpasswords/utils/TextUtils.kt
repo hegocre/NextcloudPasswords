@@ -1,5 +1,7 @@
 package com.hegocre.nextcloudpasswords.utils
 
+import android.webkit.URLUtil
+
 fun String.isValidEmail(): Boolean {
     return if (this.isBlank()) {
         true
@@ -12,6 +14,6 @@ fun String.isValidURL(): Boolean {
     return if (this.isBlank()) {
         true
     } else {
-        android.util.Patterns.WEB_URL.matcher(this).matches()
+        URLUtil.isValidUrl(this) || URLUtil.isValidUrl("http://${this}")
     }
 }
