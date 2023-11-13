@@ -155,6 +155,11 @@ object AutofillHelper {
     ) {
         val autofillLabel = label ?: context.getString(R.string.app_name)
 
+        val authIntent = Intent().apply {
+            setPackage(context.packageName)
+            identifier = AUTOFILL_INTENT_ID
+        }
+
         val intentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
         } else {
@@ -164,7 +169,7 @@ object AutofillHelper {
         val pendingIntent = PendingIntent.getActivity(
             context,
             1001,
-            Intent(),
+            authIntent,
             intentFlags
         )
 
@@ -208,4 +213,6 @@ object AutofillHelper {
             )
         }
     }
+
+    const val AUTOFILL_INTENT_ID = "com.hegocre.nextcloudpasswords.intents.autofill"
 }

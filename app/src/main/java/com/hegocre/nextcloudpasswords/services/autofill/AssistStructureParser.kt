@@ -17,6 +17,8 @@ import androidx.annotation.RequiresApi
 class AssistStructureParser(assistStructure: AssistStructure) {
     val usernameAutofillIds = mutableListOf<AutofillId>()
     val passwordAutofillIds = mutableListOf<AutofillId>()
+    private var lastTextAutofillId: AutofillId? = null
+    private var candidateTextAutofillId: AutofillId? = null
 
     private val webDomains = HashMap<String, Int>()
 
@@ -31,6 +33,10 @@ class AssistStructureParser(assistStructure: AssistStructure) {
             val windowNode = assistStructure.getWindowNodeAt(i)
             windowNode.rootViewNode?.let { parseNode(it) }
         }
+        if (usernameAutofillIds.isEmpty())
+            candidateTextAutofillId?.let {
+                usernameAutofillIds.add(it)
+            }
     }
 
     /**
@@ -42,10 +48,20 @@ class AssistStructureParser(assistStructure: AssistStructure) {
         node.autofillId?.let { autofillId ->
             val fieldType = getFieldType(node)
             if (fieldType != null) {
-                if (fieldType == FIELD_TYPE_USERNAME)
-                    usernameAutofillIds.add(autofillId)
-                else if (fieldType == FIELD_TYPE_PASSWORD)
-                    passwordAutofillIds.add(autofillId)
+                when (fieldType) {
+                    FIELD_TYPE_USERNAME -> {
+                        usernameAutofillIds.add(autofillId)
+                    }
+                    FIELD_TYPE_PASSWORD -> {
+                        passwordAutofillIds.add(autofillId)
+                        // We save the autofillId of the field above the password field,
+                        // in case we don't find any explicit username field
+                        candidateTextAutofillId = lastTextAutofillId
+                    }
+                    FIELD_TYPE_TEXT -> {
+                        lastTextAutofillId = autofillId
+                    }
+                }
             }
         }
 
@@ -107,6 +123,10 @@ class AssistStructureParser(assistStructure: AssistStructure) {
             ) {
                 return FIELD_TYPE_PASSWORD
             }
+
+            if (node.inputType.isTextType(InputType.TYPE_CLASS_TEXT)) {
+                return FIELD_TYPE_TEXT
+            }
         }
         return null
     }
@@ -136,5 +156,6 @@ class AssistStructureParser(assistStructure: AssistStructure) {
     companion object {
         private const val FIELD_TYPE_USERNAME = 0
         private const val FIELD_TYPE_PASSWORD = 1
+        private const val FIELD_TYPE_TEXT = 2
     }
 }

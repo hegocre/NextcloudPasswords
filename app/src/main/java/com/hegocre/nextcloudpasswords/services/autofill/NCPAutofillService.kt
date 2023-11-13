@@ -15,7 +15,6 @@ import android.service.autofill.SaveRequest
 import androidx.annotation.RequiresApi
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.data.user.UserException
-import com.hegocre.nextcloudpasswords.ui.activities.MainActivity
 
 @RequiresApi(Build.VERSION_CODES.O)
 class NCPAutofillService : AutofillService() {
@@ -76,7 +75,8 @@ class NCPAutofillService : AutofillService() {
         }
 
         // Intent to open MainActivity and provide a response to the request
-        val authIntent = Intent(this, MainActivity::class.java).apply {
+        val authIntent = Intent("com.hegocre.nextcloudpasswords.action.main").apply {
+            setPackage(packageName)
             putExtra(AUTOFILL_REQUEST, true)
             searchHint?.let {
                 putExtra(AUTOFILL_SEARCH_HINT, it)
