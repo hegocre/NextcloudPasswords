@@ -2,3 +2,5 @@ files:
   - source: /app/src/main/res/values/strings.xml
     translation: /app/src/main/res/values-%android_code%/%original_file_name%
     translate_attributes: 0
+  - source: /fastlane/metadata/android/en-US/*_description.txt
+    translation: /fastlane/metadata/android/%locale%/%original_path%
