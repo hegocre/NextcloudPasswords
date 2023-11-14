@@ -5,14 +5,7 @@ import android.app.assist.AssistStructure
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.service.autofill.Dataset
-import android.service.autofill.Field
-import android.service.autofill.FillResponse
-import android.service.autofill.Presentations
-import android.view.autofill.AutofillId
 import android.view.autofill.AutofillManager
-import android.view.autofill.AutofillValue
-import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -26,11 +19,11 @@ import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.user.UserController
-import com.hegocre.nextcloudpasswords.services.NCPAutofillService
+import com.hegocre.nextcloudpasswords.services.autofill.AutofillHelper
+import com.hegocre.nextcloudpasswords.services.autofill.NCPAutofillService
 import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsApp
 import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsAppLock
 import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
-import com.hegocre.nextcloudpasswords.utils.AssistStructureParser
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -147,63 +140,15 @@ class MainActivity : FragmentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun autofillReply(password: Password, structure: AssistStructure) {
-        val helper = AssistStructureParser(structure)
-
-        val fillResponse = FillResponse.Builder()
-            .addDataset(Dataset.Builder()
-                .apply {
-                    helper.nodes.forEach { node ->
-                        if (node.isFocused) {
-                            node.autofillId?.let { autofillId ->
-                                addAutofillValue(autofillId, password.label, password.username)
-                            }
-                        }
-                    }
-                    helper.usernameAutofillIds.forEach { autofillId ->
-                        addAutofillValue(autofillId, password.label, password.username)
-                    }
-                    helper.passwordAutofillIds.forEach { autofillId ->
-                        addAutofillValue(autofillId, password.label, password.password)
-                    }
-                }
-                .build()
-            ).build()
+        val dataset = AutofillHelper.buildDataset(this, password, structure, null)
 
         val replyIntent = Intent().apply {
-            putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, fillResponse)
+            putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, dataset)
         }
 
         setResult(Activity.RESULT_OK, replyIntent)
 
         finish()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun Dataset.Builder.addAutofillValue(
-        autofillId: AutofillId,
-        label: String,
-        value: String
-    ) {
-        val presentation =
-            RemoteViews(packageName, android.R.layout.simple_list_item_1).apply {
-                setTextViewText(android.R.id.text1, label)
-            }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val fieldBuilder = Field.Builder()
-            fieldBuilder.setValue(AutofillValue.forText(value))
-            val dialogPresentation = Presentations.Builder()
-                .setMenuPresentation(presentation).build()
-            fieldBuilder.setPresentations(dialogPresentation)
-            setField(autofillId, fieldBuilder.build())
-        } else {
-            @Suppress("DEPRECATION")
-            setValue(
-                autofillId,
-                AutofillValue.forText(value),
-                presentation
-            )
-        }
     }
 }
 

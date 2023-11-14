@@ -126,8 +126,8 @@ class EditablePasswordState(originalPassword: Password?) {
                     notes = it[4]
                     folder = it[5]
                     customFields =
-                        Json.decodeFromString<List<CustomField>>(it[5]).toMutableStateList()
-                    favorite = it[6].toBooleanStrictOrNull() ?: false
+                        Json.decodeFromString<List<CustomField>>(it[6]).toMutableStateList()
+                    favorite = it[7].toBooleanStrictOrNull() ?: false
                 }
             }
         )
@@ -366,7 +366,7 @@ fun EditablePasswordView(
 
         itemsIndexed(
             items = editablePasswordState.customFields,
-            key = { _, field -> "password_custom_${field.label}" }) { index, customField ->
+            key = { index, field -> "${index}_password_custom_${field.label}" }) { index, customField ->
             var showValue by rememberSaveable {
                 mutableStateOf(customField.type != CustomField.TYPE_SECRET)
             }
@@ -542,16 +542,12 @@ fun EditablePasswordView(
     if (showAddCustomFieldDialog) {
         AddCustomFieldDialog(
             onAddClick = { type, label ->
-                if (editablePasswordState.customFields.any { it.label == label }) {
-                    Toast.makeText(context, R.string.custom_field_exists, Toast.LENGTH_LONG).show()
-                } else {
-                    editablePasswordState.customFields.add(
-                        CustomField(
-                            type = type, label = label, value = ""
-                        )
+                editablePasswordState.customFields.add(
+                    CustomField(
+                        type = type, label = label, value = ""
                     )
-                    showAddCustomFieldDialog = false
-                }
+                )
+                showAddCustomFieldDialog = false
             },
             onDismissRequest = {
                 showAddCustomFieldDialog = false

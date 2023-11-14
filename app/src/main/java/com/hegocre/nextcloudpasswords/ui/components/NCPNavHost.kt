@@ -96,8 +96,12 @@ fun NCPNavHost(
         navController.navigate("${NCPScreen.Folders.name}/${folder.id}")
     }
 
-    val startDestination by PreferencesManager.getInstance(context).getStartScreen()
+    val userStartDestination by PreferencesManager.getInstance(context).getStartScreen()
         .collectAsState(NCPScreen.Passwords.name, context = Dispatchers.IO)
+
+    val startDestination = remember(isAutofillRequest, userStartDestination) {
+        if (isAutofillRequest) NCPScreen.Passwords.name else userStartDestination
+    }
 
     val filteredPasswordList = remember(passwordsDecryptionState.decryptedList, searchQuery) {
         passwordsDecryptionState.decryptedList?.filter {

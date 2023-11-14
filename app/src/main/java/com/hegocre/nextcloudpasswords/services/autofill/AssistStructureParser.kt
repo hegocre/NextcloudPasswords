@@ -1,9 +1,8 @@
-package com.hegocre.nextcloudpasswords.utils
+package com.hegocre.nextcloudpasswords.services.autofill
 
 import android.app.assist.AssistStructure
 import android.os.Build
 import android.text.InputType
-import android.util.Log
 import android.view.View
 import android.view.autofill.AutofillId
 import androidx.annotation.RequiresApi
@@ -16,11 +15,10 @@ import androidx.annotation.RequiresApi
  */
 @RequiresApi(Build.VERSION_CODES.O)
 class AssistStructureParser(assistStructure: AssistStructure) {
-    val nodes = mutableListOf<AssistStructure.ViewNode>()
-
-    val allAutofillIds = mutableListOf<AutofillId>()
     val usernameAutofillIds = mutableListOf<AutofillId>()
     val passwordAutofillIds = mutableListOf<AutofillId>()
+    private var lastTextAutofillId: AutofillId? = null
+    private var candidateTextAutofillId: AutofillId? = null
 
     private val webDomains = HashMap<String, Int>()
 
@@ -35,6 +33,10 @@ class AssistStructureParser(assistStructure: AssistStructure) {
             val windowNode = assistStructure.getWindowNodeAt(i)
             windowNode.rootViewNode?.let { parseNode(it) }
         }
+        if (usernameAutofillIds.isEmpty())
+            candidateTextAutofillId?.let {
+                usernameAutofillIds.add(it)
+            }
     }
 
     /**
@@ -43,16 +45,23 @@ class AssistStructureParser(assistStructure: AssistStructure) {
      * @param node The node to parse.
      */
     private fun parseNode(node: AssistStructure.ViewNode) {
-        nodes.add(node)
-
         node.autofillId?.let { autofillId ->
-            allAutofillIds.add(autofillId)
             val fieldType = getFieldType(node)
             if (fieldType != null) {
-                if (fieldType == FIELD_TYPE_USERNAME)
-                    usernameAutofillIds.add(autofillId)
-                else if (fieldType == FIELD_TYPE_PASSWORD)
-                    passwordAutofillIds.add(autofillId)
+                when (fieldType) {
+                    FIELD_TYPE_USERNAME -> {
+                        usernameAutofillIds.add(autofillId)
+                    }
+                    FIELD_TYPE_PASSWORD -> {
+                        passwordAutofillIds.add(autofillId)
+                        // We save the autofillId of the field above the password field,
+                        // in case we don't find any explicit username field
+                        candidateTextAutofillId = lastTextAutofillId
+                    }
+                    FIELD_TYPE_TEXT -> {
+                        lastTextAutofillId = autofillId
+                    }
+                }
             }
         }
 
@@ -75,43 +84,48 @@ class AssistStructureParser(assistStructure: AssistStructure) {
      * @return The determined field type.
      */
     private fun getFieldType(node: AssistStructure.ViewNode): Int? {
-        //Determine field type, first by autofill hint. If there are no hints, try with html attributes.
-        //If no html, try with input type (may sometimes work wrong)
         if (node.autofillType == View.AUTOFILL_TYPE_TEXT) {
+            // Get by autofill hint
             node.autofillHints?.forEach { hint ->
                 if (hint == View.AUTOFILL_HINT_USERNAME || hint == View.AUTOFILL_HINT_EMAIL_ADDRESS) {
-                    Log.d("AUTOFILL", "Found autofill hint username")
                     return FIELD_TYPE_USERNAME
                 } else if (hint == View.AUTOFILL_HINT_PASSWORD) {
-                    Log.d("AUTOFILL", "Found autofill hint password")
                     return FIELD_TYPE_PASSWORD
                 }
             }
-            if (node.hasAttribute("type", "mail") ||
+
+            // Get by HTML attributes
+            if (node.hasAttribute("type", "email") ||
+                node.hasAttribute("type", "tel") ||
+                node.hasAttribute("type", "text") ||
+                node.hasAttribute("name", "email") ||
                 node.hasAttribute("name", "mail") ||
                 node.hasAttribute("name", "user") ||
                 node.hasAttribute("name", "username")
             ) {
-                Log.d("AUTOFILL", "Found autofill attribute username")
                 return FIELD_TYPE_USERNAME
             }
             if (node.hasAttribute("type", "password")) {
-                Log.d("AUTOFILL", "Found autofill attribute password")
                 return FIELD_TYPE_PASSWORD
             }
+
+
             if (node.hint?.lowercase()?.contains("user") == true ||
                 node.hint?.lowercase()?.contains("mail") == true
             ) {
-                Log.d("AUTOFILL", "Found autofill field username")
                 return FIELD_TYPE_USERNAME
             }
-            Log.d("AUTOFILL", "Input type = ${node.inputType}")
+
+            // Get by field type
             if (node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_PASSWORD) ||
                 node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) ||
                 node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD)
             ) {
-                Log.d("AUTOFILL", "Found autofill field password")
                 return FIELD_TYPE_PASSWORD
+            }
+
+            if (node.inputType.isTextType(InputType.TYPE_CLASS_TEXT)) {
+                return FIELD_TYPE_TEXT
             }
         }
         return null
@@ -142,5 +156,6 @@ class AssistStructureParser(assistStructure: AssistStructure) {
     companion object {
         private const val FIELD_TYPE_USERNAME = 0
         private const val FIELD_TYPE_PASSWORD = 1
+        private const val FIELD_TYPE_TEXT = 2
     }
 }
