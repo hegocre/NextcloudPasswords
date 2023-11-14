@@ -1,0 +1,10 @@
+Aquesta aplicació es connecta a un servidor de Nextcloud amb l'aplicació Contrasenyes instal·lada, i permet veure i editar el seu contingut en una interfície amigable. A més, actua com a servei d'Emplenament Automàtic, permetent iniciar sessió als dispositius Android de forma senzilla.
+
+Característiques:
+- Mostrar les contrasenyes i carpetes de l'usuari amb una interfície de Material Design
+- Edit and create passwords, including custom fields
+- Edit and create folders
+- Show site icons, with cache to minimize data usage (optional)
+- App lock screen with both passcode and biometric authentication
+- Autofill service (Android 8.0 or higher)
+- Privacy friendly: The only server this app connects is your own Nextcloud Server
