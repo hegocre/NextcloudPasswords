@@ -15,8 +15,8 @@ android {
         applicationId "com.hegocre.nextcloudpasswords"
         minSdk 24
         targetSdk 34
-        versionCode 6
-        versionName "1.0.3"
+        versionCode 10
+        versionName "1.0.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -66,6 +66,7 @@ android {
         kotlinCompilerExtensionVersion '1.5.4'
     }
     packagingOptions {
+        doNotStrip '**/*.so'
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
