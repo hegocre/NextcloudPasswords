@@ -1,6 +1,5 @@
 package com.hegocre.nextcloudpasswords.utils
 
-import android.content.Context
 import com.goterl.lazysodium.interfaces.SecretBox
 import com.goterl.lazysodium.utils.Key
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
@@ -11,16 +10,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.security.MessageDigest
 
-suspend fun List<Password>.decryptPasswords(
-    context: Context,
-    csEv1Keychain: CSEv1Keychain? = null
-): List<Password> =
+suspend fun List<Password>.decryptPasswords(csEv1Keychain: CSEv1Keychain? = null): List<Password> =
     withContext(Dispatchers.Default) {
         val decryptedList: MutableList<Password> = mutableListOf()
 
         forEach { password ->
             //Decrypt password
-            val decryptedPassword = password.decrypt(context, csEv1Keychain)
+            val decryptedPassword = password.decrypt(csEv1Keychain)
             if (decryptedPassword != null)
                 decryptedList.add(decryptedPassword)
         }

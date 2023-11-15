@@ -1,7 +1,5 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
@@ -14,14 +12,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.twotone.Lock
 import androidx.compose.material.icons.twotone.Security
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -29,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -83,6 +80,7 @@ fun MixedLazyColumn(
     onPasswordLongClick: ((Password) -> Unit)? = null,
     onFolderClick: ((Folder) -> Unit)? = null,
     onFolderLongClick: ((Folder) -> Unit)? = null,
+    getPainterForUrl: (@Composable (String) -> Painter)? = null
 ) {
     val context = LocalContext.current
     val shouldShowIcon by PreferencesManager.getInstance(context).getShowIcons()
@@ -105,7 +103,8 @@ fun MixedLazyColumn(
                     password = folder,
                     shouldShowIcon = shouldShowIcon,
                     onPasswordClick = onPasswordClick,
-                    onPasswordLongClick = onPasswordLongClick
+                    onPasswordLongClick = onPasswordLongClick,
+                    getPainterForUrl = getPainterForUrl
                 )
             }
         }
@@ -120,6 +119,7 @@ fun PasswordRow(
     shouldShowIcon: Boolean = false,
     onPasswordClick: ((Password) -> Unit)? = null,
     onPasswordLongClick: ((Password) -> Unit)? = null,
+    getPainterForUrl: (@Composable (String) -> Painter)? = null
 ) {
     ListItem(
         modifier = modifier
@@ -162,48 +162,19 @@ fun PasswordRow(
         } else null,
         leadingContent = if (shouldShowIcon) {
             {
-                val context = LocalContext.current
-                val imageBitmap by password.faviconBitmap.collectAsState()
-                if (imageBitmap == null && !password.isFaviconLoading) {
-                    LaunchedEffect(Unit) {
-                        password.loadFavicon(context)
-                    }
-                }
-                Crossfade(
-                    targetState = imageBitmap,
-                    animationSpec = tween(250),
-                    label = "Icon"
-                ) { image ->
-                    if (image == null) {
-                        Image(
-                            modifier = Modifier
-                                .size(45.dp)
-                                .padding(8.dp),
-                            imageVector = Icons.TwoTone.Lock,
-                            contentDescription = stringResource(R.string.site_favicon),
-                            colorFilter = ColorFilter.tint(
-                                MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = ContentAlpha.medium
-                                )
-                            )
-                        )
-                    } else {
-                        imageBitmap?.let {
-                            Image(
-                                modifier = Modifier
-                                    .size(45.dp)
-                                    .padding(all = 8.dp)
-                                    .clip(RoundedCornerShape(4.dp)),
-                                bitmap = it,
-                                contentDescription = stringResource(R.string.site_favicon)
-                            )
-                        }
-                    }
+                getPainterForUrl?.let {
+                    Image(
+                        painter = getPainterForUrl(password.url),
+                        modifier = Modifier
+                            .size(45.dp)
+                            .padding(all = 8.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+                        contentDescription = stringResource(R.string.site_favicon)
+                    )
                 }
             }
         } else null,
-
-        )
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)

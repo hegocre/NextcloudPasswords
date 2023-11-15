@@ -215,24 +215,6 @@ class ApiController private constructor(context: Context) {
     }
 
     /**
-     * Gets a favicon from a url via the [ServiceApi] class. An open session is not needed for
-     * this method to be called.
-     *
-     * @param url The url of the requested site favicon.
-     * @return A [ByteArray] with the encoded bitmap.
-     */
-    suspend fun getFavicon(url: String): ByteArray? {
-        val result = serviceApi.favicon(url)
-        return if (result is Result.Success) {
-            result.data
-        } else {
-            if (result is Result.Error)
-                Log.d("API Controller", "Error ${result.code} requesting favicon")
-            null
-        }
-    }
-
-    /**
      * Creates a new password via the [PasswordsApi] class. This can only be called when a
      * session is open, otherwise an error is thrown.
      *
@@ -321,6 +303,9 @@ class ApiController private constructor(context: Context) {
         val result = foldersApi.delete(deletedFolder, sessionCode)
         return result is Result.Success
     }
+
+    fun getFaviconServiceRequest(url: String): Pair<String, Server> =
+        Pair(serviceApi.getFaviconUrl(url), server)
 
     companion object {
         private var instance: ApiController? = null

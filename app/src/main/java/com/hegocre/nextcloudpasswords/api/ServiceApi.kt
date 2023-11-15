@@ -8,9 +8,8 @@ import com.hegocre.nextcloudpasswords.utils.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import java.net.MalformedURLException
 import java.net.SocketTimeoutException
-import java.net.URL
+import java.net.URLEncoder
 import javax.net.ssl.SSLHandshakeException
 
 /**
@@ -21,51 +20,6 @@ import javax.net.ssl.SSLHandshakeException
  * @param server The [Server] where the requests will be made.
  */
 class ServiceApi private constructor(private val server: Server) {
-
-    /**
-     * Sends a request to the api to obtain a favicon. No session is required to send this request.
-     *
-     * @param url The url of the requested site favicon.
-     * @return A result with the Bitmap encoded as a [ByteArray] if success, and an error code otherwise.
-     */
-    suspend fun favicon(url: String): Result<ByteArray> {
-        val domain = try {
-            URL(url).host
-        } catch (e: MalformedURLException) {
-            url
-        }
-
-        return try {
-            val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().get(
-                    sUrl = server.url + String.format(FAVICON_URL, domain, 256),
-                    username = server.username,
-                    password = server.password
-                )
-            }
-
-            val code = apiResponse.code
-            val body = apiResponse.body?.bytes()
-
-            withContext(Dispatchers.IO) {
-                apiResponse.close()
-            }
-
-            if (code == 200 && body != null) {
-                Result.Success(body)
-            } else {
-                Result.Error(Error.API_BAD_RESPONSE)
-            }
-
-        } catch (e: SocketTimeoutException) {
-            Result.Error(Error.API_TIMEOUT)
-        } catch (ex: SSLHandshakeException) {
-            Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
-        } catch (ex: Exception) {
-            Result.Error(Error.UNKNOWN)
-        }
-
-    }
 
     /**
      * Sends a request to the api to obtain a generated password using user settings.
@@ -105,6 +59,9 @@ class ServiceApi private constructor(private val server: Server) {
             Result.Error(Error.UNKNOWN)
         }
     }
+
+    fun getFaviconUrl(url: String): String =
+        server.url + String.format(FAVICON_URL, URLEncoder.encode(url, "utf-8"), 256)
 
     companion object {
         private const val FAVICON_URL = "/index.php/apps/passwords/api/1.0/service/favicon/%s/%d"

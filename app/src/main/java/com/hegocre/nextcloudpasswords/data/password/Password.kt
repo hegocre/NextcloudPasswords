@@ -1,24 +1,12 @@
 package com.hegocre.nextcloudpasswords.data.password
 
-import android.content.Context
-import android.graphics.BitmapFactory
 import android.net.Uri
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
-import com.hegocre.nextcloudpasswords.data.favicon.FaviconController
 import com.hegocre.nextcloudpasswords.utils.decryptValue
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
@@ -86,49 +74,13 @@ data class Password(
     val created: Int,
     val updated: Int
 ) {
-    @Ignore
-    private val _faviconBitmap = MutableStateFlow<ImageBitmap?>(null)
-    val faviconBitmap: StateFlow<ImageBitmap?>
-        get() = _faviconBitmap.asStateFlow()
-
-    @Ignore
-    private var _isFaviconLoading = false
-    val isFaviconLoading: Boolean
-        get() = _isFaviconLoading
-
-    /**
-     * Trigger a request to load the site's favicon. The result is emitted into [_faviconBitmap] and
-     * observed as needed.
-     *
-     * @param context Context of the application.
-     */
-    suspend fun loadFavicon(context: Context) {
-        _isFaviconLoading = true
-        val faviconBitmap = FaviconController.getInstance(context).getOnlineFavicon(url)
-        if (faviconBitmap != null) {
-            val bitmap = BitmapFactory.decodeByteArray(faviconBitmap, 0, faviconBitmap.size)
-            _faviconBitmap.emit(bitmap.asImageBitmap())
-        }
-        _isFaviconLoading = false
-    }
-
-    private suspend fun loadCachedFavicon(context: Context) {
-        _isFaviconLoading = true
-        val faviconBitmap = FaviconController.getInstance(context).getCachedFavicon(url)
-        if (faviconBitmap != null) {
-            val bitmap = BitmapFactory.decodeByteArray(faviconBitmap, 0, faviconBitmap.size)
-            _faviconBitmap.emit(bitmap.asImageBitmap())
-        }
-        _isFaviconLoading = false
-    }
-
     /**
      * Returns a copy of this object with the encrypted fields decrypted using the keychain.
      *
      * @param csEv1Keychain The keychain used to decrypt the values.
      * @return The object with the decrypted values.
      */
-    suspend fun decrypt(context: Context, csEv1Keychain: CSEv1Keychain? = null): Password? {
+    suspend fun decrypt(csEv1Keychain: CSEv1Keychain? = null): Password? {
         //Not encrypted
         if (cseType == "none") return this
 
@@ -157,13 +109,7 @@ data class Password(
             )
         }
 
-        return decryptedPassword.apply {
-            CoroutineScope(Dispatchers.IO + Job()).launch {
-                loadCachedFavicon(context)
-            }
-        }
-
-
+        return decryptedPassword
     }
 
     fun matches(query: String): Boolean {
