@@ -31,7 +31,7 @@ There are many ways you can contribute, including:
 
 - Spread the word! Share the application to help the community grow. A review on Google Play is highly appreciated
 - Help with the [translations](https://nextcloudpasswords.crowdin.com/nextcloud-passwords). Make the app multilingual! 😃
-- [Make a donation](https://paypal.me/hegocre). and any small tip will be invested in coffee in order to survive those long coding nights 😴
+- [Make a donation](https://paypal.me/hegocre). Your generosity is the only source of income, and any small tip will be invested in coffee in order to survive those long coding nights 😴
 
 ## Contact
 
