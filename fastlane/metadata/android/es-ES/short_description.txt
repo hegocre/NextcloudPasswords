@@ -1,0 +1,1 @@
+Aplicación segura para ver las contraseñas de Nextcloud

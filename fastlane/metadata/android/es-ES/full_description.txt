@@ -1,0 +1,10 @@
+Esta aplicación se conecta a un servidor de Nextcloud con la aplicación Contraseñas instalada, y permite ver y editar su contenido en una interfaz amigable. Además, actúa como servicio de Autocompletado, permitiendo iniciar sesión en dispositivos Android de forma sencilla.
+
+Características:
+- Muestra las contraseñas y carpetas del usuario con una interfaz de Material Design
+- Edita y crea contraseñas, incluidos los campos personalizados
+- Edita y crea carpetas
+- Muestra los iconos de los sitios web, con memoria caché para reducir el uso de datos (opcional)
+- Bloquea la aplicación con un código o con autenticación biométrica
+- Servicio de autocompletado (Android 8.0 y superior)
+- Respetuoso con la privacidad: El único servidor al que se conecta es la instancia de Nextcloud
