@@ -1,1 +1,1 @@
-Secure app for viewing passwords for the Nextcloud Passwords app
+Aplicación segura para ver las contraseñas de Nextcloud
