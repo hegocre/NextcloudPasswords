@@ -293,6 +293,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                     )
                 }
                 placeholder(lockDrawable)
+                fallback(lockDrawable)
             }.build()
         )
     }
