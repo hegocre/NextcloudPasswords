@@ -164,7 +164,7 @@ fun PasswordRow(
             {
                 getPainterForUrl?.let {
                     Image(
-                        painter = getPainterForUrl(password.url),
+                        painter = getPainterForUrl(password.url.ifBlank { password.label }),
                         modifier = Modifier
                             .size(45.dp)
                             .padding(all = 8.dp)
