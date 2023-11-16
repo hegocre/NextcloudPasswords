@@ -172,12 +172,6 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun dismissMasterPasswordDialog() {
-        viewModelScope.launch {
-            _needsMasterPassword.emit(false)
-        }
-    }
-
     fun setVisiblePassword(password: Password) {
         visiblePassword.value = password
     }

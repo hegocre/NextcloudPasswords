@@ -260,7 +260,7 @@ fun NextcloudPasswordsApp(
                         setMasterPassword("")
                     },
                     errorText = if (masterPasswordInvalid) "Invalid password" else "",
-                    onDismissRequest = { passwordsViewModel.dismissMasterPasswordDialog() }
+                    onDismissRequest = { }
                 )
             }
 
