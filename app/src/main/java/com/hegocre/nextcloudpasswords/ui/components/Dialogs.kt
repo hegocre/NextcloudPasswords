@@ -47,7 +47,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ColorFilter
@@ -65,8 +67,10 @@ import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.utils.autofill
 import kotlinx.coroutines.job
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MasterPasswordDialog(
     masterPassword: String,
@@ -115,7 +119,12 @@ fun MasterPasswordDialog(
                         }
                     },
                     errorText = errorText,
-                    modifier = Modifier.focusRequester(requester)
+                    modifier = Modifier
+                        .focusRequester(requester)
+                        .autofill(
+                            autofillTypes = listOf(AutofillType.Password),
+                            onFill = setMasterPassword
+                        )
                 )
 
                 CompositionLocalProvider(
