@@ -79,7 +79,7 @@ fun NCPNavHost(
         key1 = passwords, key2 = keychain
     ) {
         value = ListDecryptionState(decryptedList = passwords?.let { passwordList ->
-            passwordList.decryptPasswords(context, keychain).sortedBy { it.label.lowercase() }
+            passwordList.decryptPasswords(keychain).sortedBy { it.label.lowercase() }
         } ?: emptyList())
     }
 
@@ -144,7 +144,8 @@ fun NCPNavHost(
                                 onPasswordLongClick = {
                                     if (sessionOpen && !isAutofillRequest)
                                         navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
-                                }
+                                },
+                                getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
                             )
                         }
                     }
@@ -178,7 +179,8 @@ fun NCPNavHost(
                                 onPasswordLongClick = {
                                     if (sessionOpen && !isAutofillRequest)
                                         navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
-                                }
+                                },
+                                getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
                             )
                         }
                     }
@@ -231,7 +233,8 @@ fun NCPNavHost(
                                 onFolderLongClick = {
                                     if (sessionOpen && !isAutofillRequest)
                                         navController.navigate("${NCPScreen.FolderEdit.name}/${it.id}")
-                                }
+                                },
+                                getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
                             )
                         }
                     }
@@ -299,7 +302,8 @@ fun NCPNavHost(
                                 onFolderLongClick = {
                                     if (sessionOpen && !isAutofillRequest)
                                         navController.navigate("${NCPScreen.FolderEdit.name}/${it.id}")
-                                }
+                                },
+                                getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
                             )
                         }
                     }

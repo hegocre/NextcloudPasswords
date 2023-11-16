@@ -270,7 +270,8 @@ fun NextcloudPasswordsApp(
                         coroutineScope.launch {
                             modalSheetState.hide()
                         }
-                    }
+                    },
+                    windowInsets = WindowInsets.navigationBars
                 ) {
                     PasswordItem(
                         password = passwordsViewModel.visiblePassword.value,

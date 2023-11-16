@@ -1,24 +1,30 @@
 package com.hegocre.nextcloudpasswords.databases
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
+import androidx.room.DeleteTable
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.hegocre.nextcloudpasswords.data.favicon.Favicon
+import androidx.room.migration.AutoMigrationSpec
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.password.Password
-import com.hegocre.nextcloudpasswords.databases.favicondatabase.FaviconDatabaseDao
 import com.hegocre.nextcloudpasswords.databases.folderdatabase.FolderDatabaseDao
 import com.hegocre.nextcloudpasswords.databases.passworddatabase.PasswordDatabaseDao
 
 @Database(
-    entities = [Favicon::class, Folder::class, Password::class],
-    version = 2,
+    entities = [Folder::class, Password::class],
+    version = 3,
+    autoMigrations = [
+        AutoMigration(from = 2, to = 3, spec = AppDatabase.DeleteFaviconsMigration::class)
+    ]
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract val faviconDao: FaviconDatabaseDao
     abstract val passwordDao: PasswordDatabaseDao
     abstract val folderDao: FolderDatabaseDao
+
+    @DeleteTable(tableName = "favicons")
+    class DeleteFaviconsMigration : AutoMigrationSpec
 
     companion object {
         @Volatile

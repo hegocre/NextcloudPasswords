@@ -1,11 +1,20 @@
 package com.hegocre.nextcloudpasswords.ui.viewmodels
 
 import android.app.Application
+import android.content.res.ColorStateList
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
 import com.hegocre.nextcloudpasswords.api.exceptions.ClientDeauthorizedException
@@ -30,6 +39,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.Credentials
+import java.net.MalformedURLException
+import java.net.URL
 
 class PasswordsViewModel(application: Application) : AndroidViewModel(application) {
     private val preferencesManager = PreferencesManager.getInstance(application)
@@ -256,6 +268,33 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
             _isUpdating.value = false
             true
         }
+    }
+
+    @Composable
+    fun getPainterForUrl(url: String): Painter {
+        val context = LocalContext.current
+        val domain = try {
+            URL(url).host
+        } catch (e: MalformedURLException) {
+            url
+        }
+        val (requestUrl, server) = apiController.getFaviconServiceRequest(domain)
+        return rememberAsyncImagePainter(
+            ImageRequest.Builder(context).apply {
+                data(requestUrl)
+                addHeader("OCS-APIRequest", "true")
+                addHeader("Authorization", Credentials.basic(server.username, server.password))
+                crossfade(true)
+                val lockDrawable = context.getDrawable(R.drawable.ic_lock)?.apply {
+                    setTintList(
+                        ColorStateList.valueOf(
+                            MaterialTheme.colorScheme.onSurface.toArgb()
+                        )
+                    )
+                }
+                placeholder(lockDrawable)
+            }.build()
+        )
     }
 
     override fun onCleared() {
