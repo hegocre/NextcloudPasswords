@@ -118,11 +118,11 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    private fun openSession(password: String?, saveKeychain: Boolean = false) {
+    private fun openSession(password: String?) {
         viewModelScope.launch {
             _isRefreshing.emit(true)
             try {
-                if (apiController.openSession(password, saveKeychain)) {
+                if (apiController.openSession(password)) {
                     sync()
                     _showSessionOpenError.emit(true)
                     return@launch
@@ -137,6 +137,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                     is PWDv1ChallengeMasterKeyInvalidException, is PWDv1ChallengePasswordException -> {
                         _needsMasterPassword.emit(true)
                         _masterPasswordInvalid.emit(true)
+                        masterPassword.postValue(null)
                         preferencesManager.setMasterPassword(null)
                     }
                     else -> {
@@ -150,7 +151,8 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun setMasterPassword(password: String, save: Boolean = false) {
-        openSession(password, save)
+        openSession(password)
+        masterPassword.postValue(password)
         viewModelScope.launch {
             _needsMasterPassword.emit(false)
             _masterPasswordInvalid.emit(false)
@@ -288,6 +290,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                 }
                 placeholder(lockDrawable)
                 fallback(lockDrawable)
+                error(lockDrawable)
             }.build()
         )
     }
