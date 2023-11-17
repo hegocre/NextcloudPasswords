@@ -46,11 +46,7 @@ class ApiController private constructor(context: Context) {
 
     private var sessionCode: String? = null
 
-    val csEv1Keychain = MutableLiveData(
-        preferencesManager.getCSEv1Keychain()?.let { csEv1KeychainJson ->
-            CSEv1Keychain.fromJson(csEv1KeychainJson)
-        }
-    )
+    val csEv1Keychain = MutableLiveData<CSEv1Keychain?>(null)
 
     val serverSettings = MutableLiveData(
         preferencesManager.getServerSettings()
@@ -61,6 +57,13 @@ class ApiController private constructor(context: Context) {
         get() = _sessionOpen.asStateFlow()
 
     init {
+        decryptCSEv1Keychain(
+            preferencesManager.getCSEv1Keychain(),
+            preferencesManager.getMasterPassword()
+        )?.let {
+            csEv1Keychain.postValue(it)
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
             var result = settingsApi.get()
             while (result !is Result.Success) {
@@ -93,12 +96,28 @@ class ApiController private constructor(context: Context) {
             preferencesManager.getSkipCertificateValidation()
     }
 
+    private fun decryptCSEv1Keychain(
+        encryptedData: String?,
+        masterPassword: String?
+    ): CSEv1Keychain? = try {
+        encryptedData?.let { encryptedCSEv1Keychain ->
+            masterPassword?.let { masterPassword ->
+                val decryptedCsEv1KeychainJson = CSEv1Keychain.decryptJson(
+                    encryptedCSEv1Keychain,
+                    masterPassword
+                )
+                CSEv1Keychain.fromJson(decryptedCsEv1KeychainJson)
+            }
+        }
+    } catch (e: Exception) {
+        null
+    }
+
     /**
      * Requests and opens a session via the [SessionApi] class.
      *
      * @param masterPassword Master password to request the session, if provided, and not needed
      * if no CSE used.
-     * @param saveKeychain A boolean indicating if the decrypted keychain should be saved.
      * @return A boolean indicating if the session was successfully opened.
      * @throws PWDv1ChallengeMasterKeyNeededException If there is no master key provided, but one is
      * needed.
@@ -108,7 +127,14 @@ class ApiController private constructor(context: Context) {
         PWDv1ChallengeMasterKeyNeededException::class,
         PWDv1ChallengeMasterKeyInvalidException::class
     )
-    suspend fun openSession(masterPassword: String?, saveKeychain: Boolean = false): Boolean {
+    suspend fun openSession(masterPassword: String?): Boolean {
+        decryptCSEv1Keychain(
+            preferencesManager.getCSEv1Keychain(),
+            masterPassword
+        )?.let {
+            csEv1Keychain.postValue(it)
+        }
+
         val requestResult = sessionApi.requestSession()
 
         val secretResult = if (requestResult is Result.Success) {
@@ -116,11 +142,23 @@ class ApiController private constructor(context: Context) {
         } else {
             // Error opening session
             if (requestResult is Result.Error) {
+                // Could not open session, try to use cached keychain
+                preferencesManager.getCSEv1Keychain()?.let { cachedKeychain ->
+                    if (masterPassword == null) {
+                        throw PWDv1ChallengeMasterKeyNeededException()
+                    } else {
+                        decryptCSEv1Keychain(cachedKeychain, masterPassword)?.let {
+                            csEv1Keychain.postValue(it)
+                        } ?: throw PWDv1ChallengeMasterKeyInvalidException() // Could not decrypt
+                    }
+                }
+                // If we get here, keychain was decrypted from cache, but session is still not open
                 when (requestResult.code) {
                     Error.API_TIMEOUT -> Log.e(
                         "API Controller",
                         "Timeout requesting session, user ${server.username}"
                     )
+
                     Error.API_BAD_RESPONSE -> Log.e(
                         "API Controller",
                         "Bad response on session request, user ${server.username}"
@@ -135,6 +173,8 @@ class ApiController private constructor(context: Context) {
         } else {
             return if (secretResult is Result.Error && secretResult.code == Error.API_NO_CSE) {
                 // No encryption, we need no session
+                // Clear old keychain, if CSE was disabled
+                preferencesManager.setCSEv1Keychain(null)
                 _sessionOpen.emit(true)
                 true
             } else {
@@ -145,7 +185,7 @@ class ApiController private constructor(context: Context) {
 
         val openedSessionRequest = sessionApi.openSession(secret)
 
-        val openedSession = if (openedSessionRequest is Result.Success) {
+        val (newSessionCode, encryptedKeychainJson) = if (openedSessionRequest is Result.Success) {
             openedSessionRequest.data
         } else {
             if (openedSessionRequest is Result.Error) {
@@ -154,6 +194,7 @@ class ApiController private constructor(context: Context) {
                         "API Controller",
                         "Timeout opening session, user ${server.username}"
                     )
+
                     Error.API_BAD_RESPONSE -> Log.e(
                         "API Controller",
                         "Bad response on session open, user ${server.username}"
@@ -163,14 +204,15 @@ class ApiController private constructor(context: Context) {
             return false
         }
 
-        openedSession.second.let { encryptedJson ->
+        preferencesManager.setCSEv1Keychain(encryptedKeychainJson)
+
+        encryptedKeychainJson.let {
             masterPassword?.let { masterPassword ->
-                val keysJson = CSEv1Keychain.decryptJson(encryptedJson, masterPassword)
-                if (saveKeychain) preferencesManager.setCSEv1Keychain(keysJson)
+                val keysJson = CSEv1Keychain.decryptJson(encryptedKeychainJson, masterPassword)
                 csEv1Keychain.postValue(CSEv1Keychain.fromJson(keysJson))
             }
         }
-        sessionCode = openedSession.first
+        sessionCode = newSessionCode
 
         _sessionOpen.emit(true)
         return true
