@@ -29,6 +29,10 @@ android {
         }
     }
 
+    androidResources {
+        generateLocaleConfig = true
+    }
+
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas".toString())
     }
