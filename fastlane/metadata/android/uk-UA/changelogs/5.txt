@@ -1,0 +1,4 @@
+- Improve autofill service
+- Improve URL searching
+- Allow connecting to servers with self-signed certificate
+- Minor bug fixes
