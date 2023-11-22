@@ -1,0 +1,3 @@
+- Millores en el funcionament sense connexió
+- Retocs visuals
+- Millores internes
