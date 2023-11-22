@@ -48,7 +48,6 @@
     <string name="enter_valid_url">Introdueixi un URL vàlid</string>
     <string name="enter_valid_email">Introdueixi un correu electrònic vàlid</string>
     <string name="could_not_generate_password">No s\'ha pogut generar la contrasenya</string>
-    <string name="custom_field_exists">El camp personalitzat ja existeix</string>
     <string name="could_not_open_url">No s\'ha pogut obrir l\'URL</string>
     <string name="about">Informació</string>
     <string name="back">Enrere</string>

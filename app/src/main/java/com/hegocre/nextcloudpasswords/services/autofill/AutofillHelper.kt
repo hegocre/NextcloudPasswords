@@ -177,7 +177,7 @@ object AutofillHelper {
             InlineSuggestionUi.newContentBuilder(pendingIntent).apply {
                 setTitle(autofillLabel)
                 setStartIcon(
-                    Icon.createWithResource(context, R.mipmap.ic_launcher_round)
+                    Icon.createWithResource(context, R.mipmap.ic_launcher)
                         .setTintBlendMode(BlendMode.DST)
                 )
             }.build().slice, inlinePresentationSpec, false
@@ -214,5 +214,5 @@ object AutofillHelper {
         }
     }
 
-    const val AUTOFILL_INTENT_ID = "com.hegocre.nextcloudpasswords.intents.autofill"
+    private const val AUTOFILL_INTENT_ID = "com.hegocre.nextcloudpasswords.intents.autofill"
 }
