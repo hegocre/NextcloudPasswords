@@ -1,0 +1,4 @@
+- Mejoras en el servicio de autocompletado
+- Mejoras en la búsqueda por URL
+- Se permite la conexión a servidores con certificados autofirmados
+- Corrección de errores menores

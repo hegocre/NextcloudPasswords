@@ -1,0 +1,3 @@
+- Mejor soporte fuera de línea
+- Ajustes visuales
+- Mejoras internas

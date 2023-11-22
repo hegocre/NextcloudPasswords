@@ -1,0 +1,3 @@
+- Better offline support
+- Visual tweaks
+- Internal improvements

@@ -1,0 +1,4 @@
+- Añadido soporte para autocompletado en línea
+- Mejoras en la detección de campos de autocompletado
+- Siempre se mostrará la vista de contraseñas en las solicitudes de autocompletado
+- Corrección de errores y mejoras internas
