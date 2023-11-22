@@ -1,0 +1,4 @@
+- Millores en el servei d'emplenament automàtic
+- Millores en la cerca d'URL
+- Es permet connectar amb instàncies amb certificats autosignats
+- Correccions d'errors menors
