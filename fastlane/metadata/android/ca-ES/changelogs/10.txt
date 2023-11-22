@@ -1,0 +1,4 @@
+- Afegit suport per l'emplenament automàtic en línia
+- Millores en la detecció de camps d'emplenament automàtic
+- Sempre es mostrarà la vista de contrasenyes a les sol·licituds d'emplenament automàtic
+- Correcció d'errors i millores internes
