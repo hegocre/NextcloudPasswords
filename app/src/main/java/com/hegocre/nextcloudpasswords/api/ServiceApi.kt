@@ -19,7 +19,10 @@ import javax.net.ssl.SSLHandshakeException
  *
  * @param server The [Server] where the requests will be made.
  */
-class ServiceApi private constructor(private val server: Server) {
+class ServiceApi private constructor(
+    private val server: Server,
+    private val okHttpRequest: OkHttpRequest
+) {
 
     /**
      * Sends a request to the api to obtain a generated password using user settings.
@@ -29,7 +32,7 @@ class ServiceApi private constructor(private val server: Server) {
     suspend fun password(sessionCode: String?): Result<String> {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().get(
+                okHttpRequest.get(
                     sUrl = server.url + PASSWORD_URL,
                     sessionCode = sessionCode,
                     username = server.username,
@@ -75,12 +78,12 @@ class ServiceApi private constructor(private val server: Server) {
          * @param server The [Server] where the requests will be made.
          * @return The instance of the api.
          */
-        fun getInstance(server: Server): ServiceApi {
+        fun getInstance(server: Server, okHttpRequest: OkHttpRequest): ServiceApi {
             synchronized(this) {
                 var tempInstance = instance
 
                 if (tempInstance == null) {
-                    tempInstance = ServiceApi(server)
+                    tempInstance = ServiceApi(server, okHttpRequest)
                     instance = tempInstance
                 }
 

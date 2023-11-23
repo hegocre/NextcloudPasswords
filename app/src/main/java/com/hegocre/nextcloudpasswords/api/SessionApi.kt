@@ -19,7 +19,10 @@ import javax.net.ssl.SSLHandshakeException
  *
  * @param server The [Server] where the requests will be made.
  */
-class SessionApi private constructor(private var server: Server) {
+class SessionApi private constructor(
+    private var server: Server,
+    private val okHttpRequest: OkHttpRequest
+) {
 
     /**
      * Sends a request to the api to open a session. If the user uses client-side encryption,
@@ -31,15 +34,17 @@ class SessionApi private constructor(private var server: Server) {
         return try {
             val apiResponse = try {
                 withContext(Dispatchers.IO) {
-                    OkHttpRequest.getInstance().get(
+                    okHttpRequest.get(
                         sUrl = server.url + REQUEST_URL,
                         username = server.username,
                         password = server.password
                     )
                 }
             } catch (ex: SSLHandshakeException) {
+                ex.printStackTrace()
                 return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
             } catch (ex: Exception) {
+                ex.printStackTrace()
                 return Result.Error(0)
             }
 
@@ -58,6 +63,7 @@ class SessionApi private constructor(private var server: Server) {
             } else Result.Error(Error.API_BAD_RESPONSE)
 
         } catch (e: SocketTimeoutException) {
+            e.printStackTrace()
             Result.Error(Error.API_TIMEOUT)
         }
     }
@@ -81,7 +87,7 @@ class SessionApi private constructor(private var server: Server) {
 
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().post(
+                okHttpRequest.post(
                     sUrl = server.url + OPEN_URL,
                     body = jsonChallenge,
                     mediaType = OkHttpRequest.JSON,
@@ -128,7 +134,7 @@ class SessionApi private constructor(private var server: Server) {
     suspend fun keepAlive(sessionCode: String): Boolean {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().get(
+                okHttpRequest.get(
                     sUrl = server.url + KEEPALIVE_URL,
                     sessionCode = sessionCode,
                     username = server.username,
@@ -157,7 +163,7 @@ class SessionApi private constructor(private var server: Server) {
     suspend fun closeSession(sessionCode: String): Boolean {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().get(
+                okHttpRequest.get(
                     sUrl = server.url + CLOSE_URL,
                     sessionCode = sessionCode,
                     username = server.username,
@@ -190,12 +196,12 @@ class SessionApi private constructor(private var server: Server) {
          * @param server The [Server] where the requests will be made.
          * @return The instance of the api.
          */
-        fun getInstance(server: Server): SessionApi {
+        fun getInstance(server: Server, okHttpRequest: OkHttpRequest): SessionApi {
             synchronized(this) {
                 var tempInstance = instance
 
                 if (tempInstance == null) {
-                    tempInstance = SessionApi(server)
+                    tempInstance = SessionApi(server, okHttpRequest)
                     instance = tempInstance
                 }
 

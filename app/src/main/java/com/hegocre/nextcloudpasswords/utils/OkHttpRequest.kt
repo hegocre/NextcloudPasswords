@@ -21,39 +21,37 @@ import javax.net.ssl.X509TrustManager
  * [here](https://square.github.io/okhttp/4.x/okhttp/okhttp3/-ok-http-client/#okhttpclients-should-be-shared).
  *
  */
-class OkHttpRequest private constructor() {
-    var allowInsecureRequests = false
-
-    private val secureClient = OkHttpClient.Builder()
-        .readTimeout(15, TimeUnit.SECONDS)
-        .writeTimeout(20, TimeUnit.SECONDS)
-        .build()
-    private val insecureClient: OkHttpClient
-
+class OkHttpRequest private constructor(allowInsecureRequests: Boolean) {
     val client: OkHttpClient
-        get() = if (allowInsecureRequests) insecureClient else secureClient
 
     init {
-        val insecureTrustManager = @SuppressLint("CustomX509TrustManager")
-        object : X509TrustManager {
-            @SuppressLint("TrustAllX509TrustManager")
-            override fun checkClientTrusted(p0: Array<out X509Certificate>?, p1: String?) {
-            }
+        client = if (allowInsecureRequests) {
+            val insecureTrustManager = @SuppressLint("CustomX509TrustManager")
+            object : X509TrustManager {
+                @SuppressLint("TrustAllX509TrustManager")
+                override fun checkClientTrusted(p0: Array<out X509Certificate>?, p1: String?) {
+                }
 
-            @SuppressLint("TrustAllX509TrustManager")
-            override fun checkServerTrusted(p0: Array<out X509Certificate>?, p1: String?) {
-            }
+                @SuppressLint("TrustAllX509TrustManager")
+                override fun checkServerTrusted(p0: Array<out X509Certificate>?, p1: String?) {
+                }
 
-            override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+                override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+            }
+            val sslContext = SSLContext.getInstance("SSL")
+            sslContext.init(null, arrayOf(insecureTrustManager), java.security.SecureRandom())
+            OkHttpClient.Builder()
+                .readTimeout(15, TimeUnit.SECONDS)
+                .writeTimeout(20, TimeUnit.SECONDS)
+                .sslSocketFactory(sslContext.socketFactory, insecureTrustManager)
+                .hostnameVerifier { _, _ -> true }
+                .build()
+        } else {
+            OkHttpClient.Builder()
+                .readTimeout(15, TimeUnit.SECONDS)
+                .writeTimeout(20, TimeUnit.SECONDS)
+                .build()
         }
-        val sslContext = SSLContext.getInstance("SSL")
-        sslContext.init(null, arrayOf(insecureTrustManager), java.security.SecureRandom())
-        insecureClient = OkHttpClient.Builder()
-            .readTimeout(15, TimeUnit.SECONDS)
-            .writeTimeout(20, TimeUnit.SECONDS)
-            .sslSocketFactory(sslContext.socketFactory, insecureTrustManager)
-            .hostnameVerifier { _, _ -> true }
-            .build()
     }
 
 
@@ -190,8 +188,8 @@ class OkHttpRequest private constructor() {
 
         val JSON = "application/json; charset=utf-8".toMediaTypeOrNull()
 
-        fun getInstance(): OkHttpRequest {
-            if (instance == null) instance = OkHttpRequest()
+        fun getInstance(allowInsecureRequests: Boolean): OkHttpRequest {
+            if (instance == null) instance = OkHttpRequest(allowInsecureRequests)
             return instance as OkHttpRequest
         }
     }

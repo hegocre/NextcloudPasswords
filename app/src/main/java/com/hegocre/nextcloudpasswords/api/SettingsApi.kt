@@ -10,7 +10,10 @@ import kotlinx.serialization.json.Json
 import java.net.SocketTimeoutException
 import javax.net.ssl.SSLHandshakeException
 
-class SettingsApi private constructor(private val server: Server) {
+class SettingsApi private constructor(
+    private val server: Server,
+    private val okHttpRequest: OkHttpRequest
+) {
 
     /**
      * Sends a request to the api to obtain required user settings. No session is required to send this request.
@@ -20,7 +23,7 @@ class SettingsApi private constructor(private val server: Server) {
     suspend fun get(): Result<ServerSettings> {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().post(
+                okHttpRequest.post(
                     sUrl = server.url + GET_URL,
                     body = ServerSettings.getRequestBody(),
                     mediaType = OkHttpRequest.JSON,
@@ -63,12 +66,12 @@ class SettingsApi private constructor(private val server: Server) {
          * @param server The [Server] where the requests will be made.
          * @return The instance of the api.
          */
-        fun getInstance(server: Server): SettingsApi {
+        fun getInstance(server: Server, okHttpRequest: OkHttpRequest): SettingsApi {
             synchronized(this) {
                 var tempInstance = instance
 
                 if (tempInstance == null) {
-                    tempInstance = SettingsApi(server)
+                    tempInstance = SettingsApi(server, okHttpRequest)
                     instance = tempInstance
                 }
 

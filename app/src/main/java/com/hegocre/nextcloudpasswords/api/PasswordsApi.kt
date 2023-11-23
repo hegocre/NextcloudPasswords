@@ -21,7 +21,10 @@ import javax.net.ssl.SSLHandshakeException
  *
  * @param server The [Server] where the requests will be made.
  */
-class PasswordsApi private constructor(private var server: Server) {
+class PasswordsApi private constructor(
+    private var server: Server,
+    private val okHttpRequest: OkHttpRequest
+) {
 
     /**
      * Sends a request to the api to list all the user passwords. If the user uses CSE, a
@@ -35,7 +38,7 @@ class PasswordsApi private constructor(private var server: Server) {
     ): Result<List<Password>> {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().get(
+                okHttpRequest.get(
                     sUrl = server.url + LIST_URL,
                     sessionCode = sessionCode,
                     username = server.username,
@@ -79,7 +82,7 @@ class PasswordsApi private constructor(private var server: Server) {
     ): Result<Unit> {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().post(
+                okHttpRequest.post(
                     sUrl = server.url + CREATE_URL,
                     sessionCode = sessionCode,
                     body = Json.encodeToString(newPassword),
@@ -124,7 +127,7 @@ class PasswordsApi private constructor(private var server: Server) {
     ): Result<Unit> {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().patch(
+                okHttpRequest.patch(
                     sUrl = server.url + UPDATE_URL,
                     sessionCode = sessionCode,
                     body = Json.encodeToString(updatedPassword),
@@ -168,7 +171,7 @@ class PasswordsApi private constructor(private var server: Server) {
     ): Result<Unit> {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().delete(
+                okHttpRequest.delete(
                     sUrl = server.url + DELETE_URL,
                     sessionCode = sessionCode,
                     body = Json.encodeToString(deletedPassword),
@@ -213,12 +216,12 @@ class PasswordsApi private constructor(private var server: Server) {
          * @param server The [Server] where the requests will be made.
          * @return The instance of the api.
          */
-        fun getInstance(server: Server): PasswordsApi {
+        fun getInstance(server: Server, okHttpRequest: OkHttpRequest): PasswordsApi {
             synchronized(this) {
                 var tempInstance = instance
 
                 if (tempInstance == null) {
-                    tempInstance = PasswordsApi(server)
+                    tempInstance = PasswordsApi(server, okHttpRequest)
                     instance = tempInstance
                 }
 

@@ -37,12 +37,14 @@ class ApiController private constructor(context: Context) {
     private val server = UserController.getInstance(context).getServer()
 
     private val preferencesManager = PreferencesManager.getInstance(context)
+    private val okHttpRequest =
+        OkHttpRequest.getInstance(preferencesManager.getSkipCertificateValidation())
 
-    private val passwordsApi = PasswordsApi.getInstance(server)
-    private val foldersApi = FoldersApi.getInstance(server)
-    private val sessionApi = SessionApi.getInstance(server)
-    private val serviceApi = ServiceApi.getInstance(server)
-    private val settingsApi = SettingsApi.getInstance(server)
+    private val passwordsApi = PasswordsApi.getInstance(server, okHttpRequest)
+    private val foldersApi = FoldersApi.getInstance(server, okHttpRequest)
+    private val sessionApi = SessionApi.getInstance(server, okHttpRequest)
+    private val serviceApi = ServiceApi.getInstance(server, okHttpRequest)
+    private val settingsApi = SettingsApi.getInstance(server, okHttpRequest)
 
     private var sessionCode: String? = null
 
@@ -92,8 +94,6 @@ class ApiController private constructor(context: Context) {
                 } ?: delay(5000L)
             }
         }
-        OkHttpRequest.getInstance().allowInsecureRequests =
-            preferencesManager.getSkipCertificateValidation()
     }
 
     private fun decryptCSEv1Keychain(

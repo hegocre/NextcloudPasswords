@@ -27,7 +27,8 @@ class ApiControllerTest {
     fun ignoreCertificateErrorsTest() {
         PreferencesManager.getInstance(context).setSkipCertificateValidation(true)
         ApiController.getInstance(context)
-        val okHttpRequest = OkHttpRequest.getInstance()
-        Assert.assertEquals(okHttpRequest.allowInsecureRequests, true)
+        val okHttpRequest = OkHttpRequest.getInstance(true)
+        val request = okHttpRequest.get("https://self-signed.badssl.com/")
+        Assert.assertEquals(request.code, 200)
     }
 }

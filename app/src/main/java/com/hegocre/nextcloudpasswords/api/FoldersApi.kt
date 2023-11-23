@@ -21,7 +21,10 @@ import javax.net.ssl.SSLHandshakeException
  *
  * @property server The [Server] where the requests will be made.
  */
-class FoldersApi private constructor(private var server: Server) {
+class FoldersApi private constructor(
+    private var server: Server,
+    private val okHttpRequest: OkHttpRequest
+) {
 
     /**
      * Sends a request to the api to list all the user passwords. If the user uses CSE, a
@@ -35,7 +38,7 @@ class FoldersApi private constructor(private var server: Server) {
     ): Result<List<Folder>> {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().get(
+                okHttpRequest.get(
                     sUrl = server.url + LIST_URL,
                     sessionCode = sessionCode,
                     username = server.username,
@@ -78,7 +81,7 @@ class FoldersApi private constructor(private var server: Server) {
     ): Result<Unit> {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().post(
+                okHttpRequest.post(
                     sUrl = server.url + CREATE_URL,
                     sessionCode = sessionCode,
                     body = Json.encodeToString(newFolder),
@@ -123,7 +126,7 @@ class FoldersApi private constructor(private var server: Server) {
     ): Result<Unit> {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().patch(
+                okHttpRequest.patch(
                     sUrl = server.url + UPDATE_URL,
                     sessionCode = sessionCode,
                     body = Json.encodeToString(updatedFolder),
@@ -167,7 +170,7 @@ class FoldersApi private constructor(private var server: Server) {
     ): Result<Unit> {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().delete(
+                okHttpRequest.delete(
                     sUrl = server.url + DELETE_URL,
                     sessionCode = sessionCode,
                     body = Json.encodeToString(deletedFolder),
@@ -213,12 +216,12 @@ class FoldersApi private constructor(private var server: Server) {
          * @param server The [Server] where the requests will be made.
          * @return The instance of the api.
          */
-        fun getInstance(server: Server): FoldersApi {
+        fun getInstance(server: Server, okHttpRequest: OkHttpRequest): FoldersApi {
             synchronized(this) {
                 var tempInstance = instance
 
                 if (tempInstance == null) {
-                    tempInstance = FoldersApi(server)
+                    tempInstance = FoldersApi(server, okHttpRequest)
                     instance = tempInstance
                 }
 
