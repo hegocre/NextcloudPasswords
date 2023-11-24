@@ -1,5 +1,6 @@
 package com.hegocre.nextcloudpasswords.api
 
+import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.api.encryption.PWDv1Challenge
 import com.hegocre.nextcloudpasswords.api.exceptions.ClientDeauthorizedException
 import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyInvalidException
@@ -37,9 +38,15 @@ class SessionApi private constructor(private var server: Server) {
                         password = server.password
                     )
                 }
-            } catch (ex: SSLHandshakeException) {
+            } catch (e: SSLHandshakeException) {
+                if (BuildConfig.DEBUG) {
+                    e.printStackTrace()
+                }
                 return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
-            } catch (ex: Exception) {
+            } catch (e: Exception) {
+                if (BuildConfig.DEBUG) {
+                    e.printStackTrace()
+                }
                 return Result.Error(0)
             }
 
@@ -58,6 +65,9 @@ class SessionApi private constructor(private var server: Server) {
             } else Result.Error(Error.API_BAD_RESPONSE)
 
         } catch (e: SocketTimeoutException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.API_TIMEOUT)
         }
     }
@@ -110,10 +120,19 @@ class SessionApi private constructor(private var server: Server) {
 
             Result.Success(Pair(xSessionCode, body))
         } catch (e: SocketTimeoutException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.API_TIMEOUT)
-        } catch (ex: SSLHandshakeException) {
+        } catch (e: SSLHandshakeException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
-        } catch (ex: Exception) {
+        } catch (e: Exception) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.UNKNOWN)
         }
     }
@@ -143,6 +162,9 @@ class SessionApi private constructor(private var server: Server) {
 
             code == 200
         } catch (e: Exception) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             false
         }
     }
@@ -172,6 +194,9 @@ class SessionApi private constructor(private var server: Server) {
 
             code == 200
         } catch (e: Exception) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             false
         }
     }

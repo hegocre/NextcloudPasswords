@@ -1,7 +1,9 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -66,7 +68,8 @@ data class LicenseNotice(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NCPAboutScreen(
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    onLogoLongPressed: (() -> Unit)? = null
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -133,6 +136,9 @@ fun NCPAboutScreen(
                                             text = "v${stringResource(id = R.string.version_name)} " +
                                                     "(${stringResource(id = R.string.version_code)})"
                                         )
+                                    },
+                                    onLongClick = {
+                                        onLogoLongPressed?.invoke()
                                     }
                                 )
                                 AboutTextField(
@@ -238,18 +244,20 @@ fun NCPAboutScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AboutTextField(
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null,
     primaryText: (@Composable () -> Unit)? = null,
     secondaryText: (@Composable () -> Unit)? = null,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {}
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(vertical = 12.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -387,7 +395,7 @@ val licenses = listOf(
 @Preview
 @Composable
 fun NCPAboutPreview() {
-    NCPAboutScreen {}
+    NCPAboutScreen({})
 }
 
 @Preview

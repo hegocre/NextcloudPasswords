@@ -1,5 +1,6 @@
 package com.hegocre.nextcloudpasswords.api
 
+import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
@@ -43,10 +44,19 @@ class SettingsApi private constructor(private val server: Server) {
             }
 
         } catch (e: SocketTimeoutException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.API_TIMEOUT)
-        } catch (ex: SSLHandshakeException) {
+        } catch (e: SSLHandshakeException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
-        } catch (ex: Exception) {
+        } catch (e: Exception) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.UNKNOWN)
         }
 
