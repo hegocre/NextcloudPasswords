@@ -1,5 +1,6 @@
 package com.hegocre.nextcloudpasswords.api
 
+import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.data.folder.DeletedFolder
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.folder.NewFolder
@@ -56,10 +57,19 @@ class FoldersApi private constructor(private var server: Server) {
                 Result.Success(Json.decodeFromString(body))
             }
         } catch (e: SocketTimeoutException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.API_TIMEOUT)
-        } catch (ex: SSLHandshakeException) {
+        } catch (e: SSLHandshakeException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
-        } catch (ex: Exception) {
+        } catch (e: Exception) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.UNKNOWN)
         }
     }
@@ -101,10 +111,19 @@ class FoldersApi private constructor(private var server: Server) {
                 Result.Success(Unit)
             }
         } catch (e: SocketTimeoutException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.API_TIMEOUT)
-        } catch (ex: SSLHandshakeException) {
+        } catch (e: SSLHandshakeException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
-        } catch (ex: Exception) {
+        } catch (e: Exception) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.UNKNOWN)
         }
     }
@@ -146,10 +165,19 @@ class FoldersApi private constructor(private var server: Server) {
                 Result.Success(Unit)
             }
         } catch (e: SocketTimeoutException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.API_TIMEOUT)
-        } catch (ex: SSLHandshakeException) {
+        } catch (e: SSLHandshakeException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
-        } catch (ex: Exception) {
+        } catch (e: Exception) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.UNKNOWN)
         }
     }
@@ -190,10 +218,19 @@ class FoldersApi private constructor(private var server: Server) {
                 Result.Success(Unit)
             }
         } catch (e: SocketTimeoutException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.API_TIMEOUT)
-        } catch (ex: SSLHandshakeException) {
+        } catch (e: SSLHandshakeException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
-        } catch (ex: Exception) {
+        } catch (e: Exception) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
             Result.Error(Error.UNKNOWN)
         }
     }

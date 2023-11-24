@@ -3,6 +3,7 @@ package com.hegocre.nextcloudpasswords.api.encryption
 import com.goterl.lazysodium.interfaces.Box
 import com.goterl.lazysodium.interfaces.PwHash
 import com.goterl.lazysodium.interfaces.SecretBox
+import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.api.exceptions.SodiumDecryptionException
 import com.hegocre.nextcloudpasswords.utils.LazySodiumUtils
 import okio.internal.commonToUtf8String
@@ -36,7 +37,10 @@ data class CSEv1Keychain(
             val encryptedJson = try {
                 val keysObj = obj.getJSONObject("keys")
                 keysObj.getString("CSEv1r1")
-            } catch (ex: JSONException) {
+            } catch (e: JSONException) {
+                if (BuildConfig.DEBUG) {
+                    e.printStackTrace()
+                }
                 return ""
             }
 
@@ -87,7 +91,10 @@ data class CSEv1Keychain(
 
             val keyObject = try {
                 obj.getJSONObject("keys")
-            } catch (ex: JSONException) {
+            } catch (e: JSONException) {
+                if (BuildConfig.DEBUG) {
+                    e.printStackTrace()
+                }
                 JSONObject()
             }
 
@@ -101,7 +108,10 @@ data class CSEv1Keychain(
 
             val current = try {
                 obj.getString("current")
-            } catch (ex: JSONException) {
+            } catch (e: JSONException) {
+                if (BuildConfig.DEBUG) {
+                    e.printStackTrace()
+                }
                 ""
             }
 

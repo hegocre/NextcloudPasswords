@@ -15,6 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
+import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.data.password.Password
@@ -24,6 +25,7 @@ import com.hegocre.nextcloudpasswords.services.autofill.NCPAutofillService
 import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsApp
 import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsAppLock
 import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
+import com.hegocre.nextcloudpasswords.utils.LogHelper
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +35,8 @@ import kotlinx.coroutines.launch
 class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (BuildConfig.DEBUG) LogHelper.getInstance()
+
         super.onCreate(savedInstanceState)
         if (!UserController.getInstance(this).isLoggedIn) {
             login()

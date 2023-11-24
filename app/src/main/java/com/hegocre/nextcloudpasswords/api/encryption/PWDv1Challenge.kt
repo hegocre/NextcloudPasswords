@@ -3,6 +3,7 @@ package com.hegocre.nextcloudpasswords.api.encryption
 import com.goterl.lazysodium.interfaces.Box
 import com.goterl.lazysodium.interfaces.GenericHash
 import com.goterl.lazysodium.interfaces.PwHash
+import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyNeededException
 import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengePasswordException
 import com.hegocre.nextcloudpasswords.api.exceptions.SodiumDecryptionException
@@ -103,7 +104,10 @@ data class PWDv1Challenge(
             val saltsArray = try {
                 val challengeObj = obj.getJSONObject("challenge")
                 challengeObj.getJSONArray("salts")
-            } catch (ex: JSONException) {
+            } catch (e: JSONException) {
+                if (BuildConfig.DEBUG) {
+                    e.printStackTrace()
+                }
                 JSONArray()
             }
 
