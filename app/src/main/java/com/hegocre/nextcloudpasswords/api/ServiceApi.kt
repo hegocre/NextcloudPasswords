@@ -39,7 +39,7 @@ class ServiceApi private constructor(private val server: Server) {
             }
 
             val code = apiResponse.code
-            val body = apiResponse.body?.string()
+            val body = withContext(Dispatchers.IO) { apiResponse.body?.string() }
             withContext(Dispatchers.IO) {
                 apiResponse.close()
             }

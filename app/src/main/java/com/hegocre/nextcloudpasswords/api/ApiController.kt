@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Class with methods used to interact with [the API](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api)
@@ -127,7 +128,7 @@ class ApiController private constructor(context: Context) {
         PWDv1ChallengeMasterKeyNeededException::class,
         PWDv1ChallengeMasterKeyInvalidException::class
     )
-    suspend fun openSession(masterPassword: String?): Boolean {
+    suspend fun openSession(masterPassword: String?): Boolean = withContext(Dispatchers.Default) {
         decryptCSEv1Keychain(
             preferencesManager.getCSEv1Keychain(),
             masterPassword
@@ -165,13 +166,13 @@ class ApiController private constructor(context: Context) {
                     )
                 }
             }
-            return false
+            return@withContext false
         }
 
         val secret = if (secretResult is Result.Success) {
             secretResult.data
         } else {
-            return if (secretResult is Result.Error && secretResult.code == Error.API_NO_CSE) {
+            return@withContext if (secretResult is Result.Error && secretResult.code == Error.API_NO_CSE) {
                 // No encryption, we need no session
                 // Clear old keychain, if CSE was disabled
                 preferencesManager.setCSEv1Keychain(null)
@@ -201,7 +202,7 @@ class ApiController private constructor(context: Context) {
                     )
                 }
             }
-            return false
+            return@withContext false
         }
 
         preferencesManager.setCSEv1Keychain(encryptedKeychainJson)
@@ -215,7 +216,7 @@ class ApiController private constructor(context: Context) {
         sessionCode = newSessionCode
 
         _sessionOpen.emit(true)
-        return true
+        return@withContext true
     }
 
     /**

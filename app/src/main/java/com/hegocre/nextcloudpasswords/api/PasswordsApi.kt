@@ -45,7 +45,7 @@ class PasswordsApi private constructor(private var server: Server) {
             }
 
             val code = apiResponse.code
-            val body = apiResponse.body?.string()
+            val body = withContext(Dispatchers.IO) { apiResponse.body?.string() }
             withContext(Dispatchers.IO) {
                 apiResponse.close()
             }
@@ -108,9 +108,7 @@ class PasswordsApi private constructor(private var server: Server) {
                 return Result.Error(Error.API_BAD_RESPONSE)
             }
 
-            withContext(Dispatchers.Default) {
-                Result.Success(Unit)
-            }
+            Result.Success(Unit)
         } catch (e: SocketTimeoutException) {
             if (BuildConfig.DEBUG) {
                 e.printStackTrace()
@@ -162,9 +160,7 @@ class PasswordsApi private constructor(private var server: Server) {
                 return Result.Error(Error.API_BAD_RESPONSE)
             }
 
-            withContext(Dispatchers.Default) {
-                Result.Success(Unit)
-            }
+            Result.Success(Unit)
         } catch (e: SocketTimeoutException) {
             if (BuildConfig.DEBUG) {
                 e.printStackTrace()
@@ -215,9 +211,7 @@ class PasswordsApi private constructor(private var server: Server) {
                 return Result.Error(Error.API_BAD_RESPONSE)
             }
 
-            withContext(Dispatchers.Default) {
-                Result.Success(Unit)
-            }
+            Result.Success(Unit)
         } catch (e: SocketTimeoutException) {
             if (BuildConfig.DEBUG) {
                 e.printStackTrace()
