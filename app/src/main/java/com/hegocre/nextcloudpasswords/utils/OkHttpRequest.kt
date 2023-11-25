@@ -191,8 +191,11 @@ class OkHttpRequest private constructor() {
         val JSON = "application/json; charset=utf-8".toMediaTypeOrNull()
 
         fun getInstance(): OkHttpRequest {
-            if (instance == null) instance = OkHttpRequest()
-            return instance as OkHttpRequest
+            synchronized(this) {
+                if (instance == null) instance = OkHttpRequest()
+
+                return instance as OkHttpRequest
+            }
         }
     }
 }

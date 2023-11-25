@@ -51,7 +51,7 @@ class SessionApi private constructor(private var server: Server) {
             }
 
             val code = apiResponse.code
-            val body = apiResponse.body?.string()
+            val body = withContext(Dispatchers.IO) { apiResponse.body?.string() }
 
             withContext(Dispatchers.IO) {
                 apiResponse.close()
@@ -100,7 +100,7 @@ class SessionApi private constructor(private var server: Server) {
                 )
             }
 
-            val body = apiResponse.body?.string()
+            val body = withContext(Dispatchers.IO) { apiResponse.body?.string() }
             val code = apiResponse.code
 
             val xSessionCode = apiResponse.header("x-api-session", null)
