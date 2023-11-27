@@ -1,2 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="url_cannot_be_empty">URL darf nicht leer sein</string>
+    <string name="url_must_start_https">URL muss mit https:// beginnen</string>
+    <string name="example">Beispiel</string>
+    <string name="log_out">Abmelden</string>
+    <string name="are_you_sure_log_out">Möchten Sie sich wirklich abmelden?</string>
+    <string name="password">Passwort</string>
+    <string name="enter_master_password">Master-Passwort eingeben</string>
+    <string name="show_password">Passwort anzeigen</string>
+    <string name="passwords">Passwörter</string>
+</resources>
