@@ -1,6 +1,7 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
 import android.widget.Toast
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Row
@@ -170,18 +171,28 @@ fun EditablePasswordView(
         item(key = "top_spacer") { Spacer(modifier = Modifier.width(16.dp)) }
 
         item(key = "favorite_button") {
+            val contentColor by animateColorAsState(
+                targetValue = if (editablePasswordState.favorite)
+                    MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(
+                    alpha = 0.80f
+                ),
+                label = "favoriteContentColor"
+            )
+            val containerColor by animateColorAsState(
+                targetValue = if (editablePasswordState.favorite)
+                    MaterialTheme.colorScheme.favoriteColor.copy(alpha = 0.3f) else MaterialTheme.colorScheme.onSurface.copy(
+                    alpha = 0.12f
+                ),
+                label = "favoriteContentColor"
+            )
             Button(
                 onClick = { editablePasswordState.favorite = !editablePasswordState.favorite },
                 modifier = Modifier
                     .padding(bottom = 16.dp)
                     .padding(horizontal = 16.dp),
-                colors = if (editablePasswordState.favorite) ButtonDefaults.filledTonalButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    containerColor = MaterialTheme.colorScheme.favoriteColor.copy(alpha = 0.3f)
-                )
-                else ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.80f),
-                    containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    contentColor = contentColor,
+                    containerColor = containerColor
                 ),
             ) {
                 Icon(
