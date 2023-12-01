@@ -134,7 +134,7 @@ fun NCPNavHost(
                         }
                     }
                     passwordsDecryptionState.decryptedList != null -> {
-                        RefreshListBody(
+                        PullToRefreshBody(
                             isRefreshing = isRefreshing,
                             onRefresh = { passwordsViewModel.sync() },
                         ) {
@@ -169,7 +169,7 @@ fun NCPNavHost(
                         }
                     }
                     passwordsDecryptionState.decryptedList != null -> {
-                        RefreshListBody(
+                        PullToRefreshBody(
                             isRefreshing = isRefreshing,
                             onRefresh = { passwordsViewModel.sync() },
                         ) {
@@ -217,7 +217,7 @@ fun NCPNavHost(
                             passwordsViewModel.setVisibleFolder(null)
                         }
 
-                        RefreshListBody(
+                        PullToRefreshBody(
                             isRefreshing = isRefreshing,
                             onRefresh = { passwordsViewModel.sync() },
                         ) {
@@ -286,7 +286,7 @@ fun NCPNavHost(
                             }
                         }
 
-                        RefreshListBody(
+                        PullToRefreshBody(
                             isRefreshing = isRefreshing,
                             onRefresh = { passwordsViewModel.sync() },
                         ) {
