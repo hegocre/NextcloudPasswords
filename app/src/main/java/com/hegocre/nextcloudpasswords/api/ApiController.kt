@@ -302,9 +302,13 @@ class ApiController private constructor(context: Context) {
      *
      * @return A string with the generated password, or null if there was an error.
      */
-    suspend fun generatePassword(): String? {
+    suspend fun generatePassword(
+        strength: Int,
+        includeDigits: Boolean,
+        includeSymbols: Boolean
+    ): String? {
         if (!sessionOpen.value) return null
-        val result = serviceApi.password(sessionCode)
+        val result = serviceApi.password(strength, includeDigits, includeSymbols, sessionCode)
         return if (result is Result.Success) result.data else null
     }
 

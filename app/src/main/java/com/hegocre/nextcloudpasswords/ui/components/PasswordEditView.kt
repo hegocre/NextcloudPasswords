@@ -72,7 +72,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlin.reflect.KSuspendFunction0
+import kotlin.reflect.KSuspendFunction3
 
 class EditablePasswordState(originalPassword: Password?) {
     var password by mutableStateOf(originalPassword?.password ?: "")
@@ -145,7 +145,7 @@ fun EditablePasswordView(
     editablePasswordState: EditablePasswordState,
     folders: List<Folder>,
     isUpdating: Boolean,
-    onGeneratePassword: KSuspendFunction0<Deferred<String?>>?,
+    onGeneratePassword: KSuspendFunction3<Int, Boolean, Boolean, Deferred<String?>>?,
     onSavePassword: () -> Unit,
     onDeletePassword: (() -> Unit)? = null
 ) {
@@ -235,6 +235,14 @@ fun EditablePasswordView(
                 mutableStateOf(false)
             }
 
+            var showGenerateDialog by remember {
+                mutableStateOf(false)
+            }
+
+            var isGenerating by rememberSaveable {
+                mutableStateOf(false)
+            }
+
             OutlinedTextField(
                 value = editablePasswordState.password,
                 onValueChange = { newText -> editablePasswordState.password = newText },
@@ -243,9 +251,7 @@ fun EditablePasswordView(
                 maxLines = 1,
                 trailingIcon = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        var isGenerating by rememberSaveable {
-                            mutableStateOf(false)
-                        }
+
 
                         if (isGenerating) {
                             CircularProgressIndicator(
@@ -265,20 +271,7 @@ fun EditablePasswordView(
 
                         if (onGeneratePassword != null) {
                             IconButton(onClick = {
-                                coroutineScope.launch {
-                                    isGenerating = true
-                                    val generatedPassword = onGeneratePassword().await()
-                                    if (generatedPassword == null) {
-                                        Toast.makeText(
-                                            context,
-                                            R.string.could_not_generate_password,
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    } else {
-                                        editablePasswordState.password = generatedPassword
-                                    }
-                                    isGenerating = false
-                                }
+                                showGenerateDialog = true
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Casino,
@@ -303,6 +296,35 @@ fun EditablePasswordView(
                     }
                 } else null
             )
+
+            if (showGenerateDialog) {
+                PasswordGenerationDialog(
+                    onGenerate = { strength, includeDigits, includeSymbols ->
+                        if (onGeneratePassword != null) {
+                            coroutineScope.launch {
+                                isGenerating = true
+                                val generatedPassword = onGeneratePassword(
+                                    strength, includeDigits, includeSymbols
+                                ).await()
+                                if (generatedPassword == null) {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.could_not_generate_password,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                } else {
+                                    editablePasswordState.password = generatedPassword
+                                }
+                                isGenerating = false
+                            }
+                            showGenerateDialog = false
+                        }
+                    },
+                    onDismissRequest = {
+                        showGenerateDialog = false
+                    }
+                )
+            }
         }
 
         item(key = "password_url") {

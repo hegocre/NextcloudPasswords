@@ -221,9 +221,11 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    suspend fun generatePassword(): Deferred<String?> {
+    suspend fun generatePassword(
+        strength: Int, includeDigits: Boolean, includeSymbols: Boolean
+    ): Deferred<String?> {
         return viewModelScope.async {
-            return@async apiController.generatePassword()
+            return@async apiController.generatePassword(strength, includeDigits, includeSymbols)
         }
     }
 
