@@ -12,7 +12,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import coil.ImageLoader
+import coil.ImageLoaderFactory
 import coil.compose.rememberAsyncImagePainter
+import coil.disk.DiskCache
 import coil.request.ImageRequest
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.ApiController
@@ -32,6 +35,8 @@ import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.password.PasswordController
 import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
+import com.hegocre.nextcloudpasswords.data.user.UserController
+import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -43,7 +48,8 @@ import okhttp3.Credentials
 import java.net.MalformedURLException
 import java.net.URL
 
-class PasswordsViewModel(application: Application) : AndroidViewModel(application) {
+class PasswordsViewModel(application: Application) : AndroidViewModel(application),
+    ImageLoaderFactory {
     private val preferencesManager = PreferencesManager.getInstance(application)
 
     private var masterPassword: MutableLiveData<String?> = MutableLiveData<String?>(null).also {
@@ -89,6 +95,9 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
 
     val serverSettings: LiveData<ServerSettings>
         get() = apiController.serverSettings
+
+    val server
+        get() = UserController.getInstance(getApplication()).getServer()
 
     val passwords: LiveData<List<Password>>
         get() = PasswordController.getInstance(getApplication()).getPasswords()
@@ -266,6 +275,19 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    override fun newImageLoader(): ImageLoader {
+        return ImageLoader.Builder(getApplication<Application>().applicationContext)
+            .okHttpClient(OkHttpRequest.getInstance().client)
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(
+                        getApplication<Application>().applicationContext
+                            .cacheDir.resolve("image_cache")
+                    )
+                    .build()
+            }.build()
+    }
+
     @Composable
     fun getPainterForUrl(url: String): Painter {
         val context = LocalContext.current
@@ -291,6 +313,31 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                 placeholder(lockDrawable)
                 fallback(lockDrawable)
                 error(lockDrawable)
+            }.build()
+        )
+    }
+
+    @Composable
+    fun getPainterForAvatar(): Painter {
+        val context = LocalContext.current
+
+        val (requestUrl, server) = apiController.getAvatarServiceRequest()
+        return rememberAsyncImagePainter(
+            model = ImageRequest.Builder(context).apply {
+                data(requestUrl)
+                addHeader("OCS-APIRequest", "true")
+                addHeader("Authorization", Credentials.basic(server.username, server.password))
+                crossfade(true)
+                val accountDrawable = context.getDrawable(R.drawable.ic_account_circle)?.apply {
+                    setTintList(
+                        ColorStateList.valueOf(
+                            MaterialTheme.colorScheme.onSurface.toArgb()
+                        )
+                    )
+                }
+                placeholder(accountDrawable)
+                fallback(accountDrawable)
+                error(accountDrawable)
             }.build()
         )
     }

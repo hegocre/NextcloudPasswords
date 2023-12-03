@@ -5,12 +5,15 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -31,11 +34,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -90,6 +95,10 @@ fun NextcloudPasswordsApp(
     var searchExpanded by rememberSaveable { mutableStateOf(isAutofillRequest) }
     val (searchQuery, setSearchQuery) = rememberSaveable { mutableStateOf(defaultSearchQuery) }
 
+    val server = remember {
+        passwordsViewModel.server
+    }
+
     val onPwClick: (Password) -> Unit = onPasswordClick ?: { password ->
         passwordsViewModel.setVisiblePassword(password)
         keyboardController?.hide()
@@ -108,6 +117,8 @@ fun NextcloudPasswordsApp(
             topBar = {
                 if (currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit) {
                     NCPSearchTopBar(
+                        username = server.username,
+                        serverAddress = server.url,
                         title = when (currentScreen) {
                             NCPScreen.Passwords, NCPScreen.Favorites -> stringResource(currentScreen.title)
                             NCPScreen.Folders -> {
@@ -118,7 +129,17 @@ fun NextcloudPasswordsApp(
                                         it.label
                                 } ?: stringResource(currentScreen.title)
                             }
+
                             else -> ""
+                        },
+                        userAvatar = { size ->
+                            Image(
+                                painter = passwordsViewModel.getPainterForAvatar(),
+                                contentDescription = "",
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .size(size)
+                            )
                         },
                         searchQuery = searchQuery,
                         setSearchQuery = setSearchQuery,

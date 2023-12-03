@@ -1,29 +1,44 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.DropdownMenu
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,6 +49,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,14 +62,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import com.hegocre.nextcloudpasswords.R
+import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import kotlinx.coroutines.job
 
@@ -64,11 +87,20 @@ object AppBarDefaults {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NCPSearchTopBar(
+    username: String,
+    serverAddress: String,
     modifier: Modifier = Modifier,
     title: String = stringResource(R.string.app_name),
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         rememberTopAppBarState()
     ),
+    userAvatar: @Composable (Dp) -> Unit = { size ->
+        Image(
+            imageVector = Icons.Outlined.AccountCircle,
+            contentDescription = username,
+            modifier = Modifier.size(size)
+        )
+    },
     searchQuery: String = "",
     setSearchQuery: (String) -> Unit = {},
     isAutofill: Boolean = false,
@@ -89,11 +121,14 @@ fun NCPSearchTopBar(
                 )
             } else {
                 TitleAppBar(
+                    username = username,
+                    serverAddress = serverAddress,
                     title = title,
                     onSearchClick = onSearchClick,
                     onLogoutClick = onLogoutClick,
                     scrollBehavior = scrollBehavior,
-                    showMenu = !isAutofill
+                    showMenu = !isAutofill,
+                    userAvatar = userAvatar
                 )
             }
         }
@@ -103,11 +138,14 @@ fun NCPSearchTopBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TitleAppBar(
+    username: String,
+    serverAddress: String,
     title: String,
     onSearchClick: () -> Unit,
     onLogoutClick: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior,
-    showMenu: Boolean
+    showMenu: Boolean,
+    userAvatar: @Composable (Dp) -> Unit
 ) {
     var menuExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -124,54 +162,21 @@ fun TitleAppBar(
             }
             if (showMenu) {
                 Box {
-                    IconButton(onClick = { menuExpanded = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = stringResource(id = R.string.menu)
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = menuExpanded,
-                        offset = DpOffset(0.dp, -(56).dp),
-                        onDismissRequest = { menuExpanded = false }
+                    IconButton(
+                        onClick = { menuExpanded = true },
+                        modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        val context = LocalContext.current
-
-                        DropdownMenuItem(
-                            onClick = {
-                                val intent =
-                                    Intent("com.hegocre.nextcloudpasswords.action.settings")
-                                        .setPackage(context.packageName)
-                                context.startActivity(intent)
-                                menuExpanded = false
-                            },
-                            text = {
-                                Text(text = stringResource(id = R.string.settings))
-                            },
-                        )
-
-                        DropdownMenuItem(
-                            onClick = {
-                                val intent = Intent("com.hegocre.nextcloudpasswords.action.about")
-                                    .setPackage(context.packageName)
-                                context.startActivity(intent)
-                                menuExpanded = false
-                            },
-                            text = {
-                                Text(text = stringResource(id = R.string.about))
-                            },
-                        )
-
-                        DropdownMenuItem(
-                            onClick = {
-                                onLogoutClick()
-                                menuExpanded = false
-                            },
-                            text = {
-                                Text(text = stringResource(R.string.log_out))
-                            }
-                        )
+                        userAvatar(26.dp)
                     }
+
+                    PopupAppMenu(
+                        username = username,
+                        serverAddress = serverAddress,
+                        menuExpanded = menuExpanded,
+                        userAvatar = userAvatar,
+                        onDismissRequest = { menuExpanded = false },
+                        onLogoutClick = onLogoutClick
+                    )
                 }
             }
         },
@@ -250,11 +255,217 @@ fun SearchAppBar(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PopupAppMenu(
+    username: String,
+    serverAddress: String,
+    menuExpanded: Boolean,
+    userAvatar: @Composable (Dp) -> Unit,
+    onDismissRequest: () -> Unit,
+    onLogoutClick: () -> Unit
+) {
+    val context = LocalContext.current
+
+    val dismissSheet = Modifier
+        .pointerInput(Unit) {
+            detectTapGestures {
+                onDismissRequest()
+            }
+        }
+
+    val orientation = LocalConfiguration.current.orientation
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
+    if (menuExpanded) {
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            modifier = Modifier.fillMaxWidth(),
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    Spacer(
+                        modifier = Modifier
+                            .height(72.dp)
+                            .fillMaxWidth()
+                            .then(dismissSheet)
+                    )
+                }
+
+                Surface(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .then(
+                            if (orientation == Configuration.ORIENTATION_PORTRAIT)
+                                Modifier.fillMaxWidth()
+                            else
+                                Modifier.width(screenHeight)
+                        ),
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = MaterialTheme.shapes.large
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .verticalScroll(rememberScrollState()),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .padding(vertical = 12.dp)
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .padding(all = 8.dp)
+                                    .padding(end = 12.dp)
+                            ) {
+                                userAvatar(40.dp)
+                            }
+
+                            Column {
+                                Text(
+                                    text = username,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Start
+                                )
+
+                                CompositionLocalProvider(
+                                    LocalContentColor provides LocalContentColor.current.copy(alpha = ContentAlpha.medium)
+                                ) {
+                                    Text(
+                                        text = serverAddress,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                        }
+
+                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+                        DropdownMenuItem(
+                            onClick = {
+                                val intent =
+                                    Intent("com.hegocre.nextcloudpasswords.action.settings")
+                                        .setPackage(context.packageName)
+                                context.startActivity(intent)
+                                onDismissRequest()
+                            },
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.settings),
+                                    modifier = Modifier.padding(end = 16.dp)
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Settings,
+                                    contentDescription = stringResource(id = R.string.settings),
+                                    modifier = Modifier
+                                        .padding(end = 8.dp)
+                                        .padding(start = 16.dp)
+                                )
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            onClick = {
+                                val intent = Intent("com.hegocre.nextcloudpasswords.action.about")
+                                    .setPackage(context.packageName)
+                                context.startActivity(intent)
+                                onDismissRequest()
+                            },
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.about),
+                                    modifier = Modifier.padding(end = 16.dp)
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Info,
+                                    contentDescription = stringResource(id = R.string.about),
+                                    modifier = Modifier
+                                        .padding(end = 8.dp)
+                                        .padding(start = 16.dp)
+                                )
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            onClick = {
+                                onLogoutClick()
+                                onDismissRequest()
+                            },
+                            text = {
+                                Text(
+                                    text = stringResource(R.string.log_out),
+                                    modifier = Modifier.padding(end = 16.dp)
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Logout,
+                                    contentDescription = stringResource(id = R.string.log_out),
+                                    modifier = Modifier
+                                        .padding(end = 8.dp)
+                                        .padding(start = 16.dp)
+                                )
+                            }
+                        )
+
+                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+                        CompositionLocalProvider(
+                            LocalContentColor provides LocalContentColor.current.copy(alpha = ContentAlpha.medium)
+                        ) {
+                            Text(
+                                text = "${stringResource(id = R.string.app_name)} v${
+                                    stringResource(
+                                        id = R.string.version_name
+                                    )
+                                }(${
+                                    stringResource(
+                                        id = R.string.version_code
+                                    )
+                                })",
+                                style = MaterialTheme.typography.labelSmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .then(dismissSheet)
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(name = "Top bar")
 @Composable
 fun TopBarPreview() {
     NextcloudPasswordsTheme {
-        NCPSearchTopBar()
+        NCPSearchTopBar("", "")
     }
 }
 
