@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -65,6 +66,7 @@ import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.FoldersApi
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.password.CustomField
+import com.hegocre.nextcloudpasswords.data.password.RequestedPassword
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.autofill
@@ -628,6 +630,137 @@ fun ListPreferenceDialog(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PasswordGenerationDialog(
+    onGenerate: (Int, Boolean, Boolean) -> Unit,
+    onDismissRequest: (() -> Unit)? = null
+) {
+    val strengthValues = mapOf(
+        RequestedPassword.STRENGTH_ULTRA to stringResource(id = R.string.ultra),
+        RequestedPassword.STRENGTH_HIGH to stringResource(id = R.string.high),
+        RequestedPassword.STRENGTH_MEDIUM to stringResource(id = R.string.medium),
+        RequestedPassword.STRENGTH_STANDARD to stringResource(id = R.string.standard),
+        RequestedPassword.STRENGTH_LOW to stringResource(id = R.string.low)
+    )
+
+    val (strength, setStrength) = remember { mutableIntStateOf(RequestedPassword.STRENGTH_STANDARD) }
+    val (includeDigits, setIncludeDigits) = remember { mutableStateOf(true) }
+    val (includeSymbols, setIncludeSymbols) = remember { mutableStateOf(true) }
+
+    var typeMenuExpanded by remember { mutableStateOf(false) }
+
+    Dialog(
+        onDismissRequest = { onDismissRequest?.invoke() },
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            contentColor = contentColorFor(backgroundColor = MaterialTheme.colorScheme.surface),
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+        ) {
+            Column(modifier = Modifier.padding(vertical = 24.dp)) {
+                Box(
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .padding(horizontal = 24.dp)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.generate_password),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .fillMaxWidth()
+                ) {
+                    ExposedDropdownMenuBox(
+                        expanded = typeMenuExpanded,
+                        onExpandedChange = { typeMenuExpanded = !typeMenuExpanded },
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .padding(bottom = 8.dp)
+                    ) {
+                        OutlinedTextField(
+                            modifier = Modifier
+                                .menuAnchor(),
+                            value = strengthValues[strength] ?: "",
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuExpanded) },
+                            label = { Text(text = stringResource(id = R.string.strength)) },
+                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = typeMenuExpanded,
+                            onDismissRequest = { typeMenuExpanded = false }
+                        ) {
+                            strengthValues.forEach { strengthValue ->
+                                DropdownMenuItem(
+                                    text = { Text(text = strengthValue.value) },
+                                    onClick = {
+                                        setStrength(strengthValue.key)
+                                        typeMenuExpanded = false
+                                    },
+                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                )
+                            }
+                        }
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                setIncludeDigits(!includeDigits)
+                            }
+                            .padding(vertical = 4.dp, horizontal = 12.dp)
+                    ) {
+                        Checkbox(
+                            checked = includeDigits,
+                            onCheckedChange = setIncludeDigits
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = stringResource(id = R.string.include_numbers))
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                setIncludeSymbols(!includeSymbols)
+                            }
+                            .padding(vertical = 4.dp, horizontal = 12.dp)
+                    ) {
+                        Checkbox(
+                            checked = includeSymbols,
+                            onCheckedChange = setIncludeSymbols
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = stringResource(id = R.string.include_special_characters))
+                    }
+                }
+
+                TextButton(
+                    onClick = {
+                        onGenerate(strength, includeDigits, includeSymbols)
+                    },
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(horizontal = 24.dp)
+                ) {
+                    Text(text = stringResource(android.R.string.ok))
+                }
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 fun MasterPasswordDialogPreview() {
@@ -700,5 +833,13 @@ fun ListPreferenceDialogPreview() {
             selectedOption = "CA",
             onSelectOption = {}
         )
+    }
+}
+
+@Preview
+@Composable
+fun GeneratePasswordDialogPreview() {
+    NextcloudPasswordsTheme {
+        PasswordGenerationDialog(onGenerate = { _, _, _ -> })
     }
 }

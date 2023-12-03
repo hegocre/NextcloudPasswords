@@ -3,11 +3,13 @@ package com.hegocre.nextcloudpasswords.api
 import android.util.Log
 import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.data.password.GeneratedPassword
+import com.hegocre.nextcloudpasswords.data.password.RequestedPassword
 import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.SocketTimeoutException
 import java.net.URLEncoder
@@ -27,14 +29,25 @@ class ServiceApi private constructor(private val server: Server) {
      *
      * @return A result with the password as aString if success, and an error code otherwise.
      */
-    suspend fun password(sessionCode: String?): Result<String> {
+    suspend fun password(
+        strength: Int,
+        includeDigits: Boolean,
+        includeSymbols: Boolean,
+        sessionCode: String?
+    ): Result<String> {
         return try {
+            val requestBody = Json.encodeToString(
+                RequestedPassword(strength, includeDigits, includeSymbols)
+            )
+
             val apiResponse = withContext(Dispatchers.IO) {
-                OkHttpRequest.getInstance().get(
+                OkHttpRequest.getInstance().post(
                     sUrl = server.url + PASSWORD_URL,
                     sessionCode = sessionCode,
                     username = server.username,
-                    password = server.password
+                    password = server.password,
+                    body = requestBody,
+                    mediaType = OkHttpRequest.JSON
                 )
             }
 
