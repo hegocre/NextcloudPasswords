@@ -89,4 +89,12 @@
     <string name="cannot_connect_to_server">No se ha podido conectar al servidor. Pulse para intentarlo de nuevo.</string>
     <string name="invalid_certificate">Certificado inválido</string>
     <string name="invalid_certificate_dialog_text">El certificado HTTPS es inválido. Desea proceder con la conexión?</string>
+    <string name="ultra">Superior</string>
+    <string name="high">Alta</string>
+    <string name="medium">Media</string>
+    <string name="standard">Estándar</string>
+    <string name="low">Baja</string>
+    <string name="include_numbers">Incluir números</string>
+    <string name="include_special_characters">Incluir caracteres especiales</string>
+    <string name="strength">Fortaleza</string>
 </resources>
