@@ -1,0 +1,2 @@
+- Solucionats problemes de connectivitat en alguns dispositius
+- Solucionats problemes de connexió amb instàncies autofirmades

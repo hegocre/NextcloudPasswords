@@ -1,0 +1,2 @@
+- Solucionados problemas de conectividad en algunos dispositivos
+- Solucionados problemas de conectividad con instancias autofirmadas
