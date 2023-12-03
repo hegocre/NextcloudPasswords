@@ -88,12 +88,4 @@
     <string name="cannot_connect_to_server">Cannot connect to server. Tap to retry.</string>
     <string name="invalid_certificate">Invalid certificate</string>
     <string name="invalid_certificate_dialog_text">The HTTPS certificate is invalid. Do you want to proceed?</string>
-    <string name="ultra">Ultra</string>
-    <string name="high">High</string>
-    <string name="medium">Medium</string>
-    <string name="standard">Standard</string>
-    <string name="low">Low</string>
-    <string name="include_numbers">Include numbers</string>
-    <string name="include_special_characters">Include special characters</string>
-    <string name="strength">Strength</string>
 </resources>
