@@ -350,6 +350,9 @@ class ApiController private constructor(context: Context) {
     fun getFaviconServiceRequest(url: String): Pair<String, Server> =
         Pair(serviceApi.getFaviconUrl(url), server)
 
+    fun getAvatarServiceRequest(): Pair<String, Server> =
+        Pair(serviceApi.getAvatarUrl(), server)
+
     companion object {
         private var instance: ApiController? = null
 

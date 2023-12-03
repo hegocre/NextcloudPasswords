@@ -96,6 +96,9 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
     val serverSettings: LiveData<ServerSettings>
         get() = apiController.serverSettings
 
+    val server
+        get() = UserController.getInstance(getApplication()).getServer()
+
     val passwords: LiveData<List<Password>>
         get() = PasswordController.getInstance(getApplication()).getPasswords()
     val folders: LiveData<List<Folder>>
@@ -310,6 +313,31 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                 placeholder(lockDrawable)
                 fallback(lockDrawable)
                 error(lockDrawable)
+            }.build()
+        )
+    }
+
+    @Composable
+    fun getPainterForAvatar(): Painter {
+        val context = LocalContext.current
+
+        val (requestUrl, server) = apiController.getAvatarServiceRequest()
+        return rememberAsyncImagePainter(
+            model = ImageRequest.Builder(context).apply {
+                data(requestUrl)
+                addHeader("OCS-APIRequest", "true")
+                addHeader("Authorization", Credentials.basic(server.username, server.password))
+                crossfade(true)
+                val accountDrawable = context.getDrawable(R.drawable.ic_account_circle)?.apply {
+                    setTintList(
+                        ColorStateList.valueOf(
+                            MaterialTheme.colorScheme.onSurface.toArgb()
+                        )
+                    )
+                }
+                placeholder(accountDrawable)
+                fallback(accountDrawable)
+                error(accountDrawable)
             }.build()
         )
     }

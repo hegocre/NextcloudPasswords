@@ -73,9 +73,13 @@ class ServiceApi private constructor(private val server: Server) {
     fun getFaviconUrl(url: String): String =
         server.url + String.format(FAVICON_URL, URLEncoder.encode(url, "utf-8"), 256)
 
+    fun getAvatarUrl(): String =
+        server.url + String.format(AVATAR_URL, URLEncoder.encode(server.username, "utf-8"), 256)
+
     companion object {
         private const val FAVICON_URL = "/index.php/apps/passwords/api/1.0/service/favicon/%s/%d"
         private const val PASSWORD_URL = "/index.php/apps/passwords/api/1.0/service/password"
+        private const val AVATAR_URL = "/index.php/apps/passwords/api/1.0/service/avatar/%s/%d"
 
         private var instance: ServiceApi? = null
 
