@@ -89,4 +89,12 @@
     <string name="cannot_connect_to_server">No s\'ha pogut connectar al servidor. Premi per intentar-ho de nou.</string>
     <string name="invalid_certificate">Certificat invàlid</string>
     <string name="invalid_certificate_dialog_text">El certificat HTTPS és invàlid. Desitja procedir amb la connexió?</string>
+    <string name="ultra">Superior</string>
+    <string name="high">Alta</string>
+    <string name="medium">Mitjana</string>
+    <string name="standard">Estàndard</string>
+    <string name="low">Baixa</string>
+    <string name="include_numbers">Incloure dígits</string>
+    <string name="include_special_characters">Incloure caràcters especials</string>
+    <string name="strength">Fortalesa</string>
 </resources>
