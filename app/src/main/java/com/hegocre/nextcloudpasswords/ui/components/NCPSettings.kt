@@ -202,6 +202,9 @@ fun NCPSettingsScreen(
                     var firstPasscode by rememberSaveable {
                         mutableStateOf("")
                     }
+                    var isEnablingBiometric by rememberSaveable {
+                        mutableStateOf(false)
+                    }
 
                     SwitchPreference(
                         checked = hasAppLock,
@@ -220,21 +223,25 @@ fun NCPSettingsScreen(
                         SwitchPreference(
                             checked = hasBiometricAppLock,
                             onCheckedChange = { enabled ->
-                                showBiometricPrompt(
-                                    context = context,
-                                    title = context.getString(R.string.biometric_prompt_title),
-                                    description = context.getString(R.string.biometric_prompt_description),
-                                    onBiometricUnlock = {
-                                        scope.launch {
-                                            preferencesManager.setHasBiometricAppLock(enabled)
+                                if (enabled && !hasAppLock) {
+                                    showCreatePasscodeDialog = true
+                                    isEnablingBiometric = true
+                                } else {
+                                    showBiometricPrompt(
+                                        context = context,
+                                        title = context.getString(R.string.biometric_prompt_title),
+                                        description = context.getString(R.string.biometric_prompt_description),
+                                        onBiometricUnlock = {
+                                            scope.launch {
+                                                preferencesManager.setHasBiometricAppLock(enabled)
+                                            }
                                         }
-                                    }
-                                )
+                                    )
+                                }
 
                             },
                             title = { Text(text = stringResource(id = R.string.biometric_unlock_settings_title)) },
                             subtitle = { Text(text = stringResource(id = R.string.biometric_unlock_settings_subtitle)) },
-                            enabled = hasAppLock
                         )
                     }
 
@@ -271,6 +278,19 @@ fun NCPSettingsScreen(
                                     }
                                 }
                                 showConfirmPasscodeDialog = false
+                                if (isEnablingBiometric) {
+                                    isEnablingBiometric = false
+                                    showBiometricPrompt(
+                                        context = context,
+                                        title = context.getString(R.string.biometric_prompt_title),
+                                        description = context.getString(R.string.biometric_prompt_description),
+                                        onBiometricUnlock = {
+                                            scope.launch {
+                                                preferencesManager.setHasBiometricAppLock(true)
+                                            }
+                                        }
+                                    )
+                                }
                             },
                             onDismissRequest = {
                                 showConfirmPasscodeDialog = false
