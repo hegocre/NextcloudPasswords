@@ -15,7 +15,9 @@ data class ServerSettings(
     @SerialName(value = "user.encryption.cse")
     val encryptionCse: Int = 0,
     @SerialName(value = "user.session.lifetime")
-    val sessionLifetime: Int = 600
+    val sessionLifetime: Int = 600,
+    @SerialName(value = "server.theme.color.primary")
+    val themeColorPrimary: String = "#745bca"
 ) {
     companion object {
         @OptIn(ExperimentalSerializationApi::class)

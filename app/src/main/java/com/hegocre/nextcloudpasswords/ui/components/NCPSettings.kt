@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
+import com.hegocre.nextcloudpasswords.ui.theme.NCPTheme
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import com.hegocre.nextcloudpasswords.utils.showBiometricPrompt
@@ -51,6 +52,10 @@ fun NCPSettingsScreen(
     onNavigationUp: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val preferencesManager = remember {
+        PreferencesManager.getInstance(context)
+    }
 
     NextcloudPasswordsTheme {
         Scaffold(
@@ -79,38 +84,42 @@ fun NCPSettingsScreen(
             }
         )
         { innerPadding ->
-            val scope = rememberCoroutineScope()
-
-            Column(Modifier.padding(innerPadding)) {
-                val selectedScreen by PreferencesManager.getInstance(context).getStartScreen()
-                    .collectAsState(initial = NCPScreen.Passwords.name, context = Dispatchers.IO)
-
-                val startViews = mapOf(
-                    NCPScreen.Passwords.name to stringResource(NCPScreen.Passwords.title),
-                    NCPScreen.Favorites.name to stringResource(NCPScreen.Favorites.title),
-                    NCPScreen.Folders.name to stringResource(NCPScreen.Folders.title)
-                )
-
+            Column(
+                Modifier
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+            ) {
                 PreferencesCategory(title = { Text(stringResource(R.string.general)) }) {
+                    val selectedScreen by preferencesManager.getStartScreen()
+                        .collectAsState(
+                            initial = NCPScreen.Passwords.name,
+                            context = Dispatchers.IO
+                        )
+
+                    val startViews = mapOf(
+                        NCPScreen.Passwords.name to stringResource(NCPScreen.Passwords.title),
+                        NCPScreen.Favorites.name to stringResource(NCPScreen.Favorites.title),
+                        NCPScreen.Folders.name to stringResource(NCPScreen.Folders.title)
+                    )
+
                     ListPreference(
                         items = startViews,
-                        onItemSelected = { selectedScreen ->
+                        onItemSelected = {
                             scope.launch {
-                                PreferencesManager.getInstance(context)
-                                    .setStartScreen(selectedScreen)
+                                preferencesManager.setStartScreen(it)
                             }
                         },
                         title = { Text(text = stringResource(id = R.string.start_view_preference_title)) },
                         selectedItem = selectedScreen
                     )
 
-                    val showIcons by PreferencesManager.getInstance(context).getShowIcons()
+                    val showIcons by preferencesManager.getShowIcons()
                         .collectAsState(initial = false, context = Dispatchers.IO)
                     SwitchPreference(
                         checked = showIcons,
                         onCheckedChange = { show ->
                             scope.launch(Dispatchers.IO) {
-                                PreferencesManager.getInstance(context).setShowIcons(show)
+                                preferencesManager.setShowIcons(show)
                             }
                         },
                         title = { Text(stringResource(R.string.show_icons_preference_title)) },
@@ -118,10 +127,61 @@ fun NCPSettingsScreen(
                     )
                 }
 
+                PreferencesCategory(title = { Text(text = stringResource(id = R.string.appearance)) }) {
+                    val appTheme by preferencesManager.getAppTheme()
+                        .collectAsState(initial = NCPTheme.SYSTEM)
+                    val useNextcloudInstanceColor by preferencesManager.getUseInstanceColor()
+                        .collectAsState(initial = false)
+                    val useSystemDynamicColor by preferencesManager.getUseSystemDynamicColor()
+                        .collectAsState(initial = false)
+                    val themes = mapOf(
+                        NCPTheme.SYSTEM to stringResource(id = R.string.system),
+                        NCPTheme.LIGHT to stringResource(id = R.string.light),
+                        NCPTheme.DARK to stringResource(id = R.string.dark),
+                        NCPTheme.AMOLED to stringResource(id = R.string.black)
+                    )
+
+                    ListPreference(
+                        items = themes,
+                        selectedItem = appTheme,
+                        onItemSelected = { theme ->
+                            scope.launch(Dispatchers.IO) {
+                                preferencesManager.setAppTheme(theme)
+                            }
+                        },
+                        title = { Text(text = stringResource(id = R.string.app_theme)) })
+
+                    SwitchPreference(
+                        checked = useNextcloudInstanceColor,
+                        onCheckedChange = { use ->
+                            scope.launch(Dispatchers.IO) {
+                                preferencesManager.setUseInstanceColor(use)
+                            }
+                        },
+                        title = { Text(text = stringResource(id = R.string.use_nextcloud_color)) },
+                        subtitle = { Text(text = stringResource(id = R.string.use_nextcloud_color_msg)) },
+                        enabled = !useSystemDynamicColor
+                    )
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        SwitchPreference(
+                            checked = useSystemDynamicColor,
+                            onCheckedChange = { use ->
+                                scope.launch(Dispatchers.IO) {
+                                    preferencesManager.setUseSystemDynamicColor(use)
+                                }
+                            },
+                            title = { Text(text = stringResource(id = R.string.use_dynamic_color)) },
+                            subtitle = { Text(text = stringResource(id = R.string.use_dynamic_color_msg)) },
+                            enabled = !useNextcloudInstanceColor
+                        )
+                    }
+                }
+
                 PreferencesCategory(title = { Text(text = stringResource(id = R.string.security)) }) {
-                    val hasAppLock by PreferencesManager.getInstance(context).getHasAppLock()
+                    val hasAppLock by preferencesManager.getHasAppLock()
                         .collectAsState(false)
-                    val hasBiometricAppLock by PreferencesManager.getInstance(context)
+                    val hasBiometricAppLock by preferencesManager
                         .getHasBiometricAppLock().collectAsState(false)
                     val canUseBiometrics = remember {
                         BiometricManager.from(context)
@@ -154,7 +214,7 @@ fun NCPSettingsScreen(
                         subtitle = { Text(text = stringResource(id = R.string.app_lock_settings_subtitle)) }
                     )
 
-                    if (hasAppLock && canUseBiometrics) {
+                    if (canUseBiometrics) {
                         SwitchPreference(
                             checked = hasBiometricAppLock,
                             onCheckedChange = { enabled ->
@@ -164,15 +224,15 @@ fun NCPSettingsScreen(
                                     description = context.getString(R.string.biometric_prompt_description),
                                     onBiometricUnlock = {
                                         scope.launch {
-                                            PreferencesManager.getInstance(context)
-                                                .setHasBiometricAppLock(enabled)
+                                            preferencesManager.setHasBiometricAppLock(enabled)
                                         }
                                     }
                                 )
 
                             },
                             title = { Text(text = stringResource(id = R.string.biometric_unlock_settings_title)) },
-                            subtitle = { Text(text = stringResource(id = R.string.biometric_unlock_settings_subtitle)) }
+                            subtitle = { Text(text = stringResource(id = R.string.biometric_unlock_settings_subtitle)) },
+                            enabled = hasAppLock
                         )
                     }
 
@@ -202,7 +262,7 @@ fun NCPSettingsScreen(
                                     ).show()
                                 } else {
                                     scope.launch {
-                                        with(PreferencesManager.getInstance(context)) {
+                                        with(preferencesManager) {
                                             setAppLockPasscode(secondPasscode)
                                             setHasAppLock(true)
                                         }
@@ -222,12 +282,13 @@ fun NCPSettingsScreen(
                             title = stringResource(id = R.string.input_passcode),
                             onInputPasscode = { passcode ->
                                 scope.launch {
-                                    with(PreferencesManager.getInstance(context)) {
+                                    with(preferencesManager) {
                                         val currentPasscode = getAppLockPasscode()
 
                                         if (currentPasscode == passcode) {
                                             setHasAppLock(false)
                                             setAppLockPasscode(null)
+                                            setHasBiometricAppLock(false)
                                         } else {
                                             Toast.makeText(
                                                 context,

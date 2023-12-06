@@ -108,6 +108,8 @@ dependencies {
 
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1'
 
+    implementation 'com.materialkolor:material-kolor:1.2.9'
+
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.arch.core:core-testing:2.2.0'
 

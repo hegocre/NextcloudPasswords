@@ -11,14 +11,21 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowCompat
+import com.hegocre.nextcloudpasswords.utils.PreferencesManager
+import com.materialkolor.dynamicColorScheme
 
-private val lightColorScheme = lightColorScheme(
+private val defaultLightColorScheme = lightColorScheme(
     primary = md_theme_light_primary,
     onPrimary = md_theme_light_onPrimary,
     primaryContainer = md_theme_light_primaryContainer,
@@ -51,7 +58,7 @@ private val lightColorScheme = lightColorScheme(
 )
 
 
-private val darkColorScheme = darkColorScheme(
+private val defaultDarkColorScheme = darkColorScheme(
     primary = md_theme_dark_primary,
     onPrimary = md_theme_dark_onPrimary,
     primaryContainer = md_theme_dark_primaryContainer,
@@ -85,18 +92,64 @@ private val darkColorScheme = darkColorScheme(
 
 @Composable
 fun NextcloudPasswordsTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
+    val preferencesManager = PreferencesManager.getInstance(context)
+    val appTheme by preferencesManager.getAppTheme().collectAsState(initial = NCPTheme.SYSTEM)
+    val useNextcloudInstanceColor by preferencesManager.getUseInstanceColor()
+        .collectAsState(initial = false)
+    val instanceColorString by preferencesManager.getInstanceColor()
+        .collectAsState(initial = "#745bca")
+    val instanceColor by remember {
+        derivedStateOf {
+            try {
+                Color(instanceColorString.toColorInt())
+            } catch (e: IllegalArgumentException) {
+                Color(0xFF745BCA)
+            }
+        }
+    }
+    val useSystemDynamicColor by preferencesManager.getUseSystemDynamicColor()
+        .collectAsState(initial = false)
+
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        useSystemDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            when {
+                appTheme == NCPTheme.LIGHT -> dynamicLightColorScheme(context)
+                appTheme == NCPTheme.DARK -> dynamicDarkColorScheme(context)
+                appTheme == NCPTheme.AMOLED -> dynamicDarkColorScheme(context).copy(
+                    background = Color.Black,
+                    surface = Color.Black
+                )
+
+                isSystemInDarkTheme() -> dynamicDarkColorScheme(context)
+                else -> dynamicLightColorScheme(context)
+            }
         }
 
-        darkTheme -> darkColorScheme
-        else -> lightColorScheme
+        useNextcloudInstanceColor -> {
+            when (appTheme) {
+                NCPTheme.LIGHT -> dynamicColorScheme(instanceColor, false)
+                NCPTheme.DARK -> dynamicColorScheme(instanceColor, true)
+                NCPTheme.AMOLED -> dynamicColorScheme(instanceColor, true).copy(
+                    background = Color.Black,
+                    surface = Color.Black
+                )
+
+                else -> dynamicColorScheme(instanceColor, isSystemInDarkTheme())
+            }
+        }
+
+        appTheme == NCPTheme.LIGHT -> defaultLightColorScheme
+        appTheme == NCPTheme.DARK -> defaultDarkColorScheme
+        appTheme == NCPTheme.AMOLED -> defaultDarkColorScheme.copy(
+            background = Color.Black,
+            surface = Color.Black
+        )
+
+        isSystemInDarkTheme() -> defaultDarkColorScheme
+        else -> defaultLightColorScheme
     }
     val view = LocalView.current
 
@@ -148,3 +201,10 @@ val ColorScheme.statusBreached: Color
     get() {
         return if (isLight()) Red500 else Red200
     }
+
+object NCPTheme {
+    const val SYSTEM = "system_theme"
+    const val LIGHT = "light_theme"
+    const val DARK = "dark_theme"
+    const val AMOLED = "amoled_theme"
+}
