@@ -62,7 +62,7 @@ fun SwitchPreference(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onCheckedChange(!checked) }
+            .clickable { if (enabled) onCheckedChange(!checked) }
             .padding(vertical = 12.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -81,7 +81,7 @@ fun SwitchPreference(
         }
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange,
+            onCheckedChange = { if (enabled) onCheckedChange(it) },
             enabled = enabled,
         )
     }
