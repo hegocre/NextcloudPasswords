@@ -53,6 +53,7 @@ class UserController private constructor(context: Context) {
             setMasterPassword(null)
             setCSEv1Keychain(null)
             setSkipCertificateValidation(false)
+            setServerSettings(null)
         }
     }
 

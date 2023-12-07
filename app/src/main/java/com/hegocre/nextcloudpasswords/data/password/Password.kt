@@ -9,6 +9,7 @@ import com.hegocre.nextcloudpasswords.utils.decryptValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import okhttp3.internal.publicsuffix.PublicSuffixDatabase
 
 /**
  * Data class representing a
@@ -120,9 +121,10 @@ data class Password(
             return true
         }
 
-        val queryDomain = Uri.parse(query).host?.removePrefix("www.")
-            ?: Uri.parse("https://$query").host?.removePrefix("www.") ?: return false
+        val domain = (Uri.parse(query).host ?: Uri.parse("https://$query").host)?.let {
+            PublicSuffixDatabase.get().getEffectiveTldPlusOne(it)
+        } ?: return false
 
-        return url.lowercase().contains(queryDomain.lowercase())
+        return url.lowercase().contains(domain.lowercase())
     }
 }

@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.components.NCPLoginScreen
+import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 
 class LoginActivity : ComponentActivity() {
 
@@ -28,6 +29,7 @@ class LoginActivity : ComponentActivity() {
                     finish()
                 },
                 onLoginFailed = {
+                    PreferencesManager.getInstance(this).setSkipCertificateValidation(false)
                     Toast.makeText(this, getString(R.string.error_logging_in), Toast.LENGTH_LONG)
                         .show()
                 }
