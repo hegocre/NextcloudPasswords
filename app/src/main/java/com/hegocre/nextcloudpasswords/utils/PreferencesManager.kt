@@ -11,6 +11,7 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
+import com.hegocre.nextcloudpasswords.ui.theme.NCPTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -66,10 +67,13 @@ class PreferencesManager private constructor(context: Context) {
     fun setCSEv1Keychain(value: String?): Boolean =
         _encryptedSharedPrefs.edit().putString("CSE_V1_KEYCHAIN", value).commit()
 
-    fun getServerSettings(): ServerSettings =
+    fun getServerSettings(): ServerSettings = try {
         _encryptedSharedPrefs.getString("SERVER_SETTINGS", null)?.let {
             Json.decodeFromString(it)
         } ?: ServerSettings()
+    } catch (e: Exception) {
+        ServerSettings()
+    }
 
     fun setServerSettings(value: ServerSettings?): Boolean =
         _encryptedSharedPrefs.edit().putString("SERVER_SETTINGS", value?.let {
@@ -89,6 +93,25 @@ class PreferencesManager private constructor(context: Context) {
         getPreference(PreferenceKeys.START_SCREEN, NCPScreen.Passwords.name)
 
     suspend fun setStartScreen(value: String) = setPreference(PreferenceKeys.START_SCREEN, value)
+
+    fun getAppTheme(): Flow<String> = getPreference(PreferenceKeys.APP_THEME, NCPTheme.SYSTEM)
+    suspend fun setAppTheme(value: String) = setPreference(PreferenceKeys.APP_THEME, value)
+
+    fun getInstanceColor(): Flow<String> = getPreference(PreferenceKeys.INSTANCE_COLOR, "#745bca")
+    suspend fun setInstanceColor(value: String) =
+        setPreference(PreferenceKeys.INSTANCE_COLOR, value)
+
+    fun getUseInstanceColor(): Flow<Boolean> =
+        getPreference(PreferenceKeys.USE_NEXTCLOUD_INSTANCE_COLOR, false)
+
+    suspend fun setUseInstanceColor(value: Boolean) =
+        setPreference(PreferenceKeys.USE_NEXTCLOUD_INSTANCE_COLOR, value)
+
+    fun getUseSystemDynamicColor(): Flow<Boolean> =
+        getPreference(PreferenceKeys.USE_SYSTEM_DYNAMIC_COLOR, false)
+
+    suspend fun setUseSystemDynamicColor(value: Boolean) =
+        setPreference(PreferenceKeys.USE_SYSTEM_DYNAMIC_COLOR, value)
 
     private fun <T> getPreference(key: Preferences.Key<T>, defaultValue: T): Flow<T> =
         sharedPreferences.data
@@ -122,6 +145,10 @@ class PreferencesManager private constructor(context: Context) {
             val START_SCREEN = stringPreferencesKey("START_SCREEN")
             val HAS_APP_LOCK = booleanPreferencesKey("HAS_APP_LOCK")
             val HAS_BIOMETRIC_APP_LOCK = booleanPreferencesKey("HAS_BIOMETRIC_APP_LOCK")
+            val APP_THEME = stringPreferencesKey("APP_THEME")
+            val USE_NEXTCLOUD_INSTANCE_COLOR = booleanPreferencesKey("USE_NEXTCLOUD_INSTANCE_COLOR")
+            val USE_SYSTEM_DYNAMIC_COLOR = booleanPreferencesKey("USE_SYSTEM_DYNAMIC_COLOR")
+            val INSTANCE_COLOR = stringPreferencesKey("INSTANCE_COLOR")
         }
     }
 }

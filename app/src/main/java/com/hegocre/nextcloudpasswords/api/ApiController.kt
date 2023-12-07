@@ -76,6 +76,7 @@ class ApiController private constructor(context: Context) {
             val settings = result.data
             serverSettings.postValue(settings)
             preferencesManager.setServerSettings(settings)
+            preferencesManager.setInstanceColor(settings.themeColorPrimary)
 
             var keepAliveDelay = (settings.sessionLifetime * 3 / 4 * 1000).toLong()
             while (true) {

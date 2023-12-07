@@ -96,4 +96,14 @@
     <string name="include_numbers">Include numbers</string>
     <string name="include_special_characters">Include special characters</string>
     <string name="strength">Strength</string>
+    <string name="appearance">Appearance</string>
+    <string name="system">System</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="black">Black</string>
+    <string name="app_theme">App theme</string>
+    <string name="use_nextcloud_color">Use Nextcloud colors</string>
+    <string name="use_nextcloud_color_msg">Use the instance color as the accent color</string>
+    <string name="use_dynamic_color">Use dynamic colors</string>
+    <string name="use_dynamic_color_msg">Use the dynamic colors from the system</string>
 </resources>

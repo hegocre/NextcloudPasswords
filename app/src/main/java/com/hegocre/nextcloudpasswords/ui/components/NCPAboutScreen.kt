@@ -390,6 +390,12 @@ val licenses = listOf(
         licenseName = "MIT License",
         licenseUrl = "https://github.com/ErikHellman/MarkdownComposer/blob/master/LICENSE.txt"
     ),
+    LicenseNotice(
+        name = "MaterialKolor",
+        copyright = "Copyright (c) 2023 Jordon de Hoog",
+        licenseName = "MIT License",
+        licenseUrl = "https://github.com/jordond/MaterialKolor/blob/main/LICENSE"
+    ),
 )
 
 @Preview

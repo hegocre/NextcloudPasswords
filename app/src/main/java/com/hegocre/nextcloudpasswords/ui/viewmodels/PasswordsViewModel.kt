@@ -308,7 +308,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                 val lockDrawable = context.getDrawable(R.drawable.ic_lock)?.apply {
                     setTintList(
                         ColorStateList.valueOf(
-                            MaterialTheme.colorScheme.onSurface.toArgb()
+                            MaterialTheme.colorScheme.primary.toArgb()
                         )
                     )
                 }
@@ -333,7 +333,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                 val accountDrawable = context.getDrawable(R.drawable.ic_account_circle)?.apply {
                     setTintList(
                         ColorStateList.valueOf(
-                            MaterialTheme.colorScheme.onSurface.toArgb()
+                            MaterialTheme.colorScheme.primary.toArgb()
                         )
                     )
                 }
