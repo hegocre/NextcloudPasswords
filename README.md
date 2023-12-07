@@ -1,16 +1,15 @@
 # Nextcloud Passwords
 
+[![Android CI](https://github.com/hegocre/NextcloudPasswords/actions/workflows/android.yml/badge.svg?branch=main)](https://github.com/hegocre/NextcloudPasswords/actions/workflows/android.yml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/hegocre/NextcloudPasswords/blob/main/LICENSE)
+[![Crowdin](https://badges.crowdin.net/e/da2d6d8cb4ace3704592ebcf73969dc9/localized.svg)](https://hegocre.crowdin.com/nextcloud-passwords)
+[![F-Droid Download](https://img.shields.io/f-droid/v/com.hegocre.nextcloudpasswords.svg?logo=F-Droid)](https://f-droid.org/packages/com.hegocre.nextcloudpasswords/)
+[![GitHub Release](https://img.shields.io/github/release/hegocre/NextcloudPasswords.svg?logo=github)](https://github.com/hegocre/NextcloudPasswords/releases/)
+[![Google Play Download](https://PlayBadges.pavi2410.me/badge/downloads?id=com.hegocre.nextcloudpasswords&pretty)](https://play.google.com/store/apps/details?id=com.hegocre.nextcloudpasswords)
+
 This app connects to a Nextcloud server with Passwords App installed, and allows to view and edit
 its content on a user-friendly UI. It also acts as an AutoFill service, making logging in on Android
 devices easier.
-
-[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="75">]([https://github.com/hegocre/NextcloudPasswords/releases](https://play.google.com/store/apps/details?id=com.hegocre.nextcloudpasswords&utm_source=github&utm_campaign=github&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1))[<img src="https://user-images.githubusercontent.com/663460/26973090-f8fdc986-4d14-11e7-995a-e7c5e79ed925.png" alt="Download APK from GitHub" height="75">](https://github.com/hegocre/NextcloudPasswords/releases)
-
-## Screenshots
-
-| ![Light app lock view](/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png) | ![Light password list view](/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png) | ![Light password detail view](/fastlane/metadata/android/en-US/images/phoneScreenshots/3.png) | ![Light password edit view](/fastlane/metadata/android/en-US/images/phoneScreenshots/4.png) |
-|----------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
-| ![Dark app lock view](/fastlane/metadata/android/en-US/images/phoneScreenshots/5.png)  | ![Dark password list view](/fastlane/metadata/android/en-US/images/phoneScreenshots/6.png)  | ![Dark password detail view](/fastlane/metadata/android/en-US/images/phoneScreenshots/7.png)  | ![Dark password edit view](/fastlane/metadata/android/en-US/images/phoneScreenshots/8.png)  |
 
 ## Features
 
@@ -24,6 +23,18 @@ devices easier.
 - Uses the latest technologies like Kotlin and Jetpack Compose
 - Privacy friendly: The only server this app connects is your own Nextcloud Server
 - Free and Open Source
+
+## Screenshots
+
+| ![Light app lock view](/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png) | ![Light password list view](/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png) | ![Light password detail view](/fastlane/metadata/android/en-US/images/phoneScreenshots/3.png) | ![Light password edit view](/fastlane/metadata/android/en-US/images/phoneScreenshots/4.png) |
+|----------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| ![Dark app lock view](/fastlane/metadata/android/en-US/images/phoneScreenshots/5.png)  | ![Dark password list view](/fastlane/metadata/android/en-US/images/phoneScreenshots/6.png)  | ![Dark password detail view](/fastlane/metadata/android/en-US/images/phoneScreenshots/7.png)  | ![Dark password edit view](/fastlane/metadata/android/en-US/images/phoneScreenshots/8.png)  |
+
+## Download
+
+[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="75">](https://play.google.com/store/apps/details?id=com.hegocre.nextcloudpasswords)
+[<img src="https://user-images.githubusercontent.com/663460/26973090-f8fdc986-4d14-11e7-995a-e7c5e79ed925.png" alt="Download APK from GitHub" height="75">](https://github.com/hegocre/NextcloudPasswords/releases)
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Download it on F-Droid" height="75">](https://f-droid.org/packages/com.hegocre.nextcloudpasswords/)
 
 ## Contribute
 
