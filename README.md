@@ -7,9 +7,7 @@
 [![GitHub Release](https://img.shields.io/github/release/hegocre/NextcloudPasswords.svg?logo=github)](https://github.com/hegocre/NextcloudPasswords/releases/)
 [![Google Play Download](https://PlayBadges.pavi2410.me/badge/downloads?id=com.hegocre.nextcloudpasswords&pretty)](https://play.google.com/store/apps/details?id=com.hegocre.nextcloudpasswords)
 
-This app connects to a Nextcloud server with Passwords App installed, and allows to view and edit
-its content on a user-friendly UI. It also acts as an AutoFill service, making logging in on Android
-devices easier.
+This app connects to a Nextcloud server with Passwords App installed, and allows to view and edit its content on a user-friendly UI. It also acts as an AutoFill service, making logging in on Android devices easier.
 
 ## Features
 
@@ -32,9 +30,11 @@ devices easier.
 
 ## Download
 
-[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="75">](https://play.google.com/store/apps/details?id=com.hegocre.nextcloudpasswords)
-[<img src="https://user-images.githubusercontent.com/663460/26973090-f8fdc986-4d14-11e7-995a-e7c5e79ed925.png" alt="Download APK from GitHub" height="75">](https://github.com/hegocre/NextcloudPasswords/releases)
+You can download the app from multiple sources. Keep in mind that each repository version is signed with a different key, which means it is not possible to switch between providers without uninstalling the previous APK first.
+
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Download it on F-Droid" height="75">](https://f-droid.org/packages/com.hegocre.nextcloudpasswords/)
+[<img src="https://user-images.githubusercontent.com/663460/26973090-f8fdc986-4d14-11e7-995a-e7c5e79ed925.png" alt="Download APK from GitHub" height="75">](https://github.com/hegocre/NextcloudPasswords/releases)
+[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="75">](https://play.google.com/store/apps/details?id=com.hegocre.nextcloudpasswords)
 
 ## Contribute
 
