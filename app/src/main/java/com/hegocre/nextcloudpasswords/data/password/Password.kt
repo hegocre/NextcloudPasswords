@@ -120,8 +120,9 @@ data class Password(
             return true
         }
 
-        val queryDomain = Uri.parse(query).host?.removePrefix("www.")
-            ?: Uri.parse("https://$query").host?.removePrefix("www.") ?: return false
+        val queryDomain = Uri.parse(query).host?.split(".")?.takeLast(2)?.joinToString(".")
+            ?: Uri.parse("https://$query").host?.split(".")?.takeLast(2)?.joinToString(".")
+            ?: return false
 
         return url.lowercase().contains(queryDomain.lowercase())
     }
