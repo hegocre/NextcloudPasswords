@@ -3,6 +3,7 @@ package com.hegocre.nextcloudpasswords.ui.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -31,7 +33,9 @@ import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.password.Password
-import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
+import com.hegocre.nextcloudpasswords.ui.components.pullrefresh.PullRefreshIndicator
+import com.hegocre.nextcloudpasswords.ui.components.pullrefresh.pullRefresh
+import com.hegocre.nextcloudpasswords.ui.components.pullrefresh.rememberPullRefreshState
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.statusBreached
 import com.hegocre.nextcloudpasswords.ui.theme.statusGood
@@ -43,6 +47,29 @@ data class ListDecryptionState<T>(
     val decryptedList: List<T>? = null,
     val isLoading: Boolean = false
 )
+
+@Composable
+fun RefreshListBody(
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit = {},
+    content: @Composable () -> Unit = {}
+) {
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = onRefresh
+    )
+
+    Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+        content()
+
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            contentColor = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
+    }
+}
 
 @Composable
 fun MixedLazyColumn(
@@ -162,7 +189,7 @@ fun FolderRow(
             Image(
                 imageVector = Icons.Filled.Folder,
                 contentDescription = stringResource(R.string.folder_icon),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary.copy(alpha = ContentAlpha.medium)),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
                     .size(45.dp)
                     .padding(8.dp)
