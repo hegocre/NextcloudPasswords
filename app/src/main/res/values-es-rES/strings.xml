@@ -97,4 +97,16 @@
     <string name="include_numbers">Incluir números</string>
     <string name="include_special_characters">Incluir caracteres especiales</string>
     <string name="strength">Fortaleza</string>
+    <string name="appearance">Apariencia</string>
+    <string name="system">Sistema</string>
+    <string name="light">Claro</string>
+    <string name="dark">Oscuro</string>
+    <string name="black">Negro</string>
+    <string name="app_theme">Tema de la aplicación</string>
+    <string name="use_nextcloud_color">Usar colores de Nextcloud</string>
+    <string name="use_nextcloud_color_msg">Usa el color de la instancia como color de acento</string>
+    <string name="use_dynamic_color">Usar colores dinámicos</string>
+    <string name="use_dynamic_color_msg">Usar los colores dinámicos del sistema</string>
+    <string name="make_a_donation">Hacer una donación</string>
+    <string name="changelog">Registro de cambios</string>
 </resources>

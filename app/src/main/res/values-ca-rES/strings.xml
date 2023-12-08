@@ -97,4 +97,16 @@
     <string name="include_numbers">Incloure dígits</string>
     <string name="include_special_characters">Incloure caràcters especials</string>
     <string name="strength">Fortalesa</string>
+    <string name="appearance">Aparença</string>
+    <string name="system">Sistema</string>
+    <string name="light">Clar</string>
+    <string name="dark">Fosc</string>
+    <string name="black">Negre</string>
+    <string name="app_theme">Tema de l\'aplicació</string>
+    <string name="use_nextcloud_color">Usar colors de Nextcloud</string>
+    <string name="use_nextcloud_color_msg">Utilitzar el color de la instància com a color d\'accent</string>
+    <string name="use_dynamic_color">Usar colors dinàmics</string>
+    <string name="use_dynamic_color_msg">Utilitzar els colors dinàmics del sistema</string>
+    <string name="make_a_donation">Fer una donació</string>
+    <string name="changelog">Registre de canvis</string>
 </resources>
