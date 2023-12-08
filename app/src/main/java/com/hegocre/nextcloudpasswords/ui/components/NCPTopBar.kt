@@ -24,17 +24,17 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Divider
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
@@ -57,7 +57,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -183,7 +182,6 @@ fun TitleAppBar(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchAppBar(
     searchQuery: String,
@@ -205,7 +203,7 @@ fun SearchAppBar(
                 onClick = onBackPressed
             ) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(id = R.string.back)
                 )
             }
@@ -277,7 +275,7 @@ fun PopupAppMenu(
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
     if (menuExpanded) {
-        AlertDialog(
+        BasicAlertDialog(
             onDismissRequest = onDismissRequest,
             modifier = Modifier.fillMaxWidth(),
             properties = DialogProperties(
@@ -351,7 +349,7 @@ fun PopupAppMenu(
                             }
                         }
 
-                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                         DropdownMenuItem(
                             onClick = {
@@ -415,7 +413,7 @@ fun PopupAppMenu(
                             },
                             leadingIcon = {
                                 Icon(
-                                    imageVector = Icons.Outlined.Logout,
+                                    imageVector = Icons.AutoMirrored.Outlined.Logout,
                                     contentDescription = stringResource(id = R.string.log_out),
                                     modifier = Modifier
                                         .padding(end = 8.dp)
@@ -424,7 +422,7 @@ fun PopupAppMenu(
                             }
                         )
 
-                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                         CompositionLocalProvider(
                             LocalContentColor provides LocalContentColor.current.copy(alpha = ContentAlpha.medium)

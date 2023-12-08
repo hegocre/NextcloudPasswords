@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Backspace
+import androidx.compose.material.icons.automirrored.outlined.Backspace
 import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
@@ -261,7 +261,7 @@ fun NextcloudPasswordsAppLock(
                                     .width(AppLockDefaults.DIGIT_SIZE)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Outlined.Backspace,
+                                    imageVector = Icons.AutoMirrored.Outlined.Backspace,
                                     contentDescription = stringResource(id = R.string.delete),
                                     modifier = Modifier.size(25.dp)
                                 )

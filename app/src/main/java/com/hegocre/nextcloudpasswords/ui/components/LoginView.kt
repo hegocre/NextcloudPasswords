@@ -313,8 +313,8 @@ fun NCPWebLoginScreen(
                 )
                 if (loadingProgress < 100) {
                     LinearProgressIndicator(
-                        progress = (loadingProgress.toFloat() / 100),
-                        modifier = Modifier.fillMaxWidth()
+                        progress = { (loadingProgress.toFloat() / 100) },
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
