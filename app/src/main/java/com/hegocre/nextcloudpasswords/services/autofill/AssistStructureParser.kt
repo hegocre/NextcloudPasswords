@@ -3,9 +3,11 @@ package com.hegocre.nextcloudpasswords.services.autofill
 import android.app.assist.AssistStructure
 import android.os.Build
 import android.text.InputType
+import android.util.Log
 import android.view.View
 import android.view.autofill.AutofillId
 import androidx.annotation.RequiresApi
+import com.hegocre.nextcloudpasswords.BuildConfig
 
 /**
  * Parser used to get the needed information from an assist structure to reply to an Autofill request.
@@ -85,8 +87,15 @@ class AssistStructureParser(assistStructure: AssistStructure) {
      */
     private fun getFieldType(node: AssistStructure.ViewNode): Int? {
         if (node.autofillType == View.AUTOFILL_TYPE_TEXT) {
+            if (BuildConfig.DEBUG) {
+                Log.d(packageName, "Autofill node -> ${node.hint}")
+            }
+
             // Get by autofill hint
             node.autofillHints?.forEach { hint ->
+                if (BuildConfig.DEBUG) {
+                    Log.d(packageName, "-- hint: $hint")
+                }
                 if (hint == View.AUTOFILL_HINT_USERNAME || hint == View.AUTOFILL_HINT_EMAIL_ADDRESS) {
                     return FIELD_TYPE_USERNAME
                 } else if (hint == View.AUTOFILL_HINT_PASSWORD || hint == "passwordAuto") {
@@ -95,6 +104,12 @@ class AssistStructureParser(assistStructure: AssistStructure) {
             }
 
             // Get by HTML attributes
+            if (BuildConfig.DEBUG) {
+                Log.d(
+                    packageName,
+                    "-- HTML Attributes: ${node.htmlInfo?.attributes?.joinToString(", ")}"
+                )
+            }
             if (node.hasAttribute("type", "email") ||
                 node.hasAttribute("type", "tel") ||
                 node.hasAttribute("type", "text") ||
@@ -117,6 +132,9 @@ class AssistStructureParser(assistStructure: AssistStructure) {
             }
 
             // Get by field type
+            if (BuildConfig.DEBUG) {
+                Log.d(packageName, "-- Field type: ${node.inputType}")
+            }
             if (node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_PASSWORD) ||
                 node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) ||
                 node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD)
