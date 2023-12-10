@@ -89,7 +89,7 @@ class AssistStructureParser(assistStructure: AssistStructure) {
             node.autofillHints?.forEach { hint ->
                 if (hint == View.AUTOFILL_HINT_USERNAME || hint == View.AUTOFILL_HINT_EMAIL_ADDRESS) {
                     return FIELD_TYPE_USERNAME
-                } else if (hint == View.AUTOFILL_HINT_PASSWORD) {
+                } else if (hint == View.AUTOFILL_HINT_PASSWORD || hint == "passwordAuto") {
                     return FIELD_TYPE_PASSWORD
                 }
             }
