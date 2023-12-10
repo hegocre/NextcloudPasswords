@@ -6,6 +6,7 @@ import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.view.autofill.AutofillId
+import android.view.inputmethod.EditorInfo
 import androidx.annotation.RequiresApi
 import com.hegocre.nextcloudpasswords.BuildConfig
 
@@ -89,27 +90,27 @@ class AssistStructureParser(assistStructure: AssistStructure) {
         if (node.autofillType == View.AUTOFILL_TYPE_TEXT) {
             if (BuildConfig.DEBUG) {
                 Log.d(packageName, "Autofill node -> ${node.hint}")
+                Log.d(
+                    packageName,
+                    "-- Hints: ${node.autofillHints?.joinToString(", ")}"
+                )
+                Log.d(
+                    packageName,
+                    "-- HTML Attributes: ${node.htmlInfo?.attributes?.joinToString(", ")}"
+                )
+                Log.d(packageName, "-- Field type: ${node.inputType}")
             }
 
             // Get by autofill hint
             node.autofillHints?.forEach { hint ->
-                if (BuildConfig.DEBUG) {
-                    Log.d(packageName, "-- hint: $hint")
-                }
                 if (hint == View.AUTOFILL_HINT_USERNAME || hint == View.AUTOFILL_HINT_EMAIL_ADDRESS) {
                     return FIELD_TYPE_USERNAME
-                } else if (hint == View.AUTOFILL_HINT_PASSWORD || hint == "passwordAuto") {
+                } else if (hint == View.AUTOFILL_HINT_PASSWORD) {
                     return FIELD_TYPE_PASSWORD
                 }
             }
 
             // Get by HTML attributes
-            if (BuildConfig.DEBUG) {
-                Log.d(
-                    packageName,
-                    "-- HTML Attributes: ${node.htmlInfo?.attributes?.joinToString(", ")}"
-                )
-            }
             if (node.hasAttribute("type", "email") ||
                 node.hasAttribute("type", "tel") ||
                 node.hasAttribute("type", "text") ||
@@ -132,17 +133,11 @@ class AssistStructureParser(assistStructure: AssistStructure) {
             }
 
             // Get by field type
-            if (BuildConfig.DEBUG) {
-                Log.d(packageName, "-- Field type: ${node.inputType}")
-            }
-            if (node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_PASSWORD) ||
-                node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) ||
-                node.inputType.isTextType(InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD)
-            ) {
+            if (node.inputType.isPasswordType()) {
                 return FIELD_TYPE_PASSWORD
             }
 
-            if (node.inputType.isTextType(InputType.TYPE_CLASS_TEXT)) {
+            if (node.inputType.isTextType()) {
                 return FIELD_TYPE_TEXT
             }
         }
@@ -160,16 +155,34 @@ class AssistStructureParser(assistStructure: AssistStructure) {
         this?.htmlInfo?.attributes?.firstOrNull { it.first == attr && it.second == value } != null
 
     /**
-     * Check if a text field matches the provided flag. Sometimes, the [InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS]
-     * or the [InputType.TYPE_CLASS_TEXT] are included.
+     * Check if a text field matches the [InputType.TYPE_CLASS_TEXT] input type.
      *
-     * @param flag The flag to compare.
-     * @return Whether the field matches the flag.
+     * @return Whether the field matches the input type.
      */
-    private fun Int?.isTextType(flag: Int) = this != null && (
-            flag == this || flag or InputType.TYPE_CLASS_TEXT == this ||
-                    flag or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS == this ||
-                    flag or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or InputType.TYPE_CLASS_TEXT == this)
+    private fun Int?.isTextType() = this != null && (this and InputType.TYPE_CLASS_TEXT != 0)
+
+    /**
+     * Check if a text field is any type of password field.
+     *
+     * @return Whether the field matches a password type.
+     */
+    private fun Int?.isPasswordType() = this != null &&
+            (isPasswordInputType(this) || isVisiblePasswordInputType(this))
+
+    //Methods extracted from android source, used since API 33 to heuristically provide
+    // the AUTOFILL_HINT_PASSWORD_AUTO hint
+    // https://android.googlesource.com/platform/frameworks/base/+/1f5c147eb5959a7e4fd03b751679cb5e00984c9c%5E%21/#F0
+    private fun isPasswordInputType(inputType: Int): Boolean {
+        val variation = inputType and (EditorInfo.TYPE_MASK_CLASS or EditorInfo.TYPE_MASK_VARIATION)
+        return variation == EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
+                || variation == EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD
+                || variation == EditorInfo.TYPE_CLASS_NUMBER or EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD
+    }
+
+    private fun isVisiblePasswordInputType(inputType: Int): Boolean {
+        val variation = inputType and (EditorInfo.TYPE_MASK_CLASS or EditorInfo.TYPE_MASK_VARIATION)
+        return variation == EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+    }
 
     companion object {
         private const val FIELD_TYPE_USERNAME = 0
