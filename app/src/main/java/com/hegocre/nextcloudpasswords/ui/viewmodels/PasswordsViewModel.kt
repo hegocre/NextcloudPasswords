@@ -12,10 +12,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import coil.ImageLoader
-import coil.ImageLoaderFactory
 import coil.compose.rememberAsyncImagePainter
-import coil.disk.DiskCache
 import coil.request.ImageRequest
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.ApiController
@@ -36,7 +33,6 @@ import com.hegocre.nextcloudpasswords.data.password.PasswordController
 import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.data.user.UserController
-import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -48,8 +44,7 @@ import okhttp3.Credentials
 import java.net.MalformedURLException
 import java.net.URL
 
-class PasswordsViewModel(application: Application) : AndroidViewModel(application),
-    ImageLoaderFactory {
+class PasswordsViewModel(application: Application) : AndroidViewModel(application) {
     private val preferencesManager = PreferencesManager.getInstance(application)
 
     private var masterPassword: MutableLiveData<String?> = MutableLiveData<String?>(null).also {
@@ -275,19 +270,6 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
             _isUpdating.value = false
             true
         }
-    }
-
-    override fun newImageLoader(): ImageLoader {
-        return ImageLoader.Builder(getApplication<Application>().applicationContext)
-            .okHttpClient(OkHttpRequest.getInstance().client)
-            .diskCache {
-                DiskCache.Builder()
-                    .directory(
-                        getApplication<Application>().applicationContext
-                            .cacheDir.resolve("image_cache")
-                    )
-                    .build()
-            }.build()
     }
 
     @Composable
