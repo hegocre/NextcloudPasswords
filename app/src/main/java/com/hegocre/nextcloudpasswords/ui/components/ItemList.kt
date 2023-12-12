@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.password.Password
-import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.statusBreached
 import com.hegocre.nextcloudpasswords.ui.theme.statusGood
@@ -162,7 +161,7 @@ fun FolderRow(
             Image(
                 imageVector = Icons.Filled.Folder,
                 contentDescription = stringResource(R.string.folder_icon),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary.copy(alpha = ContentAlpha.medium)),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
                     .size(45.dp)
                     .padding(8.dp)
