@@ -67,9 +67,9 @@ class EditableFolderState(originalFolder: Folder?) {
             },
             restore = {
                 EditableFolderState(null).apply {
-                    label = it[1]
-                    parent = it[2]
-                    favorite = it[6].toBooleanStrictOrNull() ?: false
+                    label = it[0]
+                    parent = it[1]
+                    favorite = it[2].toBooleanStrictOrNull() ?: false
                 }
             }
         )
