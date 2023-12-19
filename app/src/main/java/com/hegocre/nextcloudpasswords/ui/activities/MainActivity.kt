@@ -103,7 +103,10 @@ class MainActivity : FragmentActivity() {
                             onCorrectPasscode = passwordsViewModel::disableLock
                         )
                     } else {
-                        passwordsViewModel.disableLock()
+                        if (hasAppLock == false) {
+                            // Avoid asking for passcode just after setting it
+                            passwordsViewModel.disableLock()
+                        }
                         NextcloudPasswordsApp(
                             passwordsViewModel = passwordsViewModel,
                             onLogOut = { logOut() },
