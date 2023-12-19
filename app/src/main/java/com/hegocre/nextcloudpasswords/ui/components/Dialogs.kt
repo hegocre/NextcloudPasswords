@@ -526,7 +526,7 @@ fun InputPasscodeDialog(
                         .focusRequester(requester),
                     value = passcode,
                     onValueChange = { newPasscode ->
-                        if (newPasscode.length <= 4 &&
+                        if (newPasscode.length <= 16 &&
                             (newPasscode.toIntOrNull() != null || newPasscode.isEmpty())
                         ) {
                             setPasscode(newPasscode)
@@ -536,7 +536,6 @@ fun InputPasscodeDialog(
                     maxLines = 1,
                     label = { Text(text = stringResource(id = R.string.passcode)) },
                     isError = showEmptyError && passcode.isBlank(),
-                    supportingText = { Text(text = "${passcode.length}/4") },
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                     trailingIcon = {
                         IconButton(onClick = { showPasscode = !showPasscode }) {
@@ -554,7 +553,7 @@ fun InputPasscodeDialog(
 
                 TextButton(
                     onClick = {
-                        if (passcode.length != 4 || passcode.toIntOrNull() == null) {
+                        if (passcode.length < 4 || passcode.toIntOrNull() == null) {
                             showEmptyError = true
                         } else {
                             onInputPasscode(passcode)

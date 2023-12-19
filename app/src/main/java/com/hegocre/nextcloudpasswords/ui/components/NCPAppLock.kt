@@ -2,7 +2,10 @@ package com.hegocre.nextcloudpasswords.ui.components
 
 import androidx.biometric.BiometricManager
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Backspace
@@ -33,8 +37,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,7 +55,9 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NextcloudPasswordsAppLock(
     onCheckPasscode: (String) -> Deferred<Boolean>,
@@ -73,13 +82,8 @@ fun NextcloudPasswordsAppLock(
     }
 
     LaunchedEffect(key1 = inputPassword) {
-        if (inputPassword.length == 4) {
-            if (onCheckPasscode(inputPassword).await()) {
-                onCorrectPasscode()
-            } else {
-                setInputPassword("")
-                isError = true
-            }
+        if (onCheckPasscode(inputPassword).await()) {
+            onCorrectPasscode()
         }
     }
 
@@ -119,26 +123,17 @@ fun NextcloudPasswordsAppLock(
 
                     Spacer(modifier = Modifier.height(168.dp))
 
-                    Row {
-                        KeyboardDigitIndicator(
-                            enabled = inputPassword.isNotEmpty(),
-                            isError = isError
-                        )
-
-                        KeyboardDigitIndicator(
-                            enabled = inputPassword.length > 1,
-                            isError = isError
-                        )
-
-                        KeyboardDigitIndicator(
-                            enabled = inputPassword.length > 2,
-                            isError = isError
-                        )
-
-                        KeyboardDigitIndicator(
-                            enabled = inputPassword.length > 3,
-                            isError = isError
-                        )
+                    if (inputPassword.isEmpty()) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                    } else {
+                        LazyRow(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            items(count = inputPassword.length, key = { it }) {
+                                KeyboardDigitIndicator(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.animateItemPlacement()
+                                )
+                            }
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(48.dp))
@@ -251,10 +246,34 @@ fun NextcloudPasswordsAppLock(
                         )
 
                         if (isPreview || inputPassword.isNotBlank()) {
+                            val interactionSource = remember { MutableInteractionSource() }
+
+                            val viewConfiguration = LocalViewConfiguration.current
+
+                            LaunchedEffect(interactionSource, inputPassword) {
+                                var isLongClick = false
+
+                                interactionSource.interactions.collectLatest { interaction ->
+                                    when (interaction) {
+                                        is PressInteraction.Press -> {
+                                            isLongClick = false
+                                            delay(viewConfiguration.longPressTimeoutMillis)
+                                            isLongClick = true
+                                            setInputPassword("")
+                                        }
+
+                                        is PressInteraction.Release -> {
+                                            if (isLongClick.not()) {
+                                                setInputPassword(inputPassword.dropLast(1))
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             FilledTonalIconButton(
-                                onClick = {
-                                    setInputPassword(inputPassword.dropLast(1))
-                                },
+                                onClick = {},
+                                interactionSource = interactionSource,
                                 modifier = Modifier
                                     .padding(AppLockDefaults.DIGIT_PADDING)
                                     .height(AppLockDefaults.DIGIT_SIZE)
@@ -301,27 +320,25 @@ fun KeyboardNumber(
 
 @Composable
 fun KeyboardDigitIndicator(
-    enabled: Boolean,
-    isError: Boolean
+    color: Color,
+    modifier: Modifier = Modifier
 ) {
+    var visible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = Unit) {
+        visible = true
+    }
+
+    val scale by animateFloatAsState(targetValue = if (visible) 1f else 0f, label = "opacity")
+
     Spacer(
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 8.dp)
             .height(10.dp)
             .width(10.dp)
+            .scale(scale)
             .clip(CircleShape)
-            .background(
-                if (!isError) {
-                    MaterialTheme.colorScheme.primary.copy(
-                        alpha = animateFloatAsState(
-                            targetValue = if (enabled) 1f else 0.4f,
-                            label = "alpha"
-                        ).value
-                    )
-                } else {
-                    MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
-                }
-            )
+            .background(color)
     )
 }
 

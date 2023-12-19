@@ -136,8 +136,10 @@ class PreferencesManager private constructor(context: Context) {
         private var instance: PreferencesManager? = null
 
         fun getInstance(context: Context): PreferencesManager {
-            if (instance == null) instance = PreferencesManager(context)
-            return instance as PreferencesManager
+            synchronized(this) {
+                if (instance == null) instance = PreferencesManager(context)
+                return instance as PreferencesManager
+            }
         }
 
         private object PreferenceKeys {

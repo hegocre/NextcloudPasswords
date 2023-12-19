@@ -1,7 +1,13 @@
 package com.hegocre.nextcloudpasswords.ui.viewmodels
 
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.ColorStateList
+import android.os.Build
+import android.os.PowerManager
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -110,6 +116,33 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         private set
 
     init {
+        val screenLockFilter = IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_OFF)
+        }
+        val screenOffReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (context != null && intent != null) {
+                    val action = intent.action
+                    val powerManage =
+                        context.getSystemService(Context.POWER_SERVICE) as PowerManager
+                    if (screenLockFilter.matchAction(action) && !powerManage.isInteractive) {
+                        viewModelScope.launch {
+                            _isLocked.emit(true)
+                        }
+                    }
+                }
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            application.registerReceiver(
+                screenOffReceiver,
+                screenLockFilter,
+                Context.RECEIVER_EXPORTED
+            )
+        } else {
+            application.registerReceiver(screenOffReceiver, screenLockFilter)
+        }
+
         if (!sessionOpen.value)
             openSession(masterPassword.value)
     }
