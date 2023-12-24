@@ -15,6 +15,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
+import coil.Coil
+import coil.ImageLoader
+import coil.disk.DiskCache
 import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.ApiController
@@ -26,6 +29,7 @@ import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsApp
 import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsAppLock
 import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
 import com.hegocre.nextcloudpasswords.utils.LogHelper
+import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -86,6 +90,16 @@ class MainActivity : FragmentActivity() {
                 Toast.makeText(this, R.string.client_deauthorized_toast, Toast.LENGTH_LONG).show()
                 logOut()
             }
+        }
+
+        Coil.setImageLoader {
+            ImageLoader.Builder(this)
+                .okHttpClient { OkHttpRequest.getInstance().client }
+                .diskCache {
+                    DiskCache.Builder()
+                        .directory(this.cacheDir.resolve("image_cache"))
+                        .build()
+                }.build()
         }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)

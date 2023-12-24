@@ -11,6 +11,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -216,6 +217,14 @@ fun NCPWebLoginScreen(
 
         val (title, setTitle) = rememberSaveable {
             mutableStateOf(url)
+        }
+
+        BackHandler(enabled = skipTlsValidation) {
+            val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+            val componentName = intent?.component
+            val mainIntent = Intent.makeRestartActivityTask(componentName)
+            context.startActivity(mainIntent)
+            Runtime.getRuntime().exit(0)
         }
 
         val webViewClient = remember(skipTlsValidation) {

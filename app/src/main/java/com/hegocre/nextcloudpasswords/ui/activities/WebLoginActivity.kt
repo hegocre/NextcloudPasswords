@@ -2,6 +2,9 @@ package com.hegocre.nextcloudpasswords.ui.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.webkit.CookieManager
+import android.webkit.WebStorage
+import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
@@ -56,6 +59,22 @@ class WebLoginActivity : ComponentActivity() {
         }
 
         finish()
+    }
+
+    override fun onDestroy() {
+        WebStorage.getInstance().deleteAllData()
+
+        // Clear all the cookies
+        CookieManager.getInstance().removeAllCookies(null)
+        CookieManager.getInstance().flush()
+
+        val webView = WebView(this)
+        webView.clearCache(true)
+        webView.clearFormData()
+        webView.clearHistory()
+        webView.clearSslPreferences()
+
+        super.onDestroy()
     }
 
     companion object {
