@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.ColorStateList
 import android.os.Build
-import android.os.PowerManager
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -118,9 +117,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (context != null && intent != null) {
                     val action = intent.action
-                    val powerManage =
-                        context.getSystemService(Context.POWER_SERVICE) as PowerManager
-                    if (screenLockFilter.matchAction(action) && !powerManage.isInteractive) {
+                    if (screenLockFilter.matchAction(action)) {
                         viewModelScope.launch {
                             _isLocked.emit(true)
                         }
