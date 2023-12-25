@@ -6,10 +6,16 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +28,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -138,15 +146,19 @@ fun NCPNavHost(
                             isRefreshing = isRefreshing,
                             onRefresh = { passwordsViewModel.sync() },
                         ) {
-                            MixedLazyColumn(
-                                passwords = filteredPasswordList,
-                                onPasswordClick = onPasswordClick,
-                                onPasswordLongClick = {
-                                    if (sessionOpen && !isAutofillRequest)
-                                        navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
-                                },
-                                getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
-                            )
+                            if (filteredPasswordList?.isEmpty() == true) {
+                                if (searchQuery.isBlank()) NoContentText() else NoResultsText()
+                            } else {
+                                MixedLazyColumn(
+                                    passwords = filteredPasswordList,
+                                    onPasswordClick = onPasswordClick,
+                                    onPasswordLongClick = {
+                                        if (sessionOpen && !isAutofillRequest)
+                                            navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
+                                    },
+                                    getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
+                                )
+                            }
                         }
                     }
                 }
@@ -173,15 +185,22 @@ fun NCPNavHost(
                             isRefreshing = isRefreshing,
                             onRefresh = { passwordsViewModel.sync() },
                         ) {
-                            MixedLazyColumn(
-                                passwords = filteredFavoritePasswords,
-                                onPasswordClick = onPasswordClick,
-                                onPasswordLongClick = {
-                                    if (sessionOpen && !isAutofillRequest)
-                                        navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
-                                },
-                                getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
-                            )
+                            if (filteredFavoritePasswords?.isEmpty() == true) {
+                                if (searchQuery.isBlank())
+                                    NoContentText()
+                                else
+                                    NoResultsText { navController.navigate(NCPScreen.Passwords.name) }
+                            } else {
+                                MixedLazyColumn(
+                                    passwords = filteredFavoritePasswords,
+                                    onPasswordClick = onPasswordClick,
+                                    onPasswordLongClick = {
+                                        if (sessionOpen && !isAutofillRequest)
+                                            navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
+                                    },
+                                    getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
+                                )
+                            }
                         }
                     }
                 }
@@ -221,21 +240,30 @@ fun NCPNavHost(
                             isRefreshing = isRefreshing,
                             onRefresh = { passwordsViewModel.sync() },
                         ) {
-                            MixedLazyColumn(
-                                passwords = filteredPasswordsParentFolder,
-                                folders = filteredFoldersParentFolder,
-                                onPasswordClick = onPasswordClick,
-                                onPasswordLongClick = {
-                                    if (sessionOpen && !isAutofillRequest)
-                                        navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
-                                },
-                                onFolderClick = onFolderClick,
-                                onFolderLongClick = {
-                                    if (sessionOpen && !isAutofillRequest)
-                                        navController.navigate("${NCPScreen.FolderEdit.name}/${it.id}")
-                                },
-                                getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
-                            )
+                            if (filteredFoldersParentFolder?.isEmpty() == true
+                                && filteredPasswordsParentFolder?.isEmpty() == true
+                            ) {
+                                if (searchQuery.isBlank())
+                                    NoContentText()
+                                else
+                                    NoResultsText { navController.navigate(NCPScreen.Passwords.name) }
+                            } else {
+                                MixedLazyColumn(
+                                    passwords = filteredPasswordsParentFolder,
+                                    folders = filteredFoldersParentFolder,
+                                    onPasswordClick = onPasswordClick,
+                                    onPasswordLongClick = {
+                                        if (sessionOpen && !isAutofillRequest)
+                                            navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
+                                    },
+                                    onFolderClick = onFolderClick,
+                                    onFolderLongClick = {
+                                        if (sessionOpen && !isAutofillRequest)
+                                            navController.navigate("${NCPScreen.FolderEdit.name}/${it.id}")
+                                    },
+                                    getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
+                                )
+                            }
                         }
                     }
                 }
@@ -290,21 +318,30 @@ fun NCPNavHost(
                             isRefreshing = isRefreshing,
                             onRefresh = { passwordsViewModel.sync() },
                         ) {
-                            MixedLazyColumn(
-                                passwords = filteredPasswordsSelectedFolder,
-                                folders = filteredFoldersSelectedFolder,
-                                onPasswordClick = onPasswordClick,
-                                onPasswordLongClick = {
-                                    if (sessionOpen && !isAutofillRequest)
-                                        navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
-                                },
-                                onFolderClick = onFolderClick,
-                                onFolderLongClick = {
-                                    if (sessionOpen && !isAutofillRequest)
-                                        navController.navigate("${NCPScreen.FolderEdit.name}/${it.id}")
-                                },
-                                getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
-                            )
+                            if (filteredFoldersSelectedFolder?.isEmpty() == true
+                                && filteredPasswordsSelectedFolder?.isEmpty() == true
+                            ) {
+                                if (searchQuery.isBlank())
+                                    NoContentText()
+                                else
+                                    NoResultsText { navController.navigate(NCPScreen.Passwords.name) }
+                            } else {
+                                MixedLazyColumn(
+                                    passwords = filteredPasswordsSelectedFolder,
+                                    folders = filteredFoldersSelectedFolder,
+                                    onPasswordClick = onPasswordClick,
+                                    onPasswordLongClick = {
+                                        if (sessionOpen && !isAutofillRequest)
+                                            navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
+                                    },
+                                    onFolderClick = onFolderClick,
+                                    onFolderLongClick = {
+                                        if (sessionOpen && !isAutofillRequest)
+                                            navController.navigate("${NCPScreen.FolderEdit.name}/${it.id}")
+                                    },
+                                    getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
+                                )
+                            }
                         }
                     }
                 }
@@ -686,6 +723,38 @@ fun NCPNavHost(
                             isUpdating = isUpdating,
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun NoContentText() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp), contentAlignment = Alignment.Center
+    ) {
+        Text(text = stringResource(id = R.string.no_content_here))
+    }
+}
+
+@Composable
+fun NoResultsText(
+    onButtonPress: (() -> Unit)? = null
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp), contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = stringResource(id = R.string.no_results_found))
+            if (onButtonPress != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onButtonPress) {
+                    Text(text = stringResource(id = R.string.search_everywhere))
                 }
             }
         }
