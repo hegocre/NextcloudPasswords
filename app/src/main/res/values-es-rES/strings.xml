@@ -109,6 +109,7 @@
     <string name="use_dynamic_color_msg">Usar los colores dinámicos del sistema</string>
     <string name="make_a_donation">Hacer una donación</string>
     <string name="changelog">Registro de cambios</string>
+    <string name="no_content_here">No hay contenido</string>
     <string name="no_results_found">No hay resultados</string>
     <string name="search_everywhere">Buscar globalmente</string>
 </resources>
