@@ -21,9 +21,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Campaign
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.MonetizationOn
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Policy
 import androidx.compose.material.icons.outlined.Web
@@ -179,6 +179,17 @@ fun NCPAboutScreen(
                                 AboutTextField(
                                     icon = {
                                         Icon(
+                                            imageVector = Icons.Outlined.Handshake,
+                                            contentDescription = stringResource(id = R.string.contribute)
+                                        )
+                                    },
+                                    primaryText = { Text(text = stringResource(id = R.string.contribute)) },
+                                    onClick = { uriHandler.openUri(contributeUrl) }
+                                )
+
+                                AboutTextField(
+                                    icon = {
+                                        Icon(
                                             imageVector = Icons.Outlined.Description,
                                             contentDescription = stringResource(id = R.string.licenses)
                                         )
@@ -240,17 +251,6 @@ fun NCPAboutScreen(
                                     },
                                     primaryText = { Text(text = stringResource(id = R.string.website)) },
                                     onClick = { uriHandler.openUri(websiteUrl) }
-                                )
-
-                                AboutTextField(
-                                    icon = {
-                                        Icon(
-                                            imageVector = Icons.Outlined.MonetizationOn,
-                                            contentDescription = stringResource(id = R.string.make_a_donation)
-                                        )
-                                    },
-                                    primaryText = { Text(text = stringResource(id = R.string.make_a_donation)) },
-                                    onClick = { uriHandler.openUri(donateUrl) }
                                 )
                             }
                         }
@@ -375,7 +375,7 @@ const val policyUrl = "https://hegocre.com/nextcloudpasswords/privacy.html"
 const val repoUrl = "https://github.com/hegocre/NextcloudPasswords"
 const val websiteUrl = "https://hegocre.com/"
 const val changelogUrl = "https://github.com/hegocre/NextcloudPasswords/releases/latest"
-const val donateUrl = "https://paypal.me/hegocre"
+const val contributeUrl = "https://github.com/hegocre/NextcloudPasswords#contribute"
 val authors = mapOf(
     "Hector Godoy" to "https://github.com/hegocre",
 )

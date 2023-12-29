@@ -107,7 +107,6 @@
     <string name="use_nextcloud_color_msg">Utilitzar el color de la instància com a color d\'accent</string>
     <string name="use_dynamic_color">Usar colors dinàmics</string>
     <string name="use_dynamic_color_msg">Utilitzar els colors dinàmics del sistema</string>
-    <string name="make_a_donation">Fer una donació</string>
     <string name="changelog">Registre de canvis</string>
     <string name="no_content_here">No hi ha contingut</string>
     <string name="no_results_found">Sense resultats</string>
