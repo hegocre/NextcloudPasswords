@@ -107,6 +107,5 @@
     <string name="use_nextcloud_color_msg">Utiliser la couleur de l\'instance comme couleur d\'accentuation</string>
     <string name="use_dynamic_color">Utiliser des couleurs dynamiques</string>
     <string name="use_dynamic_color_msg">Utiliser les couleurs dynamiques du système</string>
-    <string name="make_a_donation">Faire un don</string>
     <string name="changelog">Journal des changements</string>
 </resources>
