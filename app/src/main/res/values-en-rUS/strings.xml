@@ -107,9 +107,9 @@
     <string name="use_nextcloud_color_msg">Use the instance color as the accent color</string>
     <string name="use_dynamic_color">Use dynamic colors</string>
     <string name="use_dynamic_color_msg">Use the dynamic colors from the system</string>
-    <string name="make_a_donation">Make a donation</string>
     <string name="changelog">Changelog</string>
     <string name="no_content_here">No content here</string>
     <string name="no_results_found">No results found</string>
     <string name="search_everywhere">Search everywhere</string>
+    <string name="contribute">Contribute</string>
 </resources>
