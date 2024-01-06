@@ -1,4 +1,4 @@
-- Improve autofill service
-- Improve URL searching
+- Popraw usługę autouzupełniania
+- Popraw wyszukiwanie URL
 - Allow connecting to servers with self-signed certificate
 - Minor bug fixes
