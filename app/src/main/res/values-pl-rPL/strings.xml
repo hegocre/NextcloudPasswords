@@ -1,2 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">Nextcloud Hasła</string>
+    <string name="site_favicon">Favicon strony</string>
+    <string name="login">Login</string>
+    <string name="server_url">Adres URL serwera</string>
+    <string name="url_cannot_be_empty">Adres URL nie może być pusty</string>
+    <string name="url_must_start_https">Adres URL musi zaczynać się od https://</string>
+    <string name="example">Przykład</string>
+    <string name="log_out">Wyloguj się</string>
+    <string name="are_you_sure_log_out">Czy na pewno chcesz się wylogować?</string>
+    <string name="password">Hasło</string>
+    <string name="enter_master_password">Wprowadź hasło główne</string>
+    <string name="show_password">Pokaż Hasło</string>
+    <string name="passwords">Hasła</string>
+    <string name="favorites">Ulubione</string>
+    <string name="folders">Foldery</string>
+</resources>
