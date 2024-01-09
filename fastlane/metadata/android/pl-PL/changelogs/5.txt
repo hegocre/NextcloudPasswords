@@ -1,4 +1,4 @@
-- Popraw usługę autouzupełniania
+- Popraw usługę auto uzupełniania
 - Popraw wyszukiwanie URL
-- Allow connecting to servers with self-signed certificate
-- Minor bug fixes
+- Zezwalaj na łączenie się z serwerami z certyfikatem podpisanym przez siebie
+- Drobne poprawki błędów
