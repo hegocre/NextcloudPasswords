@@ -15,6 +15,7 @@ import android.service.autofill.SaveRequest
 import androidx.annotation.RequiresApi
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.data.user.UserException
+import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 
 @RequiresApi(Build.VERSION_CODES.O)
 class NCPAutofillService : AutofillService() {
@@ -42,9 +43,11 @@ class NCPAutofillService : AutofillService() {
             return
         }
 
-        val inlineSuggestionsRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            request.inlineSuggestionsRequest
-        } else null
+        val useInline = PreferencesManager.getInstance(applicationContext).getUseInlineAutofill()
+        val inlineSuggestionsRequest =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && useInline) {
+                request.inlineSuggestionsRequest
+            } else null
 
         val searchHint: String? = when {
             // If the structure contains a domain, use that (probably a web browser)

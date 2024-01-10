@@ -356,6 +356,24 @@ fun NCPSettingsScreen(
                             subtitle = { Text(stringResource(R.string.autofill_setting_subtitle)) },
                             enabled = !autofillEnabled
                         )
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            var useInlineAutofill by remember { mutableStateOf(preferencesManager.getUseInlineAutofill()) }
+
+                            SwitchPreference(
+                                checked = useInlineAutofill,
+                                onCheckedChange = { enabled ->
+                                    scope.launch(Dispatchers.IO) {
+                                        if (preferencesManager.setUseInlineAutofill(enabled)) {
+                                            useInlineAutofill = enabled
+                                        }
+                                    }
+                                },
+                                title = { Text(text = stringResource(id = R.string.use_inline_autofill)) },
+                                subtitle = { Text(text = stringResource(id = R.string.use_inline_autofill_msg)) },
+                                enabled = autofillEnabled
+                            )
+                        }
                     }
                 }
             }
