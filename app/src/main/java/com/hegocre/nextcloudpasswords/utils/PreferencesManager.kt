@@ -86,6 +86,12 @@ class PreferencesManager private constructor(context: Context) {
     fun setSkipCertificateValidation(value: Boolean): Boolean =
         _encryptedSharedPrefs.edit().putBoolean("SKIP_CERTIFICATE_VALIDATION", value).commit()
 
+    fun getUseInlineAutofill(): Boolean =
+        _encryptedSharedPrefs.getBoolean("USE_INLINE_AUTOFILL", false)
+
+    fun setUseInlineAutofill(value: Boolean): Boolean =
+        _encryptedSharedPrefs.edit().putBoolean("USE_INLINE_AUTOFILL", value).commit()
+
     fun getShowIcons(): Flow<Boolean> = getPreference(PreferenceKeys.SHOW_ICONS, false)
     suspend fun setShowIcons(value: Boolean) = setPreference(PreferenceKeys.SHOW_ICONS, value)
 
