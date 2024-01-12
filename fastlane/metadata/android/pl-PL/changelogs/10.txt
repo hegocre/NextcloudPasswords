@@ -1,4 +1,4 @@
-- Added support for inline autofill
-- Autofill field detection improvements
-- Always go to passwords view on autofill requests
-- Bug fixes and internal improvements
+- Dodano wsparcie dla autouzupełniania w linii
+- Poprawa wykrywania pól autouzupełniania
+- Zawsze przejdź do widoku hasła przy żądaniach autouzupełniania
+- Poprawki błędów i wewnętrzne ulepszenia

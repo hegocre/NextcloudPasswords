@@ -1,8 +1,8 @@
-- Add more digits to app lock
-- Lock app on device lock
-- Add password generation options
-- Add appearance customization options
-- Add more information on the about screen
-- Fix icon loading on self-hosted instances
-- Fix some autofill fields not being detected
-- Visual improvements and bug fixes
+- Dodaj więcej cyfr do blokady aplikacji
+- Zablokuj aplikację na blokadzie urządzenia
+- Dodaj opcje generowania hasła
+- Dodaj opcje dostosowywania wyglądu
+- Dodaj więcej informacji na temat ekranu
+- Napraw ładowanie ikon na instancjach hostowanych przez siebie
+- Napraw niektóre pola autouzupełniania, które nie są wykrywane
+- Wizualne ulepszenia i poprawki błędów
