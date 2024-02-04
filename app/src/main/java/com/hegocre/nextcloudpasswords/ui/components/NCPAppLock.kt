@@ -117,15 +117,14 @@ fun NextcloudPasswordsAppLock(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                if (LocalConfiguration.current.orientation != Configuration.ORIENTATION_LANDSCAPE) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         PasscodeIndicator(
                             inputPassword = inputPassword,
                             isError = isError
                         )
 
-                        val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat()
-                        val spacerPadding = minOf((screenHeight * 0.04).roundToInt(), 170)
+                        val spacerPadding = minOf((screenHeight() * 0.04).roundToInt(), 170)
                         Spacer(modifier = Modifier.height(spacerPadding.dp))
 
                         KeyPad(
@@ -199,8 +198,7 @@ fun PasscodeIndicator(
                 stringResource(id = R.string.incorrect_code),
         )
 
-        val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat()
-        val spacerPadding = minOf((screenHeight * 0.1).roundToInt(), 170)
+        val spacerPadding = minOf((screenHeight() * 0.1).roundToInt(), 170)
         Spacer(modifier = Modifier.height(spacerPadding.dp))
 
         if (inputPassword.isEmpty()) {
@@ -284,24 +282,14 @@ fun KeyPad(
             )
         }
 
-        val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat().times(
-            if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 0.8f else 1f
-        )
-        val screenWidth = LocalConfiguration.current.screenWidthDp.toFloat()
-
-        val buttonSize =
-            minOf((screenHeight * 0.20).roundToInt(), (screenWidth * 0.25).roundToInt(), 90)
-        val buttonPadding =
-            minOf((screenHeight * 0.04).roundToInt(), (screenWidth * 0.06).roundToInt(), 8)
-
         Row {
             if (showBiometricIndicator) {
                 FilledTonalIconButton(
                     onClick = onBiometricClick,
                     modifier = Modifier
-                        .padding(buttonPadding.dp)
-                        .height(buttonSize.dp)
-                        .width(buttonSize.dp)
+                        .padding(buttonPadding().dp)
+                        .height(buttonSize().dp)
+                        .width(buttonSize().dp)
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Fingerprint,
@@ -312,9 +300,9 @@ fun KeyPad(
             } else {
                 Spacer(
                     modifier = Modifier
-                        .padding(buttonPadding.dp)
-                        .height(buttonSize.dp)
-                        .width(buttonSize.dp)
+                        .padding(buttonPadding().dp)
+                        .height(buttonSize().dp)
+                        .width(buttonSize().dp)
                 )
             }
 
@@ -353,9 +341,9 @@ fun KeyPad(
                     onClick = {},
                     interactionSource = interactionSource,
                     modifier = Modifier
-                        .padding(buttonPadding.dp)
-                        .height(buttonSize.dp)
-                        .width(buttonSize.dp)
+                        .padding(buttonPadding().dp)
+                        .height(buttonSize().dp)
+                        .width(buttonSize().dp)
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.Backspace,
@@ -366,9 +354,9 @@ fun KeyPad(
             } else {
                 Spacer(
                     modifier = Modifier
-                        .padding(buttonPadding.dp)
-                        .height(buttonSize.dp)
-                        .width(buttonSize.dp)
+                        .padding(buttonPadding().dp)
+                        .height(buttonSize().dp)
+                        .width(buttonSize().dp)
                 )
             }
         }
@@ -380,24 +368,14 @@ fun KeyboardNumber(
     number: String,
     onPressNumber: (String) -> Unit
 ) {
-    val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat().times(
-        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 0.8f else 1f
-    )
-    val screenWidth = LocalConfiguration.current.screenWidthDp.toFloat()
-
-    val buttonSize =
-        minOf((screenHeight * 0.20).roundToInt(), (screenWidth * 0.25).roundToInt(), 90)
-    val buttonPadding =
-        minOf((screenHeight * 0.04).roundToInt(), (screenWidth * 0.06).roundToInt(), 8)
-
     FilledTonalButton(
         onClick = {
             onPressNumber(number)
         },
         modifier = Modifier
-            .padding(buttonPadding.dp)
-            .height(buttonSize.dp)
-            .width(buttonSize.dp)
+            .padding(buttonPadding().dp)
+            .height(buttonSize().dp)
+            .width(buttonSize().dp)
     ) {
         Text(text = number, fontSize = 25.sp)
     }
@@ -425,6 +403,30 @@ fun KeyboardDigitIndicator(
             .clip(CircleShape)
             .background(color)
     )
+}
+
+@Composable
+fun screenHeight(): Float =
+    LocalConfiguration.current.screenHeightDp.toFloat()
+
+@Composable
+fun screenWidth(): Float =
+    LocalConfiguration.current.screenWidthDp.toFloat()
+
+@Composable
+fun buttonSize(): Int {
+    val screenHeight = screenHeight().times(
+        if (LocalConfiguration.current.orientation != Configuration.ORIENTATION_LANDSCAPE) 0.8f else 1f
+    )
+    return minOf((screenHeight * 0.20).roundToInt(), (screenWidth() * 0.25).roundToInt(), 90)
+}
+
+@Composable
+fun buttonPadding(): Int {
+    val screenHeight = screenHeight().times(
+        if (LocalConfiguration.current.orientation != Configuration.ORIENTATION_LANDSCAPE) 0.8f else 1f
+    )
+    return minOf((screenHeight * 0.04).roundToInt(), (screenWidth() * 0.06).roundToInt(), 8)
 }
 
 @Preview
