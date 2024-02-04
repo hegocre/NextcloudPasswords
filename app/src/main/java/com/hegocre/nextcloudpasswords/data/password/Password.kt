@@ -121,10 +121,13 @@ data class Password(
             return true
         }
 
-        val domain = (Uri.parse(query).host ?: Uri.parse("https://$query").host)?.let {
-            PublicSuffixDatabase.get().getEffectiveTldPlusOne(it)
-        } ?: return false
-
-        return url.lowercase().contains(domain.lowercase())
+        try {
+            val domain = (Uri.parse(query).host ?: Uri.parse("https://$query").host)?.let {
+                PublicSuffixDatabase.get().getEffectiveTldPlusOne(it)
+            } ?: return false
+            return url.lowercase().contains(domain.lowercase())
+        } catch (e: Exception) {
+            return false
+        }
     }
 }
