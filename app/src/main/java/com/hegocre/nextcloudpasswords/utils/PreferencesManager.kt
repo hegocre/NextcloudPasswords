@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import com.hegocre.nextcloudpasswords.data.password.RequestedPassword
 import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.ui.theme.NCPTheme
@@ -91,6 +92,15 @@ class PreferencesManager private constructor(context: Context) {
 
     fun setUseInlineAutofill(value: Boolean): Boolean =
         _encryptedSharedPrefs.edit().putBoolean("USE_INLINE_AUTOFILL", value).commit()
+
+    fun getPasswordGenerationOptions(): String? =
+        _encryptedSharedPrefs.getString(
+            "PASSWORD_GENERATION_OPTIONS",
+            "${RequestedPassword.STRENGTH_STANDARD};true;true"
+        )
+
+    fun setPasswordGenerationOptions(value: String?): Boolean =
+        _encryptedSharedPrefs.edit().putString("PASSWORD_GENERATION_OPTIONS", value).commit()
 
     fun getShowIcons(): Flow<Boolean> = getPreference(PreferenceKeys.SHOW_ICONS, false)
     suspend fun setShowIcons(value: Boolean) = setPreference(PreferenceKeys.SHOW_ICONS, value)

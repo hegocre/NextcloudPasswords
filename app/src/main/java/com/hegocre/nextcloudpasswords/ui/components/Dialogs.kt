@@ -45,6 +45,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -55,6 +56,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -69,8 +71,11 @@ import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.RequestedPassword
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import com.hegocre.nextcloudpasswords.utils.autofill
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -647,6 +652,15 @@ fun PasswordGenerationDialog(
     val (includeDigits, setIncludeDigits) = remember { mutableStateOf(true) }
     val (includeSymbols, setIncludeSymbols) = remember { mutableStateOf(true) }
 
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        val lastValues = PreferencesManager.getInstance(context)
+            .getPasswordGenerationOptions()?.split(";") ?: listOf()
+        setStrength(lastValues.getOrNull(0)?.toIntOrNull() ?: strength)
+        setIncludeDigits(lastValues.getOrNull(1)?.toBooleanStrictOrNull() ?: includeDigits)
+        setIncludeSymbols(lastValues.getOrNull(2)?.toBooleanStrictOrNull() ?: includeSymbols)
+    }
+
     var typeMenuExpanded by remember { mutableStateOf(false) }
 
     Dialog(
@@ -745,9 +759,15 @@ fun PasswordGenerationDialog(
                     }
                 }
 
+                val coroutineScope = rememberCoroutineScope()
                 TextButton(
                     onClick = {
                         onGenerate(strength, includeDigits, includeSymbols)
+                        coroutineScope.launch(Dispatchers.IO) {
+                            PreferencesManager.getInstance(context).setPasswordGenerationOptions(
+                                "$strength;$includeDigits;$includeSymbols"
+                            )
+                        }
                     },
                     modifier = Modifier
                         .align(Alignment.End)
