@@ -1,16 +1,19 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import android.content.res.Configuration
 import androidx.biometric.BiometricManager
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -39,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalViewConfiguration
@@ -56,8 +60,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlin.math.roundToInt
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NextcloudPasswordsAppLock(
     onCheckPasscode: (String) -> Deferred<Boolean>,
@@ -113,104 +117,55 @@ fun NextcloudPasswordsAppLock(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = if (!isError)
-                            stringResource(id = R.string.input_passcode)
-                        else
-                            stringResource(id = R.string.incorrect_code),
-                    )
+                if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        PasscodeIndicator(
+                            inputPassword = inputPassword,
+                            isError = isError
+                        )
 
-                    Spacer(modifier = Modifier.height(168.dp))
+                        val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat()
+                        val spacerPadding = minOf((screenHeight * 0.04).roundToInt(), 170)
+                        Spacer(modifier = Modifier.height(spacerPadding.dp))
 
-                    if (inputPassword.isEmpty()) {
-                        Spacer(modifier = Modifier.height(10.dp))
-                    } else {
-                        LazyRow(modifier = Modifier.padding(horizontal = 16.dp)) {
-                            items(count = inputPassword.length, key = { it }) {
-                                KeyboardDigitIndicator(
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.animateItemPlacement()
+                        KeyPad(
+                            inputPassword = inputPassword,
+                            setInputPassword = { setInputPassword(inputPassword + it) },
+                            showBiometricIndicator = hasBiometricAppLock && canAuthenticateBiometric,
+                            onBiometricClick = {
+                                showBiometricPrompt(
+                                    context = context,
+                                    title = context.getString(R.string.biometric_prompt_title),
+                                    description = context.getString(R.string.biometric_prompt_description),
+                                    onBiometricUnlock = onCorrectPasscode
                                 )
-                            }
+                            },
+                            showBackspaceIndicator = inputPassword.isNotBlank(),
+                            onBackspaceClick = { setInputPassword(inputPassword.dropLast(1)) },
+                            onBackspaceLongClick = { setInputPassword("") }
+                        )
+                    }
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            PasscodeIndicator(
+                                inputPassword = inputPassword,
+                                isError = isError
+                            )
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(48.dp))
-
-                    Row {
-                        KeyboardNumber(
-                            number = "1",
-                            onPressNumber = {
-                                setInputPassword(inputPassword + it)
-                            }
-                        )
-
-                        KeyboardNumber(
-                            number = "2",
-                            onPressNumber = {
-                                setInputPassword(inputPassword + it)
-                            }
-                        )
-
-                        KeyboardNumber(
-                            number = "3",
-                            onPressNumber = {
-                                setInputPassword(inputPassword + it)
-                            }
-                        )
-                    }
-
-                    Row {
-                        KeyboardNumber(
-                            number = "4",
-                            onPressNumber = {
-                                setInputPassword(inputPassword + it)
-                            }
-                        )
-
-                        KeyboardNumber(
-                            number = "5",
-                            onPressNumber = {
-                                setInputPassword(inputPassword + it)
-                            }
-                        )
-
-                        KeyboardNumber(
-                            number = "6",
-                            onPressNumber = {
-                                setInputPassword(inputPassword + it)
-                            }
-                        )
-                    }
-
-                    Row {
-                        KeyboardNumber(
-                            number = "7",
-                            onPressNumber = {
-                                setInputPassword(inputPassword + it)
-                            }
-                        )
-
-                        KeyboardNumber(
-                            number = "8",
-                            onPressNumber = {
-                                setInputPassword(inputPassword + it)
-                            }
-                        )
-
-                        KeyboardNumber(
-                            number = "9",
-                            onPressNumber = {
-                                setInputPassword(inputPassword + it)
-                            }
-                        )
-                    }
-
-                    Row {
-                        if (hasBiometricAppLock && canAuthenticateBiometric) {
-                            FilledTonalIconButton(
-                                onClick = {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            KeyPad(
+                                inputPassword = inputPassword,
+                                setInputPassword = { setInputPassword(inputPassword + it) },
+                                showBiometricIndicator = hasBiometricAppLock && canAuthenticateBiometric,
+                                onBiometricClick = {
                                     showBiometricPrompt(
                                         context = context,
                                         title = context.getString(R.string.biometric_prompt_title),
@@ -218,83 +173,203 @@ fun NextcloudPasswordsAppLock(
                                         onBiometricUnlock = onCorrectPasscode
                                     )
                                 },
-                                modifier = Modifier
-                                    .padding(AppLockDefaults.DIGIT_PADDING)
-                                    .height(AppLockDefaults.DIGIT_SIZE)
-                                    .width(AppLockDefaults.DIGIT_SIZE)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Fingerprint,
-                                    contentDescription = stringResource(id = R.string.biometric_unlock_settings_title),
-                                    modifier = Modifier.size(35.dp)
-                                )
-                            }
-                        } else {
-                            Spacer(
-                                modifier = Modifier
-                                    .padding(AppLockDefaults.DIGIT_PADDING)
-                                    .height(AppLockDefaults.DIGIT_SIZE)
-                                    .width(AppLockDefaults.DIGIT_SIZE)
-                            )
-                        }
-
-                        KeyboardNumber(
-                            number = "0",
-                            onPressNumber = {
-                                setInputPassword(inputPassword + it)
-                            }
-                        )
-
-                        if (isPreview || inputPassword.isNotBlank()) {
-                            val interactionSource = remember { MutableInteractionSource() }
-
-                            val viewConfiguration = LocalViewConfiguration.current
-
-                            LaunchedEffect(interactionSource, inputPassword) {
-                                var isLongClick = false
-
-                                interactionSource.interactions.collectLatest { interaction ->
-                                    when (interaction) {
-                                        is PressInteraction.Press -> {
-                                            isLongClick = false
-                                            delay(viewConfiguration.longPressTimeoutMillis)
-                                            isLongClick = true
-                                            setInputPassword("")
-                                        }
-
-                                        is PressInteraction.Release -> {
-                                            if (isLongClick.not()) {
-                                                setInputPassword(inputPassword.dropLast(1))
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            FilledTonalIconButton(
-                                onClick = {},
-                                interactionSource = interactionSource,
-                                modifier = Modifier
-                                    .padding(AppLockDefaults.DIGIT_PADDING)
-                                    .height(AppLockDefaults.DIGIT_SIZE)
-                                    .width(AppLockDefaults.DIGIT_SIZE)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Outlined.Backspace,
-                                    contentDescription = stringResource(id = R.string.delete),
-                                    modifier = Modifier.size(25.dp)
-                                )
-                            }
-                        } else {
-                            Spacer(
-                                modifier = Modifier
-                                    .padding(AppLockDefaults.DIGIT_PADDING)
-                                    .height(AppLockDefaults.DIGIT_SIZE)
-                                    .width(AppLockDefaults.DIGIT_SIZE)
+                                showBackspaceIndicator = inputPassword.isNotBlank(),
+                                onBackspaceClick = { setInputPassword(inputPassword.dropLast(1)) },
+                                onBackspaceLongClick = { setInputPassword("") }
                             )
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PasscodeIndicator(
+    inputPassword: String,
+    isError: Boolean,
+) {
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = if (!isError)
+                stringResource(id = R.string.input_passcode)
+            else
+                stringResource(id = R.string.incorrect_code),
+        )
+
+        val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat()
+        val spacerPadding = minOf((screenHeight * 0.1).roundToInt(), 170)
+        Spacer(modifier = Modifier.height(spacerPadding.dp))
+
+        if (inputPassword.isEmpty()) {
+            Spacer(modifier = Modifier.height(10.dp))
+        } else {
+            LazyRow(modifier = Modifier.padding(horizontal = 16.dp)) {
+                items(count = inputPassword.length, key = { it }) {
+                    KeyboardDigitIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.animateItemPlacement()
+                    )
+                }
+            }
+        }
+    }
+
+}
+
+@Composable
+fun KeyPad(
+    inputPassword: String,
+    setInputPassword: (String) -> Unit,
+    showBiometricIndicator: Boolean,
+    onBiometricClick: () -> Unit,
+    showBackspaceIndicator: Boolean,
+    onBackspaceClick: () -> Unit,
+    onBackspaceLongClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isPreview = LocalInspectionMode.current
+
+    Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Row {
+            KeyboardNumber(
+                number = "1",
+                onPressNumber = setInputPassword
+            )
+
+            KeyboardNumber(
+                number = "2",
+                onPressNumber = setInputPassword
+            )
+
+            KeyboardNumber(
+                number = "3",
+                onPressNumber = setInputPassword
+            )
+        }
+
+        Row {
+            KeyboardNumber(
+                number = "4",
+                onPressNumber = setInputPassword
+            )
+
+            KeyboardNumber(
+                number = "5",
+                onPressNumber = setInputPassword
+            )
+
+            KeyboardNumber(
+                number = "6",
+                onPressNumber = setInputPassword
+            )
+        }
+
+        Row {
+            KeyboardNumber(
+                number = "7",
+                onPressNumber = setInputPassword
+            )
+
+            KeyboardNumber(
+                number = "8",
+                onPressNumber = setInputPassword
+            )
+
+            KeyboardNumber(
+                number = "9",
+                onPressNumber = setInputPassword
+            )
+        }
+
+        val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat().times(
+            if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 0.8f else 1f
+        )
+        val screenWidth = LocalConfiguration.current.screenWidthDp.toFloat()
+
+        val buttonSize =
+            minOf((screenHeight * 0.20).roundToInt(), (screenWidth * 0.25).roundToInt(), 90)
+        val buttonPadding =
+            minOf((screenHeight * 0.04).roundToInt(), (screenWidth * 0.06).roundToInt(), 8)
+
+        Row {
+            if (showBiometricIndicator) {
+                FilledTonalIconButton(
+                    onClick = onBiometricClick,
+                    modifier = Modifier
+                        .padding(buttonPadding.dp)
+                        .height(buttonSize.dp)
+                        .width(buttonSize.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Fingerprint,
+                        contentDescription = stringResource(id = R.string.biometric_unlock_settings_title),
+                        modifier = Modifier.size(35.dp)
+                    )
+                }
+            } else {
+                Spacer(
+                    modifier = Modifier
+                        .padding(buttonPadding.dp)
+                        .height(buttonSize.dp)
+                        .width(buttonSize.dp)
+                )
+            }
+
+            KeyboardNumber(
+                number = "0",
+                onPressNumber = setInputPassword
+            )
+
+            if (isPreview || showBackspaceIndicator) {
+                val interactionSource = remember { MutableInteractionSource() }
+
+                val viewConfiguration = LocalViewConfiguration.current
+
+                LaunchedEffect(interactionSource, inputPassword) {
+                    var isLongClick = false
+
+                    interactionSource.interactions.collectLatest { interaction ->
+                        when (interaction) {
+                            is PressInteraction.Press -> {
+                                isLongClick = false
+                                delay(viewConfiguration.longPressTimeoutMillis)
+                                isLongClick = true
+                                onBackspaceLongClick()
+                            }
+
+                            is PressInteraction.Release -> {
+                                if (isLongClick.not()) {
+                                    onBackspaceClick()
+                                }
+                            }
+                        }
+                    }
+                }
+
+                FilledTonalIconButton(
+                    onClick = {},
+                    interactionSource = interactionSource,
+                    modifier = Modifier
+                        .padding(buttonPadding.dp)
+                        .height(buttonSize.dp)
+                        .width(buttonSize.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.Backspace,
+                        contentDescription = stringResource(id = R.string.delete),
+                        modifier = Modifier.size(25.dp)
+                    )
+                }
+            } else {
+                Spacer(
+                    modifier = Modifier
+                        .padding(buttonPadding.dp)
+                        .height(buttonSize.dp)
+                        .width(buttonSize.dp)
+                )
             }
         }
     }
@@ -305,14 +380,24 @@ fun KeyboardNumber(
     number: String,
     onPressNumber: (String) -> Unit
 ) {
+    val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat().times(
+        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) 0.8f else 1f
+    )
+    val screenWidth = LocalConfiguration.current.screenWidthDp.toFloat()
+
+    val buttonSize =
+        minOf((screenHeight * 0.20).roundToInt(), (screenWidth * 0.25).roundToInt(), 90)
+    val buttonPadding =
+        minOf((screenHeight * 0.04).roundToInt(), (screenWidth * 0.06).roundToInt(), 8)
+
     FilledTonalButton(
         onClick = {
             onPressNumber(number)
         },
         modifier = Modifier
-            .padding(AppLockDefaults.DIGIT_PADDING)
-            .height(AppLockDefaults.DIGIT_SIZE)
-            .width(AppLockDefaults.DIGIT_SIZE)
+            .padding(buttonPadding.dp)
+            .height(buttonSize.dp)
+            .width(buttonSize.dp)
     ) {
         Text(text = number, fontSize = 25.sp)
     }
@@ -340,11 +425,6 @@ fun KeyboardDigitIndicator(
             .clip(CircleShape)
             .background(color)
     )
-}
-
-object AppLockDefaults {
-    val DIGIT_SIZE = 90.dp
-    val DIGIT_PADDING = 8.dp
 }
 
 @Preview
