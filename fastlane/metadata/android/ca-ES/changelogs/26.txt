@@ -1,4 +1,4 @@
-- Fix pin layout on non-vertical orientations
-- Fix error when typing some characters on the search bar
-- Remember last used password generation options
-- Allow disabling inline autofill
+- Solucionats problemes en la distribució de la pantalla de bloqueig
+- Solucionat un problema en escriure alguns caràcters a la barra de cerca
+- Es recordaran les opcions utilitzades en la generació de contrasenyes
+- Es permet desactivar l'autocompletat en línia
