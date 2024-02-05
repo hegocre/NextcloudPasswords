@@ -112,4 +112,6 @@
     <string name="no_results_found">No hay resultados</string>
     <string name="search_everywhere">Buscar globalmente</string>
     <string name="contribute">Contribuir</string>
+    <string name="use_inline_autofill">Autocompletado en línea</string>
+    <string name="use_inline_autofill_msg">Mostar sugerencias de autocompletado en el teclado si es posible</string>
 </resources>
