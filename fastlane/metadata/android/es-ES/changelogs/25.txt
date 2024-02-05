@@ -3,6 +3,6 @@
 - Añadidas opciones de generación de contraseñas
 - Añadidas opciones de personalización de apariencia
 - Se muestra más información en la sección de información
-- Fix icon loading on self-hosted instances
-- Fix some autofill fields not being detected
-- Visual improvements and bug fixes
+- Solucionados problemas en la carga de imágenes en instancias autofirmadas
+- Mejorada la detección de campos de autocompletado
+- Mejoras visuales y corrección de errores
