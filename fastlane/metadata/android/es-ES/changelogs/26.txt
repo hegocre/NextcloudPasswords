@@ -1,4 +1,4 @@
-- Fix pin layout on non-vertical orientations
-- Fix error when typing some characters on the search bar
-- Remember last used password generation options
-- Allow disabling inline autofill
+- Solucionados problemas en la distribución de la pantalla de bloqueo
+- Solucionado un problema al escribir algunos caracteres en la barra de búsqueda
+- Se recordarán las opciones utilizadas en la generación de contraseñas
+- Se permite desactivar el autocompletado en línea
