@@ -1,0 +1,4 @@
+- Solucionados problemas en la distribución de la pantalla de bloqueo
+- Solucionado un problema al escribir algunos caracteres en la barra de búsqueda
+- Se recordarán las opciones utilizadas en la generación de contraseñas
+- Se permite desactivar el autocompletado en línea

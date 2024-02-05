@@ -1,0 +1,4 @@
+- Solucionats problemes en la distribució de la pantalla de bloqueig
+- Solucionat un problema en escriure alguns caràcters a la barra de cerca
+- Es recordaran les opcions utilitzades en la generació de contrasenyes
+- Es permet desactivar l'autocompletat en línia
