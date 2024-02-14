@@ -70,4 +70,18 @@
     <string name="select">Выделение</string>
     <string name="create">Создать</string>
     <string name="edit_folder">Редактировать папку</string>
+    <string name="folder_saving_failed">Не удалось сохранить папку. Пожалуйста, попробуйте снова</string>
+    <string name="folder_deleting_failed">Не удалось удалить папку. Пожалуйста, попробуйте снова</string>
+    <string name="delete_folder">Удалить папку</string>
+    <string name="parent_folder">Родительская папка</string>
+    <string name="security">Безопасность</string>
+    <string name="app_lock_settings_title">Блокировка приложения</string>
+    <string name="app_lock_settings_subtitle">Блокировать доступ к приложению с помощью пин-кода</string>
+    <string name="biometric_unlock_settings_title">Разблокировка биометрией</string>
+    <string name="biometric_unlock_settings_subtitle">Разрешить разблокировку приложения при помощи биометрических данных</string>
+    <string name="incorrect_code">Неправильный код</string>
+    <string name="passcode">Пин-код</string>
+    <string name="input_passcode">Введите пин-код</string>
+    <string name="confirm_passcode">Подтвердите пин-код</string>
+    <string name="passcodes_dont_match">Пин-код не совпадает</string>
 </resources>
