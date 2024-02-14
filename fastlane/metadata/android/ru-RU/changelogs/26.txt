@@ -1,4 +1,4 @@
-- Fix pin layout on non-vertical orientations
-- Fix error when typing some characters on the search bar
-- Remember last used password generation options
-- Allow disabling inline autofill
+- Исправлено поведение интерфейса в альбомной ориентации
+- Исправлена ошибка при печати некоторых символов в поисковой строке
+- Последние выбранные опции генерации паролей теперь запоминаются
+- Добавлена возможность отключения автозаполнения при печати
