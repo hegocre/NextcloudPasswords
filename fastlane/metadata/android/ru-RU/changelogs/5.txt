@@ -1,4 +1,4 @@
-- Improve autofill service
-- Improve URL searching
-- Allow connecting to servers with self-signed certificate
-- Minor bug fixes
+- Улучшен сервис автозаполнения
+- Улучшен поиск URL
+- Теперь можно подключаться к серверам с самозаверенными сертификатами
+- Прочие небольшие исправления

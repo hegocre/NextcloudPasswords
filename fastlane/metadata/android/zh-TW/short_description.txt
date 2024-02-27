@@ -1,1 +1,1 @@
-Secure app for viewing passwords for the Nextcloud Passwords app
+用於檢視Nextcloud Passwords應用程式的安全App
