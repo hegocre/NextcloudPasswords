@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Nextcloud Passwords</string>
-    <string name="site_favicon">Website Favicon</string>
+    <string name="site_favicon">Website-Icon</string>
     <string name="login">Login</string>
     <string name="server_url">Server-URL</string>
     <string name="url_cannot_be_empty">URL darf nicht leer sein</string>
@@ -17,7 +17,7 @@
     <string name="folders">Ordner</string>
     <string name="error_logging_in">Fehler beim Anmelden</string>
     <string name="search">Suche</string>
-    <string name="autofill">Automatisch ausfüllen</string>
+    <string name="autofill">Automatisches Ausfüllen</string>
     <string name="settings">Einstellungen</string>
     <string name="autofill_setting_subtitle">Dienst für automatisches Ausfüllen aktivieren</string>
     <string name="general">Allgemein</string>
@@ -43,19 +43,19 @@
     <string name="field_type">Feldtyp</string>
     <string name="text">Text</string>
     <string name="email">E-Mail</string>
-    <string name="secret">Secret</string>
-    <string name="field_cannot_be_empty">Dieses Feld muss ausgefüllt sein</string>
-    <string name="enter_valid_url">Bitte gültige URL eingeben</string>
+    <string name="secret">Geheimnis</string>
+    <string name="field_cannot_be_empty">Dieses Feld darf nicht leer sein</string>
+    <string name="enter_valid_url">Bitte eine gültige URL eingeben</string>
     <string name="enter_valid_email">Bitte eine gültige E-Mail eingeben</string>
     <string name="could_not_generate_password">Passwort konnte nicht erstellt werden</string>
     <string name="could_not_open_url">URL konnte nicht geöffnet werden</string>
     <string name="about">Info</string>
     <string name="back">Zurück</string>
     <string name="version">Version</string>
-    <string name="source_code">Quellcode</string>
+    <string name="source_code">Quelltext</string>
     <string name="privacy_policy">Datenschutzerklärung</string>
     <string name="licenses">Lizenzen</string>
-    <string name="help_suggestions">Hilfe und Vorschläge</string>
+    <string name="help_suggestions">Hilfe und Anregungen</string>
     <string name="authors">Autor</string>
     <string name="website">Website</string>
     <string name="security_status">Sicherheitsstatus</string>
@@ -63,7 +63,7 @@
     <string name="new_password">Neues Passwort</string>
     <string name="menu">Menü</string>
     <string name="clear_query">Suche löschen</string>
-    <string name="generate_password">Passwort erstellen</string>
+    <string name="generate_password">Passwort erzeugen</string>
     <string name="copy_value">Inhalt kopieren</string>
     <string name="home">Startseite</string>
     <string name="folder">Ordner</string>
@@ -84,7 +84,7 @@
     <string name="input_passcode">Zugangscode eingeben</string>
     <string name="confirm_passcode">Zugangscode bestätigen</string>
     <string name="passcodes_dont_match">Zugangscodes stimmen nicht überein</string>
-    <string name="biometric_prompt_description">Bitte die Identität verifizieren, um auf die Passwörter zuzugreifen</string>
+    <string name="biometric_prompt_description">Bitte verifizieren Sie Ihre Identität, um auf die Passwörter zuzugreifen</string>
     <string name="biometric_prompt_title">Biometrische Authentifizierung</string>
     <string name="cannot_connect_to_server">Keine Verbindung zum Server. Bitte tippen für einen weiteren Verbindungsversuch.</string>
     <string name="invalid_certificate">Ungültiges Zertifikat</string>
@@ -112,5 +112,6 @@
     <string name="no_results_found">Keine Ergebnisse gefunden</string>
     <string name="search_everywhere">Überall suchen</string>
     <string name="contribute">Mitwirken</string>
-    <string name="use_inline_autofill">Inline-Autofill verwenden</string>
+    <string name="use_inline_autofill">Inline-AutoAusfüllen verwenden</string>
+    <string name="use_inline_autofill_msg">AutoAusfüllen-Vorschläge auf der Tastatur anzeigen, wenn unterstützt</string>
 </resources>
