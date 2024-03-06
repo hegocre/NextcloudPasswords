@@ -1,4 +1,4 @@
-- Added support for inline autofill
-- Autofill field detection improvements
+- Toegevoegde ondersteuning voor "Inline autofill"
+- "Autofill" veld detectie verbeteringen
 - Always go to passwords view on autofill requests
-- Bug fixes and internal improvements
+"Bug Fixes"en interne verbeteringen
