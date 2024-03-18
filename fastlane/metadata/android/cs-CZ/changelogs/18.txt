@@ -1,2 +1,2 @@
-- Fix connectivity problems on some devices
-- Fix connection to instances with self-signed certificates
+- Oprava problémů s připojením na některých zařízeních
+- Oprava připojení k serverům s self-signed certifikátem
