@@ -1,2 +1,2 @@
-- Internal improvements
-- Added Russian and Chinese Traditional
+- Interní vylepšení
+- Přidána Ruština a Tradiční Čínština
