@@ -1,4 +1,4 @@
-- Unterstützung für Inline-Autofill hinzugefügt
-- Verbesserungen der Autofill-Felderkennung
-- Gehe immer zur Passwortansicht bei Autofilling-Anfragen
+- Unterstützung für Inline-AutoAusfüllen hinzugefügt
+- Verbesserungen der AutoAusfüllen-Felderkennung
+- Gehe immer zur Passwortansicht bei AutoAusfüllen-Anfragen
 - Fehlerbehebungen und interne Verbesserungen
