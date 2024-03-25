@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Nextcloud Passwords</string>
-    <string name="site_favicon">Website-Icon</string>
+    <string name="app_name">Nextcloud Passwörter</string>
+    <string name="site_favicon">Webseiten-Symbol</string>
     <string name="login">Login</string>
     <string name="server_url">Server-URL</string>
     <string name="url_cannot_be_empty">URL darf nicht leer sein</string>
@@ -21,8 +21,8 @@
     <string name="settings">Einstellungen</string>
     <string name="autofill_setting_subtitle">Dienst für automatisches Ausfüllen aktivieren</string>
     <string name="general">Allgemein</string>
-    <string name="show_icons_preference_title">Icons anzeigen</string>
-    <string name="show_icons_preference_subtitle">Website-Icons anzeigen</string>
+    <string name="show_icons_preference_title">Symbole anzeigen</string>
+    <string name="show_icons_preference_subtitle">Webseite-Symbole anzeigen</string>
     <string name="start_view_preference_title">Startansicht</string>
     <string name="client_deauthorized_toast">Der Client wurde deautorisiert. Bitte melden Sie sich erneut an.</string>
     <string name="autofill_service">Dienst für automatisches Ausfüllen</string>
@@ -33,7 +33,7 @@
     <string name="url">URL</string>
     <string name="password_saving_failed">Passwort speichern fehlgeschlagen. Bitte erneut versuchen</string>
     <string name="delete_password">Passwort löschen</string>
-    <string name="password_deleting_failed">Das Löschen des Passworts ist fehlgeschlagen. Bitte erneut versuchen</string>
+    <string name="password_deleting_failed">Löschen des Passworts fehlgeschlagen. Bitte erneut versuchen</string>
     <string name="are_you_sure_delete_element">Dieses Element wird gelöscht. Bitte bestätigen Sie diese Aktion</string>
     <string name="delete">Löschen</string>
     <string name="notes">Notizen</string>
@@ -43,21 +43,21 @@
     <string name="field_type">Feldtyp</string>
     <string name="text">Text</string>
     <string name="email">E-Mail</string>
-    <string name="secret">Geheimnis</string>
+    <string name="secret">Geheim</string>
     <string name="field_cannot_be_empty">Dieses Feld darf nicht leer sein</string>
-    <string name="enter_valid_url">Bitte eine gültige URL eingeben</string>
-    <string name="enter_valid_email">Bitte eine gültige E-Mail eingeben</string>
+    <string name="enter_valid_url">Bitte gültige URL eingeben</string>
+    <string name="enter_valid_email">Bitte gültige E-Mail eingeben</string>
     <string name="could_not_generate_password">Passwort konnte nicht erstellt werden</string>
     <string name="could_not_open_url">URL konnte nicht geöffnet werden</string>
-    <string name="about">Info</string>
+    <string name="about">Über</string>
     <string name="back">Zurück</string>
     <string name="version">Version</string>
     <string name="source_code">Quelltext</string>
     <string name="privacy_policy">Datenschutzerklärung</string>
     <string name="licenses">Lizenzen</string>
-    <string name="help_suggestions">Hilfe und Anregungen</string>
+    <string name="help_suggestions">Hilfe und Vorschläge</string>
     <string name="authors">Autor</string>
-    <string name="website">Website</string>
+    <string name="website">Webseite</string>
     <string name="security_status">Sicherheitsstatus</string>
     <string name="folder_icon">Ordnersymbol</string>
     <string name="new_password">Neues Passwort</string>
@@ -76,7 +76,7 @@
     <string name="parent_folder">Übergeordneter Ordner</string>
     <string name="security">Sicherheit</string>
     <string name="app_lock_settings_title">App-Sperre</string>
-    <string name="app_lock_settings_subtitle">Sperre den Zugriff auf die App mit einem Zugangscode</string>
+    <string name="app_lock_settings_subtitle">Den Zugriff auf die App mit einem Zugangscode sperrem</string>
     <string name="biometric_unlock_settings_title">Biometrisch entsperren</string>
     <string name="biometric_unlock_settings_subtitle">Erlaube das Entsperren der App mit Gerätebiometrie</string>
     <string name="incorrect_code">Zugangscode ist nicht korrekt</string>
