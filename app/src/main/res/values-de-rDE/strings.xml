@@ -76,9 +76,9 @@
     <string name="parent_folder">Übergeordneter Ordner</string>
     <string name="security">Sicherheit</string>
     <string name="app_lock_settings_title">App-Sperre</string>
-    <string name="app_lock_settings_subtitle">Den Zugriff auf die App mit einem Zugangscode sperrem</string>
+    <string name="app_lock_settings_subtitle">Den Zugriff auf die App mit einem Zugangscode sperren</string>
     <string name="biometric_unlock_settings_title">Biometrisch entsperren</string>
-    <string name="biometric_unlock_settings_subtitle">Erlaube das Entsperren der App mit Gerätebiometrie</string>
+    <string name="biometric_unlock_settings_subtitle">Das Entsperren der App mit Gerätebiometrie erlauben</string>
     <string name="incorrect_code">Zugangscode ist nicht korrekt</string>
     <string name="passcode">Zugangscode</string>
     <string name="input_passcode">Zugangscode eingeben</string>
