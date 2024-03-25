@@ -1,8 +1,8 @@
-- Add more digits to app lock
-- Lock app on device lock
-- Add password generation options
-- Add appearance customization options
-- Add more information on the about screen
-- Fix icon loading on self-hosted instances
-- Fix some autofill fields not being detected
-- Visual improvements and bug fixes
+- Weitere Ziffern zur App-Sperre hinzufügen
+- Sperre App bei Gerätesperrung
+- Optionen zur Passwort-Generierung hinzufügen
+- Optionen zur Anpassung hinzufügen
+- Weitere Informationen auf dem Info-Bildschirm hinzufügen
+- Das Laden des Symbols auf selbst-gehosteten Instanzen behoben
+- Einige nicht erkannte AutoAusfüllen-Felder behoben
+- Visuelle Verbesserungen und Fehlerkorrekturen
