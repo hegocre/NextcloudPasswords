@@ -1,1 +1,1 @@
-Sichere App zum Anzeigen von Passwörtern für die Nextcloud Passwords App
+Sichere App zum Anzeigen von Passwörtern für die Nextcloud Passwörter App
