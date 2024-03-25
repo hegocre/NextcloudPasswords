@@ -1,4 +1,4 @@
-- Autofill Service verbessern
+- AutoAusfüllen-Dienst verbessern
 - URL-Suche verbessern
 - Verbindung zu Servern mit selbstsigniertem Zertifikat erlauben
 - Kleinere Fehlerbehebungen
