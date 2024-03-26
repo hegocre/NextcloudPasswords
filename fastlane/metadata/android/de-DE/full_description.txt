@@ -1,4 +1,4 @@
-Diese App verbindet sich mit einem Nextcloud Server mit installierter Passwort-App und ermöglicht das Betrachten und Bearbeiten von Inhalten auf einer benutzerfreundlichen Benutzeroberfläche. Sie agiert auch als AutoAusfüllen-Dienst, um bequemes Anmelden auf Android-Geräten zu ermöglichen.
+Diese App verbindet sich mit einem Nextcloud Server und installierter Passwort-App und ermöglicht das Betrachten und Bearbeiten von Inhalten auf einer benutzerfreundlichen Benutzeroberfläche. Sie agiert auch als AutoAusfüllen-Dienst, um bequemes Anmelden auf Android-Geräten zu ermöglichen.
 
 Funktionen:
 - Passwörter und Ordner in einer Material Design-Oberfläche anzeigen
@@ -6,5 +6,5 @@ Funktionen:
 - Ordner bearbeiten und erstellen
 - Zeige Seitensymbole mit Cache, um Datenverbrauch zu minimieren (optional)
 - App-Sperre mit Zugangscode und biometrischer Authentifizierung
-- Autofill-Dienst (Android 8.0 oder höher)
+- AutoAusfüllen-Dienst (Android 8.0 oder höher)
 - Datenschutzfreundlich: Der einzige Server, mit dem sich diese App verbindet, ist der eigene Nextcloud Server
