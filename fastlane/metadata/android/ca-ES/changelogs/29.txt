@@ -1,0 +1,2 @@
+- Millores internes
+- Added Russian and Chinese Traditional

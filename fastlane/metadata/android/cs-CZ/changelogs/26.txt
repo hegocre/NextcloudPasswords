@@ -1,4 +1,4 @@
-- Fix pin layout on non-vertical orientations
-- Fix error when typing some characters on the search bar
-- Remember last used password generation options
-- Allow disabling inline autofill
+- Opravit rozložení propnutých položek při nevertikálních orientacích
+- Oprava chyb při psaní některých znaků na vyhledávací liště
+- Zapamatovat si naposledy použité možnosti generování hesla
+- Povolit vypnutí automatického vyplňování inline

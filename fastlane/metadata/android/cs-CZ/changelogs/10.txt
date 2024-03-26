@@ -1,4 +1,4 @@
-- Added support for inline autofill
-- Autofill field detection improvements
-- Always go to passwords view on autofill requests
-- Bug fixes and internal improvements
+- Přidána podpora pro inline automatické vyplňování
+- Zlepšení detekce pole automatického vyplňování
+- Vždy přejít na zobrazení hesel při automatickém vyplňování
+- Opravy chyb a interní vylepšení

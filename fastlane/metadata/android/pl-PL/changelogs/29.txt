@@ -1,0 +1,2 @@
+- Wewnętrzne ulepszenia
+- Added Russian and Chinese Traditional

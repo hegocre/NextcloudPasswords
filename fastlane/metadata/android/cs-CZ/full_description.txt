@@ -1,10 +1,10 @@
-This app connects to a Nextcloud server with Passwords App installed, and allows viewing and editing its content on a user-friendly UI. It also acts as an AutoFill service, making logging in on Android devices easier.
+Tato aplikace se připojuje k Nextcloud serveru s nainstalovanou aplikací Passwords App a umožňuje zobrazení a úpravu jejího obsahu na uživatelsky přívětivém UI. Také funguje jako služba automatického vyplňování, usnadňující přihlášení na Android zařízeních.
 
-Features:
-- Display user passwords and folders on a Material Design UI
-- Edit and create passwords, including custom fields
-- Edit and create folders
-- Show site icons, with cache to minimize data usage (optional)
-- App lock screen with both passcode and biometric authentication
-- Autofill service (Android 8.0 or higher)
-- Privacy friendly: The only server this app connects is your own Nextcloud Server
+Výhody:
+- Zobrazí uživatelská hesla a složky v Material Design rozhraní
+- Upravit a vytvořit hesla, včetně vlastních polí
+- Upravit a vytvořit složky
+- Zobrazit ikony stránek s mezipamětí pro minimalizaci využití dat (volitelné)
+- Zamykací obrazovka aplikace s heslem i biometrickým ověřením
+- Služba automatického vyplňování (Android 8.0 nebo vyšší)
+- Přívětivé k ochraně osobních údajů: Jediný server, na který je aplikace připojena, je váš vlastní Nextcloud server
