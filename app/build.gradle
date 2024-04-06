@@ -15,7 +15,7 @@ android {
         applicationId "com.hegocre.nextcloudpasswords"
         minSdk 24
         targetSdk 34
-        versionCode 28
+        versionCode 29
         versionName "1.0.9"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -66,7 +66,7 @@ android {
         buildConfig true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.5.8'
+        kotlinCompilerExtensionVersion '1.5.11'
     }
     packagingOptions {
         resources {
@@ -88,11 +88,11 @@ dependencies {
     implementation 'com.goterl:lazysodium-android:5.1.0@aar'
     implementation 'net.java.dev.jna:jna:5.14.0@aar'
 
-    implementation 'org.commonmark:commonmark:0.21.0'
+    implementation 'org.commonmark:commonmark:0.22.0'
     implementation 'io.coil-kt:coil-compose:2.6.0'
 
     //Compose dependencies
-    implementation platform('androidx.compose:compose-bom:2024.02.00')
+    implementation platform('androidx.compose:compose-bom:2024.04.00')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.material3:material3'
     implementation 'androidx.compose.ui:ui-tooling-preview'
@@ -110,12 +110,12 @@ dependencies {
 
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3'
 
-    implementation 'com.materialkolor:material-kolor:1.4.0'
+    implementation 'com.materialkolor:material-kolor:1.4.4'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.arch.core:core-testing:2.2.0'
 
-    androidTestImplementation platform('androidx.compose:compose-bom:2024.02.00')
+    androidTestImplementation platform('androidx.compose:compose-bom:2024.04.00')
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
