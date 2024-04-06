@@ -1,0 +1,2 @@
+- Внутренние улучшения
+- Added Russian and Chinese Traditional

@@ -1,2 +1,2 @@
-- Fix connectivity problems on some devices
-- Fix connection to instances with self-signed certificates
+Herstel verbindingsproblemen op sommige apparaten
+- Herstel verbinding naar servers met "self-signed" certificaten

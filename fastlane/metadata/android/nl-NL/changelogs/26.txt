@@ -1,4 +1,4 @@
-- Fix pin layout on non-vertical orientations
-- Fix error when typing some characters on the search bar
-- Remember last used password generation options
-- Allow disabling inline autofill
+- Herstel pin lay-out op niet-verticale oriëntaties
+- Fout herstellen bij het typen van enkele tekens op de zoekbalk
+- Onthoud laatst gebruikte wachtwoord generatieopties
+- Uitzetten van "inline autofill" toestaan

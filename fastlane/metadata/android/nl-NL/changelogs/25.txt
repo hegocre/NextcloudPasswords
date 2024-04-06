@@ -1,8 +1,8 @@
-- Add more digits to app lock
-- Lock app on device lock
-- Add password generation options
-- Add appearance customization options
-- Add more information on the about screen
-- Fix icon loading on self-hosted instances
-- Fix some autofill fields not being detected
-- Visual improvements and bug fixes
+- Meer cijfers toevoegen aan app-vergrendeling
+- Vergrendel app bij apparaat vergrendeling
+- Voeg wachtwoordgeneratie opties toe
+-Voeg uiterlijke aanpassingsopties toe
+- Meer informatie toevoegen op het "about" scherm
+Herstel het laden van pictogrammen op zelf gehoste servers
+Herstel sommige "autofill" velden die niet gedetecteerd worden
+Visuele verbeteringen en "Bug Fixes"
