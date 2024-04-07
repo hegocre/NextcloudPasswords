@@ -4,7 +4,7 @@ Funktionen:
 - Passwörter und Ordner in einer Material Design-Oberfläche anzeigen
 - Bearbeiten und Erstellen von Passwörtern, einschließlich benutzerdefinierter Felder
 - Ordner bearbeiten und erstellen
-- Zeige Seitensymbole mit Cache, um Datenverbrauch zu minimieren (optional)
+- Webseiten-Symbole anzeigen, mit Cache, um die Datennutzung zu minimieren (optional)
 - App-Sperre mit Zugangscode und biometrischer Authentifizierung
 - AutoAusfüllen-Dienst (Android 8.0 oder höher)
 - Datenschutzfreundlich: Der einzige Server, mit dem sich diese App verbindet, ist der eigene Nextcloud Server
