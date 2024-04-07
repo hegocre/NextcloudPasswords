@@ -115,13 +115,13 @@ fun MasterPasswordDialog(
                     visualTransformation = if (showPassword)
                         VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardType = KeyboardType.Password,
-                    label = stringResource(R.string.enter_master_password),
+                    label = stringResource(R.string.dialog_master_password_title),
                     trailingIcon = {
                         IconButton(onClick = { showPassword = !showPassword }) {
                             Icon(
                                 imageVector = if (showPassword)
                                     Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                contentDescription = stringResource(R.string.show_password)
+                                contentDescription = stringResource(R.string.text_input_show_password_toggle)
                             )
                         }
                     },
@@ -175,8 +175,8 @@ fun LogOutDialog(
 ) {
     AlertDialog(
         onDismissRequest = { onDismissRequest?.invoke() },
-        title = { Text(text = stringResource(R.string.log_out)) },
-        text = { Text(text = stringResource(R.string.are_you_sure_log_out)) },
+        title = { Text(text = stringResource(R.string.action_log_out)) },
+        text = { Text(text = stringResource(R.string.dialog_log_out_text)) },
         confirmButton = {
             TextButton(
                 onClick = {
@@ -184,7 +184,7 @@ fun LogOutDialog(
                     onDismissRequest?.invoke()
                 }
             ) {
-                Text(text = stringResource(R.string.log_out))
+                Text(text = stringResource(R.string.action_log_out))
             }
         },
         dismissButton = {
@@ -202,8 +202,8 @@ fun DeleteElementDialog(
 ) {
     AlertDialog(
         onDismissRequest = { onDismissRequest?.invoke() },
-        title = { Text(text = stringResource(R.string.delete)) },
-        text = { Text(text = stringResource(R.string.are_you_sure_delete_element)) },
+        title = { Text(text = stringResource(R.string.action_delete)) },
+        text = { Text(text = stringResource(R.string.dialog_delete_element_text)) },
         confirmButton = {
             TextButton(
                 onClick = {
@@ -211,7 +211,7 @@ fun DeleteElementDialog(
                     onDismissRequest?.invoke()
                 }
             ) {
-                Text(text = stringResource(R.string.delete))
+                Text(text = stringResource(R.string.action_delete))
             }
         },
         dismissButton = {
@@ -229,10 +229,10 @@ fun AddCustomFieldDialog(
     onDismissRequest: (() -> Unit)? = null
 ) {
     val types = mapOf(
-        CustomField.TYPE_TEXT to stringResource(id = R.string.text),
-        CustomField.TYPE_EMAIL to stringResource(id = R.string.email),
-        CustomField.TYPE_URL to stringResource(id = R.string.url),
-        CustomField.TYPE_SECRET to stringResource(id = R.string.secret)
+        CustomField.TYPE_TEXT to stringResource(id = R.string.custom_field_type_text),
+        CustomField.TYPE_EMAIL to stringResource(id = R.string.custom_field_type_email),
+        CustomField.TYPE_URL to stringResource(id = R.string.custom_field_type_url),
+        CustomField.TYPE_SECRET to stringResource(id = R.string.custom_field_type_secret)
     )
 
     val (type, setType) = remember { mutableStateOf(CustomField.TYPE_TEXT) }
@@ -255,7 +255,7 @@ fun AddCustomFieldDialog(
         ) {
             Column(modifier = Modifier.padding(all = 24.dp)) {
                 Text(
-                    text = stringResource(id = R.string.add_custom_field),
+                    text = stringResource(id = R.string.action_add_custom_field),
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
@@ -278,7 +278,7 @@ fun AddCustomFieldDialog(
                             onValueChange = {},
                             readOnly = true,
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuExpanded) },
-                            label = { Text(text = stringResource(id = R.string.field_type)) },
+                            label = { Text(text = stringResource(id = R.string.custom_field_type)) },
                             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                         )
 
@@ -305,11 +305,11 @@ fun AddCustomFieldDialog(
                         onValueChange = setLabel,
                         singleLine = true,
                         maxLines = 1,
-                        label = { Text(text = stringResource(id = R.string.label)) },
+                        label = { Text(text = stringResource(id = R.string.custom_field_label)) },
                         isError = showEmptyError && label.isBlank(),
                         supportingText = if (showEmptyError && label.isBlank()) {
                             {
-                                Text(text = stringResource(id = R.string.field_cannot_be_empty))
+                                Text(text = stringResource(id = R.string.error_field_cannot_be_empty))
                             }
                         } else null
                     )
@@ -367,9 +367,9 @@ fun SelectFolderDialog(
             Column(modifier = Modifier.padding(vertical = 24.dp)) {
                 Text(
                     text = if (selectedFolderId == FoldersApi.DEFAULT_FOLDER_UUID) {
-                        stringResource(id = R.string.home)
+                        stringResource(id = R.string.top_level_folder_name)
                     } else {
-                        selectedFolder?.label ?: stringResource(id = R.string.home)
+                        selectedFolder?.label ?: stringResource(id = R.string.top_level_folder_name)
                     },
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier
@@ -390,7 +390,7 @@ fun SelectFolderDialog(
                                     leadingContent = {
                                         Image(
                                             imageVector = Icons.Filled.Folder,
-                                            contentDescription = stringResource(R.string.folder_icon),
+                                            contentDescription = stringResource(R.string.content_description_folder_icon),
                                             colorFilter = ColorFilter.tint(
                                                 MaterialTheme.colorScheme.onSurface.copy(
                                                     alpha = ContentAlpha.medium
@@ -433,7 +433,7 @@ fun SelectFolderDialog(
                         .align(Alignment.End)
                         .padding(horizontal = 24.dp)
                 ) {
-                    Text(text = stringResource(R.string.select))
+                    Text(text = stringResource(R.string.action_select))
                 }
             }
         }
@@ -457,7 +457,7 @@ fun AddElementDialog(
         ) {
             Column(modifier = Modifier.padding(vertical = 24.dp)) {
                 Text(
-                    text = stringResource(id = R.string.create),
+                    text = stringResource(id = R.string.action_create_element),
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier
                         .padding(bottom = 16.dp)
@@ -547,7 +547,7 @@ fun InputPasscodeDialog(
                             Icon(
                                 imageVector = if (showPasscode)
                                     Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                contentDescription = stringResource(R.string.show_password)
+                                contentDescription = stringResource(R.string.text_input_show_password_toggle)
                             )
                         }
                     },
@@ -641,11 +641,11 @@ fun PasswordGenerationDialog(
     onDismissRequest: (() -> Unit)? = null
 ) {
     val strengthValues = mapOf(
-        RequestedPassword.STRENGTH_ULTRA to stringResource(id = R.string.ultra),
-        RequestedPassword.STRENGTH_HIGH to stringResource(id = R.string.high),
-        RequestedPassword.STRENGTH_MEDIUM to stringResource(id = R.string.medium),
-        RequestedPassword.STRENGTH_STANDARD to stringResource(id = R.string.standard),
-        RequestedPassword.STRENGTH_LOW to stringResource(id = R.string.low)
+        RequestedPassword.STRENGTH_ULTRA to stringResource(id = R.string.password_strength_ultra),
+        RequestedPassword.STRENGTH_HIGH to stringResource(id = R.string.password_strength_high),
+        RequestedPassword.STRENGTH_MEDIUM to stringResource(id = R.string.password_strength_medium),
+        RequestedPassword.STRENGTH_STANDARD to stringResource(id = R.string.password_strength_standard),
+        RequestedPassword.STRENGTH_LOW to stringResource(id = R.string.password_strength_low)
     )
 
     val (strength, setStrength) = remember { mutableIntStateOf(RequestedPassword.STRENGTH_STANDARD) }
@@ -679,7 +679,7 @@ fun PasswordGenerationDialog(
                         .padding(horizontal = 24.dp)
                 ) {
                     Text(
-                        text = stringResource(id = R.string.generate_password),
+                        text = stringResource(id = R.string.action_generate_password),
                         style = MaterialTheme.typography.headlineSmall
                     )
                 }
@@ -703,7 +703,7 @@ fun PasswordGenerationDialog(
                             onValueChange = {},
                             readOnly = true,
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuExpanded) },
-                            label = { Text(text = stringResource(id = R.string.strength)) },
+                            label = { Text(text = stringResource(id = R.string.password_generation_strength)) },
                             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                         )
 
@@ -738,7 +738,7 @@ fun PasswordGenerationDialog(
                             onCheckedChange = setIncludeDigits
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = stringResource(id = R.string.include_numbers))
+                        Text(text = stringResource(id = R.string.password_generation_include_numbers))
                     }
 
                     Row(
@@ -755,7 +755,7 @@ fun PasswordGenerationDialog(
                             onCheckedChange = setIncludeSymbols
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = stringResource(id = R.string.include_special_characters))
+                        Text(text = stringResource(id = R.string.password_generation_include_special_characters))
                     }
                 }
 

@@ -197,10 +197,10 @@ fun EditablePasswordView(
             ) {
                 Icon(
                     imageVector = Icons.Default.Star,
-                    contentDescription = stringResource(id = R.string.favorite)
+                    contentDescription = stringResource(id = R.string.password_attr_favorite)
                 )
                 Text(
-                    text = stringResource(id = R.string.favorite),
+                    text = stringResource(id = R.string.password_attr_favorite),
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
             }
@@ -210,7 +210,7 @@ fun EditablePasswordView(
             OutlinedTextField(
                 value = editablePasswordState.label,
                 onValueChange = { newText -> editablePasswordState.label = newText },
-                label = { Text(text = stringResource(id = R.string.label)) },
+                label = { Text(text = stringResource(id = R.string.password_folder_attr_label)) },
                 singleLine = true,
                 maxLines = 1,
                 modifier = Modifier
@@ -220,7 +220,7 @@ fun EditablePasswordView(
                 isError = showFieldErrors && editablePasswordState.label.isBlank(),
                 supportingText = if (showFieldErrors && editablePasswordState.label.isBlank()) {
                     {
-                        Text(text = stringResource(id = R.string.field_cannot_be_empty))
+                        Text(text = stringResource(id = R.string.error_field_cannot_be_empty))
                     }
                 } else null
             )
@@ -230,7 +230,7 @@ fun EditablePasswordView(
             OutlinedTextField(
                 value = editablePasswordState.username,
                 onValueChange = { newText -> editablePasswordState.username = newText },
-                label = { Text(text = stringResource(id = R.string.username)) },
+                label = { Text(text = stringResource(id = R.string.password_attr_username)) },
                 singleLine = true,
                 maxLines = 1,
                 modifier = Modifier
@@ -257,7 +257,7 @@ fun EditablePasswordView(
             OutlinedTextField(
                 value = editablePasswordState.password,
                 onValueChange = { newText -> editablePasswordState.password = newText },
-                label = { Text(text = stringResource(id = R.string.password)) },
+                label = { Text(text = stringResource(id = R.string.password_attr_password)) },
                 singleLine = true,
                 maxLines = 1,
                 trailingIcon = {
@@ -276,7 +276,7 @@ fun EditablePasswordView(
                             Icon(
                                 imageVector = if (showPassword)
                                     Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                contentDescription = stringResource(R.string.show_password)
+                                contentDescription = stringResource(R.string.text_input_show_password_toggle)
                             )
                         }
 
@@ -286,7 +286,7 @@ fun EditablePasswordView(
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Casino,
-                                    contentDescription = stringResource(id = R.string.generate_password)
+                                    contentDescription = stringResource(id = R.string.action_generate_password)
                                 )
                             }
                         }
@@ -303,7 +303,7 @@ fun EditablePasswordView(
                 isError = showFieldErrors && editablePasswordState.password.isBlank(),
                 supportingText = if (showFieldErrors && editablePasswordState.password.isBlank()) {
                     {
-                        Text(text = stringResource(id = R.string.field_cannot_be_empty))
+                        Text(text = stringResource(id = R.string.error_field_cannot_be_empty))
                     }
                 } else null
             )
@@ -320,7 +320,7 @@ fun EditablePasswordView(
                                 if (generatedPassword == null) {
                                     Toast.makeText(
                                         context,
-                                        R.string.could_not_generate_password,
+                                        R.string.error_could_not_generate_password,
                                         Toast.LENGTH_LONG
                                     ).show()
                                 } else {
@@ -342,7 +342,7 @@ fun EditablePasswordView(
             OutlinedTextField(
                 value = editablePasswordState.url,
                 onValueChange = { newText -> editablePasswordState.url = newText },
-                label = { Text(text = stringResource(id = R.string.url)) },
+                label = { Text(text = stringResource(id = R.string.password_attr_url)) },
                 singleLine = true,
                 maxLines = 1,
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri),
@@ -353,7 +353,7 @@ fun EditablePasswordView(
                 isError = showFieldErrors && !editablePasswordState.url.isValidURL(),
                 supportingText = if (showFieldErrors && !editablePasswordState.url.isValidURL()) {
                     {
-                        Text(text = stringResource(id = R.string.enter_valid_url))
+                        Text(text = stringResource(id = R.string.error_enter_valid_url))
                     }
                 } else null
             )
@@ -369,10 +369,10 @@ fun EditablePasswordView(
             ) {
                 OutlinedTextField(
                     value = if (editablePasswordState.folder == FoldersApi.DEFAULT_FOLDER_UUID) {
-                        stringResource(id = R.string.home)
+                        stringResource(id = R.string.top_level_folder_name)
                     } else {
                         folders.firstOrNull { it.id == editablePasswordState.folder }?.label
-                            ?: stringResource(id = R.string.home)
+                            ?: stringResource(id = R.string.top_level_folder_name)
                     },
                     onValueChange = { },
                     label = { Text(text = stringResource(id = R.string.folder)) },
@@ -421,7 +421,7 @@ fun EditablePasswordView(
                                 Icon(
                                     imageVector = if (showValue)
                                         Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                    contentDescription = stringResource(R.string.show_password)
+                                    contentDescription = stringResource(R.string.text_input_show_password_toggle)
                                 )
                             }
                         }
@@ -429,7 +429,7 @@ fun EditablePasswordView(
                         IconButton(onClick = { editablePasswordState.customFields.removeAt(index) }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.delete)
+                                contentDescription = stringResource(R.string.action_delete)
                             )
                         }
                     }
@@ -457,7 +457,7 @@ fun EditablePasswordView(
                     CustomField.TYPE_URL -> {
                         if (showFieldErrors && !customField.value.isValidURL()) {
                             {
-                                Text(text = stringResource(id = R.string.enter_valid_url))
+                                Text(text = stringResource(id = R.string.error_enter_valid_url))
                             }
                         } else null
                     }
@@ -465,7 +465,7 @@ fun EditablePasswordView(
                     CustomField.TYPE_EMAIL -> {
                         if (showFieldErrors && !customField.value.isValidEmail()) {
                             {
-                                Text(text = stringResource(id = R.string.enter_valid_email))
+                                Text(text = stringResource(id = R.string.error_enter_valid_email))
                             }
                         } else null
                     }
@@ -480,7 +480,7 @@ fun EditablePasswordView(
             OutlinedTextField(
                 value = editablePasswordState.notes,
                 onValueChange = { newText -> editablePasswordState.notes = newText },
-                label = { Text(text = stringResource(id = R.string.notes)) },
+                label = { Text(text = stringResource(id = R.string.password_attr_notes)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 24.dp)
@@ -492,7 +492,7 @@ fun EditablePasswordView(
             Button(
                 onClick = { showAddCustomFieldDialog = true },
                 content = {
-                    Text(text = stringResource(id = R.string.add_custom_field))
+                    Text(text = stringResource(id = R.string.action_add_custom_field))
                 },
                 colors = ButtonDefaults.filledTonalButtonColors(),
                 modifier = Modifier
@@ -519,7 +519,7 @@ fun EditablePasswordView(
                             modifier = Modifier.size(16.dp)
                         )
                     } else {
-                        Text(text = stringResource(id = R.string.save))
+                        Text(text = stringResource(id = R.string.action_save))
                     }
                 },
                 enabled = !isUpdating,
@@ -539,7 +539,7 @@ fun EditablePasswordView(
                             disabledContentColor = MaterialTheme.colorScheme.error.copy(alpha = ContentAlpha.medium)
                         ),
                         content = {
-                            Text(text = stringResource(id = R.string.delete_password))
+                            Text(text = stringResource(id = R.string.action_delete_password))
                         },
                         modifier = Modifier
                             .fillMaxWidth()

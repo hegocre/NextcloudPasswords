@@ -193,9 +193,9 @@ fun PasscodeIndicator(
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = if (!isError)
-                stringResource(id = R.string.input_passcode)
+                stringResource(id = R.string.app_lock_input_passcode)
             else
-                stringResource(id = R.string.incorrect_code),
+                stringResource(id = R.string.error_app_lock_incorrect_code),
         )
 
         val spacerPadding = minOf((screenHeight() * 0.1).roundToInt(), 170)
@@ -293,7 +293,7 @@ fun KeyPad(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Fingerprint,
-                        contentDescription = stringResource(id = R.string.biometric_unlock_settings_title),
+                        contentDescription = stringResource(id = R.string.biometric_unlock_preference_title),
                         modifier = Modifier.size(35.dp)
                     )
                 }
@@ -347,7 +347,7 @@ fun KeyPad(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.Backspace,
-                        contentDescription = stringResource(id = R.string.delete),
+                        contentDescription = stringResource(id = R.string.action_delete),
                         modifier = Modifier.size(25.dp)
                     )
                 }

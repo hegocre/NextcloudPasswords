@@ -82,13 +82,13 @@ fun NCPAboutScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(text = stringResource(id = R.string.about))
+                        Text(text = stringResource(id = R.string.screen_about))
                     },
                     navigationIcon = {
                         IconButton(onClick = onBackPressed) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.back)
+                                contentDescription = stringResource(id = R.string.navigation_back)
                             )
                         }
                     },
@@ -222,7 +222,7 @@ fun NCPAboutScreen(
                         ) {
                             Column(modifier = Modifier.padding(vertical = 8.dp)) {
                                 Text(
-                                    text = stringResource(id = R.string.authors),
+                                    text = stringResource(id = R.string.author),
                                     style = MaterialTheme.typography.titleMedium,
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -234,7 +234,7 @@ fun NCPAboutScreen(
                                         icon = {
                                             Icon(
                                                 imageVector = Icons.Outlined.Person,
-                                                contentDescription = stringResource(id = R.string.authors)
+                                                contentDescription = stringResource(id = R.string.author)
                                             )
                                         },
                                         primaryText = { Text(text = author.key) },
