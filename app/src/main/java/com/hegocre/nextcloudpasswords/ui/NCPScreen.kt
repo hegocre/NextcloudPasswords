@@ -34,7 +34,7 @@ enum class NCPScreen(
         unselectedIcon = Icons.Outlined.Folder
     ),
     PasswordEdit(
-        title = R.string.edit_password,
+        title = R.string.action_edit_password,
         selectedIcon = Icons.Default.Edit,
         unselectedIcon = Icons.Default.Edit,
         hidden = true

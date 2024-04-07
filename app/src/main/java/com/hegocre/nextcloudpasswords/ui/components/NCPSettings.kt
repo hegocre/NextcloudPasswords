@@ -64,13 +64,13 @@ fun NCPSettingsScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(stringResource(R.string.settings))
+                        Text(stringResource(R.string.screen_settings))
                     },
                     navigationIcon = {
                         IconButton(onClick = onNavigationUp) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.back)
+                                contentDescription = stringResource(id = R.string.navigation_back)
                             )
                         }
                     },
@@ -91,7 +91,7 @@ fun NCPSettingsScreen(
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
             ) {
-                PreferencesCategory(title = { Text(stringResource(R.string.general)) }) {
+                PreferencesCategory(title = { Text(stringResource(R.string.preferences_category_general)) }) {
                     val selectedScreen by preferencesManager.getStartScreen()
                         .collectAsState(
                             initial = NCPScreen.Passwords.name,
@@ -129,7 +129,7 @@ fun NCPSettingsScreen(
                     )
                 }
 
-                PreferencesCategory(title = { Text(text = stringResource(id = R.string.appearance)) }) {
+                PreferencesCategory(title = { Text(text = stringResource(id = R.string.preferences_category_appearance)) }) {
                     val appTheme by preferencesManager.getAppTheme()
                         .collectAsState(initial = NCPTheme.SYSTEM)
                     val useNextcloudInstanceColor by preferencesManager.getUseInstanceColor()
@@ -137,10 +137,10 @@ fun NCPSettingsScreen(
                     val useSystemDynamicColor by preferencesManager.getUseSystemDynamicColor()
                         .collectAsState(initial = false)
                     val themes = mapOf(
-                        NCPTheme.SYSTEM to stringResource(id = R.string.system),
-                        NCPTheme.LIGHT to stringResource(id = R.string.light),
-                        NCPTheme.DARK to stringResource(id = R.string.dark),
-                        NCPTheme.AMOLED to stringResource(id = R.string.black)
+                        NCPTheme.SYSTEM to stringResource(id = R.string.app_theme_system),
+                        NCPTheme.LIGHT to stringResource(id = R.string.app_theme_light),
+                        NCPTheme.DARK to stringResource(id = R.string.app_theme_dark),
+                        NCPTheme.AMOLED to stringResource(id = R.string.app_theme_black)
                     )
 
                     ListPreference(
@@ -151,7 +151,7 @@ fun NCPSettingsScreen(
                                 preferencesManager.setAppTheme(theme)
                             }
                         },
-                        title = { Text(text = stringResource(id = R.string.app_theme)) })
+                        title = { Text(text = stringResource(id = R.string.app_theme_preference_title)) })
 
                     SwitchPreference(
                         checked = useNextcloudInstanceColor,
@@ -160,8 +160,8 @@ fun NCPSettingsScreen(
                                 preferencesManager.setUseInstanceColor(use)
                             }
                         },
-                        title = { Text(text = stringResource(id = R.string.use_nextcloud_color)) },
-                        subtitle = { Text(text = stringResource(id = R.string.use_nextcloud_color_msg)) },
+                        title = { Text(text = stringResource(id = R.string.use_nextcloud_color_preference_title)) },
+                        subtitle = { Text(text = stringResource(id = R.string.use_nextcloud_color_preference_subtitle)) },
                         enabled = !useSystemDynamicColor
                     )
 
@@ -173,14 +173,14 @@ fun NCPSettingsScreen(
                                     preferencesManager.setUseSystemDynamicColor(use)
                                 }
                             },
-                            title = { Text(text = stringResource(id = R.string.use_dynamic_color)) },
-                            subtitle = { Text(text = stringResource(id = R.string.use_dynamic_color_msg)) },
+                            title = { Text(text = stringResource(id = R.string.use_dynamic_colors_preference_title)) },
+                            subtitle = { Text(text = stringResource(id = R.string.use_dynamic_colors_preference_subtitle)) },
                             enabled = !useNextcloudInstanceColor
                         )
                     }
                 }
 
-                PreferencesCategory(title = { Text(text = stringResource(id = R.string.security)) }) {
+                PreferencesCategory(title = { Text(text = stringResource(id = R.string.preferences_category_security)) }) {
                     val hasAppLock by preferencesManager.getHasAppLock()
                         .collectAsState(false)
                     val hasBiometricAppLock by preferencesManager
@@ -215,8 +215,8 @@ fun NCPSettingsScreen(
                                 showDeletePasscodeDialog = true
                             }
                         },
-                        title = { Text(text = stringResource(id = R.string.app_lock_settings_title)) },
-                        subtitle = { Text(text = stringResource(id = R.string.app_lock_settings_subtitle)) }
+                        title = { Text(text = stringResource(id = R.string.app_lock_preference_title)) },
+                        subtitle = { Text(text = stringResource(id = R.string.app_lock_preference_subtitle)) }
                     )
 
                     if (canUseBiometrics) {
@@ -240,14 +240,14 @@ fun NCPSettingsScreen(
                                 }
 
                             },
-                            title = { Text(text = stringResource(id = R.string.biometric_unlock_settings_title)) },
-                            subtitle = { Text(text = stringResource(id = R.string.biometric_unlock_settings_subtitle)) },
+                            title = { Text(text = stringResource(id = R.string.biometric_unlock_preference_title)) },
+                            subtitle = { Text(text = stringResource(id = R.string.biometric_unlock_preference_subtitle)) },
                         )
                     }
 
                     if (showCreatePasscodeDialog) {
                         InputPasscodeDialog(
-                            title = stringResource(id = R.string.input_passcode),
+                            title = stringResource(id = R.string.app_lock_input_passcode),
                             onInputPasscode = {
                                 firstPasscode = it
                                 showCreatePasscodeDialog = false
@@ -261,12 +261,12 @@ fun NCPSettingsScreen(
 
                     if (showConfirmPasscodeDialog) {
                         InputPasscodeDialog(
-                            title = stringResource(id = R.string.confirm_passcode),
+                            title = stringResource(id = R.string.app_lock_confirm_passcode),
                             onInputPasscode = { secondPasscode ->
                                 if (firstPasscode != secondPasscode) {
                                     Toast.makeText(
                                         context,
-                                        R.string.passcodes_dont_match,
+                                        R.string.error_passcodes_dont_match,
                                         Toast.LENGTH_LONG
                                     ).show()
                                 } else {
@@ -301,7 +301,7 @@ fun NCPSettingsScreen(
 
                     if (showDeletePasscodeDialog) {
                         InputPasscodeDialog(
-                            title = stringResource(id = R.string.input_passcode),
+                            title = stringResource(id = R.string.app_lock_input_passcode),
                             onInputPasscode = { passcode ->
                                 scope.launch {
                                     with(preferencesManager) {
@@ -314,7 +314,7 @@ fun NCPSettingsScreen(
                                         } else {
                                             Toast.makeText(
                                                 context,
-                                                R.string.incorrect_code,
+                                                R.string.error_app_lock_incorrect_code,
                                                 Toast.LENGTH_LONG
                                             ).show()
                                         }
@@ -340,7 +340,7 @@ fun NCPSettingsScreen(
                             autofillEnabled = true
                         }
                     }
-                    PreferencesCategory(title = { Text(text = stringResource(R.string.autofill_service)) }) {
+                    PreferencesCategory(title = { Text(text = stringResource(R.string.preferences_category_autofill_service)) }) {
                         SwitchPreference(
                             checked = autofillEnabled,
                             onCheckedChange = { enable ->
@@ -352,8 +352,8 @@ fun NCPSettingsScreen(
                                     launchAutofillRequest.launch(intent)
                                 }
                             },
-                            title = { Text(stringResource(R.string.autofill)) },
-                            subtitle = { Text(stringResource(R.string.autofill_setting_subtitle)) },
+                            title = { Text(stringResource(R.string.autofill_preference_title)) },
+                            subtitle = { Text(stringResource(R.string.autofill_preference_subtitle)) },
                             enabled = !autofillEnabled
                         )
 
@@ -369,8 +369,8 @@ fun NCPSettingsScreen(
                                         }
                                     }
                                 },
-                                title = { Text(text = stringResource(id = R.string.use_inline_autofill)) },
-                                subtitle = { Text(text = stringResource(id = R.string.use_inline_autofill_msg)) },
+                                title = { Text(text = stringResource(id = R.string.inline_autofill_preference_title)) },
+                                subtitle = { Text(text = stringResource(id = R.string.inline_autofill_preference_subtitle)) },
                                 enabled = autofillEnabled
                             )
                         }

@@ -118,7 +118,7 @@ fun PasswordRow(
             {
                 Icon(
                     imageVector = Icons.TwoTone.Security,
-                    contentDescription = stringResource(id = R.string.security_status),
+                    contentDescription = stringResource(id = R.string.password_attr_security_status),
                     modifier = Modifier
                         .size(40.dp)
                         .padding(all = 8.dp),
@@ -140,7 +140,7 @@ fun PasswordRow(
                             .size(45.dp)
                             .padding(all = 8.dp)
                             .clip(RoundedCornerShape(4.dp)),
-                        contentDescription = stringResource(R.string.site_favicon)
+                        contentDescription = stringResource(R.string.content_description_site_favicon)
                     )
                 }
             }
@@ -160,7 +160,7 @@ fun FolderRow(
         leadingContent = {
             Image(
                 imageVector = Icons.Filled.Folder,
-                contentDescription = stringResource(R.string.folder_icon),
+                contentDescription = stringResource(R.string.content_description_folder_icon),
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
                     .size(45.dp)

@@ -121,10 +121,10 @@ fun EditableFolderView(
             ) {
                 Icon(
                     imageVector = Icons.Default.Star,
-                    contentDescription = stringResource(id = R.string.favorite)
+                    contentDescription = stringResource(id = R.string.password_attr_favorite)
                 )
                 Text(
-                    text = stringResource(id = R.string.favorite),
+                    text = stringResource(id = R.string.password_attr_favorite),
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
             }
@@ -134,7 +134,7 @@ fun EditableFolderView(
             OutlinedTextField(
                 value = editableFolderState.label,
                 onValueChange = { newText -> editableFolderState.label = newText },
-                label = { Text(text = stringResource(id = R.string.label)) },
+                label = { Text(text = stringResource(id = R.string.password_folder_attr_label)) },
                 singleLine = true,
                 maxLines = 1,
                 modifier = Modifier
@@ -144,7 +144,7 @@ fun EditableFolderView(
                 isError = showFieldErrors && editableFolderState.label.isBlank(),
                 supportingText = if (showFieldErrors && editableFolderState.label.isBlank()) {
                     {
-                        Text(text = stringResource(id = R.string.field_cannot_be_empty))
+                        Text(text = stringResource(id = R.string.error_field_cannot_be_empty))
                     }
                 } else null
             )
@@ -160,13 +160,13 @@ fun EditableFolderView(
             ) {
                 OutlinedTextField(
                     value = if (editableFolderState.parent == FoldersApi.DEFAULT_FOLDER_UUID) {
-                        stringResource(id = R.string.home)
+                        stringResource(id = R.string.top_level_folder_name)
                     } else {
                         folders.firstOrNull { it.id == editableFolderState.parent }?.label
-                            ?: stringResource(id = R.string.home)
+                            ?: stringResource(id = R.string.top_level_folder_name)
                     },
                     onValueChange = { },
-                    label = { Text(text = stringResource(id = R.string.parent_folder)) },
+                    label = { Text(text = stringResource(id = R.string.folder_attr_parent_folder)) },
                     singleLine = true,
                     maxLines = 1,
                     modifier = Modifier
@@ -205,7 +205,7 @@ fun EditableFolderView(
                             modifier = Modifier.size(16.dp)
                         )
                     } else {
-                        Text(text = stringResource(id = R.string.save))
+                        Text(text = stringResource(id = R.string.action_save))
                     }
                 },
                 enabled = !isUpdating,
@@ -225,7 +225,7 @@ fun EditableFolderView(
                             disabledContentColor = MaterialTheme.colorScheme.error.copy(alpha = ContentAlpha.medium)
                         ),
                         content = {
-                            Text(text = stringResource(id = R.string.delete_folder))
+                            Text(text = stringResource(id = R.string.action_delete_folder))
                         },
                         modifier = Modifier
                             .fillMaxWidth()

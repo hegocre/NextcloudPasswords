@@ -115,7 +115,7 @@ fun PasswordItemContent(
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = stringResource(
-                                id = R.string.favorite
+                                id = R.string.password_attr_favorite
                             ),
                             tint = MaterialTheme.colorScheme.favoriteColor
                         )
@@ -141,7 +141,7 @@ fun PasswordItemContent(
                     IconButton(onClick = it) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(id = R.string.edit_password),
+                            contentDescription = stringResource(id = R.string.action_edit_password),
                         )
                     }
                 }
@@ -150,7 +150,7 @@ fun PasswordItemContent(
         LazyColumn {
             if (password.username.isNotBlank()) {
                 item(key = "${password.id}_username") {
-                    val usernameLabel = stringResource(id = R.string.username)
+                    val usernameLabel = stringResource(id = R.string.password_attr_username)
 
                     PasswordTextField(
                         text = password.username,
@@ -158,7 +158,7 @@ fun PasswordItemContent(
                         icon = {
                             Icon(
                                 imageVector = Icons.TwoTone.AccountCircle,
-                                contentDescription = stringResource(id = R.string.username)
+                                contentDescription = stringResource(id = R.string.password_attr_username)
                             )
                         },
                         trailingIcon = {
@@ -172,7 +172,7 @@ fun PasswordItemContent(
                             }) {
                                 Icon(
                                     imageVector = Icons.TwoTone.ContentCopy,
-                                    contentDescription = stringResource(id = R.string.copy_value)
+                                    contentDescription = stringResource(id = R.string.action_copy_value)
                                 )
                             }
                         }
@@ -183,7 +183,7 @@ fun PasswordItemContent(
             item(key = "${password.id}_password") {
                 var showPassword by rememberSaveable { mutableStateOf(false) }
 
-                val passwordLabel = stringResource(id = R.string.password)
+                val passwordLabel = stringResource(id = R.string.password_attr_password)
 
                 PasswordTextField(
                     text = if (showPassword) password.password else "●".repeat(password.password.length),
@@ -191,7 +191,7 @@ fun PasswordItemContent(
                     icon = {
                         Icon(
                             imageVector = Icons.TwoTone.Password,
-                            contentDescription = stringResource(id = R.string.password)
+                            contentDescription = stringResource(id = R.string.password_attr_password)
                         )
                     },
                     trailingIcon = {
@@ -205,7 +205,7 @@ fun PasswordItemContent(
                         }) {
                             Icon(
                                 imageVector = Icons.TwoTone.ContentCopy,
-                                contentDescription = stringResource(id = R.string.copy_value)
+                                contentDescription = stringResource(id = R.string.action_copy_value)
                             )
                         }
                     },
@@ -216,7 +216,7 @@ fun PasswordItemContent(
 
             if (password.url.isNotBlank()) {
                 item(key = "${password.id}_url") {
-                    val urlLabel = stringResource(id = R.string.url)
+                    val urlLabel = stringResource(id = R.string.password_attr_url)
 
                     PasswordTextField(
                         text = password.url,
@@ -224,7 +224,7 @@ fun PasswordItemContent(
                         icon = {
                             Icon(
                                 imageVector = Icons.TwoTone.Link,
-                                contentDescription = stringResource(id = R.string.url)
+                                contentDescription = stringResource(id = R.string.password_attr_url)
                             )
                         },
                         trailingIcon = {
@@ -238,7 +238,7 @@ fun PasswordItemContent(
                             }) {
                                 Icon(
                                     imageVector = Icons.TwoTone.ContentCopy,
-                                    contentDescription = stringResource(id = R.string.copy_value)
+                                    contentDescription = stringResource(id = R.string.action_copy_value)
                                 )
                             }
                         },
@@ -249,7 +249,7 @@ fun PasswordItemContent(
                                 } catch (ex: ActivityNotFoundException) {
                                     Toast.makeText(
                                         context,
-                                        R.string.could_not_open_url,
+                                        R.string.error_could_not_open_url,
                                         Toast.LENGTH_LONG
                                     ).show()
                                 }
@@ -261,7 +261,7 @@ fun PasswordItemContent(
                                 } catch (ex: ActivityNotFoundException) {
                                     Toast.makeText(
                                         context,
-                                        R.string.could_not_open_url,
+                                        R.string.error_could_not_open_url,
                                         Toast.LENGTH_LONG
                                     ).show()
                                 }
@@ -284,12 +284,12 @@ fun PasswordItemContent(
                                     if (customField.type == CustomField.TYPE_TEXT) {
                                         Icon(
                                             imageVector = Icons.TwoTone.Info,
-                                            contentDescription = stringResource(id = R.string.text)
+                                            contentDescription = stringResource(id = R.string.custom_field_type_text)
                                         )
                                     } else {
                                         Icon(
                                             imageVector = Icons.TwoTone.AlternateEmail,
-                                            contentDescription = stringResource(id = R.string.email)
+                                            contentDescription = stringResource(id = R.string.custom_field_type_email)
                                         )
                                     }
                                 },
@@ -304,7 +304,7 @@ fun PasswordItemContent(
                                     }) {
                                         Icon(
                                             imageVector = Icons.TwoTone.ContentCopy,
-                                            contentDescription = stringResource(id = R.string.copy_value)
+                                            contentDescription = stringResource(id = R.string.action_copy_value)
                                         )
                                     }
                                 }
@@ -321,7 +321,7 @@ fun PasswordItemContent(
                                 icon = {
                                     Icon(
                                         imageVector = Icons.TwoTone.Shield,
-                                        contentDescription = stringResource(id = R.string.secret)
+                                        contentDescription = stringResource(id = R.string.custom_field_type_secret)
                                     )
                                 },
                                 trailingIcon = {
@@ -335,7 +335,7 @@ fun PasswordItemContent(
                                     }) {
                                         Icon(
                                             imageVector = Icons.TwoTone.ContentCopy,
-                                            contentDescription = stringResource(id = R.string.copy_value)
+                                            contentDescription = stringResource(id = R.string.action_copy_value)
                                         )
                                     }
                                 },
@@ -352,7 +352,7 @@ fun PasswordItemContent(
                                 icon = {
                                     Icon(
                                         imageVector = Icons.TwoTone.Link,
-                                        contentDescription = stringResource(id = R.string.url)
+                                        contentDescription = stringResource(id = R.string.password_attr_url)
                                     )
                                 },
                                 trailingIcon = {
@@ -366,7 +366,7 @@ fun PasswordItemContent(
                                     }) {
                                         Icon(
                                             imageVector = Icons.TwoTone.ContentCopy,
-                                            contentDescription = stringResource(id = R.string.copy_value)
+                                            contentDescription = stringResource(id = R.string.action_copy_value)
                                         )
                                     }
                                 },
@@ -377,7 +377,7 @@ fun PasswordItemContent(
                                         } catch (ex: ActivityNotFoundException) {
                                             Toast.makeText(
                                                 context,
-                                                R.string.could_not_open_url,
+                                                R.string.error_could_not_open_url,
                                                 Toast.LENGTH_LONG
                                             ).show()
                                         }
@@ -389,7 +389,7 @@ fun PasswordItemContent(
                                         } catch (ex: ActivityNotFoundException) {
                                             Toast.makeText(
                                                 context,
-                                                R.string.could_not_open_url,
+                                                R.string.error_could_not_open_url,
                                                 Toast.LENGTH_LONG
                                             ).show()
                                         }
@@ -403,7 +403,7 @@ fun PasswordItemContent(
 
             if (password.notes.isNotBlank()) {
                 item(key = "${password.id}_notes") {
-                    val notesLabel = stringResource(id = R.string.notes)
+                    val notesLabel = stringResource(id = R.string.password_attr_notes)
 
                     PasswordMarkdownField(
                         markdown = password.notes.replace("\n", "\n\n"),

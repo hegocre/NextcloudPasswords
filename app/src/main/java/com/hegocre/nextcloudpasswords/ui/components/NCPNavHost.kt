@@ -464,7 +464,7 @@ fun NCPNavHost(
                                         } else {
                                             Toast.makeText(
                                                 context,
-                                                R.string.password_saving_failed,
+                                                R.string.error_password_saving_failed,
                                                 Toast.LENGTH_LONG
                                             ).show()
                                         }
@@ -536,7 +536,7 @@ fun NCPNavHost(
                                         } else {
                                             Toast.makeText(
                                                 context,
-                                                R.string.password_saving_failed,
+                                                R.string.error_password_saving_failed,
                                                 Toast.LENGTH_LONG
                                             ).show()
                                         }
@@ -558,7 +558,7 @@ fun NCPNavHost(
                                         } else {
                                             Toast.makeText(
                                                 context,
-                                                R.string.password_deleting_failed,
+                                                R.string.error_password_deleting_failed,
                                                 Toast.LENGTH_LONG
                                             ).show()
                                         }
@@ -651,7 +651,7 @@ fun NCPNavHost(
                                         } else {
                                             Toast.makeText(
                                                 context,
-                                                R.string.folder_saving_failed,
+                                                R.string.error_folder_saving_failed,
                                                 Toast.LENGTH_LONG
                                             ).show()
                                         }
@@ -691,7 +691,7 @@ fun NCPNavHost(
                                         } else {
                                             Toast.makeText(
                                                 context,
-                                                R.string.folder_saving_failed,
+                                                R.string.error_folder_saving_failed,
                                                 Toast.LENGTH_LONG
                                             ).show()
                                         }
@@ -713,7 +713,7 @@ fun NCPNavHost(
                                         } else {
                                             Toast.makeText(
                                                 context,
-                                                R.string.folder_deleting_failed,
+                                                R.string.error_folder_deleting_failed,
                                                 Toast.LENGTH_LONG
                                             ).show()
                                         }
@@ -736,7 +736,7 @@ fun NoContentText() {
             .fillMaxSize()
             .padding(16.dp), contentAlignment = Alignment.Center
     ) {
-        Text(text = stringResource(id = R.string.no_content_here))
+        Text(text = stringResource(id = R.string.empty_list_no_content_here))
     }
 }
 
@@ -750,11 +750,11 @@ fun NoResultsText(
             .padding(16.dp), contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = stringResource(id = R.string.no_results_found))
+            Text(text = stringResource(id = R.string.empty_list_no_results_found))
             if (onButtonPress != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = onButtonPress) {
-                    Text(text = stringResource(id = R.string.search_everywhere))
+                    Text(text = stringResource(id = R.string.action_search_everywhere))
                 }
             }
         }

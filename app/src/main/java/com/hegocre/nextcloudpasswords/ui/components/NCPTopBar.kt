@@ -156,7 +156,7 @@ fun TitleAppBar(
             IconButton(onClick = onSearchClick) {
                 Icon(
                     imageVector = Icons.Outlined.Search,
-                    contentDescription = stringResource(id = R.string.search)
+                    contentDescription = stringResource(id = R.string.action_search)
                 )
             }
             if (showMenu) {
@@ -204,7 +204,7 @@ fun SearchAppBar(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(id = R.string.back)
+                    contentDescription = stringResource(id = R.string.navigation_back)
                 )
             }
 
@@ -224,7 +224,7 @@ fun SearchAppBar(
                 onValueChange = setSearchQuery,
                 maxLines = 1,
                 singleLine = true,
-                placeholder = { Text(text = stringResource(R.string.search)) },
+                placeholder = { Text(text = stringResource(R.string.action_search)) },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
@@ -245,7 +245,7 @@ fun SearchAppBar(
             ) {
                 Icon(
                     imageVector = Icons.Default.Clear,
-                    contentDescription = stringResource(id = R.string.clear_query)
+                    contentDescription = stringResource(id = R.string.action_clear_search_query)
                 )
             }
         }
@@ -361,14 +361,14 @@ fun PopupAppMenu(
                             },
                             text = {
                                 Text(
-                                    text = stringResource(id = R.string.settings),
+                                    text = stringResource(id = R.string.screen_settings),
                                     modifier = Modifier.padding(end = 16.dp)
                                 )
                             },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Outlined.Settings,
-                                    contentDescription = stringResource(id = R.string.settings),
+                                    contentDescription = stringResource(id = R.string.screen_settings),
                                     modifier = Modifier
                                         .padding(end = 8.dp)
                                         .padding(start = 16.dp)
@@ -385,14 +385,14 @@ fun PopupAppMenu(
                             },
                             text = {
                                 Text(
-                                    text = stringResource(id = R.string.about),
+                                    text = stringResource(id = R.string.screen_about),
                                     modifier = Modifier.padding(end = 16.dp)
                                 )
                             },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Outlined.Info,
-                                    contentDescription = stringResource(id = R.string.about),
+                                    contentDescription = stringResource(id = R.string.screen_about),
                                     modifier = Modifier
                                         .padding(end = 8.dp)
                                         .padding(start = 16.dp)
@@ -407,14 +407,14 @@ fun PopupAppMenu(
                             },
                             text = {
                                 Text(
-                                    text = stringResource(R.string.log_out),
+                                    text = stringResource(R.string.action_log_out),
                                     modifier = Modifier.padding(end = 16.dp)
                                 )
                             },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Outlined.Logout,
-                                    contentDescription = stringResource(id = R.string.log_out),
+                                    contentDescription = stringResource(id = R.string.action_log_out),
                                     modifier = Modifier
                                         .padding(end = 8.dp)
                                         .padding(start = 16.dp)

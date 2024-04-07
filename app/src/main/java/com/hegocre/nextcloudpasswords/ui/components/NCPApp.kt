@@ -156,7 +156,7 @@ fun NextcloudPasswordsApp(
                             IconButton(onClick = { navController.navigateUp() }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(id = R.string.back)
+                                    contentDescription = stringResource(id = R.string.navigation_back)
                                 )
                             }
                         }
@@ -171,7 +171,7 @@ fun NextcloudPasswordsApp(
                             modifier = Modifier.clickable { (passwordsViewModel.sync()) }
                         ) {
                             Text(
-                                text = stringResource(id = R.string.cannot_connect_to_server),
+                                text = stringResource(id = R.string.error_cannot_connect_to_server),
                                 style = MaterialTheme.typography.bodySmall,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
@@ -216,7 +216,7 @@ fun NextcloudPasswordsApp(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Add,
-                            contentDescription = stringResource(id = R.string.new_password)
+                            contentDescription = stringResource(id = R.string.action_create_element)
                         )
                     }
                 }
