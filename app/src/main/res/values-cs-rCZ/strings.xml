@@ -92,6 +92,7 @@
     <string name="error_cannot_connect_to_server">Nelze se připojit k serveru. Klepnutím akci opakujte.</string>
     <string name="dialog_invalid_certificate_title">Neplatný certifikát</string>
     <string name="dialog_invalid_certificate_text">HTTPS certifikát je neplatný. Chcete pokračovat?</string>
+    <string name="password_strength_ultra">Ultra</string>
     <string name="password_strength_high">Vysoké</string>
     <string name="password_strength_medium">Střední</string>
     <string name="password_strength_standard">Standardní</string>
