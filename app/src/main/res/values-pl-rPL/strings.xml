@@ -92,6 +92,7 @@
     <string name="error_cannot_connect_to_server">Nie można połączyć się z serwerem. Dotknij, aby ponowić.</string>
     <string name="dialog_invalid_certificate_title">Niepoprawny certyfikat</string>
     <string name="dialog_invalid_certificate_text">Certyfikat HTTPS jest nieprawidłowy. Czy chcesz kontynuować?</string>
+    <string name="password_strength_ultra">Ultra</string>
     <string name="password_strength_high">Wysoki</string>
     <string name="password_strength_medium">Średni</string>
     <string name="password_strength_standard">Standardowy</string>
@@ -100,6 +101,7 @@
     <string name="password_generation_include_special_characters">Uwzględnij znaki specjalne</string>
     <string name="password_generation_strength">Siła</string>
     <string name="preferences_category_appearance">Wygląd</string>
+    <string name="app_theme_system">System</string>
     <string name="app_theme_light">Jasny</string>
     <string name="app_theme_dark">Ciemny</string>
     <string name="app_theme_black">Czarny</string>
