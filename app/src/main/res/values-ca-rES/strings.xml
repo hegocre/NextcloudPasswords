@@ -46,6 +46,7 @@
     <string name="custom_field_type">Tipus de camp</string>
     <string name="custom_field_type_text">Text</string>
     <string name="custom_field_type_email">Correu electrònic</string>
+    <string name="custom_field_type_secret">Secret</string>
     <string name="error_field_cannot_be_empty">Aquest camp no pot estar buit</string>
     <string name="error_enter_valid_url">Introdueixi un URL vàlid</string>
     <string name="error_enter_valid_email">Introdueixi un correu electrònic vàlid</string>
