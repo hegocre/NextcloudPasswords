@@ -46,6 +46,7 @@
     <string name="custom_field_type">Type de champ</string>
     <string name="custom_field_type_text">Texte</string>
     <string name="custom_field_type_email">E-mail</string>
+    <string name="custom_field_type_secret">Secret</string>
     <string name="error_field_cannot_be_empty">Ce champ ne peut être vide</string>
     <string name="error_enter_valid_url">Saisissez une URL valide</string>
     <string name="error_enter_valid_email">Saisissez un e-mail valide</string>
@@ -91,8 +92,10 @@
     <string name="error_cannot_connect_to_server">Impossible de se connecter au serveur. Tapez pour réessayer.</string>
     <string name="dialog_invalid_certificate_title">Certificat invalide</string>
     <string name="dialog_invalid_certificate_text">Le certificat HTTPS n\'est pas valide. Voulez-vous continuer ?</string>
+    <string name="password_strength_ultra">Ultra</string>
     <string name="password_strength_high">Haut</string>
     <string name="password_strength_medium">Médium</string>
+    <string name="password_strength_standard">Standard</string>
     <string name="password_strength_low">Faible</string>
     <string name="password_generation_include_numbers">Inclure des chiffres</string>
     <string name="password_generation_include_special_characters">Inclure des caractères spéciaux</string>
