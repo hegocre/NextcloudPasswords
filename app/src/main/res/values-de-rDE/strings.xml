@@ -44,6 +44,7 @@
     <string name="password_attr_favorite">Favorit</string>
     <string name="action_add_custom_field">Neues benutzerdefiniertes Feld</string>
     <string name="custom_field_type">Feldtyp</string>
+    <string name="custom_field_type_text">Text</string>
     <string name="custom_field_type_email">E-Mail</string>
     <string name="custom_field_type_secret">Geheim</string>
     <string name="error_field_cannot_be_empty">Dieses Feld darf nicht leer sein</string>
@@ -91,13 +92,16 @@
     <string name="error_cannot_connect_to_server">Keine Verbindung zum Server. Bitte tippen für einen weiteren Verbindungsversuch.</string>
     <string name="dialog_invalid_certificate_title">Ungültiges Zertifikat</string>
     <string name="dialog_invalid_certificate_text">Das HTTPS-Zertifikat ist ungültig. Fortfahren?</string>
+    <string name="password_strength_ultra">Ultra</string>
     <string name="password_strength_high">Hoch</string>
     <string name="password_strength_medium">Mittel</string>
+    <string name="password_strength_standard">Standard</string>
     <string name="password_strength_low">Niedrig</string>
     <string name="password_generation_include_numbers">Zahlen einschließen</string>
     <string name="password_generation_include_special_characters">Sonderzeichen einschließen</string>
     <string name="password_generation_strength">Stärke</string>
     <string name="preferences_category_appearance">Aussehen</string>
+    <string name="app_theme_system">System</string>
     <string name="app_theme_light">Hell</string>
     <string name="app_theme_dark">Dunkel</string>
     <string name="app_theme_black">Schwarz</string>
