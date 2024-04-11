@@ -1,2 +1,2 @@
 - Millores internes
-- Added Russian and Chinese Traditional
+- Afegides traduccions al rus i al xinès tradicional
