@@ -1,32 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Nextcloud Пароли</string>
-    <string name="content_description_site_favicon">Иконка сайта</string>
-    <string name="action_login">Войти</string>
-    <string name="login_server_url">URL сервера</string>
-    <string name="error_url_cannot_be_empty">URL не может быть пустым</string>
-    <string name="error_url_must_start_https">URL должен начинаться с https://</string>
     <string name="example">Пример</string>
-    <string name="action_log_out">Выход</string>
-    <string name="dialog_log_out_text">Вы действительно хотите выйти?</string>
     <string name="password">Пароль</string>
-    <string name="password_attr_password">Пароль</string>
-    <string name="dialog_master_password_title">Введите мастер-пароль</string>
-    <string name="text_input_show_password_toggle">Показать пароль</string>
     <string name="passwords">Пароли</string>
     <string name="favorites">Избранное</string>
     <string name="folders">Папки</string>
     <string name="error_logging_in">Ошибка входа</string>
-    <string name="action_search">Поиск</string>
-    <string name="autofill_preference_title">Автозаполнение</string>
-    <string name="screen_settings">Настройки</string>
-    <string name="autofill_preference_subtitle">Включить службу автозаполнения</string>
-    <string name="preferences_category_general">Основное</string>
     <string name="show_icons_preference_title">Показывать иконки</string>
     <string name="show_icons_preference_subtitle">Показывать иконки веб-сайтов</string>
     <string name="start_view_preference_title">Стартовый экран</string>
     <string name="client_deauthorized_toast">Клиент был деавторизован. Пожалуйста, войдите снова.</string>
-    <string name="preferences_category_autofill_service">Служба автозаполнения</string>
     <string name="action_save">Сохранить</string>
     <string name="action_edit_password">Редактировать пароль</string>
     <string name="password_folder_attr_label">Наименование</string>
