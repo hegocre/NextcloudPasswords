@@ -1,37 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Nextcloud Passwords</string>
-    <string name="content_description_site_favicon">網站圖示</string>
-    <string name="action_login">登入</string>
-    <string name="login_server_url">伺服器網址</string>
-    <string name="error_url_cannot_be_empty">網址不能為空</string>
-    <string name="error_url_must_start_https">網址起頭通常為https://</string>
     <string name="example">範例</string>
-    <string name="action_log_out">登出</string>
-    <string name="dialog_log_out_text">您確定要登出?</string>
     <string name="password">密碼</string>
-    <string name="password_attr_password">密碼</string>
-    <string name="dialog_master_password_title">輸入主密碼</string>
-    <string name="text_input_show_password_toggle">顯示密碼</string>
     <string name="passwords">密碼</string>
     <string name="favorites">收藏</string>
     <string name="folders">資料夾</string>
     <string name="error_logging_in">錯誤登入</string>
-    <string name="action_search">搜尋</string>
-    <string name="autofill_preference_title">自動填入</string>
-    <string name="screen_settings">設定</string>
-    <string name="autofill_preference_subtitle">啟用自動填入</string>
-    <string name="preferences_category_general">一般</string>
     <string name="show_icons_preference_title">顯示圖示</string>
     <string name="show_icons_preference_subtitle">顯示網站圖示</string>
     <string name="start_view_preference_title">開始檢視</string>
     <string name="client_deauthorized_toast">此客戶端已被取消授權，請從新登入</string>
-    <string name="preferences_category_autofill_service">自動填入服務</string>
-    <string name="action_save">儲存</string>
-    <string name="action_edit_password">編輯密碼</string>
-    <string name="password_folder_attr_label">標籤</string>
-    <string name="custom_field_label">標籤</string>
-    <string name="password_attr_username">使用者名稱</string>
     <string name="password_attr_url">網址</string>
     <string name="custom_field_type_url">網址</string>
     <string name="error_password_saving_failed">密碼儲存錯誤，請重新嘗試</string>
