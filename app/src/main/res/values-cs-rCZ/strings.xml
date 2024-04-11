@@ -2,8 +2,6 @@
 <resources>
     <string name="app_name">Nextcloud Passwords</string>
     <string name="content_description_site_favicon">Favikona stránky</string>
-    <string name="action_login">Přihlašovací jméno</string>
-    <string name="login_server_url">URL serveru</string>
     <string name="error_url_cannot_be_empty">Adresa URL nesmí být prázdná</string>
     <string name="error_url_must_start_https">Adresa URL musí začínat na https://</string>
     <string name="example">Příklad</string>
@@ -32,8 +30,6 @@
     <string name="password_folder_attr_label">Označení</string>
     <string name="custom_field_label">Označení</string>
     <string name="password_attr_username">Uživatelské jméno</string>
-    <string name="password_attr_url">URL</string>
-    <string name="custom_field_type_url">URL</string>
     <string name="error_password_saving_failed">Ukládání hesla selhalo. Prosím, zkuste to znovu</string>
     <string name="action_delete_password">Odstranit heslo</string>
     <string name="error_password_deleting_failed">Mazání hesla selhalo. Prosím, zkuste to znovu</string>
@@ -44,7 +40,6 @@
     <string name="password_attr_favorite">Oblíbené</string>
     <string name="action_add_custom_field">Nové vlastní pole</string>
     <string name="custom_field_type">Typ pole</string>
-    <string name="custom_field_type_text">Text</string>
     <string name="custom_field_type_email">E-mail</string>
     <string name="custom_field_type_secret">Tajné</string>
     <string name="error_field_cannot_be_empty">Toto pole nemůže být prázdné</string>
@@ -92,7 +87,6 @@
     <string name="error_cannot_connect_to_server">Nelze se připojit k serveru. Klepnutím akci opakujte.</string>
     <string name="dialog_invalid_certificate_title">Neplatný certifikát</string>
     <string name="dialog_invalid_certificate_text">HTTPS certifikát je neplatný. Chcete pokračovat?</string>
-    <string name="password_strength_ultra">Ultra</string>
     <string name="password_strength_high">Vysoké</string>
     <string name="password_strength_medium">Střední</string>
     <string name="password_strength_standard">Standardní</string>
