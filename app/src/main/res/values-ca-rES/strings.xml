@@ -2,7 +2,6 @@
 <resources>
     <string name="app_name">Nextcloud Passwords</string>
     <string name="content_description_site_favicon">Icona del lloc</string>
-    <string name="action_login">Iniciar sessió</string>
     <string name="login_server_url">Adreça del servidor</string>
     <string name="error_url_cannot_be_empty">L\'adreça no pot estar buida</string>
     <string name="error_url_must_start_https">L\'adreça ha de començar amb https://</string>
@@ -21,7 +20,6 @@
     <string name="autofill_preference_title">Emplenament automàtic</string>
     <string name="screen_settings">Configuració</string>
     <string name="autofill_preference_subtitle">Activar el servei d\'emplenament automàtic</string>
-    <string name="preferences_category_general">General</string>
     <string name="show_icons_preference_title">Mostrar icones</string>
     <string name="show_icons_preference_subtitle">Mostrar les icones dels llocs web</string>
     <string name="start_view_preference_title">Vista inicial</string>
@@ -39,14 +37,11 @@
     <string name="error_password_deleting_failed">No s\'ha pogut eliminar la contrasenya. Si us plau, intenteu-ho de nou</string>
     <string name="dialog_delete_element_text">Aquest element serà eliminat. Si us plau, confirmeu aquesta acció</string>
     <string name="action_delete">Eliminar</string>
-    <string name="password_attr_notes">Notes</string>
     <string name="copied">%s copiat</string>
     <string name="password_attr_favorite">Favorita</string>
     <string name="action_add_custom_field">Nou camp personalitzat</string>
     <string name="custom_field_type">Tipus de camp</string>
-    <string name="custom_field_type_text">Text</string>
     <string name="custom_field_type_email">Correu electrònic</string>
-    <string name="custom_field_type_secret">Secret</string>
     <string name="error_field_cannot_be_empty">Aquest camp no pot estar buit</string>
     <string name="error_enter_valid_url">Introdueixi un URL vàlid</string>
     <string name="error_enter_valid_email">Introdueixi un correu electrònic vàlid</string>
