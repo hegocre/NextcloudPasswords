@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Nextcloud Hasła</string>
-    <string name="content_description_site_favicon">Favicon strony</string>
-    <string name="action_login">Login</string>
-    <string name="login_server_url">Adres URL serwera</string>
-    <string name="error_url_cannot_be_empty">Adres URL nie może być pusty</string>
-    <string name="error_url_must_start_https">Adres URL musi zaczynać się od https://</string>
     <string name="example">Przykład</string>
-    <string name="action_log_out">Wyloguj się</string>
-    <string name="dialog_log_out_text">Czy na pewno chcesz się wylogować?</string>
     <string name="password">Hasło</string>
-    <string name="password_attr_password">Hasło</string>
-    <string name="dialog_master_password_title">Wprowadź hasło główne</string>
     <string name="text_input_show_password_toggle">Pokaż Hasło</string>
     <string name="passwords">Hasła</string>
     <string name="favorites">Ulubione</string>
@@ -19,9 +10,6 @@
     <string name="error_logging_in">Wystąpił błąd podczas logowania</string>
     <string name="action_search">Wyszukaj</string>
     <string name="autofill_preference_title">Autouzupełnianie</string>
-    <string name="screen_settings">Ustawienia</string>
-    <string name="autofill_preference_subtitle">Włącz usługę automatycznego uzupełniania</string>
-    <string name="preferences_category_general">Ogólne</string>
     <string name="show_icons_preference_title">Pokazuj ikony</string>
     <string name="show_icons_preference_subtitle">Pokazuj ikony strony internetowej</string>
     <string name="start_view_preference_title">Widok początkowy</string>
@@ -92,7 +80,6 @@
     <string name="error_cannot_connect_to_server">Nie można połączyć się z serwerem. Dotknij, aby ponowić.</string>
     <string name="dialog_invalid_certificate_title">Niepoprawny certyfikat</string>
     <string name="dialog_invalid_certificate_text">Certyfikat HTTPS jest nieprawidłowy. Czy chcesz kontynuować?</string>
-    <string name="password_strength_ultra">Ultra</string>
     <string name="password_strength_high">Wysoki</string>
     <string name="password_strength_medium">Średni</string>
     <string name="password_strength_standard">Standardowy</string>
@@ -101,7 +88,6 @@
     <string name="password_generation_include_special_characters">Uwzględnij znaki specjalne</string>
     <string name="password_generation_strength">Siła</string>
     <string name="preferences_category_appearance">Wygląd</string>
-    <string name="app_theme_system">System</string>
     <string name="app_theme_light">Jasny</string>
     <string name="app_theme_dark">Ciemny</string>
     <string name="app_theme_black">Czarny</string>
