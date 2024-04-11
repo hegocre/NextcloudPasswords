@@ -110,7 +110,7 @@
     <string name="use_nextcloud_color_preference_subtitle">Farbe der Nextcloud-Instanz als Akzentfarbe verwenden</string>
     <string name="use_dynamic_colors_preference_title">Dynamische Farben verwenden</string>
     <string name="use_dynamic_colors_preference_subtitle">Dynamische Farben des Systems verwenden</string>
-    <string name="changelog">Changelog</string>
+    <string name="changelog">Änderungsprotokoll</string>
     <string name="empty_list_no_content_here">Kein Inhalt</string>
     <string name="empty_list_no_results_found">Keine Ergebnisse gefunden</string>
     <string name="action_search_everywhere">Überall suchen</string>
