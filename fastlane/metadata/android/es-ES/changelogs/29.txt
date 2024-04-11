@@ -1,2 +1,2 @@
 - Mejoras internas
-- Added Russian and Chinese Traditional
+- Añadidas traducciones a ruso y chino tradicional
