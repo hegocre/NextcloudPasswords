@@ -2,16 +2,12 @@
 <resources>
     <string name="app_name">Nextcloud Passwords</string>
     <string name="content_description_site_favicon">Icono del sitio</string>
-    <string name="action_login">Iniciar sesión</string>
-    <string name="login_server_url">Dirección del servidor</string>
     <string name="error_url_cannot_be_empty">La dirección no puede estar vacía</string>
-    <string name="error_url_must_start_https">La dirección debe comenzar por https://</string>
     <string name="example">Ejemplo</string>
     <string name="action_log_out">Cerrar sesión</string>
     <string name="dialog_log_out_text">¿Seguro que desea cerrar sessión?</string>
     <string name="password">Contraseña</string>
     <string name="password_attr_password">Contraseña</string>
-    <string name="dialog_master_password_title">Introduzca la contraseña</string>
     <string name="text_input_show_password_toggle">Mostrar contraseña</string>
     <string name="passwords">Contraseñas</string>
     <string name="favorites">Favoritas</string>
@@ -19,9 +15,6 @@
     <string name="error_logging_in">Error iniciando sesión</string>
     <string name="action_search">Buscar</string>
     <string name="autofill_preference_title">Autocompletar</string>
-    <string name="screen_settings">Configuración</string>
-    <string name="autofill_preference_subtitle">Activar el servicio de autocompletar</string>
-    <string name="preferences_category_general">General</string>
     <string name="show_icons_preference_title">Mostrar iconos</string>
     <string name="show_icons_preference_subtitle">Mostrar iconos de los sitios web</string>
     <string name="start_view_preference_title">Vista inicial</string>
