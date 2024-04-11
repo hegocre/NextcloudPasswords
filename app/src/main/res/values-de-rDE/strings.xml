@@ -2,16 +2,12 @@
 <resources>
     <string name="app_name">Nextcloud Passwörter</string>
     <string name="content_description_site_favicon">Webseiten-Symbol</string>
-    <string name="action_login">Login</string>
-    <string name="login_server_url">Server-URL</string>
     <string name="error_url_cannot_be_empty">URL darf nicht leer sein</string>
-    <string name="error_url_must_start_https">URL muss mit https:// beginnen</string>
     <string name="example">Beispiel</string>
     <string name="action_log_out">Abmelden</string>
     <string name="dialog_log_out_text">Möchten Sie sich wirklich abmelden?</string>
     <string name="password">Passwort</string>
     <string name="password_attr_password">Passwort</string>
-    <string name="dialog_master_password_title">Master-Passwort eingeben</string>
     <string name="text_input_show_password_toggle">Passwort anzeigen</string>
     <string name="passwords">Passwörter</string>
     <string name="favorites">Favoriten</string>
@@ -19,7 +15,6 @@
     <string name="error_logging_in">Fehler beim Anmelden</string>
     <string name="action_search">Suche</string>
     <string name="autofill_preference_title">Automatisches Ausfüllen</string>
-    <string name="screen_settings">Einstellungen</string>
     <string name="autofill_preference_subtitle">Dienst für automatisches Ausfüllen aktivieren</string>
     <string name="preferences_category_general">Allgemein</string>
     <string name="show_icons_preference_title">Symbole anzeigen</string>
@@ -32,8 +27,6 @@
     <string name="password_folder_attr_label">Name</string>
     <string name="custom_field_label">Name</string>
     <string name="password_attr_username">Benutzername</string>
-    <string name="password_attr_url">URL</string>
-    <string name="custom_field_type_url">URL</string>
     <string name="error_password_saving_failed">Passwort speichern fehlgeschlagen. Bitte erneut versuchen</string>
     <string name="action_delete_password">Passwort löschen</string>
     <string name="error_password_deleting_failed">Löschen des Passworts fehlgeschlagen. Bitte erneut versuchen</string>
@@ -44,7 +37,6 @@
     <string name="password_attr_favorite">Favorit</string>
     <string name="action_add_custom_field">Neues benutzerdefiniertes Feld</string>
     <string name="custom_field_type">Feldtyp</string>
-    <string name="custom_field_type_text">Text</string>
     <string name="custom_field_type_email">E-Mail</string>
     <string name="custom_field_type_secret">Geheim</string>
     <string name="error_field_cannot_be_empty">Dieses Feld darf nicht leer sein</string>
@@ -92,16 +84,13 @@
     <string name="error_cannot_connect_to_server">Keine Verbindung zum Server. Bitte tippen für einen weiteren Verbindungsversuch.</string>
     <string name="dialog_invalid_certificate_title">Ungültiges Zertifikat</string>
     <string name="dialog_invalid_certificate_text">Das HTTPS-Zertifikat ist ungültig. Fortfahren?</string>
-    <string name="password_strength_ultra">Ultra</string>
     <string name="password_strength_high">Hoch</string>
     <string name="password_strength_medium">Mittel</string>
-    <string name="password_strength_standard">Standard</string>
     <string name="password_strength_low">Niedrig</string>
     <string name="password_generation_include_numbers">Zahlen einschließen</string>
     <string name="password_generation_include_special_characters">Sonderzeichen einschließen</string>
     <string name="password_generation_strength">Stärke</string>
     <string name="preferences_category_appearance">Aussehen</string>
-    <string name="app_theme_system">System</string>
     <string name="app_theme_light">Hell</string>
     <string name="app_theme_dark">Dunkel</string>
     <string name="app_theme_black">Schwarz</string>
