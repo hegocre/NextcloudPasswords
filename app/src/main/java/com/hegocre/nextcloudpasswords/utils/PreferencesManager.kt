@@ -129,6 +129,12 @@ class PreferencesManager private constructor(context: Context) {
     suspend fun setUseSystemDynamicColor(value: Boolean) =
         setPreference(PreferenceKeys.USE_SYSTEM_DYNAMIC_COLOR, value)
 
+    fun getSearchByUsername(): Flow<Boolean> =
+        getPreference(PreferenceKeys.SEARCH_BY_USERNAME, true)
+
+    suspend fun setSearchByUsername(value: Boolean) =
+        setPreference(PreferenceKeys.SEARCH_BY_USERNAME, value)
+
     private fun <T> getPreference(key: Preferences.Key<T>, defaultValue: T): Flow<T> =
         sharedPreferences.data
             .catch { exception ->
@@ -167,6 +173,7 @@ class PreferencesManager private constructor(context: Context) {
             val USE_NEXTCLOUD_INSTANCE_COLOR = booleanPreferencesKey("USE_NEXTCLOUD_INSTANCE_COLOR")
             val USE_SYSTEM_DYNAMIC_COLOR = booleanPreferencesKey("USE_SYSTEM_DYNAMIC_COLOR")
             val INSTANCE_COLOR = stringPreferencesKey("INSTANCE_COLOR")
+            val SEARCH_BY_USERNAME = booleanPreferencesKey("SEARCH_BY_USERNAME")
         }
     }
 }

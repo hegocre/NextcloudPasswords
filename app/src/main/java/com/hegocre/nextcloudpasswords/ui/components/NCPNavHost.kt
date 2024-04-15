@@ -111,9 +111,13 @@ fun NCPNavHost(
         if (isAutofillRequest) NCPScreen.Passwords.name else userStartDestination
     }
 
+    val searchByUsername by PreferencesManager.getInstance(context).getSearchByUsername()
+        .collectAsState(true, context = Dispatchers.IO)
+
     val filteredPasswordList = remember(passwordsDecryptionState.decryptedList, searchQuery) {
         passwordsDecryptionState.decryptedList?.filter {
-            !it.hidden && !it.trashed && it.matches(searchQuery)
+            !it.hidden && !it.trashed && (it.matches(searchQuery)
+                    || (searchByUsername && it.username.contains(searchQuery)))
         }
     }
     val filteredFolderList = remember(foldersDecryptionState.decryptedList, searchQuery) {
