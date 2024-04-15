@@ -127,6 +127,19 @@ fun NCPSettingsScreen(
                         title = { Text(stringResource(R.string.show_icons_preference_title)) },
                         subtitle = { Text(stringResource(R.string.show_icons_preference_subtitle)) }
                     )
+
+                    val searchByUsername by preferencesManager.getSearchByUsername()
+                        .collectAsState(initial = true, context = Dispatchers.IO)
+                    SwitchPreference(
+                        checked = searchByUsername,
+                        onCheckedChange = { search ->
+                            scope.launch(Dispatchers.IO) {
+                                preferencesManager.setSearchByUsername(search)
+                            }
+                        },
+                        title = { Text(stringResource(R.string.search_by_username_preference_title)) },
+                        subtitle = { Text(stringResource(R.string.search_by_username_preference_subtitle)) }
+                    )
                 }
 
                 PreferencesCategory(title = { Text(text = stringResource(id = R.string.preferences_category_appearance)) }) {
