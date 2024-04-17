@@ -117,4 +117,6 @@
     <string name="contribute">Contribuir</string>
     <string name="inline_autofill_preference_title">Autocompletado en línea</string>
     <string name="inline_autofill_preference_subtitle">Mostar sugerencias de autocompletado en el teclado si es posible</string>
+    <string name="search_by_username_preference_title">Búsqueda por usuario</string>
+    <string name="search_by_username_preference_subtitle">Buscar contraseñas por el nombre de usuario</string>
 </resources>
