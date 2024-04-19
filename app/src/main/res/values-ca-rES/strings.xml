@@ -117,4 +117,6 @@
     <string name="contribute">Contribuir</string>
     <string name="inline_autofill_preference_title">Autocompletat en línia</string>
     <string name="inline_autofill_preference_subtitle">Mostrar els suggeriments d\'autocompletat al teclat si és possible</string>
+    <string name="search_by_username_preference_title">Cerca per usuari</string>
+    <string name="search_by_username_preference_subtitle">Cercar contrasenyes pel nom d\'usuari</string>
 </resources>

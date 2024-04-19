@@ -117,4 +117,6 @@
     <string name="contribute">Contribute</string>
     <string name="inline_autofill_preference_title">Use inline autofill</string>
     <string name="inline_autofill_preference_subtitle">Show autofill suggestions on the keyboard when supported</string>
+    <string name="search_by_username_preference_title">Search by username</string>
+    <string name="search_by_username_preference_subtitle">Search passwords by the username value</string>
 </resources>

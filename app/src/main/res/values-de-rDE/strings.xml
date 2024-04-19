@@ -117,4 +117,6 @@
     <string name="contribute">Mitwirken</string>
     <string name="inline_autofill_preference_title">Inline-AutoAusfüllen verwenden</string>
     <string name="inline_autofill_preference_subtitle">AutoAusfüllen-Vorschläge auf der Tastatur anzeigen, wenn unterstützt</string>
+    <string name="search_by_username_preference_title">Nach Benutzername suchen</string>
+    <string name="search_by_username_preference_subtitle">Passwörter nach Benutzername suchen</string>
 </resources>
