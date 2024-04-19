@@ -178,11 +178,15 @@ class AssistStructureParser(assistStructure: AssistStructure) {
         return variation == EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
                 || variation == EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD
                 || variation == EditorInfo.TYPE_CLASS_NUMBER or EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD
+                || variation == EditorInfo.TYPE_TEXT_VARIATION_PASSWORD
+                || variation == EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD
+                || variation == EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD
     }
 
     private fun isVisiblePasswordInputType(inputType: Int): Boolean {
         val variation = inputType and (EditorInfo.TYPE_MASK_CLASS or EditorInfo.TYPE_MASK_VARIATION)
         return variation == EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                || variation == EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
     }
 
     companion object {
