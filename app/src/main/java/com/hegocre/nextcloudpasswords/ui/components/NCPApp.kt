@@ -206,7 +206,7 @@ fun NextcloudPasswordsApp(
             },
             floatingActionButton = {
                 AnimatedVisibility(
-                    visible = !isAutofillRequest && currentScreen != NCPScreen.PasswordEdit &&
+                    visible = currentScreen != NCPScreen.PasswordEdit &&
                             currentScreen != NCPScreen.FolderEdit && sessionOpen,
                     enter = scaleIn(),
                     exit = scaleOut(),
