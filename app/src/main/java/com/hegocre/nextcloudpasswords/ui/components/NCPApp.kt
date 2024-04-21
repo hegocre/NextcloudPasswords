@@ -51,7 +51,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.FoldersApi
-import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
@@ -64,7 +63,7 @@ fun NextcloudPasswordsApp(
     onLogOut: () -> Unit,
     isAutofillRequest: Boolean = false,
     defaultSearchQuery: String = "",
-    onPasswordClick: ((Password) -> Unit)? = null
+    replyAutofill: ((String, String, String) -> Unit)? = null
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -93,14 +92,6 @@ fun NextcloudPasswordsApp(
 
     val server = remember {
         passwordsViewModel.server
-    }
-
-    val onPwClick: (Password) -> Unit = onPasswordClick ?: { password ->
-        passwordsViewModel.setVisiblePassword(password)
-        keyboardController?.hide()
-        coroutineScope.launch {
-            modalSheetState.show()
-        }
     }
 
     NextcloudPasswordsTheme {
@@ -229,7 +220,14 @@ fun NextcloudPasswordsApp(
                 searchQuery = searchQuery,
                 isAutofillRequest = isAutofillRequest,
                 modalSheetState = modalSheetState,
-                onPasswordClick = onPwClick,
+                openPasswordDetails = { password ->
+                    passwordsViewModel.setVisiblePassword(password)
+                    keyboardController?.hide()
+                    coroutineScope.launch {
+                        modalSheetState.show()
+                    }
+                },
+                replyAutofill = replyAutofill,
                 searchVisibility = searchExpanded,
                 closeSearch = {
                     searchExpanded = false

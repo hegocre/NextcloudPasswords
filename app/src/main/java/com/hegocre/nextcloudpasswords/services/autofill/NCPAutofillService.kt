@@ -51,7 +51,7 @@ class NCPAutofillService : AutofillService() {
 
         val searchHint: String? = when {
             // If the structure contains a domain, use that (probably a web browser)
-            helper.webDomain != null && helper.webDomain != "localhost" -> {
+            helper.webDomain != null -> {
                 helper.webDomain
             }
 

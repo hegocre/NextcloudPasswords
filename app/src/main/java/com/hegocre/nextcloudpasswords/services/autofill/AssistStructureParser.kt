@@ -29,7 +29,8 @@ class AssistStructureParser(assistStructure: AssistStructure) {
 
     // Get the most repeated domain on the fields (there may be more than one)
     val webDomain: String?
-        get() = webDomains.toList().maxByOrNull { (_, value) -> value }?.first
+        get() = webDomains.toList().filter { it.first != "localhost" }
+            .maxByOrNull { (_, value) -> value }?.first
 
     init {
         for (i in 0 until assistStructure.windowNodeCount) {

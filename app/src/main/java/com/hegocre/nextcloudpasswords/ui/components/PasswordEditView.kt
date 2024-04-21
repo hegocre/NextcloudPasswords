@@ -88,6 +88,7 @@ class EditablePasswordState(originalPassword: Password?) {
         Json.decodeFromString<List<CustomField>>(originalPassword?.customFields ?: "[]")
             .toMutableStateList()
     var favorite by mutableStateOf(originalPassword?.favorite ?: false)
+    var replyAutofill = false
 
     fun isValid(): Boolean {
         if (label.isBlank())
@@ -117,7 +118,8 @@ class EditablePasswordState(originalPassword: Password?) {
             save = {
                 listOf(
                     it.password, it.label, it.username, it.url, it.notes,
-                    it.folder, Json.encodeToString(it.customFields.toList()), it.favorite.toString()
+                    it.folder, Json.encodeToString(it.customFields.toList()),
+                    it.favorite.toString(), it.replyAutofill.toString()
                 )
             },
             restore = {
@@ -131,6 +133,7 @@ class EditablePasswordState(originalPassword: Password?) {
                     customFields =
                         Json.decodeFromString<List<CustomField>>(it[6]).toMutableStateList()
                     favorite = it[7].toBooleanStrictOrNull() ?: false
+                    replyAutofill = it[8].toBooleanStrictOrNull() ?: false
                 }
             }
         )
@@ -148,6 +151,7 @@ fun EditablePasswordView(
     editablePasswordState: EditablePasswordState,
     folders: List<Folder>,
     isUpdating: Boolean,
+    isAutofillRequest: Boolean,
     onGeneratePassword: KSuspendFunction3<Int, Boolean, Boolean, Deferred<String?>>?,
     onSavePassword: () -> Unit,
     onDeletePassword: (() -> Unit)? = null
@@ -531,6 +535,37 @@ fun EditablePasswordView(
             )
         }
 
+        if (isAutofillRequest) {
+            item(key = "password_save_autofill") {
+                Button(
+                    onClick = {
+                        if (!editablePasswordState.isValid()) {
+                            showFieldErrors = true
+                        } else {
+                            editablePasswordState.replyAutofill = true
+                            onSavePassword()
+                        }
+                    },
+                    content = {
+                        if (isUpdating) {
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.primary,
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        } else {
+                            Text(text = stringResource(id = R.string.action_save_autofill))
+                        }
+                    },
+                    enabled = !isUpdating,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                        .padding(horizontal = 16.dp)
+                )
+            }
+        }
+
         if (onDeletePassword != null) {
             item(key = "password_delete") {
                 if (!isUpdating) {
@@ -629,6 +664,7 @@ fun PasswordEditPreview() {
                 },
                 folders = listOf(),
                 isUpdating = false,
+                isAutofillRequest = true,
                 onSavePassword = { },
                 onDeletePassword = { },
                 onGeneratePassword = null
