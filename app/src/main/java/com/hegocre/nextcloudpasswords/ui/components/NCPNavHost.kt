@@ -66,10 +66,11 @@ fun NCPNavHost(
     modifier: Modifier = Modifier,
     searchQuery: String = "",
     isAutofillRequest: Boolean,
+    openPasswordDetails: (Password) -> Unit,
+    replyAutofill: ((String, String, String) -> Unit)? = null,
     modalSheetState: SheetState? = null,
     searchVisibility: Boolean? = null,
     closeSearch: (() -> Unit)? = null,
-    onPasswordClick: ((Password) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -98,6 +99,14 @@ fun NCPNavHost(
         value = ListDecryptionState(decryptedList = folders?.let { folderList ->
             folderList.decryptFolders(keychain).sortedBy { it.label.lowercase() }
         } ?: emptyList())
+    }
+
+    val onPasswordClick: (Password) -> Unit = { password ->
+        if (isAutofillRequest && replyAutofill != null) {
+            replyAutofill(password.label, password.username, password.password)
+        } else {
+            openPasswordDetails(password)
+        }
     }
 
     val onFolderClick: (Folder) -> Unit = { folder ->
@@ -464,7 +473,15 @@ fun NCPNavHost(
                                         if (passwordsViewModel.createPassword(newPassword)
                                                 .await()
                                         ) {
-                                            navController.navigateUp()
+                                            if (editablePasswordState.replyAutofill && replyAutofill != null) {
+                                                replyAutofill(
+                                                    editablePasswordState.label,
+                                                    editablePasswordState.username,
+                                                    editablePasswordState.password
+                                                )
+                                            } else {
+                                                navController.navigateUp()
+                                            }
                                         } else {
                                             Toast.makeText(
                                                 context,
@@ -536,7 +553,15 @@ fun NCPNavHost(
                                         if (passwordsViewModel.updatePassword(updatedPassword)
                                                 .await()
                                         ) {
-                                            navController.navigateUp()
+                                            if (editablePasswordState.replyAutofill && replyAutofill != null) {
+                                                replyAutofill(
+                                                    editablePasswordState.label,
+                                                    editablePasswordState.username,
+                                                    editablePasswordState.password
+                                                )
+                                            } else {
+                                                navController.navigateUp()
+                                            }
                                         } else {
                                             Toast.makeText(
                                                 context,
@@ -570,6 +595,7 @@ fun NCPNavHost(
                                 }
                             },
                             isUpdating = isUpdating,
+                            isAutofillRequest = isAutofillRequest,
                             onGeneratePassword = passwordsViewModel::generatePassword
                         )
                     }

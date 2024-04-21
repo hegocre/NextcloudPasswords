@@ -20,13 +20,12 @@ import android.widget.inline.InlinePresentationSpec
 import androidx.annotation.RequiresApi
 import androidx.autofill.inline.v1.InlineSuggestionUi
 import com.hegocre.nextcloudpasswords.R
-import com.hegocre.nextcloudpasswords.data.password.Password
 
 object AutofillHelper {
     @RequiresApi(Build.VERSION_CODES.O)
     fun buildDataset(
         context: Context,
-        password: Password?,
+        password: Triple<String, String, String>?,
         assistStructure: AssistStructure,
         inlinePresentationSpec: InlinePresentationSpec?,
         authenticationIntent: IntentSender? = null
@@ -51,7 +50,7 @@ object AutofillHelper {
     @RequiresApi(Build.VERSION_CODES.R)
     private fun buildInlineDataset(
         context: Context,
-        password: Password?,
+        password: Triple<String, String, String>?,
         assistStructure: AssistStructure,
         inlinePresentationSpec: InlinePresentationSpec,
         authenticationIntent: IntentSender? = null
@@ -63,8 +62,8 @@ object AutofillHelper {
                     addInlineAutofillValue(
                         context,
                         autofillId,
-                        password?.label,
-                        password?.username,
+                        password?.first,
+                        password?.second,
                         inlinePresentationSpec
                     )
                 }
@@ -72,8 +71,8 @@ object AutofillHelper {
                     addInlineAutofillValue(
                         context,
                         autofillId,
-                        password?.label,
-                        password?.password,
+                        password?.first,
+                        password?.third,
                         inlinePresentationSpec
                     )
                 }
@@ -86,17 +85,17 @@ object AutofillHelper {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun buildPresentationDataset(
         context: Context,
-        password: Password?,
+        password: Triple<String, String, String>?,
         assistStructure: AssistStructure,
         authenticationIntent: IntentSender? = null
     ): Dataset {
         val helper = AssistStructureParser(assistStructure)
         return Dataset.Builder().apply {
             helper.usernameAutofillIds.forEach { autofillId ->
-                addAutofillValue(context, autofillId, password?.label, password?.username)
+                addAutofillValue(context, autofillId, password?.first, password?.second)
             }
             helper.passwordAutofillIds.forEach { autofillId ->
-                addAutofillValue(context, autofillId, password?.label, password?.password)
+                addAutofillValue(context, autofillId, password?.first, password?.third)
             }
             if (authenticationIntent != null) {
                 setAuthentication(authenticationIntent)

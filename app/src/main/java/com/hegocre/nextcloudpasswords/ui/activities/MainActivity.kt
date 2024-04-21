@@ -21,7 +21,6 @@ import coil.disk.DiskCache
 import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.ApiController
-import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.services.autofill.AutofillHelper
 import com.hegocre.nextcloudpasswords.services.autofill.NCPAutofillService
@@ -62,11 +61,11 @@ class MainActivity : FragmentActivity() {
                 ""
             }
 
-        val onPasswordClick: ((Password) -> Unit)? =
+        val replyAutofill: ((String, String, String) -> Unit)? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
                 && autofillRequested
             ) {
-                { password ->
+                { label, username, password ->
                     val structure = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                         intent.getParcelableExtra(
                             AutofillManager.EXTRA_ASSIST_STRUCTURE,
@@ -79,7 +78,7 @@ class MainActivity : FragmentActivity() {
                         setResult(Activity.RESULT_CANCELED)
                         finish()
                     } else {
-                        autofillReply(password, structure)
+                        autofillReply(Triple(label, username, password), structure)
                     }
                 }
             } else null
@@ -124,7 +123,7 @@ class MainActivity : FragmentActivity() {
                         NextcloudPasswordsApp(
                             passwordsViewModel = passwordsViewModel,
                             onLogOut = { logOut() },
-                            onPasswordClick = onPasswordClick,
+                            replyAutofill = replyAutofill,
                             isAutofillRequest = autofillRequested,
                             defaultSearchQuery = autofillSearchQuery
                         )
@@ -160,7 +159,10 @@ class MainActivity : FragmentActivity() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun autofillReply(password: Password, structure: AssistStructure) {
+    private fun autofillReply(
+        password: Triple<String, String, String>,
+        structure: AssistStructure
+    ) {
         val dataset = AutofillHelper.buildDataset(this, password, structure, null)
 
         val replyIntent = Intent().apply {
