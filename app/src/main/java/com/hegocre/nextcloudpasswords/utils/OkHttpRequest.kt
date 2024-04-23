@@ -25,8 +25,8 @@ class OkHttpRequest private constructor() {
     var allowInsecureRequests = false
 
     private val secureClient = OkHttpClient.Builder()
-        .readTimeout(15, TimeUnit.SECONDS)
-        .writeTimeout(20, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .build()
     private val insecureClient: OkHttpClient
 
