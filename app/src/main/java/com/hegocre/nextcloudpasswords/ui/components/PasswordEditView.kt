@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -83,6 +84,7 @@ class EditablePasswordState(originalPassword: Password?) {
     var notes by mutableStateOf(originalPassword?.notes ?: "")
     var folder by mutableStateOf(originalPassword?.folder ?: FoldersApi.DEFAULT_FOLDER_UUID)
     var customFields =
+        if (originalPassword?.customFields?.isBlank() == true) mutableStateListOf() else
         Json.decodeFromString<List<CustomField>>(originalPassword?.customFields ?: "[]")
             .toMutableStateList()
     var favorite by mutableStateOf(originalPassword?.favorite ?: false)
