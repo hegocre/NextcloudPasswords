@@ -1,5 +1,5 @@
-- Allow searching by username
-- Allow adding passwords when autofilling
+- Suche nach Benutzername erlauben
+- Das Hinzufügen von Passwörtern beim automatischen Ausfüllen erlauben
 - Added Czech, Russian and Chinese Traditional translations
 - Visuelle Optimierungen
 - Internal improvements and bug fixes
