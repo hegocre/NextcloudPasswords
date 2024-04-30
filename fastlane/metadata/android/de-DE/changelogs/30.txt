@@ -1,5 +1,5 @@
 - Suche nach Benutzername erlauben
-- Das Hinzufügen von Passwörtern beim automatischen Ausfüllen erlauben
-- Added Czech, Russian and Chinese Traditional translations
+- Hinzufügen von Passwörtern beim automatischen Ausfüllen erlauben
+- Übersetzungen für Tschechisch, Russisch und Chinesisch Traditionell hinzugefügt
 - Visuelle Optimierungen
-- Internal improvements and bug fixes
+- Interne Verbesserungen und Fehlerbehebungen
