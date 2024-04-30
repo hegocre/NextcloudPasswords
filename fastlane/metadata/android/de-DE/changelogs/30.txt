@@ -1,0 +1,5 @@
+- Suche nach Benutzername erlauben
+- Hinzufügen von Passwörtern beim automatischen Ausfüllen erlauben
+- Übersetzungen für Tschechisch, Russisch und Chinesisch Traditionell hinzugefügt
+- Visuelle Optimierungen
+- Interne Verbesserungen und Fehlerbehebungen
