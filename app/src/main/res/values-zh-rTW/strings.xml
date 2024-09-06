@@ -117,4 +117,7 @@
     <string name="contribute">貢獻</string>
     <string name="inline_autofill_preference_title">使用內部自動填入</string>
     <string name="inline_autofill_preference_subtitle">如果支援，在鍵盤上顯示自動填入建議</string>
+    <string name="search_by_username_preference_title">使用者名稱搜尋</string>
+    <string name="search_by_username_preference_subtitle">利用使用者名稱搜尋密碼</string>
+    <string name="action_save_autofill">儲存並自動填入</string>
 </resources>

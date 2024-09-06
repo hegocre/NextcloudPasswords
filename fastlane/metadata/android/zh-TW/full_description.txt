@@ -1,10 +1,10 @@
-This app connects to a Nextcloud server with Passwords App installed, and allows viewing and editing its content on a user-friendly UI. It also acts as an AutoFill service, making logging in on Android devices easier.
+這個App用於連接安裝在Nextcloud伺服器的Passwrods應用程式，並且提供友善的UI介面用於查詢與編輯密碼。 並且提供自動填入功能，在Android設備上登入變得更加容易
 
-Features:
-- Display user passwords and folders on a Material Design UI
-- Edit and create passwords, including custom fields
-- Edit and create folders
-- Show site icons, with cache to minimize data usage (optional)
-- App lock screen with both passcode and biometric authentication
-- Autofill service (Android 8.0 or higher)
-- Privacy friendly: The only server this app connects is your own Nextcloud Server
+特點:
+- 在Material Design UI上顯示使用者密碼與資料夾
+- 編輯和建立密碼，包含自訂欄位
+- 編輯與建立資料夾
+- 顯示網站圖示，並且利用快取以最大程度減少資料使用(可選項)
+- 可以使用生物辨識認證或密碼方式解鎖App
+- 自動填入功能(僅支援Android 8.0或以上的版本)
+- 隱私友善: 這個App只有唯一連接到您的Nextcloud伺服器
