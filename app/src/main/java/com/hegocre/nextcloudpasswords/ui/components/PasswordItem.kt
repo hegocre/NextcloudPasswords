@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
@@ -475,7 +476,11 @@ fun PasswordMarkdownField(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        MDDocument(root)
+        SelectionContainer {
+            Column {
+                MDDocument(root)
+            }
+        }
     }
 }
 
