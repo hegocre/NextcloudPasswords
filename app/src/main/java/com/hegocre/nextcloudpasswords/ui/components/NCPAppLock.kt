@@ -3,7 +3,6 @@ package com.hegocre.nextcloudpasswords.ui.components
 import android.content.res.Configuration
 import androidx.biometric.BiometricManager
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -184,7 +183,6 @@ fun NextcloudPasswordsAppLock(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PasscodeIndicator(
     inputPassword: String,
@@ -208,7 +206,7 @@ fun PasscodeIndicator(
                 items(count = inputPassword.length, key = { it }) {
                     KeyboardDigitIndicator(
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.animateItemPlacement()
+                        modifier = Modifier.animateItem()
                     )
                 }
             }

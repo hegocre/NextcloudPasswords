@@ -32,6 +32,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
@@ -272,8 +273,7 @@ fun AddCustomFieldDialog(
                         onExpandedChange = { typeMenuExpanded = !typeMenuExpanded }
                     ) {
                         OutlinedTextField(
-                            modifier = Modifier
-                                .menuAnchor(),
+                            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
                             value = types[type] ?: "",
                             onValueChange = {},
                             readOnly = true,
@@ -697,8 +697,7 @@ fun PasswordGenerationDialog(
                             .padding(bottom = 8.dp)
                     ) {
                         OutlinedTextField(
-                            modifier = Modifier
-                                .menuAnchor(),
+                            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
                             value = strengthValues[strength] ?: "",
                             onValueChange = {},
                             readOnly = true,
