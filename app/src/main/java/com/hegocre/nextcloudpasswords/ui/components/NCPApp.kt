@@ -73,7 +73,8 @@ fun NextcloudPasswordsApp(
         backstackEntry.value?.destination?.route
     )
 
-    val modalSheetState = rememberModalBottomSheetState()
+    var openBottomSheet by rememberSaveable { mutableStateOf(false) }
+    val modalSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val needsMasterPassword by passwordsViewModel.needsMasterPassword.collectAsState()
     val masterPasswordInvalid by passwordsViewModel.masterPasswordInvalid.collectAsState()
@@ -223,9 +224,7 @@ fun NextcloudPasswordsApp(
                 openPasswordDetails = { password ->
                     passwordsViewModel.setVisiblePassword(password)
                     keyboardController?.hide()
-                    coroutineScope.launch {
-                        modalSheetState.show()
-                    }
+                    openBottomSheet = true
                 },
                 replyAutofill = replyAutofill,
                 searchVisibility = searchExpanded,
@@ -279,14 +278,11 @@ fun NextcloudPasswordsApp(
                 )
             }
 
-            if (modalSheetState.isVisible) {
+            if (openBottomSheet) {
                 ModalBottomSheet(
-                    onDismissRequest = {
-                        coroutineScope.launch {
-                            modalSheetState.hide()
-                        }
-                    },
-                    contentWindowInsets = { WindowInsets.navigationBars }
+                    onDismissRequest = { openBottomSheet = false },
+                    contentWindowInsets = { WindowInsets.navigationBars },
+                    sheetState = modalSheetState
                 ) {
                     PasswordItem(
                         password = passwordsViewModel.visiblePassword.value,
@@ -294,6 +290,10 @@ fun NextcloudPasswordsApp(
                             {
                                 coroutineScope.launch {
                                     modalSheetState.hide()
+                                }.invokeOnCompletion {
+                                    if (!modalSheetState.isVisible) {
+                                        openBottomSheet = false
+                                    }
                                 }
                                 navController.navigate("${NCPScreen.PasswordEdit.name}/${passwordsViewModel.visiblePassword.value?.id ?: "none"}")
                             }
