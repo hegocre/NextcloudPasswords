@@ -13,6 +13,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.SocketTimeoutException
 import java.net.URLEncoder
+import java.util.Locale
 import javax.net.ssl.SSLHandshakeException
 
 /**
@@ -84,10 +85,20 @@ class ServiceApi private constructor(private val server: Server) {
     }
 
     fun getFaviconUrl(url: String): String =
-        server.url + String.format(FAVICON_URL, URLEncoder.encode(url, "utf-8"), 256)
+        server.url + String.format(
+            Locale.getDefault(),
+            FAVICON_URL,
+            URLEncoder.encode(url, "utf-8"),
+            256
+        )
 
     fun getAvatarUrl(): String =
-        server.url + String.format(AVATAR_URL, URLEncoder.encode(server.username, "utf-8"), 256)
+        server.url + String.format(
+            Locale.getDefault(),
+            AVATAR_URL,
+            URLEncoder.encode(server.username, "utf-8"),
+            256
+        )
 
     companion object {
         private const val FAVICON_URL = "/index.php/apps/passwords/api/1.0/service/favicon/%s/%d"

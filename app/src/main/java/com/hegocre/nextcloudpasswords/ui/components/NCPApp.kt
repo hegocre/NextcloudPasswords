@@ -286,7 +286,7 @@ fun NextcloudPasswordsApp(
                             modalSheetState.hide()
                         }
                     },
-                    windowInsets = WindowInsets.navigationBars
+                    contentWindowInsets = { WindowInsets.navigationBars }
                 ) {
                     PasswordItem(
                         password = passwordsViewModel.visiblePassword.value,

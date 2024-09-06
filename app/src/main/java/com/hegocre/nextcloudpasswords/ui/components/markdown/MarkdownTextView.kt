@@ -117,7 +117,7 @@ fun MDImage(image: Image, modifier: Modifier = Modifier) {
 
 @Composable
 fun MDBulletList(bulletList: BulletList, modifier: Modifier = Modifier) {
-    val marker = bulletList.bulletMarker
+    val marker = bulletList.marker
     MDListItems(bulletList, modifier = modifier) {
         val text = buildAnnotatedString {
             pushStyle(MaterialTheme.typography.bodyMedium.toSpanStyle())
@@ -131,8 +131,8 @@ fun MDBulletList(bulletList: BulletList, modifier: Modifier = Modifier) {
 
 @Composable
 fun MDOrderedList(orderedList: OrderedList, modifier: Modifier = Modifier) {
-    var number = orderedList.startNumber
-    val delimiter = orderedList.delimiter
+    var number = orderedList.markerStartNumber
+    val delimiter = orderedList.markerDelimiter
     MDListItems(orderedList, modifier) {
         val text = buildAnnotatedString {
             pushStyle(MaterialTheme.typography.bodyMedium.toSpanStyle())

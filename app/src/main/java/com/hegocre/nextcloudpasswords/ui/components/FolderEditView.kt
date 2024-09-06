@@ -1,7 +1,5 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
@@ -13,8 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
@@ -23,22 +19,16 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -151,41 +141,20 @@ fun EditableFolderView(
         }
 
         item(key = "folder_parent") {
-            CompositionLocalProvider(
-                LocalTextSelectionColors provides TextSelectionColors(
-                    Color.Transparent,
-                    Color.Transparent
-                ),
-                LocalTextInputService provides null
-            ) {
-                OutlinedTextField(
-                    value = if (editableFolderState.parent == FoldersApi.DEFAULT_FOLDER_UUID) {
-                        stringResource(id = R.string.top_level_folder_name)
-                    } else {
-                        folders.firstOrNull { it.id == editableFolderState.parent }?.label
-                            ?: stringResource(id = R.string.top_level_folder_name)
-                    },
-                    onValueChange = { },
-                    label = { Text(text = stringResource(id = R.string.folder_attr_parent_folder)) },
-                    singleLine = true,
-                    maxLines = 1,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                        .padding(horizontal = 16.dp),
-                    interactionSource = remember { MutableInteractionSource() }
-                        .also { mutableInteractionSource ->
-                            LaunchedEffect(key1 = mutableInteractionSource) {
-                                mutableInteractionSource.interactions.collect {
-                                    if (it is PressInteraction.Release) {
-                                        showFolderDialog = true
-                                    }
-                                }
-                            }
-                        },
-                    colors = OutlinedTextFieldDefaults.colors(cursorColor = Color.Unspecified)
-                )
-            }
+            OutlinedClickableTextField(
+                value = if (editableFolderState.parent == FoldersApi.DEFAULT_FOLDER_UUID) {
+                    stringResource(id = R.string.top_level_folder_name)
+                } else {
+                    folders.firstOrNull { it.id == editableFolderState.parent }?.label
+                        ?: stringResource(id = R.string.top_level_folder_name)
+                },
+                label = stringResource(id = R.string.folder_attr_parent_folder),
+                onClick = { showFolderDialog = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp)
+            )
         }
 
         item(key = "folder_save") {

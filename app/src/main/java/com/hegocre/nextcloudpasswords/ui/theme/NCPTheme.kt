@@ -130,14 +130,15 @@ fun NextcloudPasswordsTheme(
 
         useNextcloudInstanceColor -> {
             when (appTheme) {
-                NCPTheme.LIGHT -> dynamicColorScheme(instanceColor, false)
-                NCPTheme.DARK -> dynamicColorScheme(instanceColor, true)
-                NCPTheme.AMOLED -> dynamicColorScheme(instanceColor, true).copy(
-                    background = Color.Black,
-                    surface = Color.Black
+                NCPTheme.LIGHT -> dynamicColorScheme(
+                    instanceColor,
+                    isDark = false,
+                    isAmoled = false
                 )
 
-                else -> dynamicColorScheme(instanceColor, isSystemInDarkTheme())
+                NCPTheme.DARK -> dynamicColorScheme(instanceColor, isDark = true, isAmoled = false)
+                NCPTheme.AMOLED -> dynamicColorScheme(instanceColor, isDark = true, isAmoled = true)
+                else -> dynamicColorScheme(instanceColor, isSystemInDarkTheme(), false)
             }
         }
 
