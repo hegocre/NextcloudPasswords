@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.AlternateEmail
@@ -55,6 +56,7 @@ import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.ui.components.markdown.MDDocument
+import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
 import com.hegocre.nextcloudpasswords.utils.copyToClipboard
@@ -64,12 +66,16 @@ import org.commonmark.parser.Parser
 
 @Composable
 fun PasswordItem(
-    password: Password?,
+    passwordInfo: Pair<Password, List<String>>?,
     modifier: Modifier = Modifier,
     onEditPassword: (() -> Unit)? = null,
 ) {
-    password?.let { pass ->
-        PasswordItemContent(password = pass, onEditPassword = onEditPassword, modifier = modifier)
+    passwordInfo?.let { pass ->
+        PasswordItemContent(
+            passwordInfo = pass,
+            onEditPassword = onEditPassword,
+            modifier = modifier
+        )
     } ?: Text(
         text = stringResource(R.string.password),
         style = MaterialTheme.typography.headlineMedium,
@@ -79,7 +85,7 @@ fun PasswordItem(
 
 @Composable
 fun PasswordItemContent(
-    password: Password,
+    passwordInfo: Pair<Password, List<String>>,
     onEditPassword: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
@@ -87,6 +93,18 @@ fun PasswordItemContent(
     val copiedText = stringResource(R.string.copied)
 
     val uriHandler = LocalUriHandler.current
+
+    val password = passwordInfo.first
+    val folderPath = remember {
+        buildAnnotatedString {
+            appendInlineContent("folder")
+            append(" ")
+            passwordInfo.second.reversed().forEachIndexed { index, folderName ->
+                if (index != 0) append(" /")
+                append(" $folderName")
+            }
+        }
+    }
 
     val customFields by remember {
         derivedStateOf {
@@ -101,7 +119,7 @@ fun PasswordItemContent(
     Column(modifier = modifier) {
         Row(
             modifier = Modifier
-                .padding(bottom = 8.dp)
+                .padding(bottom = 4.dp)
                 .padding(horizontal = 16.dp),
             verticalAlignment = CenterVertically
         ) {
@@ -151,6 +169,37 @@ fun PasswordItemContent(
             }
         }
         LazyColumn {
+            item(key = "${password.id}_path") {
+                val folderInlineContent = mapOf(
+                    Pair(
+                        "folder",
+                        InlineTextContent(
+                            placeholder = Placeholder(
+                                width = LocalTextStyle.current.fontSize,
+                                height = LocalTextStyle.current.fontSize,
+                                placeholderVerticalAlign = PlaceholderVerticalAlign.Center
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Folder,
+                                contentDescription = stringResource(
+                                    id = R.string.folder
+                                ),
+                                tint = MaterialTheme.colorScheme.onSurface
+                                    .copy(alpha = ContentAlpha.medium)
+                            )
+                        }
+                    )
+                )
+                Text(
+                    text = folderPath,
+                    inlineContent = folderInlineContent,
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .padding(horizontal = 16.dp)
+                )
+            }
+
             if (password.username.isNotBlank()) {
                 item(key = "${password.id}_username") {
                     val usernameLabel = stringResource(id = R.string.password_attr_username)
@@ -490,7 +539,8 @@ fun PasswordItemPreview() {
     NextcloudPasswordsTheme {
         Surface {
             PasswordItem(
-                password = Password(
+                passwordInfo = Pair(
+                    Password(
                     id = "",
                     label = "Nextcloud with a really long label",
                     username = "john_doe",
@@ -518,6 +568,7 @@ fun PasswordItemPreview() {
                     edited = 0,
                     created = 0,
                     updated = 0
+                    ), listOf("Second", "Home")
                 ),
                 onEditPassword = {},
                 modifier = Modifier.padding(bottom = 16.dp)
