@@ -104,7 +104,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
     val folders: LiveData<List<Folder>>
         get() = FolderController.getInstance(getApplication()).getFolders()
 
-    var visiblePassword = mutableStateOf<Password?>(null)
+    var visiblePassword = mutableStateOf<Pair<Password, List<String>>?>(null)
         private set
     var visibleFolder = mutableStateOf<Folder?>(null)
         private set
@@ -208,8 +208,8 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun setVisiblePassword(password: Password) {
-        visiblePassword.value = password
+    fun setVisiblePassword(password: Password, folderPath: List<String>) {
+        visiblePassword.value = Pair(password, folderPath)
     }
 
     fun setVisibleFolder(folder: Folder?) {

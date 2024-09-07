@@ -66,7 +66,7 @@ fun NCPNavHost(
     modifier: Modifier = Modifier,
     searchQuery: String = "",
     isAutofillRequest: Boolean,
-    openPasswordDetails: (Password) -> Unit,
+    openPasswordDetails: (Password, List<String>) -> Unit,
     replyAutofill: ((String, String, String) -> Unit)? = null,
     modalSheetState: SheetState? = null,
     searchVisibility: Boolean? = null,
@@ -101,11 +101,23 @@ fun NCPNavHost(
         } ?: emptyList())
     }
 
+    val baseFolderName = stringResource(R.string.top_level_folder_name)
     val onPasswordClick: (Password) -> Unit = { password ->
         if (isAutofillRequest && replyAutofill != null) {
             replyAutofill(password.label, password.username, password.password)
         } else {
-            openPasswordDetails(password)
+            val folderPath = mutableListOf<String>()
+            var nextFolderUuid = password.folder
+            while (nextFolderUuid != FoldersApi.DEFAULT_FOLDER_UUID) {
+                val nextFolder =
+                    foldersDecryptionState.decryptedList?.find { it.id == nextFolderUuid }
+                nextFolder?.label?.let {
+                    folderPath.add(it)
+                }
+                nextFolderUuid = nextFolder?.parent ?: FoldersApi.DEFAULT_FOLDER_UUID
+            }
+            folderPath.add(baseFolderName)
+            openPasswordDetails(password, folderPath.toList())
         }
     }
 

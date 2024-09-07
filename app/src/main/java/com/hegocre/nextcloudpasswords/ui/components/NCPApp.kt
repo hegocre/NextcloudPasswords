@@ -221,8 +221,8 @@ fun NextcloudPasswordsApp(
                 searchQuery = searchQuery,
                 isAutofillRequest = isAutofillRequest,
                 modalSheetState = modalSheetState,
-                openPasswordDetails = { password ->
-                    passwordsViewModel.setVisiblePassword(password)
+                openPasswordDetails = { password, folderPath ->
+                    passwordsViewModel.setVisiblePassword(password, folderPath)
                     keyboardController?.hide()
                     openBottomSheet = true
                 },
@@ -285,7 +285,7 @@ fun NextcloudPasswordsApp(
                     sheetState = modalSheetState
                 ) {
                     PasswordItem(
-                        password = passwordsViewModel.visiblePassword.value,
+                        passwordInfo = passwordsViewModel.visiblePassword.value,
                         onEditPassword = if (sessionOpen) {
                             {
                                 coroutineScope.launch {
@@ -295,7 +295,7 @@ fun NextcloudPasswordsApp(
                                         openBottomSheet = false
                                     }
                                 }
-                                navController.navigate("${NCPScreen.PasswordEdit.name}/${passwordsViewModel.visiblePassword.value?.id ?: "none"}")
+                                navController.navigate("${NCPScreen.PasswordEdit.name}/${passwordsViewModel.visiblePassword.value?.first?.id ?: "none"}")
                             }
                         } else null,
                         modifier = Modifier.padding(bottom = 16.dp)
