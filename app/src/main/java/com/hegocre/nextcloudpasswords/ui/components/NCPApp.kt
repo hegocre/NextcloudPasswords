@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -87,7 +88,10 @@ fun NextcloudPasswordsApp(
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    var searchExpanded by rememberSaveable { mutableStateOf(isAutofillRequest) }
+    var searchExpanded by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (isAutofillRequest) searchExpanded = true
+    }
     val (searchQuery, setSearchQuery) = rememberSaveable { mutableStateOf(defaultSearchQuery) }
 
     val server = remember {
