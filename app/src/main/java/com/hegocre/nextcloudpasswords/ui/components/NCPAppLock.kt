@@ -40,7 +40,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -59,6 +66,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.job
 import kotlin.math.roundToInt
 
 @Composable
@@ -108,8 +116,39 @@ fun NextcloudPasswordsAppLock(
         }
     }
 
+    val requester = remember { FocusRequester() }
+
     NextcloudPasswordsTheme {
-        Scaffold { paddingValues ->
+        Scaffold(
+            modifier = Modifier
+                .onKeyEvent { keyEvent ->
+                    if (keyEvent.type == KeyEventType.KeyDown) {
+                        when (keyEvent.key) {
+                            Key.Zero, Key.NumPad0 -> setInputPassword(inputPassword + "0")
+                            Key.One, Key.NumPad1 -> setInputPassword(inputPassword + "1")
+                            Key.Two, Key.NumPad2 -> setInputPassword(inputPassword + "2")
+                            Key.Three, Key.NumPad3 -> setInputPassword(inputPassword + "3")
+                            Key.Four, Key.NumPad4 -> setInputPassword(inputPassword + "4")
+                            Key.Five, Key.NumPad5 -> setInputPassword(inputPassword + "5")
+                            Key.Six, Key.NumPad6 -> setInputPassword(inputPassword + "6")
+                            Key.Seven, Key.NumPad7 -> setInputPassword(inputPassword + "7")
+                            Key.Eight, Key.NumPad8 -> setInputPassword(inputPassword + "8")
+                            Key.Nine, Key.NumPad9 -> setInputPassword(inputPassword + "9")
+                            Key.Backspace -> setInputPassword(inputPassword.dropLast(1))
+                        }
+                    }
+                    return@onKeyEvent true
+                }
+                .focusRequester(requester)
+        ) { paddingValues ->
+            LaunchedEffect(key1 = Unit) {
+                coroutineContext.job.invokeOnCompletion {
+                    if (it?.cause == null) {
+                        requester.requestFocus()
+                    }
+                }
+            }
+
             Box(
                 modifier = Modifier
                     .padding(paddingValues)
