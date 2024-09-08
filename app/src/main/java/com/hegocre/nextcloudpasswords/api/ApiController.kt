@@ -3,6 +3,7 @@ package com.hegocre.nextcloudpasswords.api
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import androidx.work.WorkManager
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
 import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyInvalidException
 import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyNeededException
@@ -15,6 +16,7 @@ import com.hegocre.nextcloudpasswords.data.password.NewPassword
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.data.user.UserController
+import com.hegocre.nextcloudpasswords.services.keepalive.KeepAliveWorker
 import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
@@ -57,6 +59,8 @@ class ApiController private constructor(context: Context) {
     val sessionOpen: StateFlow<Boolean>
         get() = _sessionOpen.asStateFlow()
 
+    private val workManager = WorkManager.getInstance(context)
+
     init {
         decryptCSEv1Keychain(
             preferencesManager.getCSEv1Keychain(),
@@ -77,22 +81,6 @@ class ApiController private constructor(context: Context) {
             serverSettings.postValue(settings)
             preferencesManager.setServerSettings(settings)
             preferencesManager.setInstanceColor(settings.themeColorPrimary)
-
-            var keepAliveDelay = (settings.sessionLifetime * 3 / 4 * 1000).toLong()
-            while (true) {
-                sessionCode?.let {
-                    delay(keepAliveDelay)
-                    keepAliveDelay = if (sessionApi.keepAlive(it)) {
-                        Log.i("KeepAlive", "Successfully sent keep alive request")
-                        (settings.sessionLifetime * 3 / 4 * 1000).toLong()
-                    } else {
-                        Log.e("KeepAlive", "Error sending keep alive request")
-                        _sessionOpen.emit(false)
-                        sessionCode = null
-                        5000L
-                    }
-                } ?: delay(5000L)
-            }
         }
         OkHttpRequest.getInstance().allowInsecureRequests =
             preferencesManager.getSkipCertificateValidation()
@@ -215,6 +203,11 @@ class ApiController private constructor(context: Context) {
             }
         }
         sessionCode = newSessionCode
+        serverSettings.value?.let { settings ->
+            val keepAliveDelay = (settings.sessionLifetime * 3 / 4 * 1000).toLong()
+            workManager.cancelAllWorkByTag(KeepAliveWorker.TAG)
+            workManager.enqueue(KeepAliveWorker.getRequest(keepAliveDelay, newSessionCode))
+        }
 
         _sessionOpen.emit(true)
         return@withContext true
@@ -234,6 +227,11 @@ class ApiController private constructor(context: Context) {
             // Session was not closed, some error happened
             false
         }
+    }
+
+    suspend fun clearSession() {
+        _sessionOpen.emit(false)
+        sessionCode = null
     }
 
     /**
