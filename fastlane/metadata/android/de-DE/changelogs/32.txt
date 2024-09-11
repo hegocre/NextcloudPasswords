@@ -1,5 +1,5 @@
-- Folder path is now displayed on the password details
-- Support predictive back gesture on Android U+
-- Make notes text selectable
-- Usage improvements
-- Library updates and bug fixes
+- Ordnerpfad wird nun bei den Passwortdetails angezeigt
+- Unterstützung für vorausschauende Zurück-Geste für Android U+
+- auswählbarer Text in Notizen 
+- Verbesserungen der Nutzung
+- Bibliotheksaktualisierungen und Fehlerbehebungen
