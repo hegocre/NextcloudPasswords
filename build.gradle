@@ -1,9 +1,9 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext {
-        kotlin_version = '1.9.25'
+        kotlin_version = '2.0.20'
         room_version = '2.6.1'
-        ksp_version = '1.0.20'
+        ksp_version = '1.0.25'
     }
     repositories {
         google()
