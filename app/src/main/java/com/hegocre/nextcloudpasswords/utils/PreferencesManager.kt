@@ -35,6 +35,13 @@ class PreferencesManager private constructor(context: Context) {
         )
     }
 
+    suspend fun clear(): Boolean {
+        sharedPreferences.edit {
+            it.clear()
+        }
+        return _encryptedSharedPrefs.edit().clear().commit()
+    }
+
     fun getHasAppLock(): Flow<Boolean> = getPreference(PreferenceKeys.HAS_APP_LOCK, false)
     suspend fun setHasAppLock(value: Boolean) = setPreference(PreferenceKeys.HAS_APP_LOCK, value)
 

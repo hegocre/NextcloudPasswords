@@ -46,15 +46,7 @@ class UserController private constructor(context: Context) {
             passwordDatabase.passwordDao.deleteDatabase()
             folderDatabase.folderDao.deleteDatabase()
         }
-        with(_preferencesManager) {
-            setLoggedInServer(null)
-            setLoggedInUser(null)
-            setLoggedInPassword(null)
-            setMasterPassword(null)
-            setCSEv1Keychain(null)
-            setSkipCertificateValidation(false)
-            setServerSettings(null)
-        }
+        _preferencesManager.clear()
     }
 
     /**
