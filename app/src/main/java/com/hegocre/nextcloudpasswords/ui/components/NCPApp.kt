@@ -277,7 +277,7 @@ fun NextcloudPasswordsApp(
                         passwordsViewModel.setMasterPassword(masterPassword, savePassword)
                         setMasterPassword("")
                     },
-                    errorText = if (masterPasswordInvalid) "Invalid password" else "",
+                    errorText = if (masterPasswordInvalid) stringResource(R.string.error_invalid_password) else "",
                     onDismissRequest = { }
                 )
             }
