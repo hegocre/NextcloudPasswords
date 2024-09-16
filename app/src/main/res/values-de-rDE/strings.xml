@@ -120,4 +120,5 @@
     <string name="search_by_username_preference_title">Nach Benutzername suchen</string>
     <string name="search_by_username_preference_subtitle">Passwörter nach Benutzername suchen</string>
     <string name="action_save_autofill">Speichern und AutoAusfüllen</string>
+    <string name="error_invalid_password">Ungültiges Passwort</string>
 </resources>
