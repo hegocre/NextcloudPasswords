@@ -4,7 +4,7 @@
 -在Material Design的UI上展示用户的密码和文件夹
 -编辑和创建密码，包括自定义项目
 -编辑和创建文件夹
-- Show site icons, with cache to minimize data usage (optional)
-- App lock screen with both passcode and biometric authentication
-- Autofill service (Android 8.0 or higher)
-- Privacy friendly: The only server this app connects is your own Nextcloud Server
+-显示网站的图标，带有缓存功能来减少流量消耗(可选)
+-可以使用密码和生物识别认证的应用锁
+-自动填充服务(需要安卓8.0及以上)
+-隐私安全：本应用只连接到你自己的Nextcloud服务器
