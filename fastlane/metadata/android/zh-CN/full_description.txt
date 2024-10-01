@@ -1,9 +1,9 @@
-This app connects to a Nextcloud server with Passwords App installed, and allows viewing and editing its content on a user-friendly UI. It also acts as an AutoFill service, making logging in on Android devices easier.
+这款应用会连接到安装了“密码（Passwords）”应用的Nextcloud服务器，允许你使用用户友好的UI来查看和修改其中的密码 它还可以作为一个安卓自动填充服务，让在安卓设备上登录变得更加简单。
 
-Features:
-- Display user passwords and folders on a Material Design UI
-- Edit and create passwords, including custom fields
-- Edit and create folders
+功能有：
+-在Material Design的UI上展示用户的密码和文件夹
+-编辑和创建密码，包括自定义项目
+-编辑和创建文件夹
 - Show site icons, with cache to minimize data usage (optional)
 - App lock screen with both passcode and biometric authentication
 - Autofill service (Android 8.0 or higher)
