@@ -1,2 +1,2 @@
-- Internal improvements
-- Added Russian and Chinese Traditional
+Sisemised parandused
+Lisatud Vene ja Hiina traditsiooniline tõlge 
