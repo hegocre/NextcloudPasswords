@@ -1,4 +1,4 @@
-- Fix pin layout on non-vertical orientations
-- Fix error when typing some characters on the search bar
-- Remember last used password generation options
-- Allow disabling inline autofill
+inParandatud Pin'i paigutus mittevertikaalsetel orientatsioonidel
+Parandatud viga otsingusse osade sümbolite kirjutamisel
+Mäleta viimati kasutad parooli genereerimise sätteid
+Luba realise automaattäite välja lülitamine
