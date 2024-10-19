@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Nextcloud\'i Paroolid</string>
-    <string name="content_description_site_favicon">Saidi ikoon</string>
+    <string name="content_description_site_favicon">Veebisaidi ikoon</string>
     <string name="action_login">Sisselogimine</string>
     <string name="login_server_url">Serveri URL</string>
     <string name="error_url_cannot_be_empty">URL ei saa olla tühi</string>
@@ -23,9 +23,9 @@
     <string name="autofill_preference_subtitle">Lülita sisse automaattäite teenus</string>
     <string name="preferences_category_general">Üldine</string>
     <string name="show_icons_preference_title">Näita ikoone</string>
-    <string name="show_icons_preference_subtitle">Näita saidi ikoone</string>
+    <string name="show_icons_preference_subtitle">Näita veebisaidi ikoone</string>
     <string name="start_view_preference_title">Algvaade</string>
-    <string name="client_deauthorized_toast">Äpp on deautoriseeritud. Palun logige uuesti sisse.</string>
+    <string name="client_deauthorized_toast">Rakendus on deautoriseeritud. Palun logige uuesti sisse.</string>
     <string name="preferences_category_autofill_service">Automaattäite teenus</string>
     <string name="action_save">Salvesta</string>
     <string name="action_edit_password">Muuda parooli</string>
@@ -83,7 +83,42 @@
     <string name="biometric_unlock_preference_title">Biomeetriline lukust vabastamine</string>
     <string name="biometric_unlock_preference_subtitle">Luba lukust avamine seadme biomeetrikatega</string>
     <string name="error_app_lock_incorrect_code">Vale kood</string>
+    <string name="passcode">Parool</string>
     <string name="app_lock_input_passcode">Sisesta parool</string>
     <string name="app_lock_confirm_passcode">Kinnita parool</string>
     <string name="error_passcodes_dont_match">Paroolid pole samasugused</string>
+    <string name="biometric_prompt_description">Palun kinnita enda identiteet, et paroolidele ligi pääseda</string>
+    <string name="biometric_prompt_title">Biomeetriline autoriseerimine</string>
+    <string name="error_cannot_connect_to_server">Ei saa serveriga ühendust. Vajutage, et uuesti proovida.</string>
+    <string name="dialog_invalid_certificate_title">Mitteekehtiv sertifikaat</string>
+    <string name="dialog_invalid_certificate_text">HTTPS\'i sertifikaat pole kehtiv. Soovite jätkata? </string>
+    <string name="password_strength_ultra">Ultra</string>
+    <string name="password_strength_high">Kõrge</string>
+    <string name="password_strength_medium">Keskmine</string>
+    <string name="password_strength_standard">Tavaline</string>
+    <string name="password_strength_low">Madal</string>
+    <string name="password_generation_include_numbers">Lisa numbried</string>
+    <string name="password_generation_include_special_characters">Lisa sümboleid</string>
+    <string name="password_generation_strength">Tugevus</string>
+    <string name="preferences_category_appearance">Välimus</string>
+    <string name="app_theme_system">Süsteem</string>
+    <string name="app_theme_light">Hele</string>
+    <string name="app_theme_dark">Tume</string>
+    <string name="app_theme_black">Must</string>
+    <string name="app_theme_preference_title">Äpi teema</string>
+    <string name="use_nextcloud_color_preference_title">Kasuta Nextcloud\'i värve</string>
+    <string name="use_nextcloud_color_preference_subtitle">Kasuta serveri värve aktsendivärvina</string>
+    <string name="use_dynamic_colors_preference_title">Kasuta dünaamilisi värve</string>
+    <string name="use_dynamic_colors_preference_subtitle">Kasuta süsteemi dünaamilisi värve</string>
+    <string name="changelog">Muudatuste logi</string>
+    <string name="empty_list_no_content_here">Siin pole sisu</string>
+    <string name="empty_list_no_results_found">Ei leidnud tulemusi</string>
+    <string name="action_search_everywhere">Otsige kõikjalt</string>
+    <string name="contribute">Panusta</string>
+    <string name="inline_autofill_preference_title">Kasuta realist automaattäidet</string>
+    <string name="inline_autofill_preference_subtitle">Näita automaattäite soovitusi klaviatuuril, kui toetatud</string>
+    <string name="search_by_username_preference_title">Otsi kasutajanime järgi</string>
+    <string name="search_by_username_preference_subtitle">Otsi paroole kasutajanime järgi</string>
+    <string name="action_save_autofill">Salvesta ja täida automaatselt</string>
+    <string name="error_invalid_password">Vale parool</string>
 </resources>
