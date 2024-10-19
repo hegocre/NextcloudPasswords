@@ -1,0 +1,5 @@
+Lubatud kasutajanime järgi otsing
+Lubatud automaattäitel paroolide lisamine
+Lisatud Tšehhi, Vene ja Hiina Traditsiooniline tõlge
+Välimuse muudatused
+Sisemised ja veaparandused

@@ -1,0 +1,8 @@
+Lisatud rohkem kohti rakenduselukku
+Lukusta rakendus seadme lukustusel
+Lisatud parooli genereerimise valikud
+Lisatud välimuse muutmise seaded
+Lisatud rohkem infot teabe lehele
+Parandatud ikooni laadimine kasutajate serveritel
+Parandatud automaattäite väljade tuvastamine
+Välimuse ja veaparandused
