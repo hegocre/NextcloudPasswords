@@ -2,4 +2,4 @@ Kausta asukoht on nüüd näidatud parooli detailidel
 Toetus tagasimineku viipele Android U+'il
 Tee märkmete tekst aktiveeritavaks
 Kasutuse parandused
-- Library updates and bug fixes
+Aluse uuendused ja veaparandused
