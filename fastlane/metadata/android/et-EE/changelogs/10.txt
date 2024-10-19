@@ -1,4 +1,4 @@
-- Added support for inline autofill
-- Autofill field detection improvements
-- Always go to passwords view on autofill requests
-- Bug fixes and internal improvements
+Lisatud realise automaattäite toetus
+Automaattäite väljade tuvastamine
+Alati mine paroolide vaatesse automaattäite kutsetel
+Vigade ja sisemised parandused
