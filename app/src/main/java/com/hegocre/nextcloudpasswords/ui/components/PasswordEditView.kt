@@ -65,7 +65,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlin.reflect.KSuspendFunction3
+import kotlin.reflect.KFunction3
 
 class EditablePasswordState(originalPassword: Password?) {
     var password by mutableStateOf(originalPassword?.password ?: "")
@@ -143,7 +143,7 @@ fun EditablePasswordView(
     folders: List<Folder>,
     isUpdating: Boolean,
     isAutofillRequest: Boolean,
-    onGeneratePassword: KSuspendFunction3<Int, Boolean, Boolean, Deferred<String?>>?,
+    onGeneratePassword: KFunction3<Int, Boolean, Boolean, Deferred<String?>>?,
     onSavePassword: () -> Unit,
     onDeletePassword: (() -> Unit)? = null
 ) {

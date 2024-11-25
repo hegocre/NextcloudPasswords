@@ -2,6 +2,7 @@ package com.hegocre.nextcloudpasswords.ui.components
 
 import android.content.res.Configuration
 import androidx.biometric.BiometricManager
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -58,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.utils.AppLockHelper
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import com.hegocre.nextcloudpasswords.utils.showBiometricPrompt
 import kotlinx.coroutines.CoroutineScope
@@ -68,6 +70,34 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.job
 import kotlin.math.roundToInt
+
+@Composable
+fun NCPAppLockWrapper(
+    content: @Composable () -> Unit,
+) {
+    val context = LocalContext.current
+    val appLockHelper = remember { AppLockHelper.getInstance(context) }
+    val hasAppLock by PreferencesManager.getInstance(context).getHasAppLock()
+        .collectAsState(null)
+    val isLocked by appLockHelper.isLocked.collectAsState()
+
+    hasAppLock?.let {
+        Crossfade(targetState = it && isLocked, label = "locked") { locked ->
+            if (locked) {
+                NextcloudPasswordsAppLock(
+                    onCheckPasscode = appLockHelper::checkPasscode,
+                    onCorrectPasscode = appLockHelper::disableLock
+                )
+            } else {
+                if (hasAppLock == false) {
+                    // Avoid asking for passcode just after setting it
+                    appLockHelper.disableLock()
+                }
+                content()
+            }
+        }
+    }
+}
 
 @Composable
 fun NextcloudPasswordsAppLock(

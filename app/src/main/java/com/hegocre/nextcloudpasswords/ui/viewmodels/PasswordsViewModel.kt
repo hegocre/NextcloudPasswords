@@ -38,6 +38,7 @@ import com.hegocre.nextcloudpasswords.data.password.PasswordController
 import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.data.user.UserController
+import com.hegocre.nextcloudpasswords.utils.AppLockHelper
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -55,10 +56,6 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
     private var masterPassword: MutableLiveData<String?> = MutableLiveData<String?>(null).also {
         it.value = preferencesManager.getMasterPassword()
     }
-
-    private var _isLocked = MutableStateFlow(true)
-    val isLocked: StateFlow<Boolean>
-        get() = _isLocked.asStateFlow()
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean>
@@ -118,9 +115,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                 if (context != null && intent != null) {
                     val action = intent.action
                     if (screenLockFilter.matchAction(action)) {
-                        viewModelScope.launch {
-                            _isLocked.emit(true)
-                        }
+                        AppLockHelper.getInstance(context).enableLock()
                     }
                 }
             }
@@ -137,19 +132,6 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
 
         if (!sessionOpen.value)
             openSession(masterPassword.value)
-    }
-
-    fun checkPasscode(passcode: String): Deferred<Boolean> {
-        return viewModelScope.async {
-            val correctPasscode = preferencesManager.getAppLockPasscode() ?: "0000"
-            passcode == correctPasscode
-        }
-    }
-
-    fun disableLock() {
-        viewModelScope.launch {
-            _isLocked.emit(false)
-        }
     }
 
     private fun openSession(password: String?) {
@@ -216,7 +198,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         visibleFolder.value = folder
     }
 
-    suspend fun createPassword(newPassword: NewPassword): Deferred<Boolean> {
+    fun createPassword(newPassword: NewPassword): Deferred<Boolean> {
         return viewModelScope.async {
             _isUpdating.value = true
             if (!apiController.createPassword(newPassword)) {
@@ -229,7 +211,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    suspend fun updatePassword(updatedPassword: UpdatedPassword): Deferred<Boolean> {
+    fun updatePassword(updatedPassword: UpdatedPassword): Deferred<Boolean> {
         return viewModelScope.async {
             _isUpdating.value = true
             if (!apiController.updatePassword(updatedPassword)) {
@@ -242,7 +224,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    suspend fun deletePassword(deletedPassword: DeletedPassword): Deferred<Boolean> {
+    fun deletePassword(deletedPassword: DeletedPassword): Deferred<Boolean> {
         return viewModelScope.async {
             _isUpdating.value = true
             if (!apiController.deletePassword(deletedPassword)) {
@@ -255,7 +237,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    suspend fun generatePassword(
+    fun generatePassword(
         strength: Int, includeDigits: Boolean, includeSymbols: Boolean
     ): Deferred<String?> {
         return viewModelScope.async {
@@ -263,7 +245,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    suspend fun createFolder(newFolder: NewFolder): Deferred<Boolean> {
+    fun createFolder(newFolder: NewFolder): Deferred<Boolean> {
         return viewModelScope.async {
             _isUpdating.value = true
             if (!apiController.createFolder(newFolder)) {
@@ -276,7 +258,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    suspend fun updateFolder(updatedFolder: UpdatedFolder): Deferred<Boolean> {
+    fun updateFolder(updatedFolder: UpdatedFolder): Deferred<Boolean> {
         return viewModelScope.async {
             _isUpdating.value = true
             if (!apiController.updateFolder(updatedFolder)) {
@@ -289,7 +271,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    suspend fun deleteFolder(deletedFolder: DeletedFolder): Deferred<Boolean> {
+    fun deleteFolder(deletedFolder: DeletedFolder): Deferred<Boolean> {
         return viewModelScope.async {
             _isUpdating.value = true
             if (!apiController.deleteFolder(deletedFolder)) {

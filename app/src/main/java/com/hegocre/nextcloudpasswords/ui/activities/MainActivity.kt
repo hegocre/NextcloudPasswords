@@ -10,9 +10,6 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.Crossfade
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
 import coil.Coil
@@ -24,12 +21,11 @@ import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.services.autofill.AutofillHelper
 import com.hegocre.nextcloudpasswords.services.autofill.NCPAutofillService
+import com.hegocre.nextcloudpasswords.ui.components.NCPAppLockWrapper
 import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsApp
-import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsAppLock
 import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
 import com.hegocre.nextcloudpasswords.utils.LogHelper
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
-import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -104,31 +100,14 @@ class MainActivity : FragmentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            val hasAppLock by PreferencesManager.getInstance(this).getHasAppLock()
-                .collectAsState(null)
-            val isLocked by passwordsViewModel.isLocked.collectAsState()
-
-            hasAppLock?.let {
-                Crossfade(targetState = it && isLocked, label = "locked") { locked ->
-                    if (locked) {
-                        NextcloudPasswordsAppLock(
-                            onCheckPasscode = passwordsViewModel::checkPasscode,
-                            onCorrectPasscode = passwordsViewModel::disableLock
-                        )
-                    } else {
-                        if (hasAppLock == false) {
-                            // Avoid asking for passcode just after setting it
-                            passwordsViewModel.disableLock()
-                        }
-                        NextcloudPasswordsApp(
-                            passwordsViewModel = passwordsViewModel,
-                            onLogOut = { logOut() },
-                            replyAutofill = replyAutofill,
-                            isAutofillRequest = autofillRequested,
-                            defaultSearchQuery = autofillSearchQuery
-                        )
-                    }
-                }
+            NCPAppLockWrapper {
+                NextcloudPasswordsApp(
+                    passwordsViewModel = passwordsViewModel,
+                    onLogOut = { logOut() },
+                    replyAutofill = replyAutofill,
+                    isAutofillRequest = autofillRequested,
+                    defaultSearchQuery = autofillSearchQuery
+                )
             }
         }
     }

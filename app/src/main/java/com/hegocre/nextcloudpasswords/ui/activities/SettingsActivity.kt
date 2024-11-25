@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
+import com.hegocre.nextcloudpasswords.ui.components.NCPAppLockWrapper
 import com.hegocre.nextcloudpasswords.ui.components.NCPSettingsScreen
 
 class SettingsActivity : FragmentActivity() {
@@ -14,9 +15,11 @@ class SettingsActivity : FragmentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            NCPSettingsScreen(
-                onNavigationUp = { finish() }
-            )
+            NCPAppLockWrapper {
+                NCPSettingsScreen(
+                    onNavigationUp = { finish() }
+                )
+            }
         }
     }
 }
