@@ -1,0 +1,5 @@
+- Ordnerpfad wird nun bei den Passwortdetails angezeigt
+- Unterstützung für vorausschauende Zurück-Geste für Android U+
+- auswählbarer Text in Notizen 
+- Verbesserungen der Nutzung
+- Bibliotheksaktualisierungen und Fehlerbehebungen

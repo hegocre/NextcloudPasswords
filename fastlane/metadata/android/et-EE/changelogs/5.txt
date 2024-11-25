@@ -1,0 +1,4 @@
+Parandatud automaattäite teenus
+Parandatud URL' otsing
+Lubatud ise allkirjastatud sertifikaatidega serveritega ühendamine
+Väiksemad veaprandused

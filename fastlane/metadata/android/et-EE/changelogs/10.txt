@@ -1,0 +1,4 @@
+Lisatud realise automaattäite toetus
+Automaattäite väljade tuvastamine
+Alati mine paroolide vaatesse automaattäite kutsetel
+Vigade ja sisemised parandused
