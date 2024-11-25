@@ -178,7 +178,7 @@ fun NCPNavHost(
                                     passwords = filteredPasswordList,
                                     onPasswordClick = onPasswordClick,
                                     onPasswordLongClick = {
-                                        if (sessionOpen && !isAutofillRequest)
+                                        if (sessionOpen && !isAutofillRequest && it.editable)
                                             navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
                                     },
                                     getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
@@ -220,7 +220,7 @@ fun NCPNavHost(
                                     passwords = filteredFavoritePasswords,
                                     onPasswordClick = onPasswordClick,
                                     onPasswordLongClick = {
-                                        if (sessionOpen && !isAutofillRequest)
+                                        if (sessionOpen && !isAutofillRequest && it.editable)
                                             navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
                                     },
                                     getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
@@ -278,7 +278,7 @@ fun NCPNavHost(
                                     folders = filteredFoldersParentFolder,
                                     onPasswordClick = onPasswordClick,
                                     onPasswordLongClick = {
-                                        if (sessionOpen && !isAutofillRequest)
+                                        if (sessionOpen && !isAutofillRequest && it.editable)
                                             navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
                                     },
                                     onFolderClick = onFolderClick,
@@ -356,7 +356,7 @@ fun NCPNavHost(
                                     folders = filteredFoldersSelectedFolder,
                                     onPasswordClick = onPasswordClick,
                                     onPasswordLongClick = {
-                                        if (sessionOpen && !isAutofillRequest)
+                                        if (sessionOpen && !isAutofillRequest && it.editable)
                                             navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
                                     },
                                     onFolderClick = onFolderClick,
