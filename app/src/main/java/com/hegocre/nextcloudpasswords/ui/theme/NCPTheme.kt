@@ -94,91 +94,93 @@ private val defaultDarkColorScheme = darkColorScheme(
 fun NextcloudPasswordsTheme(
     content: @Composable () -> Unit
 ) {
-    val context = LocalContext.current
-    val preferencesManager = PreferencesManager.getInstance(context)
-    val appTheme by preferencesManager.getAppTheme().collectAsState(initial = NCPTheme.SYSTEM)
-    val useNextcloudInstanceColor by preferencesManager.getUseInstanceColor()
-        .collectAsState(initial = false)
-    val instanceColorString by preferencesManager.getInstanceColor()
-        .collectAsState(initial = "#745bca")
-    val instanceColor by remember {
-        derivedStateOf {
-            try {
-                Color(instanceColorString.toColorInt())
-            } catch (e: IllegalArgumentException) {
-                Color(0xFF745BCA)
-            }
-        }
-    }
-    val useSystemDynamicColor by preferencesManager.getUseSystemDynamicColor()
-        .collectAsState(initial = false)
+    val isPreview = LocalInspectionMode.current
 
-    val colorScheme = when {
-        useSystemDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            when {
-                appTheme == NCPTheme.LIGHT -> dynamicLightColorScheme(context)
-                appTheme == NCPTheme.DARK -> dynamicDarkColorScheme(context)
-                appTheme == NCPTheme.AMOLED -> dynamicDarkColorScheme(context).copy(
-                    background = Color.Black,
-                    surface = Color.Black
-                )
-
-                isSystemInDarkTheme() -> dynamicDarkColorScheme(context)
-                else -> dynamicLightColorScheme(context)
-            }
-        }
-
-        useNextcloudInstanceColor -> {
-            when (appTheme) {
-                NCPTheme.LIGHT -> dynamicColorScheme(
-                    instanceColor,
-                    isDark = false,
-                    isAmoled = false
-                )
-
-                NCPTheme.DARK -> dynamicColorScheme(instanceColor, isDark = true, isAmoled = false)
-                NCPTheme.AMOLED -> dynamicColorScheme(instanceColor, isDark = true, isAmoled = true)
-                else -> dynamicColorScheme(instanceColor, isSystemInDarkTheme(), false)
-            }
-        }
-
-        appTheme == NCPTheme.LIGHT -> defaultLightColorScheme
-        appTheme == NCPTheme.DARK -> defaultDarkColorScheme
-        appTheme == NCPTheme.AMOLED -> defaultDarkColorScheme.copy(
-            background = Color.Black,
-            surface = Color.Black
+    if (isPreview) {
+        MaterialTheme(
+            colorScheme = if (isSystemInDarkTheme()) defaultDarkColorScheme else defaultLightColorScheme,
+            typography = Typography,
+            content = content
         )
-
-        isSystemInDarkTheme() -> defaultDarkColorScheme
-        else -> defaultLightColorScheme
-    }
-    val view = LocalView.current
-
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = Color.Transparent.toArgb()
-            val insetsController = WindowCompat.getInsetsController(window, view)
-            insetsController.isAppearanceLightStatusBars = colorScheme.isLight()
-
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                if (colorScheme.isLight()) {
-                    window.navigationBarColor = Color.Black.copy(alpha = 0.3f).toArgb()
-                } else {
-                    window.navigationBarColor = Color.Transparent.toArgb()
+    } else {
+        val context = LocalContext.current
+        val preferencesManager = PreferencesManager.getInstance(context)
+        val appTheme by preferencesManager.getAppTheme().collectAsState(initial = NCPTheme.SYSTEM)
+        val useNextcloudInstanceColor by preferencesManager.getUseInstanceColor()
+            .collectAsState(initial = false)
+        val instanceColorString by preferencesManager.getInstanceColor()
+            .collectAsState(initial = "#745bca")
+        val instanceColor by remember {
+            derivedStateOf {
+                try {
+                    Color(instanceColorString.toColorInt())
+                } catch (e: IllegalArgumentException) {
+                    Color(0xFF745BCA)
                 }
-            } else {
-                insetsController.isAppearanceLightNavigationBars = colorScheme.isLight()
-                window.navigationBarColor = Color.Transparent.toArgb()
             }
         }
-    }
+        val useSystemDynamicColor by preferencesManager.getUseSystemDynamicColor()
+            .collectAsState(initial = false)
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+        val colorScheme = when {
+            useSystemDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                when {
+                    appTheme == NCPTheme.LIGHT -> dynamicLightColorScheme(context)
+                    appTheme == NCPTheme.DARK -> dynamicDarkColorScheme(context)
+                    appTheme == NCPTheme.AMOLED -> dynamicDarkColorScheme(context).copy(
+                        background = Color.Black,
+                        surface = Color.Black
+                    )
+
+                    isSystemInDarkTheme() -> dynamicDarkColorScheme(context)
+                    else -> dynamicLightColorScheme(context)
+                }
+            }
+
+            useNextcloudInstanceColor -> {
+                when (appTheme) {
+                    NCPTheme.LIGHT -> dynamicColorScheme(
+                        instanceColor,
+                        isDark = false,
+                        isAmoled = false
+                    )
+
+                    NCPTheme.DARK -> dynamicColorScheme(instanceColor, isDark = true, isAmoled = false)
+                    NCPTheme.AMOLED -> dynamicColorScheme(instanceColor, isDark = true, isAmoled = true)
+                    else -> dynamicColorScheme(instanceColor, isSystemInDarkTheme(), false)
+                }
+            }
+
+            appTheme == NCPTheme.LIGHT -> defaultLightColorScheme
+            appTheme == NCPTheme.DARK -> defaultDarkColorScheme
+            appTheme == NCPTheme.AMOLED -> defaultDarkColorScheme.copy(
+                background = Color.Black,
+                surface = Color.Black
+            )
+
+            isSystemInDarkTheme() -> defaultDarkColorScheme
+            else -> defaultLightColorScheme
+        }
+        val view = LocalView.current
+
+        if (!view.isInEditMode) {
+            SideEffect {
+                val window = (view.context as Activity).window
+                val insetsController = WindowCompat.getInsetsController(window, view)
+                insetsController.isAppearanceLightStatusBars = colorScheme.isLight()
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    insetsController.isAppearanceLightNavigationBars = colorScheme.isLight()
+                }
+            }
+        }
+
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }
 
 fun ColorScheme.isLight() = this.background.luminance() > 0.5
