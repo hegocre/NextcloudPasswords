@@ -127,6 +127,21 @@ fun NCPSettingsScreen(
                         title = { Text(stringResource(R.string.show_icons_preference_title)) },
                         subtitle = { Text(stringResource(R.string.show_icons_preference_subtitle)) }
                     )
+                }
+
+                PreferencesCategory(title = { Text(stringResource(R.string.preferences_category_search)) }) {
+                    val useStringUrlMatching by preferencesManager.getUseStrictUrlMatching()
+                        .collectAsState(initial = true, context = Dispatchers.IO)
+                    SwitchPreference(
+                        checked = useStringUrlMatching,
+                        onCheckedChange = { useStrict ->
+                            scope.launch(Dispatchers.IO) {
+                                preferencesManager.setUseStrictUrlMatching(useStrict)
+                            }
+                        },
+                        title = { Text(stringResource(R.string.use_strict_domain_matching_preference_title)) },
+                        subtitle = { Text(stringResource(R.string.use_strict_domain_matching_preference_subtitle)) }
+                    )
 
                     val searchByUsername by preferencesManager.getSearchByUsername()
                         .collectAsState(initial = true, context = Dispatchers.IO)
@@ -268,6 +283,7 @@ fun NCPSettingsScreen(
                             },
                             onDismissRequest = {
                                 showCreatePasscodeDialog = false
+                                isEnablingBiometric = false
                             }
                         )
                     }
@@ -307,6 +323,7 @@ fun NCPSettingsScreen(
                             },
                             onDismissRequest = {
                                 showConfirmPasscodeDialog = false
+                                isEnablingBiometric = false
                                 firstPasscode = ""
                             }
                         )

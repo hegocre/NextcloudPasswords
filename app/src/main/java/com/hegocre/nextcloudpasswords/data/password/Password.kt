@@ -113,19 +113,19 @@ data class Password(
         return decryptedPassword
     }
 
-    fun matches(query: String): Boolean {
+    fun matches(query: String, strictUrlMatching: Boolean = true): Boolean {
         if (label.lowercase().contains(query.lowercase())) {
-            return true
-        }
-        if (url.lowercase().contains(query.lowercase())) {
             return true
         }
 
         try {
-            val domain = (Uri.parse(query).host ?: Uri.parse("https://$query").host)?.let {
-                PublicSuffixDatabase.get().getEffectiveTldPlusOne(it)
+            val queryDomain = (Uri.parse(query).host ?: Uri.parse("https://$query").host)?.let {
+                if (strictUrlMatching) it else PublicSuffixDatabase.get().getEffectiveTldPlusOne(it)
             } ?: return false
-            return url.lowercase().contains(domain.lowercase())
+            val passwordDomain = (Uri.parse(url).host ?: Uri.parse("https://$url").host)?.let {
+                if (strictUrlMatching) it else PublicSuffixDatabase.get().getEffectiveTldPlusOne(it)
+            } ?: return false
+            return queryDomain == passwordDomain
         } catch (e: Exception) {
             return false
         }
