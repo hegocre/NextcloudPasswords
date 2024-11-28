@@ -142,6 +142,12 @@ class PreferencesManager private constructor(context: Context) {
     suspend fun setSearchByUsername(value: Boolean) =
         setPreference(PreferenceKeys.SEARCH_BY_USERNAME, value)
 
+    fun getUseStrictUrlMatching(): Flow<Boolean> =
+        getPreference(PreferenceKeys.USE_STRICT_URL_MATCHING, true)
+
+    suspend fun setUseStrictUrlMatching(value: Boolean) =
+        setPreference(PreferenceKeys.USE_STRICT_URL_MATCHING, value)
+
     private fun <T> getPreference(key: Preferences.Key<T>, defaultValue: T): Flow<T> =
         sharedPreferences.data
             .catch { exception ->
@@ -181,6 +187,7 @@ class PreferencesManager private constructor(context: Context) {
             val USE_SYSTEM_DYNAMIC_COLOR = booleanPreferencesKey("USE_SYSTEM_DYNAMIC_COLOR")
             val INSTANCE_COLOR = stringPreferencesKey("INSTANCE_COLOR")
             val SEARCH_BY_USERNAME = booleanPreferencesKey("SEARCH_BY_USERNAME")
+            val USE_STRICT_URL_MATCHING = booleanPreferencesKey("USE_STRICT_URL_MATCHING")
         }
     }
 }

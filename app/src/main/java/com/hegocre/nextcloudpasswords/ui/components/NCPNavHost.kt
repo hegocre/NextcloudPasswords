@@ -134,10 +134,12 @@ fun NCPNavHost(
 
     val searchByUsername by PreferencesManager.getInstance(context).getSearchByUsername()
         .collectAsState(true, context = Dispatchers.IO)
+    val strictUrlMatching by PreferencesManager.getInstance(context).getUseStrictUrlMatching()
+        .collectAsState(true, context = Dispatchers.IO)
 
     val filteredPasswordList = remember(passwordsDecryptionState.decryptedList, searchQuery) {
         passwordsDecryptionState.decryptedList?.filter {
-            !it.hidden && !it.trashed && (it.matches(searchQuery)
+            !it.hidden && !it.trashed && (it.matches(searchQuery, strictUrlMatching)
                     || (searchByUsername && it.username.contains(searchQuery)))
         }
     }
