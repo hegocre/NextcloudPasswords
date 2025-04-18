@@ -2,7 +2,6 @@ package com.hegocre.nextcloudpasswords.ui.components
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.view.autofill.AutofillManager
@@ -47,6 +46,7 @@ import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import com.hegocre.nextcloudpasswords.utils.showBiometricPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -377,7 +377,7 @@ fun NCPSettingsScreen(
                                 if (enable) {
                                     val intent =
                                         Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE).apply {
-                                            data = Uri.parse("package:${context.packageName}")
+                                            data = "package:${context.packageName}".toUri()
                                         }
                                     launchAutofillRequest.launch(intent)
                                 }
