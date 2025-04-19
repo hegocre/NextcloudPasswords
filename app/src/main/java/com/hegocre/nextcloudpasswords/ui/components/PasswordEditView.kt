@@ -27,6 +27,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -46,6 +47,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -253,6 +256,7 @@ fun EditablePasswordView(
             OutlinedTextField(
                 value = editablePasswordState.password,
                 onValueChange = { newText -> editablePasswordState.password = newText },
+                textStyle = LocalTextStyle.current.copy(fontFamily = FontFamily(Font(R.font.dejavu_sans_mono))),
                 label = { Text(text = stringResource(id = R.string.password_attr_password)) },
                 singleLine = true,
                 maxLines = 1,
@@ -388,6 +392,10 @@ fun EditablePasswordView(
                     editablePasswordState.customFields.removeAt(index)
                     editablePasswordState.customFields.add(index, newElement)
                 },
+                textStyle = if (customField.type == CustomField.TYPE_SECRET)
+                    LocalTextStyle.current.copy(fontFamily = FontFamily(Font(R.font.dejavu_sans_mono)))
+                else
+                    LocalTextStyle.current,
                 label = { Text(text = customField.label) },
                 singleLine = true,
                 maxLines = 1,
