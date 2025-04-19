@@ -223,6 +223,33 @@ fun DeleteElementDialog(
     )
 }
 
+@Composable
+fun DiscardChangesDialog(
+    onDismissRequest: (() -> Unit)? = null,
+    onConfirmButton: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { onDismissRequest?.invoke() },
+        title = { Text(text = stringResource(R.string.action_discard)) },
+        text = { Text(text = stringResource(R.string.dialog_discard_changes_text)) },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmButton()
+                    onDismissRequest?.invoke()
+                }
+            ) {
+                Text(text = stringResource(R.string.action_discard))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDismissRequest?.invoke() }) {
+                Text(text = stringResource(id = android.R.string.cancel))
+            }
+        }
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddCustomFieldDialog(

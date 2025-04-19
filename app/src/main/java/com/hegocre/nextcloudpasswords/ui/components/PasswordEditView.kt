@@ -1,6 +1,8 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -65,6 +67,7 @@ import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
 import com.hegocre.nextcloudpasswords.utils.isValidEmail
 import com.hegocre.nextcloudpasswords.utils.isValidURL
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlin.reflect.KFunction3
@@ -151,6 +154,7 @@ fun EditablePasswordView(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     var showDeleteDialog by rememberSaveable {
         mutableStateOf(false)
@@ -164,7 +168,33 @@ fun EditablePasswordView(
     var showFieldErrors by rememberSaveable {
         mutableStateOf(false)
     }
+    var showDiscardDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var confirmedDiscard by rememberSaveable {
+        mutableStateOf(false)
+    }
 
+    BackHandler (enabled = !confirmedDiscard) {
+        showDiscardDialog = true
+    }
+
+    if (showDiscardDialog) {
+        DiscardChangesDialog(
+            onConfirmButton = {
+                confirmedDiscard = true
+                showDiscardDialog = false
+                coroutineScope.launch {
+                    awaitFrame()
+                    onBackPressedDispatcher?.onBackPressed()
+                    confirmedDiscard = false
+                }
+            },
+            onDismissRequest = {
+                showDiscardDialog = false
+            }
+        )
+    }
 
     LazyColumn {
         item(key = "top_spacer") { Spacer(modifier = Modifier.width(16.dp)) }
