@@ -1,5 +1,7 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
@@ -24,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -38,6 +41,8 @@ import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
+import kotlinx.coroutines.android.awaitFrame
+import kotlinx.coroutines.launch
 
 class EditableFolderState(originalFolder: Folder?) {
     var label by mutableStateOf(originalFolder?.label ?: "")
@@ -80,6 +85,9 @@ fun EditableFolderView(
     onSaveFolder: () -> Unit,
     onDeleteFolder: (() -> Unit)? = null
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
     var showDeleteDialog by rememberSaveable {
         mutableStateOf(false)
     }
@@ -88,6 +96,33 @@ fun EditableFolderView(
     }
     var showFieldErrors by rememberSaveable {
         mutableStateOf(false)
+    }
+    var showDiscardDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var confirmedDiscard by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    BackHandler (enabled = !confirmedDiscard) {
+        showDiscardDialog = true
+    }
+
+    if (showDiscardDialog) {
+        DiscardChangesDialog(
+            onConfirmButton = {
+                confirmedDiscard = true
+                showDiscardDialog = false
+                coroutineScope.launch {
+                    awaitFrame()
+                    onBackPressedDispatcher?.onBackPressed()
+                    confirmedDiscard = false
+                }
+            },
+            onDismissRequest = {
+                showDiscardDialog = false
+            }
+        )
     }
 
 

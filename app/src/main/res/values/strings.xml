@@ -123,4 +123,6 @@
     <string name="preferences_category_search">Search</string>
     <string name="use_strict_domain_matching_preference_title">Strict domain matching</string>
     <string name="use_strict_domain_matching_preference_subtitle">Match passwords by its full domain, excluding subdomains</string>
+    <string name="action_discard">Discard</string>
+    <string name="dialog_discard_changes_text">Changes made to this item will be discarded. Do you want to continue?</string>
 </resources>
