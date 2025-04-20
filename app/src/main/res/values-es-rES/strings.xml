@@ -124,4 +124,6 @@
     <string name="preferences_category_search">Buscar</string>
     <string name="use_strict_domain_matching_preference_title">Dominio estricto</string>
     <string name="use_strict_domain_matching_preference_subtitle">Hacer coincidir las contraseñas por su dominio completo, excluyendo subdominios</string>
+    <string name="action_discard">Descartar</string>
+    <string name="dialog_discard_changes_text">Los cambios realizados a este objeto serán descartados. ¿Desea continuar?</string>
 </resources>
