@@ -124,4 +124,6 @@
     <string name="preferences_category_search">Cerca</string>
     <string name="use_strict_domain_matching_preference_title">Domini estricte</string>
     <string name="use_strict_domain_matching_preference_subtitle">Fer coincidir les contrasenyes pel domini complet, excloent-hi subdominis</string>
+    <string name="action_discard">Descartar</string>
+    <string name="dialog_discard_changes_text">Els canvis fets a aquest element seran descartats. Voleu continuar?</string>
 </resources>
