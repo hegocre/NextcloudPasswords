@@ -1,0 +1,4 @@
+- Trust user Certificate Authorities (thanks to @SaeedDev94)
+- Ask for confirmation before discarding edits
+- Updated dependencies
+- Interne Verbesserungen und Fehlerbehebungen
