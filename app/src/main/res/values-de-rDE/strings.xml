@@ -124,4 +124,6 @@
     <string name="preferences_category_search">Suche</string>
     <string name="use_strict_domain_matching_preference_title">Strikte Domänen-Übereinstimmung</string>
     <string name="use_strict_domain_matching_preference_subtitle">Passwörter nach der vollständigen Domain abgleichen, ohne Subdomains</string>
+    <string name="action_discard">Verwerfen</string>
+    <string name="dialog_discard_changes_text">Änderungen an diesem Element werden verworfen. Möchten Sie fortfahren?</string>
 </resources>
