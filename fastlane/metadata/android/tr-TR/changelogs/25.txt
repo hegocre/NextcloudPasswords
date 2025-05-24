@@ -5,4 +5,4 @@
 - Add more information on the about screen
 - Fix icon loading on self-hosted instances
 - Fix some autofill fields not being detected
-- Visual improvements and bug fixes
+- Görünüm iyileştirmeleri ve hata düzeltmeleri
