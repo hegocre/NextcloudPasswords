@@ -1,5 +1,5 @@
 - Folder path is now displayed on the password details
 - Support predictive back gesture on Android U+
-- Make notes text selectable
+- Notlardaki metni seçilebilir yap
 - Usage improvements
 - Library updates and bug fixes
