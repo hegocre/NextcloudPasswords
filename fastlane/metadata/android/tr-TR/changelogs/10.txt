@@ -1,4 +1,4 @@
 - Satır için otomatik doldurma desteği eklendi
 - Otomatik doldurma alanı algılama iyileştirmeleri
-- Otomatik doldurma isteklerinde her zaman parolalar görünümüne git
+- Otomatik doldurma isteklerinde her zaman şifreler görünümüne git
 - Hata düzeltmeleri ve dahili iyileştirmeler
