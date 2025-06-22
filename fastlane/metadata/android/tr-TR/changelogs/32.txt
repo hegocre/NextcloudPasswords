@@ -1,4 +1,4 @@
-- Klasör dizini artık parola ayrıntılarında görüntülenir
+- Klasör dizini artık şifre ayrıntılarında görüntülenir
 - Android U ve üzerinde öngörülebilir geri hareket desteği eklendi
 - Notlardaki metni seçilebilir yap
 - Kullanım iyileştirmeleri
