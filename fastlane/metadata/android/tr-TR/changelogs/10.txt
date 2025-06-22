@@ -1,4 +1,4 @@
-- Added support for inline autofill
-- Autofill field detection improvements
-- Always go to passwords view on autofill requests
-- Bug fixes and internal improvements
+- Satır için otomatik doldurma desteği eklendi
+- Otomatik doldurma alanı algılama iyileştirmeleri
+- Otomatik doldurma isteklerinde her zaman parolalar görünümüne git
+- Hata düzeltmeleri ve dahili iyileştirmeler
