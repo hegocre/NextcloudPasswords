@@ -1,4 +1,4 @@
 - Kullanıcı Sertifika Yetkililerine güvenildi (teşekkürler: @SaeedDev94)
 - Düzenlemeleri yok saymadan önce onay soruldu
-- Updated dependencies
+- Bağımlılıklar güncellendi
 - Dahili iyileştirmeler ve hata düzeltmeleri
