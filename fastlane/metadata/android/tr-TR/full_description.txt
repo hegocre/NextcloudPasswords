@@ -5,6 +5,6 @@ Bu uygulama Passwords Uygulaması yüklü bir Nextcloud sunucusuna bağlanır ve
 - Özel alanları da içermek üzere şifreleri düzenle ve oluştur
 - Klasörleri düzenle ve oluştur
 - Site simgelerini, veri kullanımını en aza indirmek için önbelleğe almak üzere göster (isteğe bağlı)
-- Sayısal şifre ve biyometrik doğrulama destekleyen uygulama kilit ekranı
+- Geçiş kodu ve biyometrik doğrulama destekleyen uygulama kilit ekranı
 - Otomatik doldurma servisi (Android 8.0 veya üstü)
 - Gizlilik dostu: Bu uygulamanın bağlandığı tek sonucu sizin kendi Nextcloud Sunucunuzdur
