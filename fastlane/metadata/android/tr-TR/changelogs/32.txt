@@ -1,5 +1,5 @@
-- Folder path is now displayed on the password details
-- Support predictive back gesture on Android U+
+- Klasör dizini artık parola ayrıntılarında görüntülenir
+- Android U ve üzerinde öngörülebilir geri hareket desteği eklendi
 - Notlardaki metni seçilebilir yap
 - Kullanım iyileştirmeleri
-- Library updates and bug fixes
+- Kütüphane güncellemeleri ve hata düzeltmeleri
