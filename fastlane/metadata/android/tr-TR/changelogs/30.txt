@@ -1,5 +1,5 @@
 - Kullanıcı adıyla aramaya izin verildi
-- Otomatik doldurma sırasında parola eklemeye izin verildi
+- Otomatik doldurma sırasında şifre eklemeye izin verildi
 - Çekçe, Rusça ve Geleneksel Çince çevirileri eklendi
 - Visual tweaks
 - Dahili iyileştirmeler ve hata düzeltmeleri
