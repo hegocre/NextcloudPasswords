@@ -1,10 +1,10 @@
 Bu uygulama Passwords Uygulaması yüklü bir Nextcloud sunucusuna bağlanır ve kullanıcı dostu bir arayüz üzerinden verileri görüntülemeye ve düzenlemeye izin verir. Bu uygulama ayrıca bir otomatik doldurma servisi olarak davranarak Android aygıtlarda oturum açmayı kolaylaştırır.
 
-Features:
-- Display user passwords and folders on a Material Design UI
-- Edit and create passwords, including custom fields
-- Edit and create folders
-- Show site icons, with cache to minimize data usage (optional)
-- App lock screen with both passcode and biometric authentication
-- Autofill service (Android 8.0 or higher)
+Özellikler:
+- Kullanıcı şifrelerini ve klasörlerini Materyal Tasarım Arayüzü ile görüntüle
+- Özel alanları da içermek üzere şifreleri düzenle ve oluştur
+- Klasörleri düzenle ve oluştur
+- Site simgelerini, veri kullanımını en aza indirmek için önbelleğe almak üzere göster (isteğe bağlı)
+- Sayısal şifre ve biyometrik doğrulama destekleyen uygulama kilit ekranı
+- Otomatik doldurma servisi (Android 8.0 veya üstü)
 - Gizlilik dostu: Bu uygulamanın bağlandığı tek sonucu sizin kendi Nextcloud Sunucunuzdur
