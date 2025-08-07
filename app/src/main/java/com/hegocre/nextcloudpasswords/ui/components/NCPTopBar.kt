@@ -65,6 +65,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -272,7 +273,7 @@ fun PopupAppMenu(
         }
 
     val orientation = LocalConfiguration.current.orientation
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val screenHeight = LocalWindowInfo.current.containerSize.height.dp
 
     if (menuExpanded) {
         BasicAlertDialog(

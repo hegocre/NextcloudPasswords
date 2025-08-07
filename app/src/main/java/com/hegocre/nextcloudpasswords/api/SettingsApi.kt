@@ -31,13 +31,13 @@ class SettingsApi private constructor(private val server: Server) {
             }
 
             val code = apiResponse.code
-            val body = withContext(Dispatchers.IO) { apiResponse.body?.string() }
+            val body = withContext(Dispatchers.IO) { apiResponse.body.string() }
 
             withContext(Dispatchers.IO) {
                 apiResponse.close()
             }
 
-            if (code == 200 && body != null) {
+            if (code == 200) {
                 Result.Success(Json.decodeFromString(body))
             } else {
                 Result.Error(Error.API_BAD_RESPONSE)

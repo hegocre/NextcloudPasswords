@@ -10,7 +10,6 @@ import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.SocketTimeoutException
 import javax.net.ssl.SSLHandshakeException
@@ -46,12 +45,12 @@ class FoldersApi private constructor(private var server: Server) {
 
 
             val code = apiResponse.code
-            val body = withContext(Dispatchers.IO) { apiResponse.body?.string() }
+            val body = withContext(Dispatchers.IO) { apiResponse.body.string() }
             withContext(Dispatchers.IO) {
                 apiResponse.close()
             }
 
-            if (code != 200 || body == null) return Result.Error(Error.API_BAD_RESPONSE)
+            if (code != 200) return Result.Error(Error.API_BAD_RESPONSE)
 
             withContext(Dispatchers.Default) {
                 Result.Success(Json.decodeFromString(body))

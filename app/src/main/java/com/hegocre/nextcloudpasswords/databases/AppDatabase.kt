@@ -39,7 +39,7 @@ abstract class AppDatabase : RoomDatabase() {
                         AppDatabase::class.java,
                         "password.db"
                     )
-                        .fallbackToDestructiveMigration()
+                        .fallbackToDestructiveMigration(true)
                         .build()
 
                     instance = tempInstance

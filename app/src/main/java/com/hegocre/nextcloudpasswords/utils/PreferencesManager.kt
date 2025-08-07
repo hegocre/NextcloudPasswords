@@ -7,16 +7,16 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
 import com.hegocre.nextcloudpasswords.data.password.RequestedPassword
 import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.ui.theme.NCPTheme
+import dev.spght.encryptedprefs.EncryptedSharedPreferences
+import dev.spght.encryptedprefs.MasterKey
+import dev.spght.encryptedprefs.MasterKeys
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.IOException
 
@@ -27,9 +27,9 @@ class PreferencesManager private constructor(context: Context) {
     private val _encryptedSharedPrefs = context.let {
         val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
         EncryptedSharedPreferences.create(
-            "${it.packageName}_encrypted_preferences",
-            masterKeyAlias,
             it,
+            "${it.packageName}_encrypted_preferences",
+            MasterKey(it, masterKeyAlias),
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
@@ -79,7 +79,7 @@ class PreferencesManager private constructor(context: Context) {
         _encryptedSharedPrefs.getString("SERVER_SETTINGS", null)?.let {
             Json.decodeFromString(it)
         } ?: ServerSettings()
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         ServerSettings()
     }
 

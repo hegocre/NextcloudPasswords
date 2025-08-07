@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.hegocre.nextcloudpasswords.R
 
 enum class NCPScreen(
-    @StringRes val title: Int,
+    @param:StringRes val title: Int,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
     val hidden: Boolean = false

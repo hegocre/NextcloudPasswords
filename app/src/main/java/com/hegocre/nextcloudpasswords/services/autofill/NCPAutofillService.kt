@@ -37,7 +37,7 @@ class NCPAutofillService : AutofillService() {
         }
         try {
             UserController.getInstance(applicationContext).getServer()
-        } catch (e: UserException) {
+        } catch (_: UserException) {
             // User not logged in, cannot fill request
             callback.onSuccess(null)
             return

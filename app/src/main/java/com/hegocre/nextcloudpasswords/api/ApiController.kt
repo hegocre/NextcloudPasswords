@@ -99,7 +99,7 @@ class ApiController private constructor(context: Context) {
                 CSEv1Keychain.fromJson(decryptedCsEv1KeychainJson)
             }
         }
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         null
     }
 

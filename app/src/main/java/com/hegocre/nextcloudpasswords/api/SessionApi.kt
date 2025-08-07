@@ -51,7 +51,7 @@ class SessionApi private constructor(private var server: Server) {
             }
 
             val code = apiResponse.code
-            val body = withContext(Dispatchers.IO) { apiResponse.body?.string() }
+            val body = withContext(Dispatchers.IO) { apiResponse.body.string() }
 
             withContext(Dispatchers.IO) {
                 apiResponse.close()
@@ -61,7 +61,7 @@ class SessionApi private constructor(private var server: Server) {
                 throw ClientDeauthorizedException()
 
             if (code == 200) {
-                Result.Success(PWDv1Challenge.fromJson(body ?: "{}"))
+                Result.Success(PWDv1Challenge.fromJson(body))
             } else Result.Error(Error.API_BAD_RESPONSE)
 
         } catch (e: SocketTimeoutException) {
@@ -100,7 +100,7 @@ class SessionApi private constructor(private var server: Server) {
                 )
             }
 
-            val body = withContext(Dispatchers.IO) { apiResponse.body?.string() }
+            val body = withContext(Dispatchers.IO) { apiResponse.body.string() }
             val code = apiResponse.code
 
             val xSessionCode = apiResponse.header("x-api-session", null)
@@ -115,7 +115,7 @@ class SessionApi private constructor(private var server: Server) {
             if (code == 403)
                 throw ClientDeauthorizedException()
 
-            if (xSessionCode == null || body == null || code != 200)
+            if (xSessionCode == null || code != 200)
                 return Result.Error(Error.API_BAD_RESPONSE)
 
             Result.Success(Pair(xSessionCode, body))

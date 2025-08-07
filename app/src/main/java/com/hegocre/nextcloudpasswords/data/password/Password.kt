@@ -1,6 +1,5 @@
 package com.hegocre.nextcloudpasswords.data.password
 
-import android.net.Uri
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -10,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import okhttp3.internal.publicsuffix.PublicSuffixDatabase
+import androidx.core.net.toUri
 
 /**
  * Data class representing a
@@ -119,14 +119,14 @@ data class Password(
         }
 
         try {
-            val queryDomain = (Uri.parse(query).host ?: Uri.parse("https://$query").host)?.let {
+            val queryDomain = (query.toUri().host ?: "https://$query".toUri().host)?.let {
                 if (strictUrlMatching) it else PublicSuffixDatabase.get().getEffectiveTldPlusOne(it)
             } ?: return false
-            val passwordDomain = (Uri.parse(url).host ?: Uri.parse("https://$url").host)?.let {
+            val passwordDomain = (url.toUri().host ?: "https://$url".toUri().host)?.let {
                 if (strictUrlMatching) it else PublicSuffixDatabase.get().getEffectiveTldPlusOne(it)
             } ?: return false
             return queryDomain == passwordDomain
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return false
         }
     }

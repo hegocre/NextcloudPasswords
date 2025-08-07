@@ -144,9 +144,9 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                     return@launch
                 }
                 _showSessionOpenError.emit(true)
-            } catch (ex: PWDv1ChallengeMasterKeyNeededException) {
+            } catch (_: PWDv1ChallengeMasterKeyNeededException) {
                 _needsMasterPassword.emit(true)
-            } catch (ex: ClientDeauthorizedException) {
+            } catch (_: ClientDeauthorizedException) {
                 _clientDeauthorized.postValue(true)
             } catch (ex: Exception) {
                 when (ex) {
@@ -289,7 +289,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         val context = LocalContext.current
         val domain = try {
             URL(url).host
-        } catch (e: MalformedURLException) {
+        } catch (_: MalformedURLException) {
             url
         }
         val (requestUrl, server) = apiController.getFaviconServiceRequest(domain)

@@ -298,7 +298,7 @@ fun PasswordItemContent(
                             {
                                 try {
                                     uriHandler.openUri(password.url)
-                                } catch (ex: ActivityNotFoundException) {
+                                } catch (_: ActivityNotFoundException) {
                                     Toast.makeText(
                                         context,
                                         R.string.error_could_not_open_url,
@@ -310,7 +310,7 @@ fun PasswordItemContent(
                             {
                                 try {
                                     uriHandler.openUri("https://${password.url}")
-                                } catch (ex: ActivityNotFoundException) {
+                                } catch (_: ActivityNotFoundException) {
                                     Toast.makeText(
                                         context,
                                         R.string.error_could_not_open_url,
@@ -426,7 +426,7 @@ fun PasswordItemContent(
                                     {
                                         try {
                                             uriHandler.openUri(customField.value)
-                                        } catch (ex: ActivityNotFoundException) {
+                                        } catch (_: ActivityNotFoundException) {
                                             Toast.makeText(
                                                 context,
                                                 R.string.error_could_not_open_url,
@@ -438,7 +438,7 @@ fun PasswordItemContent(
                                     {
                                         try {
                                             uriHandler.openUri("https://${customField.value}")
-                                        } catch (ex: ActivityNotFoundException) {
+                                        } catch (_: ActivityNotFoundException) {
                                             Toast.makeText(
                                                 context,
                                                 R.string.error_could_not_open_url,

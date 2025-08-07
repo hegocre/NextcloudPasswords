@@ -114,7 +114,7 @@ fun NextcloudPasswordsTheme(
             derivedStateOf {
                 try {
                     Color(instanceColorString.toColorInt())
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                     Color(0xFF745BCA)
                 }
             }

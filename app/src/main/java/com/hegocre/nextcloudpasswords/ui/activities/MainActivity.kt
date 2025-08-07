@@ -1,6 +1,5 @@
 package com.hegocre.nextcloudpasswords.ui.activities
 
-import android.app.Activity
 import android.app.assist.AssistStructure
 import android.content.Intent
 import android.os.Build
@@ -71,7 +70,7 @@ class MainActivity : FragmentActivity() {
                         @Suppress("DEPRECATION") intent.getParcelableExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)
 
                     if (structure == null) {
-                        setResult(Activity.RESULT_CANCELED)
+                        setResult(RESULT_CANCELED)
                         finish()
                     } else {
                         autofillReply(Triple(label, username, password), structure)
@@ -148,7 +147,7 @@ class MainActivity : FragmentActivity() {
             putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, dataset)
         }
 
-        setResult(Activity.RESULT_OK, replyIntent)
+        setResult(RESULT_OK, replyIntent)
 
         finish()
     }
