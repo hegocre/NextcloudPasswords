@@ -1,0 +1,4 @@
+- Vertrauenswürdige Zertifizierungsstellen (Dank an @SaeedDev94)
+- Bitte um Bestätigung vor Verwerfen der Bearbeitungen fragen
+- Aktualisierte Abhängigkeiten
+- Interne Verbesserungen und Fehlerbehebungen

@@ -1,5 +1,5 @@
-- Allow searching by username
-- Allow adding passwords when autofilling
-- Added Czech, Russian and Chinese Traditional translations
+- Kullanıcı adıyla aramaya izin verildi
+- Otomatik doldurma sırasında şifre eklemeye izin verildi
+- Çekçe, Rusça ve Geleneksel Çince çevirileri eklendi
 - Visual tweaks
-- Internal improvements and bug fixes
+- Dahili iyileştirmeler ve hata düzeltmeleri

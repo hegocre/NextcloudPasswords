@@ -1,4 +1,4 @@
-- Improve autofill service
-- Improve URL searching
-- Allow connecting to servers with self-signed certificate
-- Minor bug fixes
+- Otomatik doldurma servisi iyileştirildi
+- URL araması iyileştirildi
+- Kendi kendine imzalanmış sertifika içeren sunuculara bağlanmaya izin verildi
+- Küçük hata düzeltmeleri

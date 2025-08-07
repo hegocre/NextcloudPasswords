@@ -1,2 +1,2 @@
-- Fix connectivity problems on some devices
-- Fix connection to instances with self-signed certificates
+- Bazı aygıtlardaki bağlantı sorunları çözüldü
+- Kendi kendine imzalanmış sertifika içeren oturumlara bağlanamama çözüldü

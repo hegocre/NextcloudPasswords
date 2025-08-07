@@ -1,4 +1,4 @@
-- Fix pin layout on non-vertical orientations
-- Fix error when typing some characters on the search bar
-- Remember last used password generation options
-- Allow disabling inline autofill
+- Dikey olmayan yönlendirmelerde iğne yerleşimi düzeltildi
+- Arama çubuğuna bazı karakterlerin yazılmasında oluşan hata düzeltildi
+- En son kullanılan şifre üretme seçenekleri hatırlandı
+- Satır içi otomatik doldurmayı devre dışı bırakmaya izin verildi
