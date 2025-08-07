@@ -57,8 +57,9 @@ android {
     }
     splits {
         abi {
-            enable true
-            universalApk true
+            def isBuildingBundle = gradle.startParameter.taskNames.any { it.toLowerCase().contains("bundle") }
+            enable = !isBuildingBundle
+            universalApk = true
         }
     }
     buildFeatures {
