@@ -15,7 +15,7 @@ java {
 }
 
 android {
-    namespace 'com.hegocre.nextcloudpasswords'
+    namespace = 'com.hegocre.nextcloudpasswords'
     compileSdk = 36
 
     defaultConfig {
@@ -27,7 +27,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
-            useSupportLibrary true
+            useSupportLibrary = true
         }
 
         applicationVariants.configureEach { variant ->
@@ -46,7 +46,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            shrinkResources true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
@@ -63,8 +63,8 @@ android {
         }
     }
     buildFeatures {
-        compose true
-        buildConfig true
+        compose = true
+        buildConfig = true
     }
     packagingOptions {
         resources {
