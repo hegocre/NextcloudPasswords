@@ -1,2 +1,2 @@
 - Bazı aygıtlardaki bağlantı sorunları çözüldü
-- Kendi kendine imzalanmış sertifika içeren oturumlara bağlanamama çözüldü
+- Self-signed sertifikalı sunuculara bağlanma sorunu çözüldü
