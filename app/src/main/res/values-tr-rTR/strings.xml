@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Nextcloud Şifreleri</string>
-    <string name="content_description_site_favicon">Site favori simgesi</string>
+    <string name="content_description_site_favicon">Site simgesi</string>
     <string name="action_login">Giriş yap</string>
     <string name="login_server_url">Sunucu URL\'si</string>
     <string name="error_url_cannot_be_empty">URL boş olamaz</string>
@@ -37,7 +37,7 @@
     <string name="error_password_saving_failed">Parolayı kaydetmek başarısız oldu. Lütfen tekrar deneyin</string>
     <string name="action_delete_password">Şifreyi sil</string>
     <string name="error_password_deleting_failed">Parolayı silmek başarısız oldu. Lütfen tekrar deneyin</string>
-    <string name="dialog_delete_element_text">Bu element silinecek. Lütfen bu eylemi onaylayın</string>
+    <string name="dialog_delete_element_text">Bu öge silinecek. Lütfen bu eylemi onaylayın</string>
     <string name="action_delete">Sil</string>
     <string name="password_attr_notes">Notlar</string>
     <string name="copied">%s kopyalandı</string>
@@ -79,14 +79,14 @@
     <string name="folder_attr_parent_folder">Üst klasör</string>
     <string name="preferences_category_security">Güvenlik</string>
     <string name="app_lock_preference_title">Uygulama kilidi</string>
-    <string name="app_lock_preference_subtitle">Uygulamaya erişimi bir geçiş koduyla kilitleyin</string>
+    <string name="app_lock_preference_subtitle">Uygulamaya erişimi bir PIN ile kilitleyin</string>
     <string name="biometric_unlock_preference_title">Biyometrik kilit açma</string>
-    <string name="biometric_unlock_preference_subtitle">Uygulamanın kilidinin aygıt biyometrikleriyle açılmasına izin ver</string>
-    <string name="error_app_lock_incorrect_code">Hatalı kod</string>
-    <string name="passcode">Geçiş kodu</string>
-    <string name="app_lock_input_passcode">Geçiş kodu gir</string>
-    <string name="app_lock_confirm_passcode">Geçiş kodunu onayla</string>
-    <string name="error_passcodes_dont_match">Geçiş kodları eşleşmiyor</string>
+    <string name="biometric_unlock_preference_subtitle">Uygulama kilidinin aygıt biyometrikleriyle açılmasına izin ver</string>
+    <string name="error_app_lock_incorrect_code">Yanlış PIN</string>
+    <string name="passcode">PIN</string>
+    <string name="app_lock_input_passcode">PIN girin</string>
+    <string name="app_lock_confirm_passcode">PIN\'i onayla</string>
+    <string name="error_passcodes_dont_match">PIN\'ler eşleşmiyor</string>
     <string name="biometric_prompt_description">Şifrelere erişmek için lütfen kimliğinizi doğrulayın</string>
     <string name="biometric_prompt_title">Biyometrik doğrulama</string>
     <string name="error_cannot_connect_to_server">Sunucuya bağlanılamıyor. Tekrar denemek için dokunun.</string>
@@ -107,9 +107,9 @@
     <string name="app_theme_black">Siyah</string>
     <string name="app_theme_preference_title">Uygulama teması</string>
     <string name="use_nextcloud_color_preference_title">Nextcloud renklerini kullan</string>
-    <string name="use_nextcloud_color_preference_subtitle">Örnek rengini vurgu rengi olarak kullan</string>
+    <string name="use_nextcloud_color_preference_subtitle">Sunucu rengini vurgu rengi olarak kullan</string>
     <string name="use_dynamic_colors_preference_title">Dinamik renkler kullan</string>
-    <string name="use_dynamic_colors_preference_subtitle">Sistem kaynaklı dinamik renkler kullan</string>
+    <string name="use_dynamic_colors_preference_subtitle">Sistemden gelen dinamik renkleri kullan</string>
     <string name="changelog">Değişiklik günlüğü</string>
     <string name="empty_list_no_content_here">Burada içerik yok</string>
     <string name="empty_list_no_results_found">Sonuç bulunamadı</string>
@@ -121,9 +121,9 @@
     <string name="search_by_username_preference_subtitle">Şifreleri kullanıcı adı değerine göre ara</string>
     <string name="action_save_autofill">Kaydetme ve otomatik doldurma</string>
     <string name="error_invalid_password">Yanlış şifre</string>
-    <string name="preferences_category_search">Search</string>
+    <string name="preferences_category_search">Ara</string>
     <string name="use_strict_domain_matching_preference_title">Tam alan adı eşleştirmesi</string>
-    <string name="use_strict_domain_matching_preference_subtitle">Şifreleri tam alan adlarıyla, alt alan atlarını dışlayarak eşleştir</string>
+    <string name="use_strict_domain_matching_preference_subtitle">Şifreleri tam alan adına göre, alt alan adlarını hariç tutarak eşleştir</string>
     <string name="action_discard">Yok say</string>
     <string name="dialog_discard_changes_text">Bu ögeye yapılan değişiklikler yok sayılacak. Devam etmek istiyor musunuz?</string>
 </resources>
