@@ -1,4 +1,4 @@
-- Otomatik doldurma servisi iyileştirildi
+- Otomatik doldurma hizmeti iyileştirildi
 - URL araması iyileştirildi
-- Kendi kendine imzalanmış sertifika içeren sunuculara bağlanmaya izin verildi
+- Self-signed sertifikalı sunuculara bağlanmaya izin ver
 - Küçük hata düzeltmeleri
