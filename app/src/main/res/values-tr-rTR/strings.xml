@@ -122,7 +122,7 @@
     <string name="action_save_autofill">Kaydetme ve otomatik doldurma</string>
     <string name="error_invalid_password">Yanlış şifre</string>
     <string name="preferences_category_search">Search</string>
-    <string name="use_strict_domain_matching_preference_title">Katı alan adı eşleştirmesi</string>
+    <string name="use_strict_domain_matching_preference_title">Tam alan adı eşleştirmesi</string>
     <string name="use_strict_domain_matching_preference_subtitle">Şifreleri tam alan adlarıyla, alt alan atlarını dışlayarak eşleştir</string>
     <string name="action_discard">Yok say</string>
     <string name="dialog_discard_changes_text">Bu ögeye yapılan değişiklikler yok sayılacak. Devam etmek istiyor musunuz?</string>
