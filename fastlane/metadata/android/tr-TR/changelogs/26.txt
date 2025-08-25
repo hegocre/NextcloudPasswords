@@ -1,4 +1,4 @@
-- Dikey olmayan yönlendirmelerde iğne yerleşimi düzeltildi
-- Arama çubuğuna bazı karakterlerin yazılmasında oluşan hata düzeltildi
-- En son kullanılan şifre üretme seçenekleri hatırlandı
-- Satır içi otomatik doldurmayı devre dışı bırakmaya izin verildi
+- Dikey olmayan yönlendirmelerde PIN yerleşimi düzeltildi
+- Arama çubuğuna bazı karakterler yazılırken oluşan hata düzeltildi
+- En son kullanılan şifre üretme seçeneklerini hatırla
+- Satır içi otomatik doldurmayı devre dışı bırakmaya izin ver
