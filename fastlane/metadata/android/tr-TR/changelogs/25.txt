@@ -3,6 +3,6 @@
 - Şifre üretme seçenekleri eklendi
 - Görünüm özelleştirmesi seçenekleri eklendi
 - Hakkında ekranına daha çok bilgi eklendi
-- Kendi kendine barındırılan oturumlarda simgenin yüklenmemesi düzeltildi
+- Self-hosted sunucularda simge yükleme sorunu çözüldü
 - Bazı otomatik doldurma alanlarının algılanmaması düzeltildi
 - Görünüm iyileştirmeleri ve hata düzeltmeleri
