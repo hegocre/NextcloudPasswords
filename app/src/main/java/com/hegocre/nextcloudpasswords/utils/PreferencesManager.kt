@@ -1,6 +1,7 @@
 package com.hegocre.nextcloudpasswords.utils
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -24,15 +25,33 @@ class PreferencesManager private constructor(context: Context) {
     private val Context._sharedPreferences by preferencesDataStore(name = "preferences")
     private val sharedPreferences = context._sharedPreferences
 
-    private val _encryptedSharedPrefs = context.let {
+    private var makingSharedPrefsAttempts = 0
+
+    private fun makeEncryptedSharedPrefs(context: Context): SharedPreferences {
         val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-        EncryptedSharedPreferences.create(
-            it,
-            "${it.packageName}_encrypted_preferences",
-            MasterKey(it, masterKeyAlias),
+        return EncryptedSharedPreferences.create(
+            context,
+            "${context.packageName}_encrypted_preferences",
+            MasterKey(context, masterKeyAlias),
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
+    }
+
+    private val _encryptedSharedPrefs = context.let {
+        try {
+            makingSharedPrefsAttempts += 1
+            makeEncryptedSharedPrefs(it)
+        } catch (e: Exception) {
+            if (makingSharedPrefsAttempts > 1) throw e
+
+            it.getSharedPreferences(
+                "${context.packageName}_encrypted_preferences",
+                Context.MODE_PRIVATE
+            ).edit().clear().apply()
+
+            makeEncryptedSharedPrefs(it)
+        }
     }
 
     suspend fun clear(): Boolean {
