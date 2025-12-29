@@ -86,18 +86,14 @@ fun NCPNavHost(
         initialValue = ListDecryptionState(isLoading = true),
         key1 = passwords, key2 = keychain
     ) {
-        value = ListDecryptionState(decryptedList = passwords?.let { passwordList ->
-            passwordList.decryptPasswords(keychain).sortedBy { it.label.lowercase() }
-        } ?: emptyList())
+        value = ListDecryptionState(decryptedList = passwords?.decryptPasswords(keychain) ?: emptyList())
     }
 
     val foldersDecryptionState by produceState(
         initialValue = ListDecryptionState(isLoading = true),
         key1 = folders, key2 = keychain
     ) {
-        value = ListDecryptionState(decryptedList = folders?.let { folderList ->
-            folderList.decryptFolders(keychain).sortedBy { it.label.lowercase() }
-        } ?: emptyList())
+        value = ListDecryptionState(decryptedList = folders?.decryptFolders(keychain) ?: emptyList())
     }
 
     val baseFolderName = stringResource(R.string.top_level_folder_name)
@@ -131,20 +127,37 @@ fun NCPNavHost(
         if (isAutofillRequest) NCPScreen.Passwords.name else userStartDestination
     }
 
+    val orderBy by PreferencesManager.getInstance(context).getOrderBy()
+        .collectAsState(PreferencesManager.ORDER_BY_TITLE_ASCENDING, context = Dispatchers.IO)
+
     val searchByUsername by PreferencesManager.getInstance(context).getSearchByUsername()
         .collectAsState(true, context = Dispatchers.IO)
     val strictUrlMatching by PreferencesManager.getInstance(context).getUseStrictUrlMatching()
         .collectAsState(true, context = Dispatchers.IO)
 
-    val filteredPasswordList = remember(passwordsDecryptionState.decryptedList, searchQuery) {
+    val filteredPasswordList = remember(passwordsDecryptionState.decryptedList, searchQuery, orderBy) {
         passwordsDecryptionState.decryptedList?.filter {
             !it.hidden && !it.trashed && (it.matches(searchQuery, strictUrlMatching)
                     || (searchByUsername && it.username.contains(searchQuery)))
+        }?.run {
+            return@run when (orderBy) {
+                PreferencesManager.ORDER_BY_TITLE_DESCENDING -> sortedByDescending { it.label.lowercase() }
+                PreferencesManager.ORDER_BY_DATE_ASCENDING -> sortedBy { it.edited }
+                PreferencesManager.ORDER_BY_DATE_DESCENDING -> sortedByDescending { it.edited }
+                else -> sortedBy { it.label.lowercase() }
+            }
         }
     }
-    val filteredFolderList = remember(foldersDecryptionState.decryptedList, searchQuery) {
+    val filteredFolderList = remember(foldersDecryptionState.decryptedList, searchQuery, orderBy) {
         foldersDecryptionState.decryptedList?.filter {
             !it.hidden && !it.trashed && it.label.lowercase().contains(searchQuery.lowercase())
+        }?.run {
+            return@run when (orderBy) {
+                PreferencesManager.ORDER_BY_TITLE_DESCENDING -> sortedByDescending { it.label.lowercase() }
+                PreferencesManager.ORDER_BY_DATE_ASCENDING -> sortedBy { it.edited }
+                PreferencesManager.ORDER_BY_DATE_DESCENDING -> sortedByDescending { it.edited }
+                else -> sortedBy { it.label.lowercase() }
+            }
         }
     }
 
