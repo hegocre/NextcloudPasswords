@@ -1,3 +1,3 @@
-- Fix crash when starting app in some cases
-- Add option to sort content by name or date
-- Dependency updates and internal improvements
+- Solucionado un bloqueo de la aplicación al iniciarse en determinadas situaciones
+- Añadida opción para ordenar contenido por nombre o fecha
+- Actualización de dependencias y mejoras internas
