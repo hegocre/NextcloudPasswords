@@ -126,4 +126,9 @@
     <string name="use_strict_domain_matching_preference_subtitle">Hacer coincidir las contraseñas por su dominio completo, excluyendo subdominios</string>
     <string name="action_discard">Descartar</string>
     <string name="dialog_discard_changes_text">Los cambios realizados a este objeto serán descartados. ¿Desea continuar?</string>
+    <string name="preference_order_by_title_asc">A - Z</string>
+    <string name="preference_order_by_title_desc">Z - A</string>
+    <string name="preference_order_by_date_asc">Más antiguo primero</string>
+    <string name="preference_order_by_date_desc">Más reciente primero</string>
+    <string name="order_by_preference_title">Ordenar el contenido por</string>
 </resources>
