@@ -126,4 +126,9 @@
     <string name="use_strict_domain_matching_preference_subtitle">Match passwords by its full domain, excluding subdomains</string>
     <string name="action_discard">Discard</string>
     <string name="dialog_discard_changes_text">Changes made to this item will be discarded. Do you want to continue?</string>
+    <string name="preference_order_by_title_asc">A - Z</string>
+    <string name="preference_order_by_title_desc">Z - A</string>
+    <string name="preference_order_by_date_asc">Oldest first</string>
+    <string name="preference_order_by_date_desc">Newest first</string>
+    <string name="order_by_preference_title">Order content by</string>
 </resources>
