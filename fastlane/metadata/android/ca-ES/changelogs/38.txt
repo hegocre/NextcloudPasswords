@@ -1,0 +1,3 @@
+- Solucionat un bloqueig de l'aplicació en iniciar-se en determinades situacions
+- Afegida l'opció d'ordenar el contingut per títol o data
+- Actualització de dependències i millores internes

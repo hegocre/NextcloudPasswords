@@ -1,4 +1,4 @@
-- Trust user Certificate Authorities (thanks to @SaeedDev94)
-- Ask for confirmation before discarding edits
-- Updated dependencies
+- Confiar en las Autoridades de Certificación del usuario (gracias a @SaeedDev94)
+- Solicitar confirmación antes de descartar ediciones
+- Dependencias actualizadas
 - Mejoras internas y corrección de errores

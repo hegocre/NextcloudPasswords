@@ -1,0 +1,3 @@
+- Fix crash when starting app in some cases
+- Add option to sort content by name or date
+- Dependency updates and internal improvements
