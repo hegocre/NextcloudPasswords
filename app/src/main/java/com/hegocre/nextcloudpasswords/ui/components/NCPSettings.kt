@@ -47,6 +47,7 @@ import com.hegocre.nextcloudpasswords.utils.showBiometricPrompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,7 +108,7 @@ fun NCPSettingsScreen(
                     ListPreference(
                         items = startViews,
                         onItemSelected = {
-                            scope.launch {
+                            scope.launch(Dispatchers.IO) {
                                 preferencesManager.setStartScreen(it)
                             }
                         },
@@ -247,6 +248,9 @@ fun NCPSettingsScreen(
                         subtitle = { Text(text = stringResource(id = R.string.app_lock_preference_subtitle)) }
                     )
 
+                    val biometricPromptTitle = stringResource(R.string.biometric_prompt_title)
+                    val biometricPromptDescription = stringResource(R.string.biometric_prompt_description)
+
                     if (canUseBiometrics) {
                         SwitchPreference(
                             checked = hasBiometricAppLock,
@@ -257,10 +261,10 @@ fun NCPSettingsScreen(
                                 } else {
                                     showBiometricPrompt(
                                         context = context,
-                                        title = context.getString(R.string.biometric_prompt_title),
-                                        description = context.getString(R.string.biometric_prompt_description),
+                                        title = biometricPromptTitle,
+                                        description = biometricPromptDescription,
                                         onBiometricUnlock = {
-                                            scope.launch {
+                                            scope.launch(Dispatchers.IO) {
                                                 preferencesManager.setHasBiometricAppLock(enabled)
                                             }
                                         }
@@ -299,7 +303,7 @@ fun NCPSettingsScreen(
                                         Toast.LENGTH_LONG
                                     ).show()
                                 } else {
-                                    scope.launch {
+                                    scope.launch(Dispatchers.IO) {
                                         with(preferencesManager) {
                                             setAppLockPasscode(secondPasscode)
                                             setHasAppLock(true)
@@ -311,10 +315,10 @@ fun NCPSettingsScreen(
                                     isEnablingBiometric = false
                                     showBiometricPrompt(
                                         context = context,
-                                        title = context.getString(R.string.biometric_prompt_title),
-                                        description = context.getString(R.string.biometric_prompt_description),
+                                        title = biometricPromptTitle,
+                                        description = biometricPromptDescription,
                                         onBiometricUnlock = {
-                                            scope.launch {
+                                            scope.launch(Dispatchers.IO) {
                                                 preferencesManager.setHasBiometricAppLock(true)
                                             }
                                         }
@@ -333,7 +337,7 @@ fun NCPSettingsScreen(
                         InputPasscodeDialog(
                             title = stringResource(id = R.string.app_lock_input_passcode),
                             onInputPasscode = { passcode ->
-                                scope.launch {
+                                scope.launch(Dispatchers.IO) {
                                     with(preferencesManager) {
                                         val currentPasscode = getAppLockPasscode()
 
@@ -342,11 +346,13 @@ fun NCPSettingsScreen(
                                             setAppLockPasscode(null)
                                             setHasBiometricAppLock(false)
                                         } else {
-                                            Toast.makeText(
-                                                context,
-                                                R.string.error_app_lock_incorrect_code,
-                                                Toast.LENGTH_LONG
-                                            ).show()
+                                            withContext(Dispatchers.Main) {
+                                                Toast.makeText(
+                                                    context,
+                                                    R.string.error_app_lock_incorrect_code,
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
                                         }
 
                                     }
