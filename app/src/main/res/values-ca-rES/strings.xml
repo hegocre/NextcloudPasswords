@@ -126,4 +126,9 @@
     <string name="use_strict_domain_matching_preference_subtitle">Fer coincidir les contrasenyes pel domini complet, excloent-hi subdominis</string>
     <string name="action_discard">Descartar</string>
     <string name="dialog_discard_changes_text">Els canvis fets a aquest element seran descartats. Voleu continuar?</string>
+    <string name="preference_order_by_title_asc">A - Z</string>
+    <string name="preference_order_by_title_desc">Z - A</string>
+    <string name="preference_order_by_date_asc">Més recents primer</string>
+    <string name="preference_order_by_date_desc">Més antigues primer</string>
+    <string name="order_by_preference_title">Ordenar el contingut per</string>
 </resources>
