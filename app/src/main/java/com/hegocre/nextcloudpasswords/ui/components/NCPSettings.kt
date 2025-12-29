@@ -116,6 +116,25 @@ fun NCPSettingsScreen(
                         selectedItem = selectedScreen
                     )
 
+                    val orderBy by preferencesManager.getOrderBy()
+                        .collectAsState(initial = PreferencesManager.ORDER_BY_TITLE_ASCENDING, context = Dispatchers.IO)
+                    val orderByOptions = mapOf(
+                        PreferencesManager.ORDER_BY_TITLE_ASCENDING to stringResource(R.string.preference_order_by_title_asc),
+                        PreferencesManager.ORDER_BY_TITLE_DESCENDING to stringResource(R.string.preference_order_by_title_desc),
+                        PreferencesManager.ORDER_BY_DATE_DESCENDING to stringResource(R.string.preference_order_by_date_desc),
+                        PreferencesManager.ORDER_BY_DATE_ASCENDING to stringResource(R.string.preference_order_by_date_asc)
+                    )
+                    ListPreference(
+                        items = orderByOptions,
+                        onItemSelected = {
+                            scope.launch(Dispatchers.IO) {
+                                preferencesManager.setOrderBy(it)
+                            }
+                        },
+                        title = { Text(text = stringResource(id = R.string.order_by_preference_title)) },
+                        selectedItem = orderBy
+                    )
+
                     val showIcons by preferencesManager.getShowIcons()
                         .collectAsState(initial = false, context = Dispatchers.IO)
                     SwitchPreference(

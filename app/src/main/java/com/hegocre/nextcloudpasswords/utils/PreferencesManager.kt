@@ -131,6 +131,9 @@ class PreferencesManager private constructor(context: Context) {
     fun getShowIcons(): Flow<Boolean> = getPreference(PreferenceKeys.SHOW_ICONS, false)
     suspend fun setShowIcons(value: Boolean) = setPreference(PreferenceKeys.SHOW_ICONS, value)
 
+    fun getOrderBy(): Flow<String> = getPreference(PreferenceKeys.ORDER_BY, ORDER_BY_TITLE_ASCENDING)
+    suspend fun setOrderBy(value: String) = setPreference(PreferenceKeys.ORDER_BY, value)
+
     fun getStartScreen(): Flow<String> =
         getPreference(PreferenceKeys.START_SCREEN, NCPScreen.Passwords.name)
 
@@ -196,6 +199,11 @@ class PreferencesManager private constructor(context: Context) {
             }
         }
 
+        const val ORDER_BY_TITLE_ASCENDING = "ORDER_BY_TITLE_ASCENDING"
+        const val ORDER_BY_TITLE_DESCENDING = "ORDER_BY_TITLE_DESCENDING"
+        const val ORDER_BY_DATE_ASCENDING = "ORDER_BY_DATE_ASCENDING"
+        const val ORDER_BY_DATE_DESCENDING = "ORDER_BY_DATE_DESCENDING"
+
         private object PreferenceKeys {
             val SHOW_ICONS = booleanPreferencesKey("SHOW_ICONS")
             val START_SCREEN = stringPreferencesKey("START_SCREEN")
@@ -207,6 +215,7 @@ class PreferencesManager private constructor(context: Context) {
             val INSTANCE_COLOR = stringPreferencesKey("INSTANCE_COLOR")
             val SEARCH_BY_USERNAME = booleanPreferencesKey("SEARCH_BY_USERNAME")
             val USE_STRICT_URL_MATCHING = booleanPreferencesKey("USE_STRICT_URL_MATCHING")
+            val ORDER_BY = stringPreferencesKey("ORDER_BY")
         }
     }
 }
