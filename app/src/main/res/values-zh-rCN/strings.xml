@@ -8,5 +8,9 @@
     <string name="folders">文件夹</string>
     <string name="error_logging_in">登录时出错</string>
     <string name="show_icons_preference_title">显示图标</string>
+    <string name="show_icons_preference_subtitle">显示网站图标</string>
     <string name="preferences_category_search">Search</string>
+    <string name="preference_order_by_title_desc">Z - A</string>
+    <string name="preference_order_by_date_asc">从旧到新</string>
+    <string name="preference_order_by_date_desc">从新到旧</string>
 </resources>
