@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Nextcloud 密码</string>
+    <string name="example">示例</string>
+    <string name="password">密码</string>
+    <string name="passwords">密码</string>
+    <string name="favorites">收藏</string>
+    <string name="folders">文件夹</string>
+    <string name="error_logging_in">登录时出错</string>
+    <string name="show_icons_preference_title">显示图标</string>
     <string name="preferences_category_search">Search</string>
 </resources>
