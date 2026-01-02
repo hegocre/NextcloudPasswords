@@ -22,7 +22,7 @@
     <string name="menu">菜单</string>
     <string name="folder">文件夹</string>
     <string name="edit_folder">编辑文件夹</string>
-    <string name="passcode">密码</string>
+    <string name="passcode">验证码</string>
     <string name="biometric_prompt_description">请验证您的身份以访问密码</string>
     <string name="biometric_prompt_title">生物识别身份验证</string>
     <string name="password_strength_ultra">超高</string>
