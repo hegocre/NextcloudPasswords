@@ -1,1 +1,1 @@
-一个安全的用于浏览Nextcloud密码(Passwords)应用的APP
+适用于 Nextcloud Passwords 的安全密码查看应用
