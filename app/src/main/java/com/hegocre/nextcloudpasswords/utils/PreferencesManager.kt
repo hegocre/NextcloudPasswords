@@ -74,21 +74,12 @@ class PreferencesManager private constructor(context: Context) {
     fun setAppLockPasscode(value: String?): Boolean =
         _encryptedSharedPrefs.edit().putString("APP_LOCK_PASSCODE", value).commit()
 
-    fun getLoggedInServer(): String? = _encryptedSharedPrefs.getString("LOGGED_IN_SERVER", null)
-    fun setLoggedInServer(value: String?): Boolean =
-        _encryptedSharedPrefs.edit().putString("LOGGED_IN_SERVER", value).commit()
-
-    fun getLoggedInUser(): String? = _encryptedSharedPrefs.getString("LOGGED_IN_USER", null)
-    fun setLoggedInUser(value: String?): Boolean =
-        _encryptedSharedPrefs.edit().putString("LOGGED_IN_USER", value).commit()
-
-    fun getLoggedInPassword(): String? = _encryptedSharedPrefs.getString("LOGGED_IN_PASSWORD", null)
-    fun setLoggedInPassword(value: String?): Boolean =
-        _encryptedSharedPrefs.edit().putString("LOGGED_IN_PASSWORD", value).commit()
-
     fun getMasterPassword(): String? = _encryptedSharedPrefs.getString("MASTER_KEY", null)
     fun setMasterPassword(value: String?): Boolean =
         _encryptedSharedPrefs.edit().putString("MASTER_KEY", value).commit()
+
+    fun getServers(): String? = _encryptedSharedPrefs.getString("SERVERS", null)
+    fun setServers(servers: String): Boolean = _encryptedSharedPrefs.edit().putString("SERVERS", servers).commit()
 
     fun getCSEv1Keychain(): String? = _encryptedSharedPrefs.getString("CSE_V1_KEYCHAIN", null)
     fun setCSEv1Keychain(value: String?): Boolean =
