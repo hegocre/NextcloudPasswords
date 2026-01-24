@@ -56,6 +56,14 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.activities.AccountsActivity"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.hegocre.nextcloudpasswords.action.accounts" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".ui.activities.AboutActivity"
             android:exported="false">
             <intent-filter>

@@ -21,6 +21,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.ApiController
+import com.hegocre.nextcloudpasswords.api.Server
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
 import com.hegocre.nextcloudpasswords.api.exceptions.ClientDeauthorizedException
 import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyInvalidException
@@ -318,6 +319,13 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         val context = LocalContext.current
 
         val (requestUrl, server) = apiController.getAvatarServiceRequest()
+        return getPainterForAvatar(server)
+    }
+
+    @Composable
+    fun getPainterForAvatar(server: Server): Painter {
+        val context = LocalContext.current
+        val requestUrl = apiController.getAvatarServiceUrl(server)
         return rememberAsyncImagePainter(
             model = ImageRequest.Builder(context).apply {
                 data(requestUrl)

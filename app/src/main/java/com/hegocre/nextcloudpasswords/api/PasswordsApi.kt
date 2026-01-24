@@ -1,10 +1,12 @@
 package com.hegocre.nextcloudpasswords.api
 
+import android.content.Context
 import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.data.password.DeletedPassword
 import com.hegocre.nextcloudpasswords.data.password.NewPassword
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
+import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.Result
@@ -19,9 +21,9 @@ import javax.net.ssl.SSLHandshakeException
  * [Password API](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Password-Api).
  * This is a Singleton class and will have only one instance.
  *
- * @param server The [Server] where the requests will be made.
+ * @param context The [Context] where the requests will be made.
  */
-class PasswordsApi private constructor(private var server: Server) {
+class PasswordsApi private constructor(private var context: Context) {
 
     /**
      * Sends a request to the api to list all the user passwords. If the user uses CSE, a
@@ -36,10 +38,10 @@ class PasswordsApi private constructor(private var server: Server) {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
                 OkHttpRequest.getInstance().get(
-                    sUrl = server.url + LIST_URL,
+                    sUrl = getServer().url + LIST_URL,
                     sessionCode = sessionCode,
-                    username = server.username,
-                    password = server.password
+                    username = getServer().username,
+                    password = getServer().password
                 )
             }
 
@@ -89,12 +91,12 @@ class PasswordsApi private constructor(private var server: Server) {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
                 OkHttpRequest.getInstance().post(
-                    sUrl = server.url + CREATE_URL,
+                    sUrl = getServer().url + CREATE_URL,
                     sessionCode = sessionCode,
                     body = Json.encodeToString(newPassword),
                     mediaType = OkHttpRequest.JSON,
-                    username = server.username,
-                    password = server.password
+                    username = getServer().username,
+                    password = getServer().password
                 )
             }
 
@@ -141,12 +143,12 @@ class PasswordsApi private constructor(private var server: Server) {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
                 OkHttpRequest.getInstance().patch(
-                    sUrl = server.url + UPDATE_URL,
+                    sUrl = getServer().url + UPDATE_URL,
                     sessionCode = sessionCode,
                     body = Json.encodeToString(updatedPassword),
                     mediaType = OkHttpRequest.JSON,
-                    username = server.username,
-                    password = server.password
+                    username = getServer().username,
+                    password = getServer().password
                 )
             }
 
@@ -192,12 +194,12 @@ class PasswordsApi private constructor(private var server: Server) {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
                 OkHttpRequest.getInstance().delete(
-                    sUrl = server.url + DELETE_URL,
+                    sUrl = getServer().url + DELETE_URL,
                     sessionCode = sessionCode,
                     body = Json.encodeToString(deletedPassword),
                     mediaType = OkHttpRequest.JSON,
-                    username = server.username,
-                    password = server.password
+                    username = getServer().username,
+                    password = getServer().password
                 )
             }
 
@@ -229,6 +231,8 @@ class PasswordsApi private constructor(private var server: Server) {
         }
     }
 
+    fun getServer() = UserController.getInstance(context).getServer()
+
     companion object {
         private const val LIST_URL = "/index.php/apps/passwords/api/1.0/password/list"
         private const val CREATE_URL = "/index.php/apps/passwords/api/1.0/password/create"
@@ -240,15 +244,15 @@ class PasswordsApi private constructor(private var server: Server) {
         /**
          * Get the instance of the [PasswordsApi], and create it if null.
          *
-         * @param server The [Server] where the requests will be made.
+         * @param context The [Context] where the requests will be made.
          * @return The instance of the api.
          */
-        fun getInstance(server: Server): PasswordsApi {
+        fun getInstance(context: Context): PasswordsApi {
             synchronized(this) {
                 var tempInstance = instance
 
                 if (tempInstance == null) {
-                    tempInstance = PasswordsApi(server)
+                    tempInstance = PasswordsApi(context)
                     instance = tempInstance
                 }
 

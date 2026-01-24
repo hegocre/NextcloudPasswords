@@ -96,10 +96,6 @@ fun NextcloudPasswordsApp(
     }
     val (searchQuery, setSearchQuery) = rememberSaveable { mutableStateOf(defaultSearchQuery) }
 
-    val server = remember {
-        passwordsViewModel.server
-    }
-
     NextcloudPasswordsTheme {
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
             rememberTopAppBarState()
@@ -112,8 +108,7 @@ fun NextcloudPasswordsApp(
             topBar = {
                 if (currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit) {
                     NCPSearchTopBar(
-                        username = server.username,
-                        serverAddress = server.url,
+                        passwordsViewModel = passwordsViewModel,
                         title = when (currentScreen) {
                             NCPScreen.Passwords, NCPScreen.Favorites -> stringResource(currentScreen.title)
                             NCPScreen.Folders -> {

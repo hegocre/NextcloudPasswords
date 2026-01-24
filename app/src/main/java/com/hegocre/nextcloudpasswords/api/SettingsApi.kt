@@ -1,7 +1,9 @@
 package com.hegocre.nextcloudpasswords.api
 
+import android.content.Context
 import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
+import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.Result
@@ -11,7 +13,7 @@ import kotlinx.serialization.json.Json
 import java.net.SocketTimeoutException
 import javax.net.ssl.SSLHandshakeException
 
-class SettingsApi private constructor(private val server: Server) {
+class SettingsApi private constructor(private val context: Context) {
 
     /**
      * Sends a request to the api to obtain required user settings. No session is required to send this request.
@@ -22,11 +24,11 @@ class SettingsApi private constructor(private val server: Server) {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
                 OkHttpRequest.getInstance().post(
-                    sUrl = server.url + GET_URL,
+                    sUrl = getServer().url + GET_URL,
                     body = ServerSettings.getRequestBody(),
                     mediaType = OkHttpRequest.JSON,
-                    username = server.username,
-                    password = server.password,
+                    username = getServer().username,
+                    password = getServer().password,
                 )
             }
 
@@ -62,6 +64,8 @@ class SettingsApi private constructor(private val server: Server) {
 
     }
 
+    fun getServer() = UserController.getInstance(context).getServer()
+
     companion object {
         private const val GET_URL = "/index.php/apps/passwords/api/1.0/settings/get"
 
@@ -70,15 +74,15 @@ class SettingsApi private constructor(private val server: Server) {
         /**
          * Get the instance of the [ServiceApi], and create it if null.
          *
-         * @param server The [Server] where the requests will be made.
+         * @param context The [Context] where the requests will be made.
          * @return The instance of the api.
          */
-        fun getInstance(server: Server): SettingsApi {
+        fun getInstance(context: Context): SettingsApi {
             synchronized(this) {
                 var tempInstance = instance
 
                 if (tempInstance == null) {
-                    tempInstance = SettingsApi(server)
+                    tempInstance = SettingsApi(context)
                     instance = tempInstance
                 }
 
