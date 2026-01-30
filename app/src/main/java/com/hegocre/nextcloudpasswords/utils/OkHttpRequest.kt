@@ -28,6 +28,8 @@ import java.util.concurrent.TimeUnit
  */
 class OkHttpRequest private constructor() {
     var allowInsecureRequests = false
+    private val initLock = java.lang.Object()
+    @Volatile private var initializing = false
 
     private var secureClient = OkHttpClient.Builder()
         .readTimeout(30, TimeUnit.SECONDS)
@@ -36,7 +38,18 @@ class OkHttpRequest private constructor() {
     private val insecureClient: OkHttpClient
 
     val client: OkHttpClient
-        get() = if (allowInsecureRequests) insecureClient else secureClient
+        get() {
+             if (allowInsecureRequests) return insecureClient
+
+             if (initializing) {
+                 synchronized(initLock) {
+                     while (initializing) {
+                         try { initLock.wait() } catch (_: InterruptedException) {}
+                     }
+                 }
+             }
+             return secureClient
+        }
 
     init {
         val insecureTrustManager = @SuppressLint("CustomX509TrustManager")
@@ -72,6 +85,7 @@ class OkHttpRequest private constructor() {
             return
         }
 
+        initializing = true
         Thread {
             try {
                 val privateKey = KeyChain.getPrivateKey(context, alias)
@@ -99,6 +113,11 @@ class OkHttpRequest private constructor() {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                initializing = false
+                synchronized(initLock) {
+                    initLock.notifyAll()
+                }
             }
         }.start()
     }

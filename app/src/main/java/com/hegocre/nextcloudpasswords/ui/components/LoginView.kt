@@ -291,7 +291,7 @@ fun NCPWebLoginScreen(
                         super.onReceivedSslError(view, handler, error)
                     }
                 }
-// ...existing code...
+
                 override fun onReceivedClientCertRequest(view: WebView?, request: ClientCertRequest?) {
                     val alias = PreferencesManager.getInstance(context).getClientCertAlias()
                     if (alias != null) {
@@ -299,18 +299,22 @@ fun NCPWebLoginScreen(
                             try {
                                 val privateKey = KeyChain.getPrivateKey(context, alias)
                                 val chain = KeyChain.getCertificateChain(context, alias)
-                                request?.proceed(privateKey, chain)
+                                if (privateKey != null && chain != null) {
+                                    request?.proceed(privateKey, chain)
+                                } else {
+                                    PreferencesManager.getInstance(context).setClientCertAlias(null)
+                                    request?.cancel()
+                                }
                             } catch (e: Exception) {
                                 request?.cancel()
                             }
                         }
                     } else {
-                         KeyChain.choosePrivateKeyAlias(
+                        KeyChain.choosePrivateKeyAlias(
                              context as Activity,
                              { selectedAlias ->
                                 if (selectedAlias != null) {
                                     PreferencesManager.getInstance(context).setClientCertAlias(selectedAlias)
-                                    // Also init OkHttp client for future API requests
                                     com.hegocre.nextcloudpasswords.utils.OkHttpRequest.getInstance().initClient(context)
 
                                     GlobalScope.launch(Dispatchers.IO) {
@@ -333,8 +337,9 @@ fun NCPWebLoginScreen(
                 }
             }
         }
-// ...existing code...
+
         val (loadingProgress, setLoadingProgress) = remember { mutableIntStateOf(0) }
+// ...existing code...
 
         Scaffold(
             modifier = modifier,
