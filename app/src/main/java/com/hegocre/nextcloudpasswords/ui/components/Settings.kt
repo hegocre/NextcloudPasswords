@@ -127,6 +127,36 @@ fun ListPreference(
     }
 }
 
+@Composable
+fun ClickablePreference(
+    onClick: () -> Unit,
+    title: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: (@Composable () -> Unit)? = null,
+    enabled: Boolean = true
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { if (enabled) onClick() }
+            .padding(vertical = 12.dp, horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            Modifier.weight(1f)
+        ) {
+            title()
+            CompositionLocalProvider(
+                LocalTextStyle provides MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp)
+            ) {
+                subtitle?.let {
+                    it()
+                }
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 fun PreferencesPreview() {

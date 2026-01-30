@@ -1,6 +1,14 @@
 package com.hegocre.nextcloudpasswords.utils
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.security.KeyChain
+import java.security.KeyStore
+import java.security.cert.X509Certificate
+import javax.net.ssl.KeyManagerFactory
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.X509TrustManager
 import okhttp3.Credentials
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -11,10 +19,7 @@ import okhttp3.Response
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URL
-import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.SSLContext
-import javax.net.ssl.X509TrustManager
 
 /**
  * Class to manage the [OkHttpRequest] requests, and make them using always the same client, as suggested
@@ -24,7 +29,7 @@ import javax.net.ssl.X509TrustManager
 class OkHttpRequest private constructor() {
     var allowInsecureRequests = false
 
-    private val secureClient = OkHttpClient.Builder()
+    private var secureClient = OkHttpClient.Builder()
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
@@ -54,6 +59,48 @@ class OkHttpRequest private constructor() {
             .sslSocketFactory(sslContext.socketFactory, insecureTrustManager)
             .hostnameVerifier { _, _ -> true }
             .build()
+    }
+
+    fun initClient(context: Context) {
+        val alias = PreferencesManager.getInstance(context).getClientCertAlias()
+
+        if (alias == null) {
+             secureClient = OkHttpClient.Builder()
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .build()
+            return
+        }
+
+        Thread {
+            try {
+                val privateKey = KeyChain.getPrivateKey(context, alias)
+                val chain = KeyChain.getCertificateChain(context, alias)
+
+                if (privateKey != null && chain != null) {
+                    val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
+                    keyStore.load(null, null)
+                    keyStore.setKeyEntry(alias, privateKey, null, chain)
+
+                    val kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
+                    kmf.init(keyStore, null)
+
+                    val sslContext = SSLContext.getInstance("TLS")
+                    sslContext.init(kmf.keyManagers, null, null)
+
+                    val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+                    tmf.init(null as KeyStore?)
+                    val trustManagers = tmf.trustManagers
+                    val x509TrustManager = trustManagers.first { it is X509TrustManager } as X509TrustManager
+
+                    secureClient = secureClient.newBuilder()
+                        .sslSocketFactory(sslContext.socketFactory, x509TrustManager)
+                        .build()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }.start()
     }
 
 

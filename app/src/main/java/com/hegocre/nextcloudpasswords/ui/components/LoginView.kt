@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.http.SslError
+import android.security.KeyChain
+import android.security.KeyChainAliasCallback
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.SslErrorHandler
@@ -62,6 +64,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.security.PrivateKey
+import java.security.cert.X509Certificate
+import android.webkit.ClientCertRequest
 
 @Composable
 fun NCPLoginScreen(
@@ -207,6 +215,8 @@ fun LoginCard(
                 onDone = onLoginButtonClick
             )
 
+            val context = LocalContext.current
+
             Button(
                 modifier = Modifier.align(Alignment.End),
                 onClick = onLoginButtonClick
@@ -281,9 +291,49 @@ fun NCPWebLoginScreen(
                         super.onReceivedSslError(view, handler, error)
                     }
                 }
+// ...existing code...
+                override fun onReceivedClientCertRequest(view: WebView?, request: ClientCertRequest?) {
+                    val alias = PreferencesManager.getInstance(context).getClientCertAlias()
+                    if (alias != null) {
+                        GlobalScope.launch(Dispatchers.IO) {
+                            try {
+                                val privateKey = KeyChain.getPrivateKey(context, alias)
+                                val chain = KeyChain.getCertificateChain(context, alias)
+                                request?.proceed(privateKey, chain)
+                            } catch (e: Exception) {
+                                request?.cancel()
+                            }
+                        }
+                    } else {
+                         KeyChain.choosePrivateKeyAlias(
+                             context as Activity,
+                             { selectedAlias ->
+                                if (selectedAlias != null) {
+                                    PreferencesManager.getInstance(context).setClientCertAlias(selectedAlias)
+                                    // Also init OkHttp client for future API requests
+                                    com.hegocre.nextcloudpasswords.utils.OkHttpRequest.getInstance().initClient(context)
+
+                                    GlobalScope.launch(Dispatchers.IO) {
+                                        try {
+                                            val privateKey = KeyChain.getPrivateKey(context, selectedAlias)
+                                            val chain = KeyChain.getCertificateChain(context, selectedAlias)
+                                            request?.proceed(privateKey, chain)
+                                        } catch (e: Exception) {
+                                             request?.cancel()
+                                        }
+                                    }
+                                } else {
+                                    request?.cancel()
+                                }
+                             },
+                             request?.keyTypes, request?.principals, request?.host, request?.port ?: -1,
+                             null
+                         )
+                    }
+                }
             }
         }
-
+// ...existing code...
         val (loadingProgress, setLoadingProgress) = remember { mutableIntStateOf(0) }
 
         Scaffold(

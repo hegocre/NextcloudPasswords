@@ -36,6 +36,9 @@ class MainActivity : FragmentActivity() {
         if (BuildConfig.DEBUG) LogHelper.getInstance()
 
         super.onCreate(savedInstanceState)
+
+        OkHttpRequest.getInstance().initClient(this)
+
         if (!UserController.getInstance(this).isLoggedIn) {
             login()
             return
