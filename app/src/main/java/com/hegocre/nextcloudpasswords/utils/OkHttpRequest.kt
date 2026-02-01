@@ -2,6 +2,7 @@ package com.hegocre.nextcloudpasswords.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.security.KeyChain
 import java.security.KeyStore
 import java.security.cert.X509Certificate
@@ -20,6 +21,9 @@ import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Class to manage the [OkHttpRequest] requests, and make them using always the same client, as suggested
@@ -78,15 +82,21 @@ class OkHttpRequest private constructor() {
         val alias = PreferencesManager.getInstance(context).getClientCertAlias()
 
         if (alias == null) {
-             secureClient = OkHttpClient.Builder()
+            val newClient = OkHttpClient.Builder()
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .build()
+
+            synchronized(initLock) {
+                secureClient = newClient
+                initializing = false
+                initLock.notifyAll()
+            }
             return
         }
 
         initializing = true
-        Thread {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 val privateKey = KeyChain.getPrivateKey(context, alias)
                 val chain = KeyChain.getCertificateChain(context, alias)
@@ -105,21 +115,24 @@ class OkHttpRequest private constructor() {
                     val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
                     tmf.init(null as KeyStore?)
                     val trustManagers = tmf.trustManagers
-                    val x509TrustManager = trustManagers.first { it is X509TrustManager } as X509TrustManager
+                    val x509TrustManager = trustManagers.firstOrNull { it is X509TrustManager } as? X509TrustManager
 
-                    secureClient = secureClient.newBuilder()
-                        .sslSocketFactory(sslContext.socketFactory, x509TrustManager)
-                        .build()
+                    if (x509TrustManager != null) {
+                        secureClient = secureClient.newBuilder()
+                            .sslSocketFactory(sslContext.socketFactory, x509TrustManager)
+                            .build()
+                    }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("OkHttpRequest", "Failed to initialize SSL context with client certificate alias: $alias", e)
+                PreferencesManager.getInstance(context).setClientCertAlias(null)
             } finally {
                 initializing = false
                 synchronized(initLock) {
                     initLock.notifyAll()
                 }
             }
-        }.start()
+        }
     }
 
 

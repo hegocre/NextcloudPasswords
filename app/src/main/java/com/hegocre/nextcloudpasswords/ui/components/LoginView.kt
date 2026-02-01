@@ -2,10 +2,10 @@ package com.hegocre.nextcloudpasswords.ui.components
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.http.SslError
 import android.security.KeyChain
-import android.security.KeyChainAliasCallback
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.SslErrorHandler
@@ -48,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -65,10 +66,7 @@ import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.security.PrivateKey
-import java.security.cert.X509Certificate
 import android.webkit.ClientCertRequest
 
 @Composable
@@ -235,6 +233,7 @@ fun NCPWebLoginScreen(
 ) {
     NextcloudPasswordsTheme {
         val context = LocalContext.current
+        val coroutineScope = rememberCoroutineScope()
 
         var showTlsDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -293,7 +292,7 @@ fun NCPWebLoginScreen(
                 override fun onReceivedClientCertRequest(view: WebView?, request: ClientCertRequest?) {
                     val alias = PreferencesManager.getInstance(context).getClientCertAlias()
                     if (alias != null) {
-                        GlobalScope.launch(Dispatchers.IO) {
+                        coroutineScope.launch(Dispatchers.IO) {
                             try {
                                 val privateKey = KeyChain.getPrivateKey(context, alias)
                                 val chain = KeyChain.getCertificateChain(context, alias)
@@ -304,33 +303,50 @@ fun NCPWebLoginScreen(
                                     request?.cancel()
                                 }
                             } catch (e: Exception) {
+                                PreferencesManager.getInstance(context).setClientCertAlias(null)
                                 request?.cancel()
                             }
                         }
                     } else {
-                        KeyChain.choosePrivateKeyAlias(
-                             context as Activity,
-                             { selectedAlias ->
-                                if (selectedAlias != null) {
-                                    PreferencesManager.getInstance(context).setClientCertAlias(selectedAlias)
-                                    com.hegocre.nextcloudpasswords.utils.OkHttpRequest.getInstance().initClient(context)
+                        val activity = context.findActivity()
+                        if (activity != null) {
+                            KeyChain.choosePrivateKeyAlias(
+                                activity,
+                                { selectedAlias ->
+                                    if (selectedAlias != null) {
+                                        PreferencesManager.getInstance(context)
+                                            .setClientCertAlias(selectedAlias)
+                                        com.hegocre.nextcloudpasswords.utils.OkHttpRequest.getInstance()
+                                            .initClient(context)
 
-                                    GlobalScope.launch(Dispatchers.IO) {
-                                        try {
-                                            val privateKey = KeyChain.getPrivateKey(context, selectedAlias)
-                                            val chain = KeyChain.getCertificateChain(context, selectedAlias)
-                                            request?.proceed(privateKey, chain)
-                                        } catch (e: Exception) {
-                                             request?.cancel()
+                                        coroutineScope.launch(Dispatchers.IO) {
+                                            try {
+                                                val privateKey =
+                                                    KeyChain.getPrivateKey(context, selectedAlias)
+                                                val chain = KeyChain.getCertificateChain(
+                                                    context,
+                                                    selectedAlias
+                                                )
+                                                request?.proceed(privateKey, chain)
+                                            } catch (e: Exception) {
+                                                PreferencesManager.getInstance(context)
+                                                    .setClientCertAlias(null)
+                                                request?.cancel()
+                                            }
                                         }
+                                    } else {
+                                        request?.cancel()
                                     }
-                                } else {
-                                    request?.cancel()
-                                }
-                             },
-                             request?.keyTypes, request?.principals, request?.host, request?.port ?: -1,
-                             null
-                         )
+                                },
+                                request?.keyTypes,
+                                request?.principals,
+                                request?.host,
+                                request?.port ?: -1,
+                                null
+                            )
+                        } else {
+                            request?.cancel()
+                        }
                     }
                 }
             }
@@ -433,4 +449,15 @@ fun PreviewCard() {
     NextcloudPasswordsTheme {
         LoginCard("", {}, "") {}
     }
+}
+
+private fun Context.findActivity(): Activity? {
+    var currentContext = this
+    while (currentContext is android.content.ContextWrapper) {
+        if (currentContext is Activity) {
+            return currentContext
+        }
+        currentContext = currentContext.baseContext
+    }
+    return null
 }

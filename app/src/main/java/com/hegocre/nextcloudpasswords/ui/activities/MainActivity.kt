@@ -37,13 +37,14 @@ class MainActivity : FragmentActivity() {
 
         super.onCreate(savedInstanceState)
 
-        // Initialize OkHttp client with the previously selected client certificate if available, so it persists across app restarts.
-        OkHttpRequest.getInstance().initClient(this)
-
         if (!UserController.getInstance(this).isLoggedIn) {
             login()
             return
         }
+
+        // Initialize OkHttp client with the previously selected client certificate if available, so it persists across app restarts.
+        // Moved after login check to avoid unnecessary initialization if redirecting.
+        OkHttpRequest.getInstance().initClient(this)
 
         val passwordsViewModel by viewModels<PasswordsViewModel>()
 
