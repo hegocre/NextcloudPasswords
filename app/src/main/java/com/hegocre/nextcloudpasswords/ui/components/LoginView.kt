@@ -215,8 +215,6 @@ fun LoginCard(
                 onDone = onLoginButtonClick
             )
 
-            val context = LocalContext.current
-
             Button(
                 modifier = Modifier.align(Alignment.End),
                 onClick = onLoginButtonClick
@@ -339,7 +337,6 @@ fun NCPWebLoginScreen(
         }
 
         val (loadingProgress, setLoadingProgress) = remember { mutableIntStateOf(0) }
-// ...existing code...
 
         Scaffold(
             modifier = modifier,

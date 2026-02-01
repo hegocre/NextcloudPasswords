@@ -37,6 +37,7 @@ class MainActivity : FragmentActivity() {
 
         super.onCreate(savedInstanceState)
 
+        // Initialize OkHttp client with the previously selected client certificate if available, so it persists across app restarts.
         OkHttpRequest.getInstance().initClient(this)
 
         if (!UserController.getInstance(this).isLoggedIn) {

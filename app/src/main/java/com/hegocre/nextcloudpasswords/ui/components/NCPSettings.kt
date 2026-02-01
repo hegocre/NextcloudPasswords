@@ -378,14 +378,12 @@ fun NCPSettingsScreen(
                                 }
                                 showDeletePasscodeDialog = false
                             },
-
                             onDismissRequest = {
                                 showDeletePasscodeDialog = false
                             }
                         )
                     }
                 }
-
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     val autofillManager = context.getSystemService(AutofillManager::class.java)
