@@ -14,7 +14,7 @@ import android.service.autofill.SaveCallback
 import android.service.autofill.SaveRequest
 import androidx.compose.runtime.collectAsState
 import android.util.Log
-import androidx.annotation.RequiresApi
+import android.annotation.TargetApi
 import androidx.lifecycle.asFlow
 import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.data.password.Password
@@ -42,7 +42,7 @@ import com.hegocre.nextcloudpasswords.utils.encryptValue
 import com.hegocre.nextcloudpasswords.utils.sha1Hash
 import com.hegocre.nextcloudpasswords.api.FoldersApi
 
-@RequiresApi(Build.VERSION_CODES.O)
+@TargetApi(Build.VERSION_CODES.O)
 class NCPAutofillService : AutofillService() {
 
     private val serviceJob = SupervisorJob()
@@ -225,7 +225,11 @@ class NCPAutofillService : AutofillService() {
             )
         )
         
-        return builder.setSaveInfo(AutofillHelper.buildSaveInfo(helper)).build()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            builder.setSaveInfo(AutofillHelper.buildSaveInfo(helper))
+        }
+
+        return builder.build()
     }
 
     private suspend fun getAppLabel(packageName: String): String = withContext(Dispatchers.IO) {

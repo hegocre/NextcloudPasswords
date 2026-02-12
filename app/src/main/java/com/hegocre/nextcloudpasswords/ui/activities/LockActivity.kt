@@ -14,7 +14,9 @@ import android.util.Log
 import android.view.autofill.AutofillManager
 import android.service.autofill.Dataset
 import android.os.Build
+import android.annotation.TargetApi
 
+@TargetApi(Build.VERSION_CODES.O)
 class LockActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

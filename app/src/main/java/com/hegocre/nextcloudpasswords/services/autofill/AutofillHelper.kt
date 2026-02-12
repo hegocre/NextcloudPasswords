@@ -23,8 +23,8 @@ import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.activities.LockActivity
 import android.service.autofill.SaveInfo
 
+@RequiresApi(Build.VERSION_CODES.O)
 object AutofillHelper {
-    @RequiresApi(Build.VERSION_CODES.O)
     fun buildDataset(
         context: Context,
         password: Triple<String, String?, String?>?,
@@ -51,12 +51,12 @@ object AutofillHelper {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.O_MR1)
     fun buildSaveInfo(
         helper: AssistStructureParser,
     ): SaveInfo {
         return SaveInfo.Builder(SaveInfo.SAVE_DATA_TYPE_USERNAME or SaveInfo.SAVE_DATA_TYPE_PASSWORD).apply {
-            if(!helper.usernameAutofillIds.isEmpty() && helper.passwordAutofillIds.isEmpty()) {
+            if(!helper.usernameAutofillIds.isEmpty() && helper.passwordAutofillIds.isEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 setFlags(SaveInfo.FLAG_DELAY_SAVE)
             } else {
                 setOptionalIds((helper.usernameAutofillIds + helper.passwordAutofillIds).toTypedArray())
@@ -126,7 +126,6 @@ object AutofillHelper {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun buildPresentationDataset(
         context: Context,
         password: Triple<String, String?, String?>?,
@@ -162,7 +161,6 @@ object AutofillHelper {
     }
 
     @SuppressLint("RestrictedApi")
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun Dataset.Builder.addAutofillValue(
         context: Context,
         autofillId: AutofillId,
