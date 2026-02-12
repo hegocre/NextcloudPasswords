@@ -20,6 +20,7 @@ import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.services.autofill.AutofillHelper
 import com.hegocre.nextcloudpasswords.services.autofill.NCPAutofillService
+import com.hegocre.nextcloudpasswords.services.autofill.AssistStructureParser
 import com.hegocre.nextcloudpasswords.ui.components.NCPAppLockWrapper
 import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsApp
 import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
@@ -141,7 +142,7 @@ class MainActivity : FragmentActivity() {
         password: Triple<String, String, String>,
         structure: AssistStructure
     ) {
-        val dataset = AutofillHelper.buildDataset(this, password, structure, null)
+        val dataset = AutofillHelper.buildDataset(this, password, AssistStructureParser(structure), null, null, false)
 
         val replyIntent = Intent().apply {
             putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, dataset)

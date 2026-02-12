@@ -63,6 +63,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.activities.LockActivity"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.hegocre.nextcloudpasswords.action.lock" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <service
             android:name=".services.autofill.NCPAutofillService"
