@@ -19,10 +19,13 @@ import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.services.autofill.AutofillHelper
+import com.hegocre.nextcloudpasswords.services.autofill.SaveData
+import com.hegocre.nextcloudpasswords.services.autofill.PasswordAutofillData
 import com.hegocre.nextcloudpasswords.services.autofill.NCPAutofillService
 import com.hegocre.nextcloudpasswords.services.autofill.AssistStructureParser
 import com.hegocre.nextcloudpasswords.ui.components.NCPAppLockWrapper
 import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsApp
+import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsAppForAutofill
 import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
 import com.hegocre.nextcloudpasswords.utils.LogHelper
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
@@ -30,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import android.util.Log
 
 class MainActivity : FragmentActivity() {
 
@@ -44,10 +48,28 @@ class MainActivity : FragmentActivity() {
 
         val passwordsViewModel by viewModels<PasswordsViewModel>()
 
-        val autofillRequested = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val autofillRequested: Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             intent.getBooleanExtra(NCPAutofillService.AUTOFILL_REQUEST, false)
         } else {
             false
+        }
+
+        val passwordId: String? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent.getStringExtra(NCPAutofillService.PASSWORD_ID) ?: null
+        } else {
+            null
+        }
+
+        val saveData: SaveData? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                intent.getParcelableExtra(
+                    NCPAutofillService.SAVE_DATA,
+                    SaveData::class.java
+                )
+            else
+                @Suppress("DEPRECATION") intent.getParcelableExtra(NCPAutofillService.SAVE_DATA)
+        } else {
+            null
         }
 
         val autofillSearchQuery =
@@ -70,11 +92,18 @@ class MainActivity : FragmentActivity() {
                     else
                         @Suppress("DEPRECATION") intent.getParcelableExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)
 
+                    Log.d("MainActivity", "Replying to autofill request with label: $label, structure: $structure")
+
                     if (structure == null) {
                         setResult(RESULT_CANCELED)
                         finish()
                     } else {
-                        autofillReply(Triple(label, username, password), structure)
+                        autofillReply(PasswordAutofillData(
+                            id = null, 
+                            label = label, 
+                            username = username, 
+                            password = password
+                        ), structure)
                     }
                 }
             } else null
@@ -99,15 +128,31 @@ class MainActivity : FragmentActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        setContent {
-            NCPAppLockWrapper {
-                NextcloudPasswordsApp(
-                    passwordsViewModel = passwordsViewModel,
-                    onLogOut = { logOut() },
-                    replyAutofill = replyAutofill,
-                    isAutofillRequest = autofillRequested,
-                    defaultSearchQuery = autofillSearchQuery
-                )
+        if (passwordId != null || saveData != null) {
+            setContent {
+                NCPAppLockWrapper {
+                    NextcloudPasswordsAppForAutofill(
+                        passwordsViewModel = passwordsViewModel,
+                        onLogOut = { logOut() },
+                        replyAutofill = replyAutofill,
+                        passwordId = passwordId,
+                        isAutofillRequest = autofillRequested,
+                        saveData = saveData,
+                        defaultSearchQuery = autofillSearchQuery
+                    )
+                }
+            }
+        } else {
+            setContent {
+                NCPAppLockWrapper {
+                    NextcloudPasswordsApp(
+                        passwordsViewModel = passwordsViewModel,
+                        onLogOut = { logOut() },
+                        replyAutofill = replyAutofill,
+                        isAutofillRequest = autofillRequested,
+                        defaultSearchQuery = autofillSearchQuery
+                    )
+                }
             }
         }
     }
@@ -139,7 +184,7 @@ class MainActivity : FragmentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun autofillReply(
-        password: Triple<String, String, String>,
+        password: PasswordAutofillData,
         structure: AssistStructure
     ) {
         val dataset = AutofillHelper.buildDataset(this, password, AssistStructureParser(structure), null, null, false)

@@ -44,7 +44,6 @@ import com.hegocre.nextcloudpasswords.api.FoldersApi
 
 @TargetApi(Build.VERSION_CODES.O)
 class NCPAutofillService : AutofillService() {
-
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Default + serviceJob)
 
@@ -52,9 +51,11 @@ class NCPAutofillService : AutofillService() {
     private val apiController by lazy { ApiController.getInstance(applicationContext) }
     private val passwordController by lazy { PasswordController.getInstance(applicationContext) }
     private val userController by lazy { UserController.getInstance(applicationContext) }
+    private val appLockHelper by lazy { AppLockHelper.getInstance(applicationContext) }
 
     private val hasAppLock by lazy { preferencesManager.getHasAppLock() }
-
+    private val isLocked by lazy { appLockHelper.isLocked }
+    
     val orderBy by lazy { preferencesManager.getOrderBy() }
     val searchByUsername by lazy { preferencesManager.getSearchByUsername() }
     val strictUrlMatching by lazy { preferencesManager.getUseStrictUrlMatching() }
@@ -93,11 +94,12 @@ class NCPAutofillService : AutofillService() {
                 val response = withContext(Dispatchers.Default) {
                     processFillRequest(request)
                 }
-                callback.onSuccess(response)
+                if (response != null) callback.onSuccess(response) 
+                else callback.onFailure("Could not complete fill request")
             } catch (e: CancellationException) {
                 throw e 
             } catch (e: Exception) {
-                Log.e(TAG, "Error handling fill request ${e.message}")
+                Log.e(TAG, "Error handling fill request: ${e.message}")
                 callback.onSuccess(null)
             }
         }
@@ -108,6 +110,7 @@ class NCPAutofillService : AutofillService() {
     }
 
     private suspend fun processFillRequest(request: FillRequest): FillResponse? {
+        Log.d(TAG, "Processing fill request")
         val context = request.fillContexts.last() ?: return null
         val helper = AssistStructureParser(context.structure)
 
@@ -115,6 +118,7 @@ class NCPAutofillService : AutofillService() {
         if (helper.packageName == packageName) return null
 
         if (helper.usernameAutofillIds.isEmpty() && helper.passwordAutofillIds.isEmpty()) {
+            Log.e(TAG, "No username or password fields detected, cannot autofill")
             return null
         }
 
@@ -126,19 +130,24 @@ class NCPAutofillService : AutofillService() {
             return null
         }
 
-        // Try to open Session
-        if (!apiController.sessionOpen.value) {
-            if (!apiController.openSession(preferencesManager.getMasterPassword())) {
-                Log.w(TAG, "Session is not open and cannot be opened")
-            }
-        }
+        Log.d(TAG, "User is logged in")
 
-        if (apiController.sessionOpen.value) {
-            passwordController.syncPasswords()
+        // Try to open Session
+        if (!apiController.sessionOpen.value && !apiController.openSession(preferencesManager.getMasterPassword())) {
+            Log.w(TAG, "Session is not open and cannot be opened")
+            // TODO: stop if we need the decrypted keychain
         }
+        Log.d(TAG, "Session is open")
+
+        // TODO: when to update?
+        //if (apiController.sessionOpen.value) {
+        //    passwordController.syncPasswords()
+        //}
 
         // Determine Search Hint
         val searchHint = helper.webDomain ?: getAppLabel(helper.packageName)
+
+        Log.d(TAG, "Search hint determined: $searchHint")
 
         // wait for passwords to be decrypted, then filter by search hint and sort them
         val filteredList = decryptedPasswordsState.value.filter {
@@ -153,11 +162,16 @@ class NCPAutofillService : AutofillService() {
             }
         }
 
+        Log.d(TAG, "Passwords filtered and sorted, count: ${filteredList.size}")
+
+        val needsAuth = hasAppLock.first() && (isLocked.firstOrNull() ?: true)
+
         return buildFillResponse(
             filteredList,
             helper,
             request,
-            searchHint
+            searchHint,
+            needsAuth
         )
     }
 
@@ -165,8 +179,10 @@ class NCPAutofillService : AutofillService() {
         passwords: List<Password>,
         helper: AssistStructureParser,
         request: FillRequest,
-        searchHint: String
+        searchHint: String,
+        needsAuth: Boolean
     ): FillResponse {
+        Log.d(TAG, "Building FillResponse with ${passwords.size} passwords, needsAuth: $needsAuth")
         val builder = FillResponse.Builder()
         val useInline = preferencesManager.getUseInlineAutofill()
         
@@ -174,16 +190,17 @@ class NCPAutofillService : AutofillService() {
             request.inlineSuggestionsRequest
         } else null
 
-        val mainAppIntent = buildMainAppIntent(applicationContext, searchHint)
-
-        val needsAuth = hasAppLock.first()
-
         // Add one Dataset for each password
         for (password in passwords) {
             builder.addDataset(
                 AutofillHelper.buildDataset(
                     applicationContext,
-                    Triple("${password.label} - ${password.username}", password.username, password.password),
+                    PasswordAutofillData(
+                        id = password.id,
+                        label = "${password.label} - ${password.username}", 
+                        username = password.username, 
+                        password = password.password
+                    ),
                     helper,
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
                     null,
@@ -192,26 +209,29 @@ class NCPAutofillService : AutofillService() {
             )
         }
 
-        // Add "Generate Password" option (only if there are no passwords?)
-        if (passwords.isEmpty() && apiController.sessionOpen.value) {
-            val options = preferencesManager.getPasswordGenerationOptions()?.split(";") ?: listOf()
-            apiController.generatePassword(
-                options.getOrNull(0)?.toIntOrNull() ?: 4,
-                options.getOrNull(1)?.toBooleanStrictOrNull() ?: true,
-                options.getOrNull(2)?.toBooleanStrictOrNull() ?: true
-            )?.let {
+        Log.d(TAG, "Datasets added to FillResponse")
+
+        // Button to create a new password in the app and autofill it
+        if (passwords.isEmpty()) {
+            val saveData = SaveData(
+                label = searchHint,
+                username = "",
+                password = "",
+                url = searchHint
+            )
             builder.addDataset(
                     AutofillHelper.buildDataset(
                         applicationContext,
-                        Triple("Generate new password", null, it),
+                        PasswordAutofillData(label = "Create new password", id = null, username = null, password = null),
                         helper,
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
-                        null,
+                        buildSaveIntent(applicationContext, saveData, true),
                         false
                     )
                 )
             }
-        }
+
+        Log.d(TAG, "Button to create new password added to FillResponse")
 
         // Option to conclude the autofill in the app
         builder.addDataset(
@@ -220,14 +240,24 @@ class NCPAutofillService : AutofillService() {
                 null,
                 helper,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
-                mainAppIntent,
+                buildMainAppIntent(applicationContext, searchHint),
                 false
             )
         )
+
+        Log.d(TAG, "Button to open app added to FillResponse")
         
+        // set Save Info, with an optional bundle if delaying the save
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            builder.setSaveInfo(AutofillHelper.buildSaveInfo(helper))
+            AutofillHelper.buildSaveInfo(helper)?.let { pair ->
+                builder.setSaveInfo(pair.first) 
+                pair.second?.let { bundle ->
+                    builder.setClientState(bundle)
+                }
+            }
         }
+
+        Log.d(TAG, "SaveInfo set in FillResponse if applicable")
 
         return builder.build()
     }
@@ -248,6 +278,74 @@ class NCPAutofillService : AutofillService() {
         }
     }
 
+    override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
+        val job = serviceScope.launch {
+            try {
+                val intent: IntentSender? = withContext(Dispatchers.Default) {
+                    processSaveRequest(request)
+                }
+                if (intent != null) callback.onSuccess(intent)
+                else callback.onFailure("Unable to complete Save Request")
+            } catch (e: CancellationException) {
+                throw e 
+            } catch (e: Exception) {
+                callback.onFailure("Error handling save request: ${e.message}")
+            }
+        }
+    }
+
+    private suspend fun processSaveRequest(request: SaveRequest): IntentSender? {
+        val context = request.fillContexts.last() ?: return null
+        val helper = AssistStructureParser(context.structure)
+
+        // Do not autofill this application
+        if (helper.packageName == packageName) return null
+
+        val delayedUsername: String? = request.clientState?.getCharSequence(AutofillHelper.USERNAME)?.toString()
+
+        val username: String = helper.usernameAutofillContent.firstOrNull { !it.isNullOrBlank() } ?: delayedUsername ?: ""
+        val password: String = helper.passwordAutofillContent.firstOrNull { !it.isNullOrBlank() } ?: ""
+
+        if (password.isBlank()) {
+            throw Exception("Blank password, cannot save")
+        }
+
+        // Check Login Status
+        try {
+            userController.getServer()
+        } catch (_: UserException) {
+            throw Exception("User not logged in, cannot save")
+        }
+
+        // Ensure Session is open
+        if (!apiController.sessionOpen.value && !apiController.openSession(preferencesManager.getMasterPassword())) {
+            throw Exception("Session is not open and cannot be opened, cannot save")
+        }
+
+        // Determine Search Hint
+        val searchHint = helper.webDomain ?: getAppLabel(helper.packageName)
+
+        return buildSaveIntent(applicationContext, prepareSaveData(searchHint, username, password, searchHint))
+    }
+
+    private suspend fun prepareSaveData(label: String, username: String, password: String, url: String): SaveData {
+        val keychain = apiController.csEv1Keychain.asFlow().first()
+        val serverSettings = apiController.serverSettings.asFlow().first()
+
+        return if(keychain != null && serverSettings.encryptionCse != 0) SaveData(
+            password = password.encryptValue(keychain.current, keychain),
+            label = label.encryptValue(keychain.current, keychain),
+            username = username.encryptValue(keychain.current, keychain),
+            url = url.encryptValue(keychain.current, keychain),
+        )
+        else SaveData(
+            password = password,
+            label = label,
+            username = username,
+            url =  url,
+        )
+    }
+
     private fun buildMainAppIntent(context: Context, searchHint: String): IntentSender {
         val appIntent = Intent(context, MainActivity::class.java).apply {
             putExtra(AUTOFILL_REQUEST, true)
@@ -265,183 +363,17 @@ class NCPAutofillService : AutofillService() {
         ).intentSender
     }
 
-    override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
-        val job = serviceScope.launch {
-            try {
-                val response: Boolean = withContext(Dispatchers.Default) {
-                    processSaveRequest(request)
-                }
-                if (response) callback.onSuccess()
-                else callback.onFailure("Unable to complete Save Request")
-            } catch (e: CancellationException) {
-                throw e 
-            } catch (e: Exception) {
-                callback.onFailure("Error handling save request: ${e.message}")
-            }
-        }
-    }
-
-    private suspend fun processSaveRequest(request: SaveRequest): Boolean {
-        val context = request.fillContexts.last() ?: return false
-        val helper = AssistStructureParser(context.structure)
-
-        // Do not autofill this application
-        if (helper.packageName == packageName) return false
-
-        val username: String = helper.usernameAutofillContent.firstOrNull { !it.isNullOrBlank() } ?: ""
-        val password: String = helper.passwordAutofillContent.firstOrNull { !it.isNullOrBlank() } ?: ""
-
-        if (password.isBlank()) {
-            val usernameIds = helper.usernameAutofillIds.map { it.toString() }
-            val passwordIds = helper.passwordAutofillIds.map { it.toString() }
-            throw Exception("Blank password, cannot save")
+    private fun buildSaveIntent(context: Context, saveData: SaveData, isAutofill: Boolean = false): IntentSender {
+        val appIntent = Intent(context, MainActivity::class.java).apply {
+            if (isAutofill) putExtra(AUTOFILL_REQUEST, true)
+            putExtra(SAVE_DATA, saveData)
         }
 
-        // Check Login Status
-        try {
-            userController.getServer()
-        } catch (_: UserException) {
-            throw Exception("User not logged in, cannot save")
-        }
+        val intentFlags = PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
 
-        // Ensure Session is open
-        if (!apiController.sessionOpen.value) {
-            if (!apiController.openSession(preferencesManager.getMasterPassword())) {
-                throw Exception("Session is not open and cannot be opened, Cannot save")
-            }
-        }
-
-        // Determine Search Hint
-        val searchHint = helper.webDomain ?: getAppLabel(helper.packageName)
-
-        // wait for passwords to be decrypted, then filter by search hint and sort them
-        val filteredList = decryptedPasswordsState.value.filter {
-            it.matches(searchHint, strictUrlMatching.first()) || 
-            (searchByUsername.first() && it.username.contains(searchHint, ignoreCase = true))
-        }.let { list ->
-            when (orderBy.first()) {
-                PreferencesManager.ORDER_BY_TITLE_DESCENDING -> list.sortedByDescending { it.label.lowercase() }
-                PreferencesManager.ORDER_BY_DATE_ASCENDING -> list.sortedBy { it.edited }
-                PreferencesManager.ORDER_BY_DATE_DESCENDING -> list.sortedByDescending { it.edited }
-                else -> list.sortedBy { it.label.lowercase() }
-            }
-        }
-
-        if (filteredList.isEmpty()) {
-            // prompt to choose label?
-            if (!createPassword(searchHint, username, password, searchHint)) {
-                throw Exception("Failed to create password")
-            }
-        } else {
-            // should prompt too choose which one(s)
-            filteredList.forEach {
-                if (!it.equals(username, password, searchHint)) {
-                    if (!updatePassword(it, searchHint, username, password, searchHint)) {  
-                        throw Exception("Failed to update password")
-                    }
-                }
-            }
-        }
-
-        return true
-    }
-
-    // check equality ignoring label
-    private fun Password.equals(username: String, password: String, url: String): Boolean {
-        return (this.username == username) 
-                && (this.password == password)
-                && (this.url == url)
-    }
-
-    private suspend fun createPassword(label: String, username: String, password: String, url: String): Boolean {
-        val keychain = apiController.csEv1Keychain.asFlow().first()
-        val serverSettings = apiController.serverSettings.asFlow().first()
-        
-        lateinit var newPassword: NewPassword
-        if(keychain != null && serverSettings.encryptionCse != 0) {
-            newPassword = NewPassword(
-                password = password.encryptValue(keychain.current, keychain),
-                label = label.encryptValue(keychain.current, keychain),
-                username = username.encryptValue(keychain.current, keychain),
-                url = url.encryptValue(keychain.current, keychain),
-                notes = "".encryptValue(keychain.current, keychain),
-                customFields = "[]".encryptValue(keychain.current, keychain),
-                hash = password.sha1Hash(),
-                cseType = "CSEv1r1",
-                cseKey = keychain.current,
-                folder = FoldersApi.DEFAULT_FOLDER_UUID,
-                edited = (System.currentTimeMillis() / 1000).toInt(),
-                hidden = false,
-                favorite = false
-            )
-        } else {
-            newPassword = NewPassword(
-                password = password,
-                label = label,
-                username = username,
-                url =  url,
-                notes = "",
-                customFields = "[]",
-                hash = password.sha1Hash(),
-                cseType = "none",
-                cseKey = "",
-                folder = FoldersApi.DEFAULT_FOLDER_UUID,
-                edited = (System.currentTimeMillis() / 1000).toInt(),
-                hidden = false,
-                favorite = false
-            )
-        }
-        return apiController.createPassword(newPassword)
-    }
-
-    suspend fun updatePassword(oldPassword: Password, label: String, username: String, password: String, url: String): Boolean {
-        val keychain = apiController.csEv1Keychain.asFlow().first()
-        val serverSettings = apiController.serverSettings.asFlow().first()
-
-        val _label = oldPassword.label // do not change labels (we are just using searchHint for the label)
-        val _username = if (username.isBlank()) oldPassword.username else username
-        val _password = if (password.isBlank()) oldPassword.password else password
-        val _url = if (url.isBlank()) oldPassword.url else url
-        
-        lateinit var updatedPassword: UpdatedPassword
-        if(keychain != null && serverSettings.encryptionCse != 0) {
-            updatedPassword = UpdatedPassword(
-                id = oldPassword.id,
-                revision = oldPassword.revision,
-                password = _password.encryptValue(keychain.current, keychain) ,
-                label = _label.encryptValue(keychain.current, keychain) ,
-                username = _username.encryptValue(keychain.current, keychain) ,
-                url = _url.encryptValue(keychain.current, keychain) ,
-                notes = oldPassword.notes.encryptValue(keychain.current, keychain),
-                customFields = oldPassword.customFields.encryptValue(keychain.current, keychain),
-                hash = password.sha1Hash(),
-                cseType = "CSEv1r1",
-                cseKey = keychain.current,
-                folder = oldPassword.folder,
-                edited = (System.currentTimeMillis() / 1000).toInt(),
-                hidden = oldPassword.hidden,
-                favorite = oldPassword.favorite
-            )
-        } else {
-            updatedPassword = UpdatedPassword(
-                id = oldPassword.id,
-                revision = oldPassword.revision,
-                password = _password,
-                label = _label,
-                username = _username,
-                url = _url,
-                notes = oldPassword.notes,
-                customFields = oldPassword.customFields,
-                hash = password.sha1Hash(),
-                cseType = "none",
-                cseKey = "",
-                folder = oldPassword.folder,
-                edited = (System.currentTimeMillis() / 1000).toInt(),
-                hidden = oldPassword.hidden,
-                favorite = oldPassword.favorite
-            )
-        }
-        return apiController.updatePassword(updatedPassword)
+        return PendingIntent.getActivity(
+            context, 1001, appIntent, intentFlags
+        ).intentSender
     }
 
     companion object {
@@ -449,6 +381,7 @@ class NCPAutofillService : AutofillService() {
         private const val TIMEOUT_MS = 2000L
         const val AUTOFILL_REQUEST = "autofill_request"
         const val AUTOFILL_SEARCH_HINT = "autofill_query"
-        const val SELECTED_DATASET = "selected_dataset"
+        const val PASSWORD_ID = "password_id"
+        const val SAVE_DATA = "save_data"
     }
 }

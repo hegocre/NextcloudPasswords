@@ -26,6 +26,8 @@ class AssistStructureParser(assistStructure: AssistStructure) {
     private var lastTextAutofillContent: String? = null
     private var candidateTextAutofillId: AutofillId? = null
 
+    val structure = assistStructure
+
     private val webDomains = HashMap<String, Int>()
 
     val packageName = assistStructure.activityComponent.flattenToShortString().substringBefore("/")
