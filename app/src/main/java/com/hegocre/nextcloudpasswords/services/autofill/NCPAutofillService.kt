@@ -41,6 +41,14 @@ import android.content.IntentSender
 import com.hegocre.nextcloudpasswords.utils.encryptValue
 import com.hegocre.nextcloudpasswords.utils.sha1Hash
 import com.hegocre.nextcloudpasswords.api.FoldersApi
+import com.hegocre.nextcloudpasswords.utils.AutofillData
+import com.hegocre.nextcloudpasswords.utils.PasswordAutofillData
+import com.hegocre.nextcloudpasswords.utils.SaveData
+
+data class ListDecryptionStateNonNullable<T>(
+    val decryptedList: List<T> = emptyList(),
+    val isLoading: Boolean = false
+)
 
 @TargetApi(Build.VERSION_CODES.O)
 class NCPAutofillService : AutofillService() {
@@ -60,7 +68,9 @@ class NCPAutofillService : AutofillService() {
     val searchByUsername by lazy { preferencesManager.getSearchByUsername() }
     val strictUrlMatching by lazy { preferencesManager.getUseStrictUrlMatching() }
 
-    private lateinit var decryptedPasswordsState: StateFlow<List<Password>>
+    private lateinit var decryptedPasswordsState: StateFlow<ListDecryptionStateNonNullable<Password>>
+    
+    private val passwordsDecrypted = MutableStateFlow(false)
 
     override fun onCreate() {
         super.onCreate()
@@ -68,13 +78,14 @@ class NCPAutofillService : AutofillService() {
             passwordController.getPasswords().asFlow(),
             apiController.csEv1Keychain.asFlow()
         ) { passwords, keychain ->
-            passwords.filter { !it.trashed && !it.hidden }.decryptPasswords(keychain)
+            ListDecryptionStateNonNullable<Password>(isLoading = true)
+            ListDecryptionStateNonNullable(passwords.filter { !it.trashed && !it.hidden }.decryptPasswords(keychain), false)
         }
         .flowOn(Dispatchers.Default)
         .stateIn(
             scope = serviceScope, 
             started = SharingStarted.Eagerly, 
-            initialValue = emptyList()
+            initialValue = ListDecryptionStateNonNullable(isLoading = true)
         )
     }
 
@@ -122,24 +133,23 @@ class NCPAutofillService : AutofillService() {
             return null
         }
 
+        // TODO: when to sync with server?
         // Check Login Status
-        try {
-            userController.getServer()
-        } catch (_: UserException) {
-            Log.e(TAG, "User not logged in, cannot autofill")
-            return null
-        }
+        //try {
+        //    userController.getServer()
+        //} catch (_: UserException) {
+        //    Log.e(TAG, "User not logged in, cannot autofill")
+        //    return null
+        //}
 
-        Log.d(TAG, "User is logged in")
+        //Log.d(TAG, "User is logged in")
 
         // Try to open Session
-        if (!apiController.sessionOpen.value && !apiController.openSession(preferencesManager.getMasterPassword())) {
-            Log.w(TAG, "Session is not open and cannot be opened")
-            // TODO: stop if we need the decrypted keychain
-        }
-        Log.d(TAG, "Session is open")
+        //if (!apiController.sessionOpen.value && !apiController.openSession(preferencesManager.getMasterPassword())) {
+        //    Log.w(TAG, "Session is not open and cannot be opened")
+        //}
+        //Log.d(TAG, "Session is open")
 
-        // TODO: when to update?
         //if (apiController.sessionOpen.value) {
         //    passwordController.syncPasswords()
         //}
@@ -150,7 +160,9 @@ class NCPAutofillService : AutofillService() {
         Log.d(TAG, "Search hint determined: $searchHint")
 
         // wait for passwords to be decrypted, then filter by search hint and sort them
-        val filteredList = decryptedPasswordsState.value.filter {
+        decryptedPasswordsState.first { !it.isLoading }
+
+        val filteredList = decryptedPasswordsState.value.decryptedList.filter {
             it.matches(searchHint, strictUrlMatching.first()) || 
             (searchByUsername.first() && it.username.contains(searchHint, ignoreCase = true))
         }.let { list ->
@@ -222,10 +234,10 @@ class NCPAutofillService : AutofillService() {
             builder.addDataset(
                     AutofillHelper.buildDataset(
                         applicationContext,
-                        PasswordAutofillData(label = "Create new password", id = null, username = null, password = null),
+                        PasswordAutofillData(label = "Create new password", id = null, username = null, password = null), // TODO: translation
                         helper,
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
-                        buildSaveIntent(applicationContext, saveData, true),
+                        AutofillHelper.buildIntent(applicationContext, 1003, AutofillData.SaveAutofill(searchHint, saveData, helper.structure)),
                         false
                     )
                 )
@@ -237,10 +249,10 @@ class NCPAutofillService : AutofillService() {
         builder.addDataset(
             AutofillHelper.buildDataset(
                 applicationContext,
-                null,
+                PasswordAutofillData(label = ">", id = null, username = null, password = null), // TODO use icon
                 helper,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
-                buildMainAppIntent(applicationContext, searchHint),
+                AutofillHelper.buildIntent(applicationContext, 1004, AutofillData.ChoosePwd(searchHint, helper.structure)),
                 false
             )
         )
@@ -248,11 +260,11 @@ class NCPAutofillService : AutofillService() {
         Log.d(TAG, "Button to open app added to FillResponse")
         
         // set Save Info, with an optional bundle if delaying the save
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             AutofillHelper.buildSaveInfo(helper)?.let { pair ->
                 builder.setSaveInfo(pair.first) 
                 pair.second?.let { bundle ->
-                    builder.setClientState(bundle)
+                    builder.setClientState(bundle)  
                 }
             }
         }
@@ -279,18 +291,22 @@ class NCPAutofillService : AutofillService() {
     }
 
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
-        val job = serviceScope.launch {
-            try {
-                val intent: IntentSender? = withContext(Dispatchers.Default) {
-                    processSaveRequest(request)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val job = serviceScope.launch {
+                try {
+                    val intent: IntentSender? = withContext(Dispatchers.Default) {
+                        processSaveRequest(request)
+                    }
+                    if (intent != null) callback.onSuccess(intent)
+                    else callback.onFailure("Unable to complete Save Request")
+                } catch (e: CancellationException) {
+                    throw e 
+                } catch (e: Exception) {
+                    callback.onFailure("Error handling save request: ${e.message}")
                 }
-                if (intent != null) callback.onSuccess(intent)
-                else callback.onFailure("Unable to complete Save Request")
-            } catch (e: CancellationException) {
-                throw e 
-            } catch (e: Exception) {
-                callback.onFailure("Error handling save request: ${e.message}")
             }
+        } else {
+            callback.onFailure("Saving not supported on android < 9.0")
         }
     }
 
@@ -325,63 +341,12 @@ class NCPAutofillService : AutofillService() {
         // Determine Search Hint
         val searchHint = helper.webDomain ?: getAppLabel(helper.packageName)
 
-        return buildSaveIntent(applicationContext, prepareSaveData(searchHint, username, password, searchHint))
-    }
-
-    private suspend fun prepareSaveData(label: String, username: String, password: String, url: String): SaveData {
-        val keychain = apiController.csEv1Keychain.asFlow().first()
-        val serverSettings = apiController.serverSettings.asFlow().first()
-
-        return if(keychain != null && serverSettings.encryptionCse != 0) SaveData(
-            password = password.encryptValue(keychain.current, keychain),
-            label = label.encryptValue(keychain.current, keychain),
-            username = username.encryptValue(keychain.current, keychain),
-            url = url.encryptValue(keychain.current, keychain),
-        )
-        else SaveData(
-            password = password,
-            label = label,
-            username = username,
-            url =  url,
-        )
-    }
-
-    private fun buildMainAppIntent(context: Context, searchHint: String): IntentSender {
-        val appIntent = Intent(context, MainActivity::class.java).apply {
-            putExtra(AUTOFILL_REQUEST, true)
-            putExtra(AUTOFILL_SEARCH_HINT, searchHint)
-        }
-
-        val intentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
-        } else {
-            PendingIntent.FLAG_CANCEL_CURRENT
-        }
-
-        return PendingIntent.getActivity(
-            context, 1001, appIntent, intentFlags
-        ).intentSender
-    }
-
-    private fun buildSaveIntent(context: Context, saveData: SaveData, isAutofill: Boolean = false): IntentSender {
-        val appIntent = Intent(context, MainActivity::class.java).apply {
-            if (isAutofill) putExtra(AUTOFILL_REQUEST, true)
-            putExtra(SAVE_DATA, saveData)
-        }
-
-        val intentFlags = PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
-
-        return PendingIntent.getActivity(
-            context, 1001, appIntent, intentFlags
-        ).intentSender
+        return AutofillHelper.buildIntent(applicationContext, 1005, AutofillData.Save(searchHint, SaveData(searchHint, username, password, searchHint)))
     }
 
     companion object {
         const val TAG = "NCPAutofillService"
         private const val TIMEOUT_MS = 2000L
-        const val AUTOFILL_REQUEST = "autofill_request"
-        const val AUTOFILL_SEARCH_HINT = "autofill_query"
-        const val PASSWORD_ID = "password_id"
-        const val SAVE_DATA = "save_data"
+        const val AUTOFILL_DATA = "autofill_data"
     }
 }

@@ -71,6 +71,7 @@ import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlin.reflect.KFunction3
+import com.hegocre.nextcloudpasswords.utils.AutofillData
 
 class EditablePasswordState(originalPassword: Password?) {
     var password by mutableStateOf(originalPassword?.password ?: "")
@@ -147,7 +148,7 @@ fun EditablePasswordView(
     editablePasswordState: EditablePasswordState,
     folders: List<Folder>,
     isUpdating: Boolean,
-    isAutofillRequest: Boolean,
+    autofillData: AutofillData?,
     onGeneratePassword: KFunction3<Int, Boolean, Boolean, Deferred<String?>>?,
     onSavePassword: () -> Unit,
     onDeletePassword: (() -> Unit)? = null
@@ -544,7 +545,7 @@ fun EditablePasswordView(
             )
         }
 
-        if (isAutofillRequest) {
+        if (autofillData != null && autofillData.isAutofill()) {
             item(key = "password_save_autofill") {
                 Button(
                     onClick = {
@@ -673,7 +674,7 @@ fun PasswordEditPreview() {
                 },
                 folders = listOf(),
                 isUpdating = false,
-                isAutofillRequest = true,
+                autofillData = null,
                 onSavePassword = { },
                 onDeletePassword = { },
                 onGeneratePassword = null

@@ -22,46 +22,11 @@ import androidx.autofill.inline.v1.InlineSuggestionUi
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.activities.MainActivity
 import android.service.autofill.SaveInfo
-import android.os.Parcel
-import android.os.Parcelable
 import android.os.Bundle
 import android.util.Log
 import android.view.autofill.AutofillManager
-
-data class SaveData(
-    val label: String,
-    val username: String,
-    val password: String,
-    val url: String
-) : Parcelable {
-    constructor(parcel: Parcel) : this(
-        parcel.readString() ?: "",
-        parcel.readString() ?: "",
-        parcel.readString() ?: "",
-        parcel.readString() ?: ""
-    )
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(label)
-        parcel.writeString(username)
-        parcel.writeString(password)
-        parcel.writeString(url)
-    }
-
-    override fun describeContents(): Int = 0
-
-    companion object CREATOR : Parcelable.Creator<SaveData> {
-        override fun createFromParcel(parcel: Parcel): SaveData {
-            return SaveData(parcel)
-        }
-
-        override fun newArray(size: Int): Array<SaveData?> {
-            return arrayOfNulls(size)
-        }
-    }
-}
-
-data class PasswordAutofillData(val id: String?, val label: String, val username: String?, val password: String?)
+import com.hegocre.nextcloudpasswords.utils.AutofillData
+import com.hegocre.nextcloudpasswords.utils.PasswordAutofillData
 
 @RequiresApi(Build.VERSION_CODES.O)
 object AutofillHelper {
@@ -91,7 +56,7 @@ object AutofillHelper {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O_MR1)
+    @RequiresApi(Build.VERSION_CODES.P)
     fun buildSaveInfo(helper: AssistStructureParser): Pair<SaveInfo, Bundle?>? {
         val requiredIds = mutableListOf<AutofillId>()
         val optionalIds = mutableListOf<AutofillId>()
@@ -153,7 +118,7 @@ object AutofillHelper {
         needsAppLock: Boolean = false
     ): Dataset {
         // build redacted dataset when app lock is needed
-        return if (needsAppLock && password != null && password.id != null) {
+        return if (needsAppLock && password?.id != null) {
             Dataset.Builder().apply {
                 helper.usernameAutofillIds.forEach { autofillId ->
                     addInlineAutofillValue(
@@ -173,7 +138,7 @@ object AutofillHelper {
                         inlinePresentationSpec
                     )
                 }
-                setAuthentication(buildAppLockIntent(context, password.id, helper))
+                setAuthentication(buildIntent(context, 1002, AutofillData.FromId(id=password.id, structure=helper.structure)))
             }.build()
         } else {
             Dataset.Builder().apply {
@@ -208,7 +173,7 @@ object AutofillHelper {
         needsAppLock: Boolean = false
     ): Dataset {
         // build redacted dataset when app lock is needed
-        return if (needsAppLock && password != null && password.id != null) {
+        return if (needsAppLock && password?.id != null) {
             Dataset.Builder().apply {
                 helper.usernameAutofillIds.forEach { autofillId ->
                     addAutofillValue(context, autofillId, password.label, null)
@@ -216,7 +181,7 @@ object AutofillHelper {
                 helper.passwordAutofillIds.forEach { autofillId ->
                     addAutofillValue(context, autofillId, password.label, null)
                 }
-                setAuthentication(buildAppLockIntent(context, password.id, helper))
+                setAuthentication(buildIntent(context, 1002, AutofillData.FromId(id=password.id, structure=helper.structure)))
             }.build()
         } else {
             Dataset.Builder().apply {
@@ -281,9 +246,8 @@ object AutofillHelper {
     ) {
         val autofillLabel = label ?: context.getString(R.string.app_name)
 
-        val authIntent = Intent().apply {
+        val authIntent = Intent(AUTOFILL_INTENT_ID).apply {
             setPackage(context.packageName)
-            identifier = AUTOFILL_INTENT_ID
         }
 
         val intentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -340,17 +304,15 @@ object AutofillHelper {
         }
     }
 
-    fun buildAppLockIntent(context: Context, passwordId: String, helper: AssistStructureParser): IntentSender {
-        val authIntent = Intent(context, MainActivity::class.java).apply {
-            putExtra(NCPAutofillService.AUTOFILL_REQUEST, true)
-            putExtra(NCPAutofillService.PASSWORD_ID, passwordId)
-            putExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, helper.structure)
+    fun buildIntent(context: Context, code: Int, autofillData: AutofillData): IntentSender {
+        val appIntent = Intent(context, MainActivity::class.java).apply {
+            putExtra(NCPAutofillService.AUTOFILL_DATA, autofillData)
         }
 
         val intentFlags = PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
 
         return PendingIntent.getActivity(
-            context, 1001, authIntent, intentFlags // TODO: unique code?
+            context, code, appIntent, intentFlags
         ).intentSender
     }
 
