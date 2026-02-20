@@ -79,7 +79,7 @@ class NCPAutofillService : AutofillService() {
             apiController.csEv1Keychain.asFlow()
         ) { passwords, keychain ->
             ListDecryptionStateNonNullable<Password>(isLoading = true)
-            ListDecryptionStateNonNullable(passwords.filter { !it.trashed && !it.hidden }.decryptPasswords(keychain), false)
+            ListDecryptionStateNonNullable(passwords.decryptPasswords(keychain), false)
         }
         .flowOn(Dispatchers.Default)
         .stateIn(
@@ -163,8 +163,8 @@ class NCPAutofillService : AutofillService() {
         decryptedPasswordsState.first { !it.isLoading }
 
         val filteredList = decryptedPasswordsState.value.decryptedList.filter {
-            it.matches(searchHint, strictUrlMatching.first()) || 
-            (searchByUsername.first() && it.username.contains(searchHint, ignoreCase = true))
+            !it.hidden && !it.trashed && (it.matches(searchHint, strictUrlMatching.first()) 
+                || (searchByUsername.first() && it.username.contains(searchHint, ignoreCase = true)))
         }.let { list ->
             when (orderBy.first()) {
                 PreferencesManager.ORDER_BY_TITLE_DESCENDING -> list.sortedByDescending { it.label.lowercase() }
