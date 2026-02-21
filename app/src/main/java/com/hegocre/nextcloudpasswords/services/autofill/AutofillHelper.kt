@@ -36,7 +36,8 @@ object AutofillHelper {
         helper: AssistStructureParser,
         inlinePresentationSpec: InlinePresentationSpec?,
         intent: IntentSender? = null,
-        needsAppLock: Boolean = false
+        needsAppLock: Boolean = false,
+        datasetIdx: Int = 0
     ): Dataset {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (inlinePresentationSpec != null) {
@@ -46,13 +47,14 @@ object AutofillHelper {
                     helper,
                     inlinePresentationSpec,
                     intent,
-                    needsAppLock
+                    needsAppLock,
+                    datasetIdx
                 )
             } else {
-                buildPresentationDataset(context, password, helper, intent, needsAppLock)
+                buildPresentationDataset(context, password, helper, intent, needsAppLock, datasetIdx)
             }
         } else {
-            buildPresentationDataset(context, password, helper, intent, needsAppLock)
+            buildPresentationDataset(context, password, helper, intent, needsAppLock, datasetIdx)
         }
     }
 
@@ -115,7 +117,8 @@ object AutofillHelper {
         helper: AssistStructureParser,
         inlinePresentationSpec: InlinePresentationSpec,
         intent: IntentSender? = null,
-        needsAppLock: Boolean = false
+        needsAppLock: Boolean = false,
+        datasetIdx: Int
     ): Dataset {
         // build redacted dataset when app lock is needed
         return if (needsAppLock && password?.id != null) {
@@ -138,7 +141,7 @@ object AutofillHelper {
                         inlinePresentationSpec
                     )
                 }
-                setAuthentication(buildIntent(context, 1002, AutofillData.FromId(id=password.id, structure=helper.structure)))
+                setAuthentication(buildIntent(context, 1004+datasetIdx, AutofillData.FromId(id=password.id, structure=helper.structure)))
             }.build()
         } else {
             Dataset.Builder().apply {
@@ -170,7 +173,8 @@ object AutofillHelper {
         password: PasswordAutofillData?,
         helper: AssistStructureParser,
         intent: IntentSender? = null,
-        needsAppLock: Boolean = false
+        needsAppLock: Boolean = false,
+        datasetIdx: Int
     ): Dataset {
         // build redacted dataset when app lock is needed
         return if (needsAppLock && password?.id != null) {
@@ -181,7 +185,7 @@ object AutofillHelper {
                 helper.passwordAutofillIds.forEach { autofillId ->
                     addAutofillValue(context, autofillId, password.label, null)
                 }
-                setAuthentication(buildIntent(context, 1002, AutofillData.FromId(id=password.id, structure=helper.structure)))
+                setAuthentication(buildIntent(context, 1004+datasetIdx, AutofillData.FromId(id=password.id, structure=helper.structure)))
             }.build()
         } else {
             Dataset.Builder().apply {

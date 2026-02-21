@@ -144,7 +144,7 @@ class MainActivity : FragmentActivity() {
         password: PasswordAutofillData,
         structure: AssistStructure
     ) {
-        val dataset = AutofillHelper.buildDataset(this, password, AssistStructureParser(structure), null, null, false)
+        val dataset = AutofillHelper.buildDataset(this, password, AssistStructureParser(structure), null)
 
         val replyIntent = Intent().apply {
             putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, dataset)

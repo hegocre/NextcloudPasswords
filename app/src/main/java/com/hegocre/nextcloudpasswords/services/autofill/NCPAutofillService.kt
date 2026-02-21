@@ -203,7 +203,7 @@ class NCPAutofillService : AutofillService() {
         } else null
 
         // Add one Dataset for each password
-        for (password in passwords) {
+        for ((idx, password) in passwords.withIndex()) {
             builder.addDataset(
                 AutofillHelper.buildDataset(
                     applicationContext,
@@ -216,7 +216,8 @@ class NCPAutofillService : AutofillService() {
                     helper,
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
                     null,
-                    needsAuth
+                    needsAuth,
+                    idx
                 )
             )
         }
@@ -237,7 +238,7 @@ class NCPAutofillService : AutofillService() {
                         PasswordAutofillData(label = "Create new password", id = null, username = null, password = null), // TODO: translation
                         helper,
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
-                        AutofillHelper.buildIntent(applicationContext, 1003, AutofillData.SaveAutofill(searchHint, saveData, helper.structure)),
+                        AutofillHelper.buildIntent(applicationContext, 1002, AutofillData.SaveAutofill(searchHint, saveData, helper.structure)),
                         false
                     )
                 )
@@ -252,7 +253,7 @@ class NCPAutofillService : AutofillService() {
                 PasswordAutofillData(label = ">", id = null, username = null, password = null), // TODO use icon
                 helper,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
-                AutofillHelper.buildIntent(applicationContext, 1004, AutofillData.ChoosePwd(searchHint, helper.structure)),
+                AutofillHelper.buildIntent(applicationContext, 1003, AutofillData.ChoosePwd(searchHint, helper.structure)),
                 false
             )
         )
@@ -341,7 +342,7 @@ class NCPAutofillService : AutofillService() {
         // Determine Search Hint
         val searchHint = helper.webDomain ?: getAppLabel(helper.packageName)
 
-        return AutofillHelper.buildIntent(applicationContext, 1005, AutofillData.Save(searchHint, SaveData(searchHint, username, password, searchHint)))
+        return AutofillHelper.buildIntent(applicationContext, 1004, AutofillData.Save(searchHint, SaveData(searchHint, username, password, searchHint)))
     }
 
     companion object {
