@@ -505,6 +505,12 @@ fun NCPNavHost(
                                                     password = if(saveData.password.isNullOrBlank()) password else saveData.password
                                                 }
                                             }
+                                            is AutofillData.ChoosePwd -> {
+                                                if (selectedPassword == null) {
+                                                    label = autofillData.searchHint
+                                                    url = autofillData.searchHint
+                                                }
+                                            }
                                             else -> {}
                                         }
                                     }
