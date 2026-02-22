@@ -63,8 +63,6 @@ class MainActivity : FragmentActivity() {
             ) {
                 val creator = { structure: AssistStructure -> 
                     { label: String, username: String, password: String ->
-                        Log.d("MainActivity", "Replying to autofill request with label: $label, structure: ${structure}")
-
                         autofillReply(PasswordAutofillData(
                             id = null, 
                             label = label, 
