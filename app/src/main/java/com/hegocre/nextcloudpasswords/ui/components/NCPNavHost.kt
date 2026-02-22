@@ -61,6 +61,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import com.hegocre.nextcloudpasswords.utils.AutofillData
+import androidx.compose.runtime.saveable.rememberSaveable
 
 @ExperimentalMaterial3Api
 @Composable
@@ -480,30 +481,32 @@ fun NCPNavHost(
                             }
 
                             passwordsDecryptionState.decryptedList != null && foldersDecryptionState.decryptedList != null -> {
-                                val editablePasswordState = rememberEditablePasswordState(selectedPassword).apply {
-                                    if (selectedPassword == null) {
-                                        folder = passwordsViewModel.visibleFolder.value?.id ?: folder
-                                    }
-                                    when (autofillData) {
-                                        is AutofillData.SaveAutofill, is AutofillData.Save -> {
-                                            // workaround as the compiler not allow accessing saveData in this dual branch for some reason
-                                            val saveData = (autofillData as? AutofillData.Save)?.saveData ?: (autofillData as AutofillData.SaveAutofill).saveData
-
-                                            if (selectedPassword == null) {
-                                                label = saveData.label
-                                                username = saveData.username
-                                                password = saveData.password
-                                                url = saveData.url
-                                            } else {
-                                                // prioritize existing label and url fields
-                                                label = if(label.isNullOrBlank()) saveData.label else label
-                                                url = if(url.isNullOrBlank()) saveData.url else url
-                                                // prioritize new username and password fields
-                                                username = if(saveData.username.isNullOrBlank()) username else saveData.username
-                                                password = if(saveData.password.isNullOrBlank()) password else saveData.password
-                                            }
+                                val editablePasswordState = rememberSaveable(selectedPassword, saver = EditablePasswordState.Saver) {
+                                    EditablePasswordState(selectedPassword).apply {
+                                        if (selectedPassword == null) {
+                                            folder = passwordsViewModel.visibleFolder.value?.id ?: folder
                                         }
-                                        else -> {}
+                                        when (autofillData) {
+                                            is AutofillData.SaveAutofill, is AutofillData.Save -> {
+                                                // workaround as the compiler not allow accessing saveData in this dual branch for some reason
+                                                val saveData = (autofillData as? AutofillData.Save)?.saveData ?: (autofillData as AutofillData.SaveAutofill).saveData
+
+                                                if (selectedPassword == null) {
+                                                    label = saveData.label
+                                                    username = saveData.username
+                                                    password = saveData.password
+                                                    url = saveData.url
+                                                } else {
+                                                    // prioritize existing label and url fields
+                                                    label = if(label.isNullOrBlank()) saveData.label else label
+                                                    url = if(url.isNullOrBlank()) saveData.url else url
+                                                    // prioritize new username and password fields
+                                                    username = if(saveData.username.isNullOrBlank()) username else saveData.username
+                                                    password = if(saveData.password.isNullOrBlank()) password else saveData.password
+                                                }
+                                            }
+                                            else -> {}
+                                        }
                                     }
                                 }
 
