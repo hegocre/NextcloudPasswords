@@ -47,7 +47,8 @@ import com.hegocre.nextcloudpasswords.utils.SaveData
 
 data class ListDecryptionStateNonNullable<T>(
     val decryptedList: List<T> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val notAllDecrypted: Boolean = false
 )
 
 @TargetApi(Build.VERSION_CODES.O)
@@ -78,7 +79,9 @@ class NCPAutofillService : AutofillService() {
             apiController.csEv1Keychain.asFlow()
         ) { passwords, keychain ->
             ListDecryptionStateNonNullable<Password>(isLoading = true)
-            ListDecryptionStateNonNullable(passwords.decryptPasswords(keychain), false)
+            passwords.decryptPasswords(keychain).let { decryptedPasswords ->
+                ListDecryptionStateNonNullable(decryptedPasswords, false, decryptedPasswords.size < passwords.size)
+            }
         }
         .flowOn(Dispatchers.Default)
         .stateIn(
@@ -144,14 +147,10 @@ class NCPAutofillService : AutofillService() {
         //Log.d(TAG, "User is logged in")
 
         // Try to open Session
-        //if (!apiController.sessionOpen.value && !apiController.openSession(preferencesManager.getMasterPassword())) {
+        //if (!apiController.sessionOpen.value && !passwordController.openSession(preferencesManager.getMasterPassword())) {
         //    Log.w(TAG, "Session is not open and cannot be opened")
         //}
         //Log.d(TAG, "Session is open")
-
-        //if (apiController.sessionOpen.value) {
-        //    passwordController.syncPasswords()
-        //}
 
         // Determine Search Hint
         val searchHint = helper.webDomain ?: getAppLabel(helper.packageName)
@@ -172,7 +171,11 @@ class NCPAutofillService : AutofillService() {
             }
         }
 
-        Log.d(TAG, "Passwords filtered and sorted, count: ${filteredList.size}")
+        // must go to the main app only if there are no passwords to show, and some were not decrypted
+        val needsAppForMasterPassword = if (filteredList.size == 0) decryptedPasswordsState.value.notAllDecrypted
+                                        else false
+
+        Log.d(TAG, "Passwords filtered and sorted, count: ${filteredList.size}, needs input for master password: $needsAppForMasterPassword")
 
         val needsAuth = hasAppLock.first() && (isLocked.firstOrNull() ?: true)
 
@@ -181,7 +184,8 @@ class NCPAutofillService : AutofillService() {
             helper,
             request,
             searchHint,
-            needsAuth
+            needsAuth,
+            needsAppForMasterPassword
         )
     }
 
@@ -190,7 +194,8 @@ class NCPAutofillService : AutofillService() {
         helper: AssistStructureParser,
         request: FillRequest,
         searchHint: String,
-        needsAuth: Boolean
+        needsAuth: Boolean,
+        needsAppForMasterPassword: Boolean
     ): FillResponse {
         Log.d(TAG, "Building FillResponse with ${passwords.size} passwords, needsAuth: $needsAuth")
         val builder = FillResponse.Builder()
@@ -200,49 +205,51 @@ class NCPAutofillService : AutofillService() {
             request.inlineSuggestionsRequest
         } else null
 
-        // Add one Dataset for each password
-        for ((idx, password) in passwords.withIndex()) {
-            builder.addDataset(
-                AutofillHelper.buildDataset(
-                    applicationContext,
-                    PasswordAutofillData(
-                        id = password.id,
-                        label = "${password.label} - ${password.username}", 
-                        username = password.username, 
-                        password = password.password
-                    ),
-                    helper,
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
-                    null,
-                    needsAuth,
-                    idx
-                )
-            )
-        }
-
-        Log.d(TAG, "Datasets added to FillResponse")
-
-        // Button to create a new password in the app and autofill it
-        if (passwords.isEmpty()) {
-            val saveData = SaveData(
-                label = searchHint,
-                username = "",
-                password = "",
-                url = searchHint
-            )
-            builder.addDataset(
+        if (!needsAppForMasterPassword) {
+            // Add one Dataset for each password
+            for ((idx, password) in passwords.withIndex()) {
+                builder.addDataset(
                     AutofillHelper.buildDataset(
                         applicationContext,
-                        PasswordAutofillData(label = "Create new password", id = null, username = null, password = null), // TODO: translation
+                        PasswordAutofillData(
+                            id = password.id,
+                            label = "${password.label} - ${password.username}", 
+                            username = password.username, 
+                            password = password.password
+                        ),
                         helper,
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
-                        AutofillHelper.buildIntent(applicationContext, 1002, AutofillData.SaveAutofill(searchHint, saveData, helper.structure)),
-                        false
+                        null,
+                        needsAuth,
+                        idx
                     )
                 )
             }
 
-        Log.d(TAG, "Button to create new password added to FillResponse")
+            Log.d(TAG, "Datasets added to FillResponse")
+
+            // Button to create a new password in the app and autofill it
+            if (passwords.isEmpty()) {
+                val saveData = SaveData(
+                    label = searchHint,
+                    username = "",
+                    password = "",
+                    url = searchHint
+                )
+                builder.addDataset(
+                        AutofillHelper.buildDataset(
+                            applicationContext,
+                            PasswordAutofillData(label = "Create new password", id = null, username = null, password = null), // TODO: translation
+                            helper,
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
+                            AutofillHelper.buildIntent(applicationContext, 1002, AutofillData.SaveAutofill(searchHint, saveData, helper.structure)),
+                            false
+                        )
+                    )
+                }
+
+            Log.d(TAG, "Button to create new password added to FillResponse")
+        }
 
         // Option to conclude the autofill in the app
         builder.addDataset(
