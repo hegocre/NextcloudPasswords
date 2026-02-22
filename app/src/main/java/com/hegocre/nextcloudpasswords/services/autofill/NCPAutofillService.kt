@@ -65,7 +65,6 @@ class NCPAutofillService : AutofillService() {
     private val isLocked by lazy { appLockHelper.isLocked }
     
     val orderBy by lazy { preferencesManager.getOrderBy() }
-    val searchByUsername by lazy { preferencesManager.getSearchByUsername() }
     val strictUrlMatching by lazy { preferencesManager.getUseStrictUrlMatching() }
 
     private lateinit var decryptedPasswordsState: StateFlow<ListDecryptionStateNonNullable<Password>>
@@ -163,8 +162,7 @@ class NCPAutofillService : AutofillService() {
         decryptedPasswordsState.first { !it.isLoading }
 
         val filteredList = decryptedPasswordsState.value.decryptedList.filter {
-            !it.hidden && !it.trashed && (it.matches(searchHint, strictUrlMatching.first()) 
-                || (searchByUsername.first() && it.username.contains(searchHint, ignoreCase = true)))
+            !it.hidden && !it.trashed && it.matches(searchHint, strictUrlMatching.first())
         }.let { list ->
             when (orderBy.first()) {
                 PreferencesManager.ORDER_BY_TITLE_DESCENDING -> list.sortedByDescending { it.label.lowercase() }
