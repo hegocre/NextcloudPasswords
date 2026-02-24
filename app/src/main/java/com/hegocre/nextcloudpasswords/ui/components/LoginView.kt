@@ -118,8 +118,8 @@ fun LoginView(
             }
         }
 
-    val (urlText, setUrlText) = remember { mutableStateOf("") }
-    var errorText by remember { mutableStateOf("") }
+    val (urlText, setUrlText) = rememberSaveable { mutableStateOf("") }
+    var errorText by rememberSaveable { mutableStateOf("") }
     val errorMessages = listOf(
         stringResource(R.string.error_url_cannot_be_empty),
         stringResource(R.string.error_url_must_start_https)
