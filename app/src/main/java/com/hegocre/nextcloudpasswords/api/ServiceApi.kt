@@ -1,9 +1,11 @@
 package com.hegocre.nextcloudpasswords.api
 
+import android.content.Context
 import android.util.Log
 import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.data.password.GeneratedPassword
 import com.hegocre.nextcloudpasswords.data.password.RequestedPassword
+import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.Result
@@ -20,9 +22,9 @@ import javax.net.ssl.SSLHandshakeException
  * [Service API](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Service-Api).
  * This is a Singleton class and will have only one instance.
  *
- * @param server The [Server] where the requests will be made.
+ * @param context The [Context] where the requests will be made.
  */
-class ServiceApi private constructor(private val server: Server) {
+class ServiceApi private constructor(private val context: Context) {
 
     /**
      * Sends a request to the api to obtain a generated password using user settings.
@@ -42,10 +44,10 @@ class ServiceApi private constructor(private val server: Server) {
 
             val apiResponse = withContext(Dispatchers.IO) {
                 OkHttpRequest.getInstance().post(
-                    sUrl = server.url + PASSWORD_URL,
+                    sUrl = getServer().url + PASSWORD_URL,
                     sessionCode = sessionCode,
-                    username = server.username,
-                    password = server.password,
+                    username = getServer().username,
+                    password = getServer().password,
                     body = requestBody,
                     mediaType = OkHttpRequest.JSON
                 )
@@ -84,7 +86,7 @@ class ServiceApi private constructor(private val server: Server) {
     }
 
     fun getFaviconUrl(url: String): String =
-        server.url + String.format(
+        getServer().url + String.format(
             Locale.getDefault(),
             FAVICON_URL,
             URLEncoder.encode(url, "utf-8"),
@@ -92,12 +94,16 @@ class ServiceApi private constructor(private val server: Server) {
         )
 
     fun getAvatarUrl(): String =
+        getAvatarUrl(getServer())
+
+    fun getAvatarUrl(server: Server): String =
         server.url + String.format(
             Locale.getDefault(),
             AVATAR_URL,
             URLEncoder.encode(server.username, "utf-8"),
             256
         )
+    fun getServer() = UserController.getInstance(context).getServer()
 
     companion object {
         private const val FAVICON_URL = "/index.php/apps/passwords/api/1.0/service/favicon/%s/%d"
@@ -109,15 +115,15 @@ class ServiceApi private constructor(private val server: Server) {
         /**
          * Get the instance of the [ServiceApi], and create it if null.
          *
-         * @param server The [Server] where the requests will be made.
+         * @param context The [Context] where the requests will be made.
          * @return The instance of the api.
          */
-        fun getInstance(server: Server): ServiceApi {
+        fun getInstance(context: Context): ServiceApi {
             synchronized(this) {
                 var tempInstance = instance
 
                 if (tempInstance == null) {
-                    tempInstance = ServiceApi(server)
+                    tempInstance = ServiceApi(context)
                     instance = tempInstance
                 }
 

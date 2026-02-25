@@ -1,10 +1,12 @@
 package com.hegocre.nextcloudpasswords.api
 
+import android.content.Context
 import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.data.folder.DeletedFolder
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.folder.NewFolder
 import com.hegocre.nextcloudpasswords.data.folder.UpdatedFolder
+import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.Result
@@ -13,15 +15,16 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.net.SocketTimeoutException
 import javax.net.ssl.SSLHandshakeException
+import kotlin.context
 
 /**
  * Class with methods used to interact with the
  * [Folder API](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Folder-Api).
  * This is a Singleton class and will have only one instance.
  *
- * @property server The [Server] where the requests will be made.
+ * @property context The [Context] where the requests will be made.
  */
-class FoldersApi private constructor(private var server: Server) {
+class FoldersApi private constructor(private var context: Context) {
 
     /**
      * Sends a request to the api to list all the user passwords. If the user uses CSE, a
@@ -36,10 +39,10 @@ class FoldersApi private constructor(private var server: Server) {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
                 OkHttpRequest.getInstance().get(
-                    sUrl = server.url + LIST_URL,
+                    sUrl = getServer().url + LIST_URL,
                     sessionCode = sessionCode,
-                    username = server.username,
-                    password = server.password
+                    username = getServer().username,
+                    password = getServer().password
                 )
             }
 
@@ -88,12 +91,12 @@ class FoldersApi private constructor(private var server: Server) {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
                 OkHttpRequest.getInstance().post(
-                    sUrl = server.url + CREATE_URL,
+                    sUrl = getServer().url + CREATE_URL,
                     sessionCode = sessionCode,
                     body = Json.encodeToString(newFolder),
                     mediaType = OkHttpRequest.JSON,
-                    username = server.username,
-                    password = server.password
+                    username = getServer().username,
+                    password = getServer().password
                 )
             }
 
@@ -140,12 +143,12 @@ class FoldersApi private constructor(private var server: Server) {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
                 OkHttpRequest.getInstance().patch(
-                    sUrl = server.url + UPDATE_URL,
+                    sUrl = getServer().url + UPDATE_URL,
                     sessionCode = sessionCode,
                     body = Json.encodeToString(updatedFolder),
                     mediaType = OkHttpRequest.JSON,
-                    username = server.username,
-                    password = server.password
+                    username = getServer().username,
+                    password = getServer().password
                 )
             }
 
@@ -191,12 +194,12 @@ class FoldersApi private constructor(private var server: Server) {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
                 OkHttpRequest.getInstance().delete(
-                    sUrl = server.url + DELETE_URL,
+                    sUrl = getServer().url + DELETE_URL,
                     sessionCode = sessionCode,
                     body = Json.encodeToString(deletedFolder),
                     mediaType = OkHttpRequest.JSON,
-                    username = server.username,
-                    password = server.password
+                    username = getServer().username,
+                    password = getServer().password
                 )
             }
 
@@ -228,6 +231,8 @@ class FoldersApi private constructor(private var server: Server) {
         }
     }
 
+    fun getServer() = UserController.getInstance(context).getServer()
+
     companion object {
         private const val LIST_URL = "/index.php/apps/passwords/api/1.0/folder/list"
         private const val CREATE_URL = "/index.php/apps/passwords/api/1.0/folder/create"
@@ -240,15 +245,15 @@ class FoldersApi private constructor(private var server: Server) {
         /**
          * Get the instance of the [FoldersApi], and create it if null.
          *
-         * @param server The [Server] where the requests will be made.
+         * @param context The [Context] where the requests will be made.
          * @return The instance of the api.
          */
-        fun getInstance(server: Server): FoldersApi {
+        fun getInstance(context: Context): FoldersApi {
             synchronized(this) {
                 var tempInstance = instance
 
                 if (tempInstance == null) {
-                    tempInstance = FoldersApi(server)
+                    tempInstance = FoldersApi(context)
                     instance = tempInstance
                 }
 

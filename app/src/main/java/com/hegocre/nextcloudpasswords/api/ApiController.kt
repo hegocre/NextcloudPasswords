@@ -36,16 +36,15 @@ import kotlinx.coroutines.withContext
  *
  * @param context Context of the application.
  */
-class ApiController private constructor(context: Context) {
-    private val server = UserController.getInstance(context).getServer()
+class ApiController private constructor(private final val context: Context) {
 
     private val preferencesManager = PreferencesManager.getInstance(context)
 
-    private val passwordsApi = PasswordsApi.getInstance(server)
-    private val foldersApi = FoldersApi.getInstance(server)
-    private val sessionApi = SessionApi.getInstance(server)
-    private val serviceApi = ServiceApi.getInstance(server)
-    private val settingsApi = SettingsApi.getInstance(server)
+    private val passwordsApi = PasswordsApi.getInstance(context)
+    private val foldersApi = FoldersApi.getInstance(context)
+    private val sessionApi = SessionApi.getInstance(context)
+    private val serviceApi = ServiceApi.getInstance(context)
+    private val settingsApi = SettingsApi.getInstance(context)
 
     private var sessionCode: String? = null
 
@@ -146,12 +145,12 @@ class ApiController private constructor(context: Context) {
                 when (requestResult.code) {
                     Error.API_TIMEOUT -> Log.e(
                         "API Controller",
-                        "Timeout requesting session, user ${server.username}"
+                        "Timeout requesting session, user ${getServer().username}"
                     )
 
                     Error.API_BAD_RESPONSE -> Log.e(
                         "API Controller",
-                        "Bad response on session request, user ${server.username}"
+                        "Bad response on session request, user ${getServer().username}"
                     )
                 }
             }
@@ -182,12 +181,12 @@ class ApiController private constructor(context: Context) {
                 when (openedSessionRequest.code) {
                     Error.API_TIMEOUT -> Log.e(
                         "API Controller",
-                        "Timeout opening session, user ${server.username}"
+                        "Timeout opening session, user ${getServer().username}"
                     )
 
                     Error.API_BAD_RESPONSE -> Log.e(
                         "API Controller",
-                        "Bad response on session open, user ${server.username}"
+                        "Bad response on session open, user ${getServer().username}"
                     )
                 }
             }
@@ -350,11 +349,16 @@ class ApiController private constructor(context: Context) {
         return result is Result.Success
     }
 
+    fun getServer() = UserController.getInstance(context).getServer()
+
     fun getFaviconServiceRequest(url: String): Pair<String, Server> =
-        Pair(serviceApi.getFaviconUrl(url), server)
+        Pair(serviceApi.getFaviconUrl(url), getServer())
 
     fun getAvatarServiceRequest(): Pair<String, Server> =
-        Pair(serviceApi.getAvatarUrl(), server)
+        Pair(serviceApi.getAvatarUrl(), getServer())
+
+    fun getAvatarServiceUrl(server: Server) = serviceApi.getAvatarUrl(server)
+
 
     companion object {
         private var instance: ApiController? = null

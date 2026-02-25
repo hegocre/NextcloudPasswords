@@ -17,7 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
-class KeepAliveWorker(context: Context, private val params: WorkerParameters) :
+class KeepAliveWorker(private val context: Context, private val params: WorkerParameters) :
     CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
         val apiController = ApiController.getInstance(applicationContext)
@@ -26,7 +26,7 @@ class KeepAliveWorker(context: Context, private val params: WorkerParameters) :
         }
 
         val server = UserController.getInstance(applicationContext).getServer()
-        val sessionApi = SessionApi.getInstance(server)
+        val sessionApi = SessionApi.getInstance(context)
 
         val sessionCode = params.inputData.getString(SESSION_CODE_KEY) ?: return Result.failure()
         val keepAliveDelay = params.inputData.getLong(KEEPALIVE_DELAY_KEY, -1L)

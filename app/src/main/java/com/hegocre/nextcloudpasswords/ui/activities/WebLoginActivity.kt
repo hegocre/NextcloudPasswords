@@ -7,9 +7,12 @@ import android.webkit.WebStorage
 import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.launch
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.ui.components.NCPWebLoginScreen
+import kotlinx.coroutines.launch
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -46,13 +49,17 @@ class WebLoginActivity : ComponentActivity() {
 
         val intent = Intent()
         if (user != null && password != null && server != null) {
-            UserController.getInstance(this).logIn(
-                server,
-                user,
-                password
-            )
+            val userController = UserController.getInstance(this)
+            lifecycleScope.launch {
+                userController.logIn(
+                    server,
+                    user,
+                    password
+                )
+            }
             intent.putExtra("loggedIn", true)
             setResult(RESULT_OK, intent)
+
         } else {
             intent.putExtra("loggedIn", false)
             setResult(RESULT_CANCELED, intent)
