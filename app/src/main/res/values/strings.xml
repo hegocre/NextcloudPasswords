@@ -130,4 +130,9 @@
     <string name="preference_order_by_date_asc">Oldest first</string>
     <string name="preference_order_by_date_desc">Newest first</string>
     <string name="order_by_preference_title">Order content by</string>
+    <string name="client_certificate_preference_title">Client Certificate</string>
+    <string name="client_certificate_preference_subtitle">Manage client certificate for mTLS</string>
+    <string name="action_clear_client_certificate">Clear client certificate</string>
+    <string name="client_certificate_cleared_toast">Client certificate cleared</string>
+    <string name="select_client_certificate">Select Client Certificate</string>
 </resources>
