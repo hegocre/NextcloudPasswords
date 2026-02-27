@@ -126,4 +126,9 @@
     <string name="use_strict_domain_matching_preference_subtitle">Passwörter nach der vollständigen Domain abgleichen, ohne Subdomains</string>
     <string name="action_discard">Verwerfen</string>
     <string name="dialog_discard_changes_text">Änderungen an diesem Element werden verworfen. Möchten Sie fortfahren?</string>
+    <string name="preference_order_by_title_asc">A - Z</string>
+    <string name="preference_order_by_title_desc">Z - A</string>
+    <string name="preference_order_by_date_asc">Ältestes zuerst</string>
+    <string name="preference_order_by_date_desc">Neueste zuerst</string>
+    <string name="order_by_preference_title">Inhalt sortieren nach</string>
 </resources>
