@@ -66,6 +66,7 @@ import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
 import com.hegocre.nextcloudpasswords.utils.isValidEmail
 import com.hegocre.nextcloudpasswords.utils.isValidURL
+import com.hegocre.nextcloudpasswords.utils.AutofillData
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
@@ -147,7 +148,7 @@ fun EditablePasswordView(
     editablePasswordState: EditablePasswordState,
     folders: List<Folder>,
     isUpdating: Boolean,
-    isAutofillRequest: Boolean,
+    autofillData: AutofillData?,
     onGeneratePassword: KFunction3<Int, Boolean, Boolean, Deferred<String?>>?,
     onSavePassword: () -> Unit,
     onDeletePassword: (() -> Unit)? = null
@@ -544,7 +545,7 @@ fun EditablePasswordView(
             )
         }
 
-        if (isAutofillRequest) {
+        if (autofillData != null && autofillData.isAutofill()) {
             item(key = "password_save_autofill") {
                 Button(
                     onClick = {
@@ -673,7 +674,7 @@ fun PasswordEditPreview() {
                 },
                 folders = listOf(),
                 isUpdating = false,
-                isAutofillRequest = true,
+                autofillData = null,
                 onSavePassword = { },
                 onDeletePassword = { },
                 onGeneratePassword = null

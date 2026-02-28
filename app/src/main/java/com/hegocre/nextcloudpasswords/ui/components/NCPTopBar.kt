@@ -78,6 +78,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.utils.AutofillData
 import kotlinx.coroutines.job
 
 object AppBarDefaults {
@@ -103,7 +104,7 @@ fun NCPSearchTopBar(
     },
     searchQuery: String = "",
     setSearchQuery: (String) -> Unit = {},
-    isAutofill: Boolean = false,
+    autofillData: AutofillData? = null,
     onLogoutClick: () -> Unit = {},
     searchExpanded: Boolean = false,
     onSearchClick: () -> Unit = {},
@@ -127,7 +128,7 @@ fun NCPSearchTopBar(
                     onSearchClick = onSearchClick,
                     onLogoutClick = onLogoutClick,
                     scrollBehavior = scrollBehavior,
-                    showMenu = !isAutofill,
+                    showMenu = autofillData == null,
                     userAvatar = userAvatar
                 )
             }

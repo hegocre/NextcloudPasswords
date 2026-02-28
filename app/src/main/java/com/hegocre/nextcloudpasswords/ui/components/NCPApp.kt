@@ -56,6 +56,7 @@ import com.hegocre.nextcloudpasswords.api.FoldersApi
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
+import com.hegocre.nextcloudpasswords.utils.AutofillData
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,8 +64,7 @@ import kotlinx.coroutines.launch
 fun NextcloudPasswordsApp(
     passwordsViewModel: PasswordsViewModel,
     onLogOut: () -> Unit,
-    isAutofillRequest: Boolean = false,
-    defaultSearchQuery: String = "",
+    autofillData: AutofillData?,
     replyAutofill: ((String, String, String) -> Unit)? = null
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -92,9 +92,16 @@ fun NextcloudPasswordsApp(
 
     var searchExpanded by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        if (isAutofillRequest) searchExpanded = true
+        if (autofillData != null && autofillData is AutofillData.ChoosePwd) searchExpanded = true
     }
-    val (searchQuery, setSearchQuery) = rememberSaveable { mutableStateOf(defaultSearchQuery) }
+    val (searchQuery, setSearchQuery) = rememberSaveable { mutableStateOf(
+        when (autofillData) {
+            is AutofillData.ChoosePwd -> autofillData.searchHint
+            is AutofillData.SaveAutofill -> autofillData.searchHint
+            is AutofillData.Save -> autofillData.searchHint
+            else -> ""
+        }    
+    )}
 
     val server = remember {
         passwordsViewModel.server
@@ -110,96 +117,99 @@ fun NextcloudPasswordsApp(
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .imePadding(),
             topBar = {
-                if (currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit) {
-                    NCPSearchTopBar(
-                        username = server.username,
-                        serverAddress = server.url,
-                        title = when (currentScreen) {
-                            NCPScreen.Passwords, NCPScreen.Favorites -> stringResource(currentScreen.title)
-                            NCPScreen.Folders -> {
-                                passwordsViewModel.visibleFolder.value?.let {
-                                    if (it.id == FoldersApi.DEFAULT_FOLDER_UUID)
-                                        stringResource(currentScreen.title)
-                                    else
-                                        it.label
-                                } ?: stringResource(currentScreen.title)
-                            }
-
-                            else -> ""
-                        },
-                        userAvatar = { size ->
-                            Image(
-                                painter = passwordsViewModel.getPainterForAvatar(),
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .size(size)
-                            )
-                        },
-                        searchQuery = searchQuery,
-                        setSearchQuery = setSearchQuery,
-                        isAutofill = isAutofillRequest,
-                        searchExpanded = searchExpanded,
-                        onSearchClick = { searchExpanded = true },
-                        onSearchCloseClick = {
-                            searchExpanded = false
-                            setSearchQuery("")
-                        },
-                        onLogoutClick = { showLogOutDialog = true },
-                        scrollBehavior = scrollBehavior
-                    )
-                } else {
-                    TopAppBar(
-                        title = { Text(text = stringResource(id = currentScreen.title)) },
-                        navigationIcon = {
-                            IconButton(onClick = { navController.navigateUp() }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(id = R.string.navigation_back)
+                if (autofillData == null || autofillData is AutofillData.ChoosePwd) {
+                    if (currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit) {
+                        NCPSearchTopBar(
+                            username = server.username,
+                            serverAddress = server.url,
+                            title = when (currentScreen) {
+                                NCPScreen.Passwords, NCPScreen.Favorites -> stringResource(currentScreen.title)
+                                NCPScreen.Folders -> {
+                                    passwordsViewModel.visibleFolder.value?.let {
+                                        if (it.id == FoldersApi.DEFAULT_FOLDER_UUID)
+                                            stringResource(currentScreen.title)
+                                        else
+                                            it.label
+                                    } ?: stringResource(currentScreen.title)
+                                }
+                                else -> ""
+                            },
+                            userAvatar = { size ->
+                                Image(
+                                    painter = passwordsViewModel.getPainterForAvatar(),
+                                    contentDescription = "",
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .size(size)
                                 )
+                            },
+                            searchQuery = searchQuery,
+                            setSearchQuery = setSearchQuery,
+                            autofillData = autofillData,
+                            searchExpanded = searchExpanded,
+                            onSearchClick = { searchExpanded = true },
+                            onSearchCloseClick = {
+                                searchExpanded = false
+                                setSearchQuery("")
+                            },
+                            onLogoutClick = { showLogOutDialog = true },
+                            scrollBehavior = scrollBehavior
+                        )
+                    } else {
+                        TopAppBar(
+                            title = { Text(text = stringResource(id = currentScreen.title)) },
+                            navigationIcon = {
+                                IconButton(onClick = { navController.navigateUp() }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = stringResource(id = R.string.navigation_back)
+                                    )
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             },
             bottomBar = {
-                Column {
-                    AnimatedVisibility(visible = !sessionOpen && showSessionOpenError && !isRefreshing) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.errorContainer,
-                            modifier = Modifier.clickable { (passwordsViewModel.sync()) }
+                if (autofillData == null || autofillData is AutofillData.ChoosePwd) {
+                    Column {
+                        AnimatedVisibility(visible = !sessionOpen && showSessionOpenError && !isRefreshing) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.errorContainer,
+                                modifier = Modifier.clickable { (passwordsViewModel.sync()) }
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.error_cannot_connect_to_server),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                )
+                            }
+                        }
+                        val navigationHeight =
+                            WindowInsets.navigationBars.getBottom(LocalDensity.current)
+                        AnimatedVisibility(
+                            visible = currentScreen != NCPScreen.PasswordEdit
+                                    && currentScreen != NCPScreen.FolderEdit,
+                            enter = slideInVertically(initialOffsetY = { (it + navigationHeight) }),
+                            exit = slideOutVertically(targetOffsetY = { (it + navigationHeight) })
                         ) {
-                            Text(
-                                text = stringResource(id = R.string.error_cannot_connect_to_server),
-                                style = MaterialTheme.typography.bodySmall,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
+                            NCPBottomNavigation(
+                                allScreens = NCPScreen.entries.filter { !it.hidden },
+                                currentScreen = currentScreen,
+                                onScreenSelected = { screen ->
+                                    navController.navigate(screen.name) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                },
                             )
                         }
-                    }
-                    val navigationHeight =
-                        WindowInsets.navigationBars.getBottom(LocalDensity.current)
-                    AnimatedVisibility(
-                        visible = currentScreen != NCPScreen.PasswordEdit
-                                && currentScreen != NCPScreen.FolderEdit,
-                        enter = slideInVertically(initialOffsetY = { (it + navigationHeight) }),
-                        exit = slideOutVertically(targetOffsetY = { (it + navigationHeight) })
-                    ) {
-                        NCPBottomNavigation(
-                            allScreens = NCPScreen.entries.filter { !it.hidden },
-                            currentScreen = currentScreen,
-                            onScreenSelected = { screen ->
-                                navController.navigate(screen.name) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                        )
                     }
                 }
             },
@@ -226,7 +236,7 @@ fun NextcloudPasswordsApp(
                 navController = navController,
                 passwordsViewModel = passwordsViewModel,
                 searchQuery = searchQuery,
-                isAutofillRequest = isAutofillRequest,
+                autofillData = autofillData,
                 modalSheetState = modalSheetState,
                 openPasswordDetails = { password, folderPath ->
                     passwordsViewModel.setVisiblePassword(password, folderPath)

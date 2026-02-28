@@ -20,6 +20,7 @@ import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.services.autofill.AutofillHelper
 import com.hegocre.nextcloudpasswords.services.autofill.NCPAutofillService
+import com.hegocre.nextcloudpasswords.services.autofill.AssistStructureParser
 import com.hegocre.nextcloudpasswords.ui.components.NCPAppLockWrapper
 import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsApp
 import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
@@ -29,9 +30,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import com.hegocre.nextcloudpasswords.utils.AutofillData
+import com.hegocre.nextcloudpasswords.utils.PasswordAutofillData
 
 class MainActivity : FragmentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         if (BuildConfig.DEBUG) LogHelper.getInstance()
 
@@ -43,38 +45,32 @@ class MainActivity : FragmentActivity() {
 
         val passwordsViewModel by viewModels<PasswordsViewModel>()
 
-        val autofillRequested = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            intent.getBooleanExtra(NCPAutofillService.AUTOFILL_REQUEST, false)
+        val autofillData: AutofillData? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                intent.getParcelableExtra(
+                    NCPAutofillService.AUTOFILL_DATA,
+                    AutofillData::class.java
+                )
+            else
+                @Suppress("DEPRECATION") intent.getParcelableExtra(NCPAutofillService.AUTOFILL_DATA)
         } else {
-            false
+            null
         }
-
-        val autofillSearchQuery =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && autofillRequested) {
-                intent.getStringExtra(NCPAutofillService.AUTOFILL_SEARCH_HINT) ?: ""
-            } else {
-                ""
-            }
 
         val replyAutofill: ((String, String, String) -> Unit)? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                && autofillRequested
-            ) {
-                { label, username, password ->
-                    val structure = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                        intent.getParcelableExtra(
-                            AutofillManager.EXTRA_ASSIST_STRUCTURE,
-                            AssistStructure::class.java
-                        )
-                    else
-                        @Suppress("DEPRECATION") intent.getParcelableExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE)
-
-                    if (structure == null) {
-                        setResult(RESULT_CANCELED)
-                        finish()
-                    } else {
-                        autofillReply(Triple(label, username, password), structure)
-                    }
+            ) {     
+                when (autofillData) {
+                    is AutofillData.isAutofill ->
+                        { label: String, username: String, password: String ->
+                            autofillReply(PasswordAutofillData(
+                                id = null, 
+                                label = label, 
+                                username = username, 
+                                password = password
+                            ), autofillData.structure)
+                        }
+                    else -> null    
                 }
             } else null
 
@@ -104,8 +100,7 @@ class MainActivity : FragmentActivity() {
                     passwordsViewModel = passwordsViewModel,
                     onLogOut = { logOut() },
                     replyAutofill = replyAutofill,
-                    isAutofillRequest = autofillRequested,
-                    defaultSearchQuery = autofillSearchQuery
+                    autofillData = autofillData,
                 )
             }
         }
@@ -138,10 +133,10 @@ class MainActivity : FragmentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun autofillReply(
-        password: Triple<String, String, String>,
+        password: PasswordAutofillData,
         structure: AssistStructure
     ) {
-        val dataset = AutofillHelper.buildDataset(this, password, structure, null)
+        val dataset = AutofillHelper.buildDataset(this, password, AssistStructureParser(structure), null)
 
         val replyIntent = Intent().apply {
             putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, dataset)

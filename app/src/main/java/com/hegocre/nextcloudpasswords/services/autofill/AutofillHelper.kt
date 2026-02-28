@@ -2,7 +2,6 @@ package com.hegocre.nextcloudpasswords.services.autofill
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
-import android.app.assist.AssistStructure
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
@@ -20,50 +19,114 @@ import android.widget.inline.InlinePresentationSpec
 import androidx.annotation.RequiresApi
 import androidx.autofill.inline.v1.InlineSuggestionUi
 import com.hegocre.nextcloudpasswords.R
+import com.hegocre.nextcloudpasswords.ui.activities.MainActivity
+import android.service.autofill.SaveInfo
+import android.os.Bundle
+import android.util.Log
+import com.hegocre.nextcloudpasswords.utils.AutofillData
+import com.hegocre.nextcloudpasswords.utils.PasswordAutofillData
 
+@RequiresApi(Build.VERSION_CODES.O)
 object AutofillHelper {
-    @RequiresApi(Build.VERSION_CODES.O)
     fun buildDataset(
         context: Context,
-        password: Triple<String, String, String>?,
-        assistStructure: AssistStructure,
+        password: PasswordAutofillData?,
+        helper: AssistStructureParser,
         inlinePresentationSpec: InlinePresentationSpec?,
-        authenticationIntent: IntentSender? = null
+        intent: IntentSender? = null,
+        needsAppLock: Boolean = false,
+        datasetIdx: Int = 0
     ): Dataset {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (inlinePresentationSpec != null) {
                 buildInlineDataset(
                     context,
                     password,
-                    assistStructure,
+                    helper,
                     inlinePresentationSpec,
-                    authenticationIntent
+                    intent,
+                    needsAppLock,
+                    datasetIdx
                 )
             } else {
-                buildPresentationDataset(context, password, assistStructure, authenticationIntent)
+                buildPresentationDataset(context, password, helper, intent, needsAppLock, datasetIdx)
             }
         } else {
-            buildPresentationDataset(context, password, assistStructure, authenticationIntent)
+            buildPresentationDataset(context, password, helper, intent, needsAppLock, datasetIdx)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun buildSaveInfo(helper: AssistStructureParser): Pair<SaveInfo, Bundle?>? {
+        val requiredIds = mutableListOf<AutofillId>()
+        val optionalIds = mutableListOf<AutofillId>()
+
+        Log.d(NCPAutofillService.TAG, "Building SaveInfo, usernameAutofillIds: ${helper.usernameAutofillIds}, passwordAutofillIds: ${helper.passwordAutofillIds}")
+        
+        if (helper.passwordAutofillIds.size == 1) requiredIds += helper.passwordAutofillIds[0]
+        else optionalIds += helper.passwordAutofillIds
+
+        if (helper.usernameAutofillIds.size == 1) requiredIds += helper.usernameAutofillIds[0]
+        else optionalIds += helper.usernameAutofillIds
+
+        Log.d(NCPAutofillService.TAG, "Required IDs: $requiredIds, Optional IDs: $optionalIds")
+
+        val type = if (!helper.usernameAutofillIds.isEmpty()) {
+            SaveInfo.SAVE_DATA_TYPE_USERNAME or SaveInfo.SAVE_DATA_TYPE_PASSWORD
+        } else {
+            SaveInfo.SAVE_DATA_TYPE_PASSWORD
+        } 
+
+        val builder = if (!requiredIds.isEmpty()) {
+            SaveInfo.Builder(type, requiredIds.toTypedArray())
+        } else {
+            SaveInfo.Builder(type)
+        }
+
+        // if there are only username views but no password views, then delay the save on supported devices
+        if(!helper.usernameAutofillIds.isEmpty() && helper.passwordAutofillIds.isEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Log.d(NCPAutofillService.TAG, "Delaying save because only username views are detected")
+            return Pair(
+                builder.apply {
+                    setFlags(SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE or SaveInfo.FLAG_DELAY_SAVE)
+                }.build(),
+                Bundle().apply {
+                    putCharSequence(USERNAME, helper.usernameAutofillContent.firstOrNull() ?: "")
+                }
+            )
+        } else if (!helper.passwordAutofillIds.isEmpty()) {
+            return Pair(
+                builder.apply {
+                    setFlags(SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE)
+                    if (!optionalIds.isEmpty()) setOptionalIds(optionalIds.toTypedArray())
+                }.build(), 
+                null
+            )
+        } else {
+            // if not delaying save and no password views, do not save
+            return null
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun buildInlineDataset(
         context: Context,
-        password: Triple<String, String, String>?,
-        assistStructure: AssistStructure,
+        password: PasswordAutofillData?,
+        helper: AssistStructureParser,
         inlinePresentationSpec: InlinePresentationSpec,
-        authenticationIntent: IntentSender? = null
+        intent: IntentSender? = null,
+        needsAppLock: Boolean = false,
+        datasetIdx: Int
     ): Dataset {
-        val helper = AssistStructureParser(assistStructure)
-        return Dataset.Builder()
-            .apply {
+        // build redacted dataset when app lock is needed
+        return if (needsAppLock && password?.id != null) {
+            Dataset.Builder().apply {
                 helper.usernameAutofillIds.forEach { autofillId ->
                     addInlineAutofillValue(
                         context,
                         autofillId,
-                        password?.first,
-                        password?.second,
+                        password.label,
+                        null,
                         inlinePresentationSpec
                     )
                 }
@@ -71,40 +134,71 @@ object AutofillHelper {
                     addInlineAutofillValue(
                         context,
                         autofillId,
-                        password?.first,
-                        password?.third,
+                        password.label,
+                        null,
                         inlinePresentationSpec
                     )
                 }
-                if (authenticationIntent != null) {
-                    setAuthentication(authenticationIntent)
-                }
+                setAuthentication(buildIntent(context, 1005+datasetIdx, AutofillData.FromId(id=password.id, structure=helper.structure)))
             }.build()
+        } else {
+            Dataset.Builder().apply {
+                helper.usernameAutofillIds.forEach { autofillId ->
+                    addInlineAutofillValue(
+                        context,
+                        autofillId,
+                        password?.label,
+                        password?.username,
+                        inlinePresentationSpec
+                    )
+                }
+                helper.passwordAutofillIds.forEach { autofillId ->
+                    addInlineAutofillValue(
+                        context,
+                        autofillId,
+                        password?.label,
+                        password?.password,
+                        inlinePresentationSpec
+                    )
+                }
+                intent?.let { setAuthentication(it) }
+            }.build()
+        }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun buildPresentationDataset(
         context: Context,
-        password: Triple<String, String, String>?,
-        assistStructure: AssistStructure,
-        authenticationIntent: IntentSender? = null
+        password: PasswordAutofillData?,
+        helper: AssistStructureParser,
+        intent: IntentSender? = null,
+        needsAppLock: Boolean = false,
+        datasetIdx: Int
     ): Dataset {
-        val helper = AssistStructureParser(assistStructure)
-        return Dataset.Builder().apply {
-            helper.usernameAutofillIds.forEach { autofillId ->
-                addAutofillValue(context, autofillId, password?.first, password?.second)
-            }
-            helper.passwordAutofillIds.forEach { autofillId ->
-                addAutofillValue(context, autofillId, password?.first, password?.third)
-            }
-            if (authenticationIntent != null) {
-                setAuthentication(authenticationIntent)
-            }
-        }.build()
+        // build redacted dataset when app lock is needed
+        return if (needsAppLock && password?.id != null) {
+            Dataset.Builder().apply {
+                helper.usernameAutofillIds.forEach { autofillId ->
+                    addAutofillValue(context, autofillId, password.label, null)
+                }
+                helper.passwordAutofillIds.forEach { autofillId ->
+                    addAutofillValue(context, autofillId, password.label, null)
+                }
+                setAuthentication(buildIntent(context, 1005+datasetIdx, AutofillData.FromId(id=password.id, structure=helper.structure)))
+            }.build()
+        } else {
+            Dataset.Builder().apply {
+                helper.usernameAutofillIds.forEach { autofillId ->
+                    addAutofillValue(context, autofillId, password?.label, password?.username)
+                }
+                helper.passwordAutofillIds.forEach { autofillId ->
+                    addAutofillValue(context, autofillId, password?.label, password?.password)
+                }
+                intent?.let { setAuthentication(it) }
+            }.build()
+        }
     }
 
     @SuppressLint("RestrictedApi")
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun Dataset.Builder.addAutofillValue(
         context: Context,
         autofillId: AutofillId,
@@ -154,9 +248,8 @@ object AutofillHelper {
     ) {
         val autofillLabel = label ?: context.getString(R.string.app_name)
 
-        val authIntent = Intent().apply {
+        val authIntent = Intent(AUTOFILL_INTENT_ID).apply {
             setPackage(context.packageName)
-            identifier = AUTOFILL_INTENT_ID
         }
 
         val intentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -213,5 +306,18 @@ object AutofillHelper {
         }
     }
 
+    fun buildIntent(context: Context, code: Int, autofillData: AutofillData): IntentSender {
+        val appIntent = Intent(context, MainActivity::class.java).apply {
+            putExtra(NCPAutofillService.AUTOFILL_DATA, autofillData)
+        }
+
+        val intentFlags = PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+
+        return PendingIntent.getActivity(
+            context, code, appIntent, intentFlags
+        ).intentSender
+    }
+
     private const val AUTOFILL_INTENT_ID = "com.hegocre.nextcloudpasswords.intents.autofill"
+    const val USERNAME = "username"
 }

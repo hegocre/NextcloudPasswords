@@ -20,8 +20,13 @@ import com.hegocre.nextcloudpasswords.BuildConfig
 class AssistStructureParser(assistStructure: AssistStructure) {
     val usernameAutofillIds = mutableListOf<AutofillId>()
     val passwordAutofillIds = mutableListOf<AutofillId>()
+    val usernameAutofillContent = mutableListOf<String?>()
+    val passwordAutofillContent = mutableListOf<String?>()
     private var lastTextAutofillId: AutofillId? = null
+    private var lastTextAutofillContent: String? = null
     private var candidateTextAutofillId: AutofillId? = null
+
+    val structure = assistStructure
 
     private val webDomains = HashMap<String, Int>()
 
@@ -40,6 +45,7 @@ class AssistStructureParser(assistStructure: AssistStructure) {
         if (usernameAutofillIds.isEmpty())
             candidateTextAutofillId?.let {
                 usernameAutofillIds.add(it)
+                usernameAutofillContent.add(lastTextAutofillContent)
             }
     }
 
@@ -55,15 +61,18 @@ class AssistStructureParser(assistStructure: AssistStructure) {
                 when (fieldType) {
                     FIELD_TYPE_USERNAME -> {
                         usernameAutofillIds.add(autofillId)
+                        usernameAutofillContent.add(node.text.toString())
                     }
                     FIELD_TYPE_PASSWORD -> {
                         passwordAutofillIds.add(autofillId)
+                        passwordAutofillContent.add(node.text.toString())
                         // We save the autofillId of the field above the password field,
                         // in case we don't find any explicit username field
                         candidateTextAutofillId = lastTextAutofillId
                     }
                     FIELD_TYPE_TEXT -> {
                         lastTextAutofillId = autofillId
+                        lastTextAutofillContent = node.text.toString()
                     }
                 }
             }
@@ -104,17 +113,27 @@ class AssistStructureParser(assistStructure: AssistStructure) {
 
             // Get by autofill hint
             node.autofillHints?.forEach { hint ->
-                if (hint == View.AUTOFILL_HINT_USERNAME || hint == View.AUTOFILL_HINT_EMAIL_ADDRESS) {
+                if (hint == View.AUTOFILL_HINT_USERNAME || 
+                    hint == View.AUTOFILL_HINT_EMAIL_ADDRESS || 
+                    hint.contains("user", true) || 
+                    hint.contains("mail", true)
+                ) {
                     return FIELD_TYPE_USERNAME
-                } else if (hint == View.AUTOFILL_HINT_PASSWORD) {
+                } else if (hint == View.AUTOFILL_HINT_PASSWORD || hint.contains("password", true)) {
                     return FIELD_TYPE_PASSWORD
                 }
             }
 
             // Get by HTML attributes
+            if (node.hasAttribute("type", "password") ||
+                node.hasAttribute("name", "password")
+            ) {
+                return FIELD_TYPE_PASSWORD
+            }
+
             if (node.hasAttribute("type", "email") ||
                 node.hasAttribute("type", "tel") ||
-                node.hasAttribute("type", "text") ||
+                //node.hasAttribute("type", "text") ||
                 node.hasAttribute("name", "email") ||
                 node.hasAttribute("name", "mail") ||
                 node.hasAttribute("name", "user") ||
@@ -122,13 +141,10 @@ class AssistStructureParser(assistStructure: AssistStructure) {
             ) {
                 return FIELD_TYPE_USERNAME
             }
-            if (node.hasAttribute("type", "password")) {
-                return FIELD_TYPE_PASSWORD
-            }
 
 
-            if (node.hint?.lowercase()?.contains("user") == true ||
-                node.hint?.lowercase()?.contains("mail") == true
+            if (node.hint?.contains("user", true) == true ||
+                node.hint?.contains("mail", true) == true
             ) {
                 return FIELD_TYPE_USERNAME
             }
@@ -139,6 +155,10 @@ class AssistStructureParser(assistStructure: AssistStructure) {
             }
 
             if (node.inputType.isTextType()) {
+                return FIELD_TYPE_TEXT
+            }
+
+            if (node.hasAttribute("type", "text")) {
                 return FIELD_TYPE_TEXT
             }
         }
@@ -153,7 +173,16 @@ class AssistStructureParser(assistStructure: AssistStructure) {
      * @return Whether the value of the provided attribute matches the provided value.
      */
     private fun AssistStructure.ViewNode?.hasAttribute(attr: String, value: String): Boolean =
-        this?.htmlInfo?.attributes?.firstOrNull { it.first == attr && it.second == value } != null
+        this?.htmlInfo?.attributes?.firstOrNull { it.first.lowercase() == attr && it.second.lowercase() == value } != null
+
+    /**
+     * Retrieve a HTML attribute value from  a view node.
+     *
+     * @param attr The attribute to retrieve.
+     * @return The retrieved attribute value, or null if not found.
+     */
+    private fun AssistStructure.ViewNode?.getAttribute(attr: String): String? =
+        this?.htmlInfo?.attributes?.firstOrNull { it.first.lowercase() == attr }?.second
 
     /**
      * Check if a text field matches the [InputType.TYPE_CLASS_TEXT] input type.
