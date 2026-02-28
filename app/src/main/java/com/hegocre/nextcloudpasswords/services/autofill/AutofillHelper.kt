@@ -139,7 +139,7 @@ object AutofillHelper {
                         inlinePresentationSpec
                     )
                 }
-                setAuthentication(buildIntent(context, 1004+datasetIdx, AutofillData.FromId(id=password.id, structure=helper.structure)))
+                setAuthentication(buildIntent(context, 1005+datasetIdx, AutofillData.FromId(id=password.id, structure=helper.structure)))
             }.build()
         } else {
             Dataset.Builder().apply {
@@ -183,7 +183,7 @@ object AutofillHelper {
                 helper.passwordAutofillIds.forEach { autofillId ->
                     addAutofillValue(context, autofillId, password.label, null)
                 }
-                setAuthentication(buildIntent(context, 1004+datasetIdx, AutofillData.FromId(id=password.id, structure=helper.structure)))
+                setAuthentication(buildIntent(context, 1005+datasetIdx, AutofillData.FromId(id=password.id, structure=helper.structure)))
             }.build()
         } else {
             Dataset.Builder().apply {
