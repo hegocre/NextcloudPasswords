@@ -62,7 +62,6 @@ class NCPAutofillService : AutofillService() {
             passwordController.getPasswords().asFlow(),
             apiController.csEv1Keychain.asFlow()
         ) { passwords, keychain ->
-            ListDecryptionStateNonNullable<Password>(isLoading = true)
             passwords.decryptPasswords(keychain).let { decryptedPasswords ->
                 ListDecryptionStateNonNullable(decryptedPasswords, false, decryptedPasswords.size < passwords.size)
             }
@@ -70,7 +69,7 @@ class NCPAutofillService : AutofillService() {
         .flowOn(Dispatchers.Default)
         .stateIn(
             scope = serviceScope, 
-            started = SharingStarted.Eagerly, 
+            started = SharingStarted.Lazily, 
             initialValue = ListDecryptionStateNonNullable(isLoading = true)
         )
     }
@@ -96,8 +95,7 @@ class NCPAutofillService : AutofillService() {
             } catch (e: CancellationException) {
                 throw e 
             } catch (e: Exception) {
-                Log.e(TAG, "Error handling fill request: ${e.message}")
-                callback.onSuccess(null)
+                callback.onFailure("Error handling fill request: ${e.message}")
             }
         }
 
@@ -282,7 +280,7 @@ class NCPAutofillService : AutofillService() {
 
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val job = serviceScope.launch {
+            serviceScope.launch {
                 try {
                     val intent: IntentSender? = withContext(Dispatchers.Default) {
                         processSaveRequest(request)
@@ -336,7 +334,6 @@ class NCPAutofillService : AutofillService() {
 
     companion object {
         const val TAG = "NCPAutofillService"
-        private const val TIMEOUT_MS = 2000L
         const val AUTOFILL_DATA = "autofill_data"
     }
 }
