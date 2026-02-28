@@ -12,7 +12,7 @@ data class SaveData(
     val username: String,
     val password: String,
     val url: String,
-) : Parcelable {}
+) : Parcelable
 
 sealed class AutofillData : Parcelable {
     interface isAutofill {

@@ -24,7 +24,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -86,13 +85,11 @@ fun NCPNavHost(
     val serverSettings by passwordsViewModel.serverSettings.observeAsState(initial = ServerSettings())
     val sessionOpen by passwordsViewModel.sessionOpen.collectAsState()
 
-    var passwordsDecryptionState by remember { 
-        mutableStateOf(ListDecryptionState<Password>(isLoading = true)) 
-    }
-
-    LaunchedEffect(passwords, keychain) {
-        passwordsDecryptionState = ListDecryptionState<Password>(isLoading = true)
-        passwordsDecryptionState = ListDecryptionState(decryptedList = passwords?.decryptPasswords(keychain) ?: emptyList())
+    val passwordsDecryptionState by produceState(
+        initialValue = ListDecryptionState(isLoading = true),
+        key1 = passwords, key2 = keychain
+    ) {
+        value = ListDecryptionState(decryptedList = passwords?.decryptPasswords(keychain) ?: emptyList())
     }
 
     val foldersDecryptionState by produceState(
@@ -487,17 +484,17 @@ fun NCPNavHost(
                                         when (autofillData) {
                                             is AutofillData.isSave -> {
                                                 if (selectedPassword == null) {
-                                                    label = saveData.label
-                                                    username = saveData.username
-                                                    password = saveData.password
-                                                    url = saveData.url
+                                                    label = autofillData.saveData.label
+                                                    username = autofillData.saveData.username
+                                                    password = autofillData.saveData.password
+                                                    url = autofillData.saveData.url
                                                 } else {
                                                     // prioritize existing label and url fields
-                                                    label = if(label.isNullOrBlank()) saveData.label else label
-                                                    url = if(url.isNullOrBlank()) saveData.url else url
+                                                    label = if(label.isNullOrBlank()) autofillData.saveData.label else label
+                                                    url = if(url.isNullOrBlank()) autofillData.saveData.url else url
                                                     // prioritize new username and password fields
-                                                    username = if(saveData.username.isNullOrBlank()) username else saveData.username
-                                                    password = if(saveData.password.isNullOrBlank()) password else saveData.password
+                                                    username = if(autofillData.saveData.username.isNullOrBlank()) username else autofillData.saveData.username
+                                                    password = if(autofillData.saveData.password.isNullOrBlank()) password else autofillData.saveData.password
                                                 }
                                             }
                                             is AutofillData.ChoosePwd -> {
@@ -587,7 +584,6 @@ fun NCPNavHost(
                                                             editablePasswordState.password
                                                         )
                                                     } else {
-                                                        passwordsDecryptionState = ListDecryptionState<Password>(isLoading = true)
                                                         navController.navigateUp()
                                                     }
                                                 } else {
@@ -668,7 +664,6 @@ fun NCPNavHost(
                                                             editablePasswordState.password
                                                         )
                                                     } else {
-                                                        passwordsDecryptionState = ListDecryptionState<Password>(isLoading = true)
                                                         navController.navigateUp()
                                                     }
                                                 } else {
@@ -692,7 +687,6 @@ fun NCPNavHost(
                                                 if (passwordsViewModel.deletePassword(deletedPassword)
                                                         .await()
                                                 ) {
-                                                    passwordsDecryptionState = ListDecryptionState<Password>(isLoading = true)
                                                     navController.navigateUp()
                                                 } else {
                                                     Toast.makeText(
