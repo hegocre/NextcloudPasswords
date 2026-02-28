@@ -133,7 +133,7 @@ class AssistStructureParser(assistStructure: AssistStructure) {
 
             if (node.hasAttribute("type", "email") ||
                 node.hasAttribute("type", "tel") ||
-                node.hasAttribute("type", "text") ||
+                //node.hasAttribute("type", "text") ||
                 node.hasAttribute("name", "email") ||
                 node.hasAttribute("name", "mail") ||
                 node.hasAttribute("name", "user") ||
@@ -155,6 +155,10 @@ class AssistStructureParser(assistStructure: AssistStructure) {
             }
 
             if (node.inputType.isTextType()) {
+                return FIELD_TYPE_TEXT
+            }
+
+            if (node.hasAttribute("type", "text")) {
                 return FIELD_TYPE_TEXT
             }
         }
