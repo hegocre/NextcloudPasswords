@@ -20,15 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -57,11 +56,10 @@ import com.hegocre.nextcloudpasswords.utils.decryptFolders
 import com.hegocre.nextcloudpasswords.utils.decryptPasswords
 import com.hegocre.nextcloudpasswords.utils.encryptValue
 import com.hegocre.nextcloudpasswords.utils.sha1Hash
+import com.hegocre.nextcloudpasswords.utils.AutofillData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import com.hegocre.nextcloudpasswords.utils.AutofillData
-import androidx.compose.runtime.saveable.rememberSaveable
 
 @ExperimentalMaterial3Api
 @Composable
@@ -487,10 +485,7 @@ fun NCPNavHost(
                                             folder = passwordsViewModel.visibleFolder.value?.id ?: folder
                                         }
                                         when (autofillData) {
-                                            is AutofillData.SaveAutofill, is AutofillData.Save -> {
-                                                // workaround as the compiler not allow accessing saveData in this dual branch for some reason
-                                                val saveData = (autofillData as? AutofillData.Save)?.saveData ?: (autofillData as AutofillData.SaveAutofill).saveData
-
+                                            is AutofillData.isSave -> {
                                                 if (selectedPassword == null) {
                                                     label = saveData.label
                                                     username = saveData.username

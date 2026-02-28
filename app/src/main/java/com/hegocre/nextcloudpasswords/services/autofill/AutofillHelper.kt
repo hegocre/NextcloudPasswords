@@ -2,7 +2,6 @@ package com.hegocre.nextcloudpasswords.services.autofill
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
-import android.app.assist.AssistStructure
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
@@ -24,7 +23,6 @@ import com.hegocre.nextcloudpasswords.ui.activities.MainActivity
 import android.service.autofill.SaveInfo
 import android.os.Bundle
 import android.util.Log
-import android.view.autofill.AutofillManager
 import com.hegocre.nextcloudpasswords.utils.AutofillData
 import com.hegocre.nextcloudpasswords.utils.PasswordAutofillData
 

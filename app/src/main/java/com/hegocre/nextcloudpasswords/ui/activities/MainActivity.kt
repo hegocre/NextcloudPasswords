@@ -30,7 +30,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import android.util.Log
 import com.hegocre.nextcloudpasswords.utils.AutofillData
 import com.hegocre.nextcloudpasswords.utils.PasswordAutofillData
 
@@ -60,23 +59,18 @@ class MainActivity : FragmentActivity() {
 
         val replyAutofill: ((String, String, String) -> Unit)? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-            ) {
-                val creator = { structure: AssistStructure -> 
-                    { label: String, username: String, password: String ->
-                        autofillReply(PasswordAutofillData(
-                            id = null, 
-                            label = label, 
-                            username = username, 
-                            password = password
-                        ), structure)
-                    }
-                }
-                       
+            ) {     
                 when (autofillData) {
-                    is AutofillData.FromId -> creator(autofillData.structure)
-                    is AutofillData.ChoosePwd -> creator(autofillData.structure)
-                    is AutofillData.SaveAutofill -> creator(autofillData.structure)
-                    else -> null
+                    is AutofillData.isAutofill ->
+                        { label: String, username: String, password: String ->
+                            autofillReply(PasswordAutofillData(
+                                id = null, 
+                                label = label, 
+                                username = username, 
+                                password = password
+                            ), autofillData.structure)
+                        }
+                    else -> null    
                 }
             } else null
 

@@ -1,8 +1,6 @@
 package com.hegocre.nextcloudpasswords.services.autofill
 
 import android.annotation.SuppressLint
-import android.app.PendingIntent
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.CancellationSignal
@@ -12,21 +10,17 @@ import android.service.autofill.FillRequest
 import android.service.autofill.FillResponse
 import android.service.autofill.SaveCallback
 import android.service.autofill.SaveRequest
-import androidx.compose.runtime.collectAsState
 import android.util.Log
 import android.annotation.TargetApi
 import androidx.lifecycle.asFlow
 import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.password.PasswordController
-import com.hegocre.nextcloudpasswords.data.password.NewPassword
-import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.data.user.UserException
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import com.hegocre.nextcloudpasswords.utils.decryptPasswords
 import com.hegocre.nextcloudpasswords.utils.AppLockHelper
-import com.hegocre.nextcloudpasswords.ui.activities.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -34,22 +28,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.CancellationException
-import android.content.Context
 import android.content.IntentSender
-import com.hegocre.nextcloudpasswords.utils.encryptValue
-import com.hegocre.nextcloudpasswords.utils.sha1Hash
-import com.hegocre.nextcloudpasswords.api.FoldersApi
 import com.hegocre.nextcloudpasswords.utils.AutofillData
 import com.hegocre.nextcloudpasswords.utils.PasswordAutofillData
 import com.hegocre.nextcloudpasswords.utils.SaveData
-
-data class ListDecryptionStateNonNullable<T>(
-    val decryptedList: List<T> = emptyList(),
-    val isLoading: Boolean = false,
-    val notAllDecrypted: Boolean = false
-)
+import com.hegocre.nextcloudpasswords.utils.ListDecryptionStateNonNullable
 
 @TargetApi(Build.VERSION_CODES.O)
 class NCPAutofillService : AutofillService() {
@@ -255,7 +239,7 @@ class NCPAutofillService : AutofillService() {
         builder.addDataset(
             AutofillHelper.buildDataset(
                 applicationContext,
-                PasswordAutofillData(label = ">", id = null, username = null, password = null), // TODO use icon
+                PasswordAutofillData(label = "More", id = null, username = null, password = null), // TODO translation
                 helper,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
                 AutofillHelper.buildIntent(applicationContext, 1003, AutofillData.ChoosePwd(searchHint, helper.structure)),

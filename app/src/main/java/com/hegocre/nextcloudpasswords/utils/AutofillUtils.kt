@@ -1,6 +1,5 @@
 package com.hegocre.nextcloudpasswords.utils
 
-import android.os.Parcel
 import android.os.Parcelable
 import android.app.assist.AssistStructure
 import kotlinx.parcelize.Parcelize
@@ -16,45 +15,56 @@ data class SaveData(
 ) : Parcelable {}
 
 sealed class AutofillData : Parcelable {
+    interface isAutofill {
+        val structure: AssistStructure
+    }
+
+    interface isSave {
+        val saveData: SaveData
+    }
+
     @Parcelize
     data class FromId(
         val id: String, 
-        val structure: AssistStructure
-    ) : AutofillData()
+        override val structure: AssistStructure
+    ) : AutofillData(), isAutofill
 
     @Parcelize
     data class ChoosePwd(
         val searchHint: String, 
-        val structure: AssistStructure
-    ) : AutofillData()
+        override val structure: AssistStructure
+    ) : AutofillData(), isAutofill
 
     @Parcelize
     data class SaveAutofill(
         val searchHint: String,
-        val saveData: SaveData,
-        val structure: AssistStructure, 
-    ) : AutofillData()
+        override val saveData: SaveData,
+        override val structure: AssistStructure, 
+    ) : AutofillData(), isAutofill, isSave
 
     @Parcelize
     data class Save(
         val searchHint: String,
-        val saveData: SaveData
-    ) : AutofillData()
+        override val saveData: SaveData
+    ) : AutofillData(), isSave
 
     fun isAutofill(): Boolean {
         return when (this) {
-            is FromId -> true
-            is ChoosePwd -> true
-            is SaveAutofill -> true
-            is Save -> false
+            is isAutofill -> true
+            else -> false
         }
     }
 
     fun isSave(): Boolean {
         return when (this) {
-            is SaveAutofill -> true
-            is Save -> true
+            is isSave -> true
             else -> false
         }
     }
 }
+
+data class ListDecryptionStateNonNullable<T>(
+    val decryptedList: List<T> = emptyList(),
+    val isLoading: Boolean = false,
+    val notAllDecrypted: Boolean = false
+)
