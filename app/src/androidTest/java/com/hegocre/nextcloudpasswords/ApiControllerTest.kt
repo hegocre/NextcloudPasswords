@@ -3,6 +3,7 @@ package com.hegocre.nextcloudpasswords
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
 import com.hegocre.nextcloudpasswords.api.ApiController
+import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import org.junit.Assert
@@ -16,10 +17,8 @@ class ApiControllerTest {
     @Before
     fun setup() {
         context = InstrumentationRegistry.getInstrumentation().targetContext
-        with(PreferencesManager.getInstance(context)) {
-            setLoggedInServer("")
-            setLoggedInUser("")
-            setLoggedInPassword("")
+        with(UserController.getInstance(context)) {
+            logIn("","","")
         }
     }
 

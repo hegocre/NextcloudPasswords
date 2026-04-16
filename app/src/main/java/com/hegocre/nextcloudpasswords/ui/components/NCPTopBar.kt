@@ -29,6 +29,7 @@ import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.ManageAccounts
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.BasicAlertDialog
@@ -78,6 +79,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
 import kotlinx.coroutines.job
 
 object AppBarDefaults {
@@ -87,8 +89,7 @@ object AppBarDefaults {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NCPSearchTopBar(
-    username: String,
-    serverAddress: String,
+    passwordsViewModel: PasswordsViewModel? = null,
     modifier: Modifier = Modifier,
     title: String = stringResource(R.string.app_name),
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
@@ -97,7 +98,7 @@ fun NCPSearchTopBar(
     userAvatar: @Composable (Dp) -> Unit = { size ->
         Image(
             imageVector = Icons.Outlined.AccountCircle,
-            contentDescription = username,
+            contentDescription = passwordsViewModel?.server?.username ?: "",
             modifier = Modifier.size(size)
         )
     },
@@ -121,8 +122,7 @@ fun NCPSearchTopBar(
                 )
             } else {
                 TitleAppBar(
-                    username = username,
-                    serverAddress = serverAddress,
+                    passwordsViewModel = passwordsViewModel,
                     title = title,
                     onSearchClick = onSearchClick,
                     onLogoutClick = onLogoutClick,
@@ -138,8 +138,7 @@ fun NCPSearchTopBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TitleAppBar(
-    username: String,
-    serverAddress: String,
+    passwordsViewModel: PasswordsViewModel? = null,
     title: String,
     onSearchClick: () -> Unit,
     onLogoutClick: () -> Unit,
@@ -170,8 +169,8 @@ fun TitleAppBar(
                     }
 
                     PopupAppMenu(
-                        username = username,
-                        serverAddress = serverAddress,
+                        username = passwordsViewModel?.server?.username ?: "",
+                        serverAddress = passwordsViewModel?.server?.url ?: "",
                         menuExpanded = menuExpanded,
                         userAvatar = userAvatar,
                         onDismissRequest = { menuExpanded = false },
@@ -379,6 +378,31 @@ fun PopupAppMenu(
 
                         DropdownMenuItem(
                             onClick = {
+                                val intent =
+                                    Intent("com.hegocre.nextcloudpasswords.action.accounts")
+                                        .setPackage(context.packageName)
+                                context.startActivity(intent)
+                                onDismissRequest()
+                            },
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.screen_manage_accounts),
+                                    modifier = Modifier.padding(end = 16.dp)
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.ManageAccounts,
+                                    contentDescription = stringResource(id = R.string.screen_manage_accounts),
+                                    modifier = Modifier
+                                        .padding(end = 8.dp)
+                                        .padding(start = 16.dp)
+                                )
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            onClick = {
                                 val intent = Intent("com.hegocre.nextcloudpasswords.action.about")
                                     .setPackage(context.packageName)
                                 context.startActivity(intent)
@@ -464,7 +488,7 @@ fun PopupAppMenu(
 @Composable
 fun TopBarPreview() {
     NextcloudPasswordsTheme {
-        NCPSearchTopBar("", "")
+        NCPSearchTopBar()
     }
 }
 

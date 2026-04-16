@@ -1,9 +1,11 @@
 package com.hegocre.nextcloudpasswords.api
 
+import android.content.Context
 import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.api.encryption.PWDv1Challenge
 import com.hegocre.nextcloudpasswords.api.exceptions.ClientDeauthorizedException
 import com.hegocre.nextcloudpasswords.api.exceptions.PWDv1ChallengeMasterKeyInvalidException
+import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.utils.Error
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.Result
@@ -18,9 +20,9 @@ import javax.net.ssl.SSLHandshakeException
  * [Session API](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Session-Api).
  * This is a Singleton class and will have only one instance.
  *
- * @param server The [Server] where the requests will be made.
+ * @param context The [Context] where the requests will be made.
  */
-class SessionApi private constructor(private var server: Server) {
+class SessionApi private constructor(private var context: Context) {
 
     /**
      * Sends a request to the api to open a session. If the user uses client-side encryption,
@@ -33,9 +35,9 @@ class SessionApi private constructor(private var server: Server) {
             val apiResponse = try {
                 withContext(Dispatchers.IO) {
                     OkHttpRequest.getInstance().get(
-                        sUrl = server.url + REQUEST_URL,
-                        username = server.username,
-                        password = server.password
+                        sUrl = getServer().url + REQUEST_URL,
+                        username = getServer().username,
+                        password = getServer().password
                     )
                 }
             } catch (e: SSLHandshakeException) {
@@ -92,11 +94,11 @@ class SessionApi private constructor(private var server: Server) {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
                 OkHttpRequest.getInstance().post(
-                    sUrl = server.url + OPEN_URL,
+                    sUrl = getServer().url + OPEN_URL,
                     body = jsonChallenge,
                     mediaType = OkHttpRequest.JSON,
-                    username = server.username,
-                    password = server.password
+                    username = getServer().username,
+                    password = getServer().password
                 )
             }
 
@@ -148,10 +150,10 @@ class SessionApi private constructor(private var server: Server) {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
                 OkHttpRequest.getInstance().get(
-                    sUrl = server.url + KEEPALIVE_URL,
+                    sUrl = getServer().url + KEEPALIVE_URL,
                     sessionCode = sessionCode,
-                    username = server.username,
-                    password = server.password
+                    username = getServer().username,
+                    password = getServer().password
                 )
             }
 
@@ -180,10 +182,10 @@ class SessionApi private constructor(private var server: Server) {
         return try {
             val apiResponse = withContext(Dispatchers.IO) {
                 OkHttpRequest.getInstance().get(
-                    sUrl = server.url + CLOSE_URL,
+                    sUrl = getServer().url + CLOSE_URL,
                     sessionCode = sessionCode,
-                    username = server.username,
-                    password = server.password
+                    username = getServer().username,
+                    password = getServer().password
                 )
             }
 
@@ -201,6 +203,8 @@ class SessionApi private constructor(private var server: Server) {
         }
     }
 
+    fun getServer() = UserController.getInstance(context).getServer()
+
     companion object {
         private const val REQUEST_URL = "/index.php/apps/passwords/api/1.0/session/request"
         private const val OPEN_URL = "/index.php/apps/passwords/api/1.0/session/open"
@@ -212,15 +216,15 @@ class SessionApi private constructor(private var server: Server) {
         /**
          * Get the instance of the [SessionApi], and create it if null.
          *
-         * @param server The [Server] where the requests will be made.
+         * @param context The [Context] where the requests will be made.
          * @return The instance of the api.
          */
-        fun getInstance(server: Server): SessionApi {
+        fun getInstance(context: Context): SessionApi {
             synchronized(this) {
                 var tempInstance = instance
 
                 if (tempInstance == null) {
-                    tempInstance = SessionApi(server)
+                    tempInstance = SessionApi(context)
                     instance = tempInstance
                 }
 
