@@ -122,4 +122,13 @@
     <string name="action_save_autofill">儲存並自動填入</string>
     <string name="error_invalid_password">無效的密碼</string>
     <string name="preferences_category_search">搜尋</string>
+    <string name="use_strict_domain_matching_preference_title">嚴格的域名比對</string>
+    <string name="use_strict_domain_matching_preference_subtitle">以完整域名配對密碼，排除子域名</string>
+    <string name="action_discard">捨棄</string>
+    <string name="dialog_discard_changes_text">對此項目進行的變更將被捨棄。確定繼續嗎？</string>
+    <string name="preference_order_by_title_asc">字母升序</string>
+    <string name="preference_order_by_title_desc">字母降序</string>
+    <string name="preference_order_by_date_asc">舊的在前</string>
+    <string name="preference_order_by_date_desc">新的在前</string>
+    <string name="order_by_preference_title">排序依據</string>
 </resources>
