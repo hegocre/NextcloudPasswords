@@ -19,8 +19,17 @@ class AppLockHelper private constructor(context: Context) {
 
     fun checkPasscode(passcode: String): Deferred<Boolean> {
         return CoroutineScope(Dispatchers.Default).async {
-            val correctPasscode = preferencesManager.getAppLockPasscode() ?: "0000"
+            // If the stored passcode cannot be read, never accept any input instead
+            // of silently falling back to a default passcode
+            val correctPasscode = preferencesManager.getAppLockPasscode()
+                ?: return@async false
             passcode == correctPasscode
+        }
+    }
+
+    fun getPasscodeLength(): Deferred<Int?> {
+        return CoroutineScope(Dispatchers.Default).async {
+            preferencesManager.getAppLockPasscode()?.length
         }
     }
 
@@ -48,6 +57,21 @@ class AppLockHelper private constructor(context: Context) {
                 instance = tempInstance
                 return tempInstance
             }
+        }
+
+        /**
+         * Decides whether an incorrect passcode [input] should be rejected with
+         * visible feedback (and the input cleared). Because the passcode dialog
+         * has no submit button, an attempt is only considered complete once it
+         * reaches the length of the stored passcode.
+         *
+         * @param correctPasscodeLength length of the stored passcode, or `null`
+         * when it cannot be read. In the latter case any non-empty [input] is
+         * rejected, as the passcode can never be verified.
+         */
+        fun shouldRejectPasscodeAttempt(input: String, correctPasscodeLength: Int?): Boolean {
+            if (input.isEmpty()) return false
+            return correctPasscodeLength == null || input.length >= correctPasscodeLength
         }
     }
 }

@@ -555,9 +555,9 @@ fun InputPasscodeDialog(
                         .focusRequester(requester),
                     value = passcode,
                     onValueChange = { newPasscode ->
-                        if (newPasscode.length <= 16 &&
-                            (newPasscode.toIntOrNull() != null || newPasscode.isEmpty())
-                        ) {
+                        // Do not parse as Int, passcodes longer than 9 digits
+                        // would overflow and get rejected
+                        if (newPasscode.length <= 16 && newPasscode.all { it.isDigit() }) {
                             setPasscode(newPasscode)
                         }
                     },
@@ -582,7 +582,9 @@ fun InputPasscodeDialog(
 
                 TextButton(
                     onClick = {
-                        if (passcode.length < 4 || passcode.toIntOrNull() == null) {
+                        // Keep in sync with the input filter above: passcodes may
+                        // be up to 16 digits, which would overflow toIntOrNull()
+                        if (passcode.length < 4 || !passcode.all { it.isDigit() }) {
                             showEmptyError = true
                         } else {
                             onInputPasscode(passcode)
