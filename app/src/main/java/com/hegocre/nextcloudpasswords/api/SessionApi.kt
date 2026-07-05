@@ -14,6 +14,29 @@ import java.net.SocketTimeoutException
 import javax.net.ssl.SSLHandshakeException
 
 /**
+ * Outcome of an initial `session/request` call, classified by HTTP status.
+ *
+ * A `401` is treated as [RECOVERABLE_AUTH_ERROR] rather than a permanent
+ * deauthorization. The server returns `401` for any failed Nextcloud
+ * authentication — an expired or server-side-invalidated app token, but equally
+ * a `401` injected by something in front of Nextcloud (captive portal, reverse
+ * proxy, WAF) on a flaky connection. The body is empty in every case, so a
+ * transient `401` cannot be told apart from a genuine revocation, and a password
+ * manager must not destroy the locally cached (offline) vault over an ambiguous,
+ * possibly transient failure. Core brute-force throttling surfaces as `429`
+ * (handled as [BAD_RESPONSE]); only the Passwords app's explicit login-attempt
+ * lockout returns `403`, which is treated as [DEAUTHORIZED].
+ */
+enum class SessionRequestOutcome { SUCCESS, RECOVERABLE_AUTH_ERROR, DEAUTHORIZED, BAD_RESPONSE }
+
+fun classifySessionRequest(code: Int): SessionRequestOutcome = when (code) {
+    200 -> SessionRequestOutcome.SUCCESS
+    401 -> SessionRequestOutcome.RECOVERABLE_AUTH_ERROR
+    403 -> SessionRequestOutcome.DEAUTHORIZED
+    else -> SessionRequestOutcome.BAD_RESPONSE
+}
+
+/**
  * Class with methods used to interact with the
  * [Session API](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api/Session-Api).
  * This is a Singleton class and will have only one instance.
@@ -57,12 +80,14 @@ class SessionApi private constructor(private var server: Server) {
                 apiResponse.close()
             }
 
-            if (code == 403 || code == 401)
-                throw ClientDeauthorizedException()
-
-            if (code == 200) {
-                Result.Success(PWDv1Challenge.fromJson(body))
-            } else Result.Error(Error.API_BAD_RESPONSE)
+            when (classifySessionRequest(code)) {
+                SessionRequestOutcome.SUCCESS -> Result.Success(PWDv1Challenge.fromJson(body))
+                // Keep the user logged in on a transient auth failure: the caller
+                // falls back to the cached keychain instead of wiping local data
+                SessionRequestOutcome.RECOVERABLE_AUTH_ERROR -> Result.Error(Error.API_AUTH_ERROR)
+                SessionRequestOutcome.DEAUTHORIZED -> throw ClientDeauthorizedException()
+                SessionRequestOutcome.BAD_RESPONSE -> Result.Error(Error.API_BAD_RESPONSE)
+            }
 
         } catch (e: SocketTimeoutException) {
             if (BuildConfig.DEBUG) {
