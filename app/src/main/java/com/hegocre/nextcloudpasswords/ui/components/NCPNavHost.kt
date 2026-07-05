@@ -315,6 +315,9 @@ fun NCPNavHost(
                                 it.parent == FoldersApi.DEFAULT_FOLDER_UUID
                             }
                         }
+                        val folderPasswordCounts = remember(passwordsDecryptionState.decryptedList) {
+                            folderPasswordCounts(passwordsDecryptionState.decryptedList ?: emptyList())
+                        }
                         when {
                             foldersDecryptionState.isLoading || passwordsDecryptionState.isLoading -> {
                                 Box(modifier = Modifier.fillMaxSize()) {
@@ -343,6 +346,7 @@ fun NCPNavHost(
                                         MixedLazyColumn(
                                             passwords = filteredPasswordsParentFolder,
                                             folders = filteredFoldersParentFolder,
+                                            folderPasswordCounts = folderPasswordCounts,
                                             onPasswordClick = onPasswordClick,
                                             onPasswordLongClick = {
                                                 if (sessionOpen && (autofillData == null || autofillData.isSave()) && it.editable)
@@ -381,6 +385,9 @@ fun NCPNavHost(
                         filteredFolderList?.filter {
                             it.parent == folderUuid
                         }
+                    }
+                    val folderPasswordCounts = remember(passwordsDecryptionState.decryptedList) {
+                        folderPasswordCounts(passwordsDecryptionState.decryptedList ?: emptyList())
                     }
                     NCPNavHostComposable(
                         modalSheetState = modalSheetState,
@@ -421,6 +428,7 @@ fun NCPNavHost(
                                         MixedLazyColumn(
                                             passwords = filteredPasswordsSelectedFolder,
                                             folders = filteredFoldersSelectedFolder,
+                                            folderPasswordCounts = folderPasswordCounts,
                                             onPasswordClick = onPasswordClick,
                                             onPasswordLongClick = {
                                                 if (sessionOpen && (autofillData == null || autofillData.isSave()) && it.editable)

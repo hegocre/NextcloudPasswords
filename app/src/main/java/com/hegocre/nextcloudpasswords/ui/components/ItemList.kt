@@ -54,6 +54,17 @@ data class ListDecryptionState<T>(
     val isLoading: Boolean = false
 )
 
+/**
+ * Counts the visible (not hidden, not trashed) passwords per folder id, so a
+ * folder row can show how many passwords it directly contains. Counts direct
+ * children only, matching the passwords shown when the folder is opened.
+ */
+fun folderPasswordCounts(passwords: List<Password>): Map<String, Int> =
+    passwords.asSequence()
+        .filter { !it.hidden && !it.trashed }
+        .groupingBy { it.folder }
+        .eachCount()
+
 @Composable
 fun MixedLazyColumn(
     passwords: List<Password>? = null,
@@ -62,7 +73,8 @@ fun MixedLazyColumn(
     onPasswordLongClick: ((Password) -> Unit)? = null,
     onFolderClick: ((Folder) -> Unit)? = null,
     onFolderLongClick: ((Folder) -> Unit)? = null,
-    getPainterForUrl: (@Composable (String) -> Painter)? = null
+    getPainterForUrl: (@Composable (String) -> Painter)? = null,
+    folderPasswordCounts: Map<String, Int>? = null
 ) {
     val context = LocalContext.current
     val shouldShowIcon by PreferencesManager.getInstance(context).getShowIcons()
@@ -89,6 +101,7 @@ fun MixedLazyColumn(
             items(items = it, key = { folder -> folder.id }) { folder ->
                 FolderRow(
                     folder = folder,
+                    passwordCount = folderPasswordCounts?.let { it[folder.id] ?: 0 },
                     onFolderClick = onFolderClick,
                     onFolderLongClick = onFolderLongClick
                 )
@@ -179,6 +192,7 @@ fun PasswordRow(
 fun FolderRow(
     folder: Folder,
     modifier: Modifier = Modifier,
+    passwordCount: Int? = null,
     onFolderClick: ((Folder) -> Unit)? = null,
     onFolderLongClick: ((Folder) -> Unit)? = null,
 ) {
@@ -195,6 +209,15 @@ fun FolderRow(
         },
         headlineContent = {
             Text(text = folder.label)
+        },
+        trailingContent = passwordCount?.let { count ->
+            {
+                Text(
+                    text = count.toString(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         },
         modifier = modifier
             .combinedClickable(
