@@ -15,6 +15,14 @@ data class CustomField(
     val type: String,
     val value: String
 ) {
+    /**
+     * Whether this field holds a secret value. Secret fields are masked in the UI and
+     * should be marked as sensitive when copied, so the system keeps them out of the
+     * clipboard preview and history (Android 13+), just like the account password.
+     */
+    val isSensitive: Boolean
+        get() = type == TYPE_SECRET
+
     companion object {
         const val TYPE_TEXT = "text"
         const val TYPE_SECRET = "secret"

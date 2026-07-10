@@ -347,7 +347,7 @@ fun PasswordItemContent(
                                 },
                                 trailingIcon = {
                                     IconButton(onClick = {
-                                        context.copyToClipboard(customField.value)
+                                        context.copyToClipboard(customField.value, isSensitive = customField.isSensitive)
                                         Toast.makeText(
                                             context,
                                             String.format(copiedText, customField.label),
@@ -378,7 +378,7 @@ fun PasswordItemContent(
                                 },
                                 trailingIcon = {
                                     IconButton(onClick = {
-                                        context.copyToClipboard(customField.value)
+                                        context.copyToClipboard(customField.value, isSensitive = customField.isSensitive)
                                         Toast.makeText(
                                             context,
                                             String.format(copiedText, customField.label),
@@ -409,7 +409,7 @@ fun PasswordItemContent(
                                 },
                                 trailingIcon = {
                                     IconButton(onClick = {
-                                        context.copyToClipboard(customField.value)
+                                        context.copyToClipboard(customField.value, isSensitive = customField.isSensitive)
                                         Toast.makeText(
                                             context,
                                             String.format(copiedText, customField.label),
