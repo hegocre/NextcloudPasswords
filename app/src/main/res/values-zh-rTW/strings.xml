@@ -64,6 +64,7 @@
     <string name="password_attr_security_status">安全狀態</string>
     <string name="content_description_folder_icon">資料夾圖示</string>
     <string name="new_password">新密碼</string>
+    <string name="more">更多的</string>
     <string name="menu">選單</string>
     <string name="action_clear_search_query">清除搜尋</string>
     <string name="action_generate_password">產生密碼</string>
