@@ -64,6 +64,7 @@
     <string name="password_attr_security_status">Turvalisuse olek</string>
     <string name="content_description_folder_icon">Kausta ikoon</string>
     <string name="new_password">Uus parool</string>
+    <string name="more">Rohkem</string>
     <string name="menu">Menüü</string>
     <string name="action_clear_search_query">Puhasta otsingu päring</string>
     <string name="action_generate_password">Genereeri parool</string>
