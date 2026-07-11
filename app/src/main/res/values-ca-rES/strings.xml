@@ -64,6 +64,7 @@
     <string name="password_attr_security_status">Estat de seguretat</string>
     <string name="content_description_folder_icon">Icona de la carpeta</string>
     <string name="new_password">Nova contrasenya</string>
+    <string name="more">Més</string>
     <string name="menu">Menú</string>
     <string name="action_clear_search_query">Netejar els termes de cerca</string>
     <string name="action_generate_password">Generar contrasenya</string>
