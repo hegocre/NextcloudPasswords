@@ -64,6 +64,7 @@
     <string name="password_attr_security_status">Güvenlik durumu</string>
     <string name="content_description_folder_icon">Klasör simgesi</string>
     <string name="new_password">Yeni şifre</string>
+    <string name="more">Daha</string>
     <string name="menu">Menü</string>
     <string name="action_clear_search_query">Arama sorgusunu temizle</string>
     <string name="action_generate_password">Şifre üret</string>
