@@ -64,6 +64,7 @@
     <string name="password_attr_security_status">Безопасность</string>
     <string name="content_description_folder_icon">Иконка папки</string>
     <string name="new_password">Новый пароль</string>
+    <string name="more">Более</string>
     <string name="menu">Меню</string>
     <string name="action_clear_search_query">Очистить поисковый запрос</string>
     <string name="action_generate_password">Сгенерировать пароль</string>
