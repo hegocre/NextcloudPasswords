@@ -63,6 +63,7 @@
     <string name="password_attr_security_status">Security status</string>
     <string name="content_description_folder_icon">Folder icon</string>
     <string name="new_password">New password</string>
+    <string name="more">More</string>
     <string name="menu">Menu</string>
     <string name="action_clear_search_query">Clear search query</string>
     <string name="action_generate_password">Generate password</string>
