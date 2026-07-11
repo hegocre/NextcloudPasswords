@@ -64,6 +64,7 @@
     <string name="password_attr_security_status">Status zabezpečení</string>
     <string name="content_description_folder_icon">Ikona složky</string>
     <string name="new_password">Nové heslo</string>
+    <string name="more">Více</string>
     <string name="menu">Menu</string>
     <string name="action_clear_search_query">Vymazat hledaný dotaz</string>
     <string name="action_generate_password">Vygenerovat heslo</string>
