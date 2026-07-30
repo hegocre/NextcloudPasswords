@@ -63,6 +63,7 @@ import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.AppLockHelper
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import com.hegocre.nextcloudpasswords.utils.showBiometricPrompt
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -87,7 +88,8 @@ fun NCPAppLockWrapper(
             if (locked) {
                 NextcloudPasswordsAppLock(
                     onCheckPasscode = appLockHelper::checkPasscode,
-                    onCorrectPasscode = appLockHelper::disableLock
+                    onCorrectPasscode = appLockHelper::disableLock,
+                    onGetPasscodeLength = appLockHelper::getPasscodeLength
                 )
             } else {
                 if (hasAppLock == false) {
@@ -103,14 +105,22 @@ fun NCPAppLockWrapper(
 @Composable
 fun NextcloudPasswordsAppLock(
     onCheckPasscode: (String) -> Deferred<Boolean>,
-    onCorrectPasscode: () -> Unit
+    onCorrectPasscode: () -> Unit,
+    onGetPasscodeLength: () -> Deferred<Int?> = { CompletableDeferred(null) }
 ) {
     val isPreview = LocalInspectionMode.current
 
-    val (inputPassword, setInputPassword) = rememberSaveable {
+    var inputPassword by rememberSaveable {
         mutableStateOf("")
     }
     var isError by remember { mutableStateOf(false) }
+
+    var passcodeLength by remember { mutableStateOf<Int?>(null) }
+    var passcodeLengthLoaded by remember { mutableStateOf(false) }
+    LaunchedEffect(key1 = Unit) {
+        passcodeLength = onGetPasscodeLength().await()
+        passcodeLengthLoaded = true
+    }
 
     val context = LocalContext.current
     val hasBiometricAppLock by if (isPreview) remember { mutableStateOf(true) }
@@ -126,9 +136,18 @@ fun NextcloudPasswordsAppLock(
     val biometricPromptTitle = stringResource(R.string.biometric_prompt_title)
     val biometricPromptDescription = stringResource(R.string.biometric_prompt_description)
 
-    LaunchedEffect(key1 = inputPassword) {
+    LaunchedEffect(inputPassword, passcodeLengthLoaded) {
         if (onCheckPasscode(inputPassword).await()) {
             onCorrectPasscode()
+        } else if (passcodeLengthLoaded &&
+            AppLockHelper.shouldRejectPasscodeAttempt(inputPassword, passcodeLength)
+        ) {
+            // Complete but incorrect passcode, or the stored passcode is not
+            // readable: give feedback instead of accepting digits endlessly.
+            // As with any submit-less PIN pad, clearing on the last digit
+            // reveals the passcode length, which the indicator dots already show.
+            isError = true
+            inputPassword = ""
         }
     }
 
@@ -158,17 +177,17 @@ fun NextcloudPasswordsAppLock(
                 .onKeyEvent { keyEvent ->
                     if (keyEvent.type == KeyEventType.KeyDown) {
                         when (keyEvent.key) {
-                            Key.Zero, Key.NumPad0 -> setInputPassword(inputPassword + "0")
-                            Key.One, Key.NumPad1 -> setInputPassword(inputPassword + "1")
-                            Key.Two, Key.NumPad2 -> setInputPassword(inputPassword + "2")
-                            Key.Three, Key.NumPad3 -> setInputPassword(inputPassword + "3")
-                            Key.Four, Key.NumPad4 -> setInputPassword(inputPassword + "4")
-                            Key.Five, Key.NumPad5 -> setInputPassword(inputPassword + "5")
-                            Key.Six, Key.NumPad6 -> setInputPassword(inputPassword + "6")
-                            Key.Seven, Key.NumPad7 -> setInputPassword(inputPassword + "7")
-                            Key.Eight, Key.NumPad8 -> setInputPassword(inputPassword + "8")
-                            Key.Nine, Key.NumPad9 -> setInputPassword(inputPassword + "9")
-                            Key.Backspace -> setInputPassword(inputPassword.dropLast(1))
+                            Key.Zero, Key.NumPad0 -> inputPassword += "0"
+                            Key.One, Key.NumPad1 -> inputPassword += "1"
+                            Key.Two, Key.NumPad2 -> inputPassword += "2"
+                            Key.Three, Key.NumPad3 -> inputPassword += "3"
+                            Key.Four, Key.NumPad4 -> inputPassword += "4"
+                            Key.Five, Key.NumPad5 -> inputPassword += "5"
+                            Key.Six, Key.NumPad6 -> inputPassword += "6"
+                            Key.Seven, Key.NumPad7 -> inputPassword += "7"
+                            Key.Eight, Key.NumPad8 -> inputPassword += "8"
+                            Key.Nine, Key.NumPad9 -> inputPassword += "9"
+                            Key.Backspace -> inputPassword = inputPassword.dropLast(1)
                         }
                     }
                     return@onKeyEvent true
@@ -201,7 +220,7 @@ fun NextcloudPasswordsAppLock(
 
                         KeyPad(
                             inputPassword = inputPassword,
-                            setInputPassword = { setInputPassword(inputPassword + it) },
+                            setInputPassword = { inputPassword += it },
                             showBiometricIndicator = hasBiometricAppLock && canAuthenticateBiometric,
                             onBiometricClick = {
                                 showBiometricPrompt(
@@ -212,8 +231,8 @@ fun NextcloudPasswordsAppLock(
                                 )
                             },
                             showBackspaceIndicator = inputPassword.isNotBlank(),
-                            onBackspaceClick = { setInputPassword(inputPassword.dropLast(1)) },
-                            onBackspaceLongClick = { setInputPassword("") }
+                            onBackspaceClick = { inputPassword = inputPassword.dropLast(1) },
+                            onBackspaceLongClick = { inputPassword = "" }
                         )
                     }
                 } else {
@@ -234,7 +253,7 @@ fun NextcloudPasswordsAppLock(
                         ) {
                             KeyPad(
                                 inputPassword = inputPassword,
-                                setInputPassword = { setInputPassword(inputPassword + it) },
+                                setInputPassword = { inputPassword += it },
                                 showBiometricIndicator = hasBiometricAppLock && canAuthenticateBiometric,
                                 onBiometricClick = {
                                     showBiometricPrompt(
@@ -245,8 +264,8 @@ fun NextcloudPasswordsAppLock(
                                     )
                                 },
                                 showBackspaceIndicator = inputPassword.isNotBlank(),
-                                onBackspaceClick = { setInputPassword(inputPassword.dropLast(1)) },
-                                onBackspaceLongClick = { setInputPassword("") }
+                                onBackspaceClick = { inputPassword = inputPassword.dropLast(1) },
+                                onBackspaceLongClick = { inputPassword = "" }
                             )
                         }
                     }
