@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class AppLockHelper(context: Context) {
+class AppLockHelper private constructor(context: Context) {
     private val preferencesManager = PreferencesManager.getInstance(context)
 
     private var _isLocked = MutableStateFlow(true)
@@ -33,6 +33,21 @@ class AppLockHelper(context: Context) {
     fun enableLock() {
         CoroutineScope(Dispatchers.Default).launch {
             _isLocked.emit(true)
+        }
+    }
+
+    companion object {
+        private var instance: AppLockHelper? = null
+
+        fun getInstance(context: Context): AppLockHelper {
+            synchronized(this) {
+                var tempInstance = instance
+                if (tempInstance == null) {
+                    tempInstance = AppLockHelper(context)
+                }
+                instance = tempInstance
+                return tempInstance
+            }
         }
     }
 }

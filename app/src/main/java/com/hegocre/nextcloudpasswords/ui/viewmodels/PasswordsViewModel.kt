@@ -117,7 +117,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                 if (context != null && intent != null) {
                     val action = intent.action
                     if (screenLockFilter.matchAction(action)) {
-                        AppLockHelper(context).enableLock()
+                        AppLockHelper.getInstance(context).enableLock()
                     }
                 }
             }
