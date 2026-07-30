@@ -302,7 +302,7 @@ fun NCPWebLoginScreen(
                                     PreferencesManager.getInstance(context).setClientCertAlias(null)
                                     request?.cancel()
                                 }
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 PreferencesManager.getInstance(context).setClientCertAlias(null)
                                 request?.cancel()
                             }
@@ -328,7 +328,7 @@ fun NCPWebLoginScreen(
                                                     selectedAlias
                                                 )
                                                 request?.proceed(privateKey, chain)
-                                            } catch (e: Exception) {
+                                            } catch (_: Exception) {
                                                 PreferencesManager.getInstance(context)
                                                     .setClientCertAlias(null)
                                                 request?.cancel()
