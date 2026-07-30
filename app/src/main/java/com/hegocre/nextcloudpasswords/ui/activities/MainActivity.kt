@@ -24,6 +24,7 @@ import com.hegocre.nextcloudpasswords.services.autofill.AssistStructureParser
 import com.hegocre.nextcloudpasswords.ui.components.NCPAppLockWrapper
 import com.hegocre.nextcloudpasswords.ui.components.NextcloudPasswordsApp
 import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
+import com.hegocre.nextcloudpasswords.utils.AppLockHelper
 import com.hegocre.nextcloudpasswords.utils.LogHelper
 import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import kotlinx.coroutines.CoroutineScope
@@ -150,6 +151,11 @@ class MainActivity : FragmentActivity() {
         setResult(RESULT_OK, replyIntent)
 
         finish()
+    }
+
+    override fun onDestroy() {
+        AppLockHelper.getInstance(this).enableLock()
+        super.onDestroy()
     }
 }
 

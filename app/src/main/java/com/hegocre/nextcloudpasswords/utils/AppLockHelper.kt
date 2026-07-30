@@ -4,36 +4,50 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.minutes
 
 class AppLockHelper private constructor(context: Context) {
     private val preferencesManager = PreferencesManager.getInstance(context)
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var reLockJob: Job? = null
 
     private var _isLocked = MutableStateFlow(true)
     val isLocked: StateFlow<Boolean>
         get() = _isLocked.asStateFlow()
 
+    private var lastResetTime = 0L
+
     fun checkPasscode(passcode: String): Deferred<Boolean> {
-        return CoroutineScope(Dispatchers.Default).async {
-            val correctPasscode = preferencesManager.getAppLockPasscode() ?: "0000"
+        return scope.async(Dispatchers.Default) {
+            val correctPasscode = preferencesManager.getAppLockPasscode() ?: return@async false
             passcode == correctPasscode
         }
     }
 
     fun disableLock() {
-        CoroutineScope(Dispatchers.Default).launch {
-            _isLocked.emit(false)
+        val currentTime = System.currentTimeMillis()
+        if (!_isLocked.value && currentTime - lastResetTime < 1000) return
+        lastResetTime = currentTime
+
+        reLockJob?.cancel()
+        _isLocked.value = false
+        reLockJob = scope.launch {
+            delay(2.minutes)
+            enableLock()
         }
     }
 
     fun enableLock() {
-        CoroutineScope(Dispatchers.Default).launch {
-            _isLocked.emit(true)
-        }
+        reLockJob?.cancel()
+        _isLocked.value = true
     }
 
     companion object {

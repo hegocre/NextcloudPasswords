@@ -49,6 +49,8 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -71,6 +73,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.job
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun NCPAppLockWrapper(
@@ -94,7 +97,18 @@ fun NCPAppLockWrapper(
                     // Avoid asking for passcode just after setting it
                     appLockHelper.disableLock()
                 }
-                content()
+                Box(
+                    modifier = Modifier.pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                awaitPointerEvent(PointerEventPass.Initial)
+                                appLockHelper.disableLock()
+                            }
+                        }
+                    }
+                ) {
+                    content()
+                }
             }
         }
     }
@@ -134,7 +148,7 @@ fun NextcloudPasswordsAppLock(
 
     LaunchedEffect(key1 = isError) {
         if (isError) {
-            delay(1500L)
+            delay(1500L.milliseconds)
             isError = false
         }
     }
@@ -394,7 +408,7 @@ fun KeyPad(
                         when (interaction) {
                             is PressInteraction.Press -> {
                                 isLongClick = false
-                                delay(viewConfiguration.longPressTimeoutMillis)
+                                delay(viewConfiguration.longPressTimeoutMillis.milliseconds)
                                 isLongClick = true
                                 onBackspaceLongClick()
                             }
