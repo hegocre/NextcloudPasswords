@@ -125,7 +125,7 @@ data class Password(
             val passwordDomain = (url.toUri().host ?: "https://$url".toUri().host)?.let {
                 if (strictUrlMatching) it else PublicSuffixDatabase.get().getEffectiveTldPlusOne(it)
             } ?: return false
-            return queryDomain == passwordDomain
+            return (queryDomain == passwordDomain || "www.$queryDomain" == passwordDomain || "www.$passwordDomain" == queryDomain)
         } catch (_: Exception) {
             return false
         }
