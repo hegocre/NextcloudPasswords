@@ -90,6 +90,10 @@ class PreferencesManager private constructor(context: Context) {
     fun setMasterPassword(value: String?): Boolean =
         _encryptedSharedPrefs.edit().putString("MASTER_KEY", value).commit()
 
+    fun getClientCertAlias(): String? = _encryptedSharedPrefs.getString("CLIENT_CERT_ALIAS", null)
+    fun setClientCertAlias(value: String?): Boolean =
+        _encryptedSharedPrefs.edit().putString("CLIENT_CERT_ALIAS", value).commit()
+
     fun getCSEv1Keychain(): String? = _encryptedSharedPrefs.getString("CSE_V1_KEYCHAIN", null)
     fun setCSEv1Keychain(value: String?): Boolean =
         _encryptedSharedPrefs.edit().putString("CSE_V1_KEYCHAIN", value).commit()
