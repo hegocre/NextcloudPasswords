@@ -24,7 +24,6 @@ import com.hegocre.nextcloudpasswords.utils.AppLockHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -46,7 +45,7 @@ class NCPAutofillService : AutofillService() {
     private val apiController by lazy { ApiController.getInstance(applicationContext) }
     private val passwordController by lazy { PasswordController.getInstance(applicationContext) }
     private val userController by lazy { UserController.getInstance(applicationContext) }
-    private val appLockHelper by lazy { AppLockHelper.getInstance(applicationContext) }
+    private val appLockHelper by lazy { AppLockHelper(applicationContext) }
 
     private val hasAppLock by lazy { preferencesManager.getHasAppLock() }
     private val isLocked by lazy { appLockHelper.isLocked }
@@ -173,7 +172,7 @@ class NCPAutofillService : AutofillService() {
         )
     }
 
-    private suspend fun buildFillResponse(
+    private fun buildFillResponse(
         passwords: List<Password>,
         helper: AssistStructureParser,
         request: FillRequest,
@@ -275,7 +274,7 @@ class NCPAutofillService : AutofillService() {
                 packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
 
             packageManager.getApplicationLabel(app).toString()
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (_: PackageManager.NameNotFoundException) {
             ""
         }
     }

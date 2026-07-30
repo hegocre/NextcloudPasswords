@@ -71,13 +71,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.job
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun NCPAppLockWrapper(
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val appLockHelper = remember { AppLockHelper.getInstance(context) }
+    val appLockHelper = remember { AppLockHelper(context) }
     val hasAppLock by PreferencesManager.getInstance(context).getHasAppLock()
         .collectAsState(null)
     val isLocked by appLockHelper.isLocked.collectAsState()
@@ -134,7 +135,7 @@ fun NextcloudPasswordsAppLock(
 
     LaunchedEffect(key1 = isError) {
         if (isError) {
-            delay(1500L)
+            delay(1500L.milliseconds)
             isError = false
         }
     }
@@ -394,7 +395,7 @@ fun KeyPad(
                         when (interaction) {
                             is PressInteraction.Press -> {
                                 isLongClick = false
-                                delay(viewConfiguration.longPressTimeoutMillis)
+                                delay(viewConfiguration.longPressTimeoutMillis.milliseconds)
                                 isLongClick = true
                                 onBackspaceLongClick()
                             }
