@@ -69,7 +69,7 @@ class MainActivity : FragmentActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             ) {     
                 when (autofillData) {
-                    is AutofillData.isAutofill ->
+                    is AutofillData.IsAutofill ->
                         { label: String, username: String, password: String ->
                             autofillReply(PasswordAutofillData(
                                 id = null, 

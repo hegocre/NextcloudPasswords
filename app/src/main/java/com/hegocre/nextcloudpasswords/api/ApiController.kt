@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Class with methods used to interact with [the API](https://git.mdns.eu/nextcloud/passwords/-/wikis/Developers/Api)
@@ -73,7 +74,7 @@ class ApiController private constructor(context: Context) {
             var result = settingsApi.get()
             while (result !is Result.Success) {
                 Log.e("ServerSettings", "Error getting server settings")
-                delay(5000L)
+                delay(5000L.milliseconds)
                 result = settingsApi.get()
             }
             Log.i("ServerSettings", "Got server settings")

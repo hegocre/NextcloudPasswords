@@ -101,7 +101,7 @@ fun MixedLazyColumn(
             items(items = it, key = { folder -> folder.id }) { folder ->
                 FolderRow(
                     folder = folder,
-                    passwordCount = folderPasswordCounts?.let { it[folder.id] ?: 0 },
+                    passwordCount = folderPasswordCounts?.let { folderPasswordCounts[folder.id] ?: 0 },
                     onFolderClick = onFolderClick,
                     onFolderLongClick = onFolderLongClick
                 )

@@ -490,7 +490,7 @@ fun NCPNavHost(
                                             folder = passwordsViewModel.visibleFolder.value?.id ?: folder
                                         }
                                         when (autofillData) {
-                                            is AutofillData.isSave -> {
+                                            is AutofillData.IsSave -> {
                                                 if (selectedPassword == null) {
                                                     label = autofillData.saveData.label
                                                     username = autofillData.saveData.username

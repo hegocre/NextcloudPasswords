@@ -15,11 +15,11 @@ data class SaveData(
 ) : Parcelable
 
 sealed class AutofillData : Parcelable {
-    interface isAutofill {
+    interface IsAutofill {
         val structures: List<AssistStructure>
     }
 
-    interface isSave {
+    interface IsSave {
         val saveData: SaveData
     }
 
@@ -27,37 +27,37 @@ sealed class AutofillData : Parcelable {
     data class FromId(
         val id: String, 
         override val structures: List<AssistStructure>
-    ) : AutofillData(), isAutofill
+    ) : AutofillData(), IsAutofill
 
     @Parcelize
     data class ChoosePwd(
         val searchHint: String, 
         override val structures: List<AssistStructure>
-    ) : AutofillData(), isAutofill
+    ) : AutofillData(), IsAutofill
 
     @Parcelize
     data class SaveAutofill(
         val searchHint: String,
         override val saveData: SaveData,
         override val structures: List<AssistStructure>, 
-    ) : AutofillData(), isAutofill, isSave
+    ) : AutofillData(), IsAutofill, IsSave
 
     @Parcelize
     data class Save(
         val searchHint: String,
         override val saveData: SaveData
-    ) : AutofillData(), isSave
+    ) : AutofillData(), IsSave
 
     fun isAutofill(): Boolean {
         return when (this) {
-            is isAutofill -> true
+            is IsAutofill -> true
             else -> false
         }
     }
 
     fun isSave(): Boolean {
         return when (this) {
-            is isSave -> true
+            is IsSave -> true
             else -> false
         }
     }
