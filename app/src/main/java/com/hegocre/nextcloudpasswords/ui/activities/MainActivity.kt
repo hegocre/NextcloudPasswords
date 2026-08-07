@@ -74,7 +74,7 @@ class MainActivity : FragmentActivity() {
                                 label = label, 
                                 username = username, 
                                 password = password
-                            ), autofillData.structure)
+                            ), autofillData.structures)
                         }
                     else -> null    
                 }
@@ -140,9 +140,16 @@ class MainActivity : FragmentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun autofillReply(
         password: PasswordAutofillData,
-        structure: AssistStructure
+        structures: List<AssistStructure>
     ) {
-        val dataset = AutofillHelper.buildDataset(this, password, AssistStructureParser(structure), null)
+        val dataset = AutofillHelper.buildDataset(
+            this, 
+            AssistStructureParser(structures),
+            null, 
+            password, 
+            null,
+            false
+        )
 
         val replyIntent = Intent().apply {
             putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, dataset)

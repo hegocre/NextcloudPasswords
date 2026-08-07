@@ -112,19 +112,42 @@ class NCPAutofillService : AutofillService() {
         }
     }
 
+    override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            serviceScope.launch {
+                try {
+                    val intent: IntentSender? = withContext(Dispatchers.Default) {
+                        processSaveRequest(request)
+                    }
+                    if (intent != null) callback.onSuccess(intent)
+                    else callback.onFailure("Unable to complete Save Request")
+                } catch (e: CancellationException) {
+                    throw e 
+                } catch (e: Throwable) {
+                    callback.onFailure("Error handling save request: ${e.message}")
+                }
+            }
+        } else {
+            callback.onFailure("Saving not supported on android < 9.0")
+        }
+    }
+
     private suspend fun processFillRequest(request: FillRequest): FillResponse? {
         loginException?.let { 
             throw it 
         }
 
-        Log.d(TAG, "Processing fill request")
-        val context = request.fillContexts.last() ?: return null
-        val helper = AssistStructureParser(context.structure)
+        Log.d(TAG, "Processing fill request with ${request.fillContexts.size} contexts")
+        if (request.fillContexts.isEmpty())
+            return null
+
+        val helper = AssistStructureParser(listOf(request.fillContexts.last().structure))
+        val delayed_helper = AssistStructureParser(request.fillContexts.map { it.structure })
 
         // Do not autofill this application
         if (helper.packageName == packageName) return null
 
-        if (helper.usernameAutofillIds.isEmpty() && helper.passwordAutofillIds.isEmpty()) {
+        if (helper.usernameAutofillData.isEmpty() && helper.passwordAutofillData.isEmpty()) {
             Log.e(TAG, "No username or password fields detected, cannot autofill")
             return null
         }
@@ -163,13 +186,17 @@ class NCPAutofillService : AutofillService() {
 
         val needsAuth = hasAppLock.first() && isLocked.value
 
+        // use username from any of the past contexts as candidate for saving
+        val candidateUsername = delayed_helper.usernameAutofillContent.firstOrNull { !it.isNullOrBlank() }
+
         return buildFillResponse(
             filteredList,
             helper,
             request,
             searchHint,
             needsAuth,
-            needsAppForMasterPassword
+            needsAppForMasterPassword,
+            candidateUsername 
         )
     }
 
@@ -179,14 +206,15 @@ class NCPAutofillService : AutofillService() {
         request: FillRequest,
         searchHint: String,
         needsAuth: Boolean,
-        needsAppForMasterPassword: Boolean
+        needsAppForMasterPassword: Boolean,
+        candidateUsername: String?
     ): FillResponse {
         Log.d(TAG, "Building FillResponse, needsAuth: $needsAuth")
         val builder = FillResponse.Builder()
         val useInline = preferencesManager.getUseInlineAutofill()
         
-        val inlineRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && useInline) {
-            request.inlineSuggestionsRequest
+        val inlinePresentationSpec = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && useInline) {
+            request.inlineSuggestionsRequest?.inlinePresentationSpecs?.first()
         } else null
 
         if (!needsAppForMasterPassword) {
@@ -195,14 +223,14 @@ class NCPAutofillService : AutofillService() {
                 builder.addDataset(
                     AutofillHelper.buildDataset(
                         applicationContext,
+                        helper,
+                        inlinePresentationSpec,
                         PasswordAutofillData(
                             id = password.id,
                             label = "${password.label} - ${password.username}", 
                             username = password.username, 
                             password = password.password
                         ),
-                        helper,
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
                         null,
                         needsAuth,
                         idx
@@ -210,23 +238,34 @@ class NCPAutofillService : AutofillService() {
                 )
             }
 
+            Log.d(TAG, "Using Inline suggestions: ${inlinePresentationSpec != null}")
+
             Log.d(TAG, "Datasets added to FillResponse")
 
             // Button to create a new password in the app and autofill it
             if (passwords.isEmpty()) {
                 val saveData = SaveData(
                     label = searchHint,
-                    username = "",
+                    username = candidateUsername ?: "",
                     password = "",
                     url = searchHint
                 )
                 builder.addDataset(
                         AutofillHelper.buildDataset(
                             applicationContext,
-                            PasswordAutofillData(label = applicationContext.getString(R.string.new_password), id = null, username = null, password = null),
                             helper,
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
-                            AutofillHelper.buildIntent(applicationContext, 1002, AutofillData.SaveAutofill(searchHint, saveData, helper.structure)),
+                            inlinePresentationSpec,
+                            PasswordAutofillData(
+                                label = applicationContext.getString(R.string.new_password), 
+                                id = null, 
+                                username = null, 
+                                password = null
+                            ),
+                            AutofillHelper.buildIntent(
+                                applicationContext, 
+                                1002, 
+                                AutofillData.SaveAutofill(searchHint, saveData, helper.structures)
+                            ),
                             false
                         )
                     )
@@ -239,79 +278,58 @@ class NCPAutofillService : AutofillService() {
         builder.addDataset(
             AutofillHelper.buildDataset(
                 applicationContext,
-                PasswordAutofillData(label = applicationContext.getString(R.string.more), id = null, username = null, password = null),
                 helper,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) inlineRequest?.inlinePresentationSpecs?.first() else null,
-                AutofillHelper.buildIntent(applicationContext, 1003, AutofillData.ChoosePwd(searchHint, helper.structure)),
+                inlinePresentationSpec,
+                PasswordAutofillData(
+                    label = applicationContext.getString(R.string.more), 
+                    id = null, 
+                    username = null, 
+                    password = null
+                ),
+                AutofillHelper.buildIntent(
+                    applicationContext, 
+                    1003, 
+                    AutofillData.ChoosePwd(searchHint, helper.structures)
+                ),
                 false
             )
         )
 
-        Log.d(TAG, "Button to open app added to FillResponse")
+        Log.d(TAG, "Button to conclude in app added to FillResponse")
         
         // set Save Info, with an optional bundle if delaying the save
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            AutofillHelper.buildSaveInfo(helper)?.let { pair ->
+            AutofillHelper.buildSaveInfo(helper, searchHint)?.let { pair ->
                 builder.setSaveInfo(pair.first) 
                 pair.second?.let { bundle ->
-                    builder.setClientState(bundle)  
-                }
+                    builder.setClientState(bundle)
+                    Log.d(TAG, "SaveInfo set in FillResponse, delaying the save")
+                } ?: Log.d(TAG, "SaveInfo set in FillResponse")
             }
         }
-
-        Log.d(TAG, "SaveInfo set in FillResponse if applicable")
 
         return builder.build()
     }
 
-    private suspend fun getAppLabel(packageName: String): String = withContext(Dispatchers.IO) {
-        try {
-            val app = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                packageManager.getApplicationInfo(
-                    packageName,
-                    PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong())
-                )
-            else
-                packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-
-            packageManager.getApplicationLabel(app).toString()
-        } catch (e: PackageManager.NameNotFoundException) {
-            ""
-        }
-    }
-
-    override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            serviceScope.launch {
-                try {
-                    val intent: IntentSender? = withContext(Dispatchers.Default) {
-                        processSaveRequest(request)
-                    }
-                    if (intent != null) callback.onSuccess(intent)
-                    else callback.onFailure("Unable to complete Save Request")
-                } catch (e: CancellationException) {
-                    throw e 
-                } catch (e: Throwable) {
-                    callback.onFailure("Error handling save request: ${e.message}")
-                }
-            }
-        } else {
-            callback.onFailure("Saving not supported on android < 9.0")
-        }
-    }
-
     private suspend fun processSaveRequest(request: SaveRequest): IntentSender? {
-        val context = request.fillContexts.last() ?: return null
-        val helper = AssistStructureParser(context.structure)
+        Log.d(TAG, "Processing save request with ${request.fillContexts.size} contexts")
+
+        if (request.fillContexts.isEmpty())
+            return null
+            
+        val helper = AssistStructureParser(listOf(request.fillContexts.last().structure))
+        val delayed_helper = AssistStructureParser(request.fillContexts.map { it.structure })
 
         // Do not autofill this application
         if (helper.packageName == packageName) return null
 
-        val delayedUsername: String? = request.clientState?.getCharSequence(AutofillHelper.USERNAME)?.toString()
+        // Determine Search Hint
+        val searchHint = helper.webDomain ?: getAppLabel(helper.packageName)
 
-        val username: String = helper.usernameAutofillContent.firstOrNull { !it.isNullOrBlank() } ?: delayedUsername ?: ""
-        val password: String = helper.passwordAutofillContent.firstOrNull { !it.isNullOrBlank() } ?: ""
-
+        // Get the most recent username and password among the past contexts
+        val username: String = delayed_helper.usernameAutofillContent.firstOrNull { !it.isNullOrBlank() } ?: ""
+        val password: String = delayed_helper.passwordAutofillContent.firstOrNull { !it.isNullOrBlank() } ?: ""
+        
         if (password.isBlank()) {
             throw IllegalArgumentException("Blank password, cannot save")
         }
@@ -328,10 +346,27 @@ class NCPAutofillService : AutofillService() {
             throw IllegalStateException("Session is not open and cannot be opened, cannot save")
         }
 
-        // Determine Search Hint
-        val searchHint = helper.webDomain ?: getAppLabel(helper.packageName)
+        return AutofillHelper.buildIntent(
+            applicationContext, 
+            1004, 
+            AutofillData.Save(searchHint, SaveData(searchHint, username, password, searchHint))
+        )
+    }
 
-        return AutofillHelper.buildIntent(applicationContext, 1004, AutofillData.Save(searchHint, SaveData(searchHint, username, password, searchHint)))
+    private suspend fun getAppLabel(packageName: String): String = withContext(Dispatchers.IO) {
+        try {
+            val app = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                packageManager.getApplicationInfo(
+                    packageName,
+                    PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong())
+                )
+            else
+                packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+
+            packageManager.getApplicationLabel(app).toString()
+        } catch (e: PackageManager.NameNotFoundException) {
+            ""
+        }
     }
 
     companion object {

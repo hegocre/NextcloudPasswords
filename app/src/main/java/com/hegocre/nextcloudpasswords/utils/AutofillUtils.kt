@@ -16,7 +16,7 @@ data class SaveData(
 
 sealed class AutofillData : Parcelable {
     interface isAutofill {
-        val structure: AssistStructure
+        val structures: List<AssistStructure>
     }
 
     interface isSave {
@@ -26,20 +26,20 @@ sealed class AutofillData : Parcelable {
     @Parcelize
     data class FromId(
         val id: String, 
-        override val structure: AssistStructure
+        override val structures: List<AssistStructure>
     ) : AutofillData(), isAutofill
 
     @Parcelize
     data class ChoosePwd(
         val searchHint: String, 
-        override val structure: AssistStructure
+        override val structures: List<AssistStructure>
     ) : AutofillData(), isAutofill
 
     @Parcelize
     data class SaveAutofill(
         val searchHint: String,
         override val saveData: SaveData,
-        override val structure: AssistStructure, 
+        override val structures: List<AssistStructure>, 
     ) : AutofillData(), isAutofill, isSave
 
     @Parcelize

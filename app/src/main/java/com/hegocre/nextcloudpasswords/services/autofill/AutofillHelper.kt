@@ -30,34 +30,48 @@ import com.hegocre.nextcloudpasswords.utils.PasswordAutofillData
 object AutofillHelper {
     fun buildDataset(
         context: Context,
-        password: PasswordAutofillData?,
         helper: AssistStructureParser,
         inlinePresentationSpec: InlinePresentationSpec?,
-        intent: IntentSender? = null,
-        needsAppLock: Boolean = false,
-        datasetIdx: Int = 0
+        password: PasswordAutofillData?,
+        intent: IntentSender?,
+        needsAppLock: Boolean,
+        intentIdx: Int = 0
     ): Dataset {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (inlinePresentationSpec != null) {
                 buildInlineDataset(
                     context,
-                    password,
                     helper,
                     inlinePresentationSpec,
+                    password,
                     intent,
                     needsAppLock,
-                    datasetIdx
+                    intentIdx
                 )
             } else {
-                buildPresentationDataset(context, password, helper, intent, needsAppLock, datasetIdx)
+                buildPresentationDataset(
+                    context, 
+                    helper, 
+                    password, 
+                    intent, 
+                    needsAppLock, 
+                    intentIdx
+                )
             }
         } else {
-            buildPresentationDataset(context, password, helper, intent, needsAppLock, datasetIdx)
+            buildPresentationDataset(
+                context, 
+                helper, 
+                password, 
+                intent, 
+                needsAppLock, 
+                intentIdx
+            )
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
-    fun buildSaveInfo(helper: AssistStructureParser): Pair<SaveInfo, Bundle?>? {
+    fun buildSaveInfo(helper: AssistStructureParser, searchHint: String): Pair<SaveInfo, Bundle?>? {
         val requiredIds = mutableListOf<AutofillId>()
         val optionalIds = mutableListOf<AutofillId>()
 
@@ -65,7 +79,7 @@ object AutofillHelper {
         
         if (helper.passwordAutofillIds.size == 1) requiredIds += helper.passwordAutofillIds[0]
         else optionalIds += helper.passwordAutofillIds
-
+        
         if (helper.usernameAutofillIds.size == 1) requiredIds += helper.usernameAutofillIds[0]
         else optionalIds += helper.usernameAutofillIds
 
@@ -85,13 +99,13 @@ object AutofillHelper {
 
         // if there are only username views but no password views, then delay the save on supported devices
         if(helper.usernameAutofillIds.isNotEmpty() && helper.passwordAutofillIds.isEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            Log.d(NCPAutofillService.TAG, "Delaying save because only username views are detected")
             return Pair(
                 builder.apply {
                     setFlags(SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE or SaveInfo.FLAG_DELAY_SAVE)
+                    if (optionalIds.isNotEmpty()) setOptionalIds(optionalIds.toTypedArray())
                 }.build(),
                 Bundle().apply {
-                    putCharSequence(USERNAME, helper.usernameAutofillContent.firstOrNull() ?: "")
+                    putCharSequence(SEARCH_HINT, searchHint)
                 }
             )
         } else if (helper.passwordAutofillIds.isNotEmpty()) {
@@ -111,12 +125,12 @@ object AutofillHelper {
     @RequiresApi(Build.VERSION_CODES.R)
     private fun buildInlineDataset(
         context: Context,
-        password: PasswordAutofillData?,
         helper: AssistStructureParser,
         inlinePresentationSpec: InlinePresentationSpec,
+        password: PasswordAutofillData?,
         intent: IntentSender? = null,
         needsAppLock: Boolean = false,
-        datasetIdx: Int
+        intentIdx: Int
     ): Dataset {
         // build redacted dataset when app lock is needed
         return if (needsAppLock && password?.id != null) {
@@ -125,21 +139,25 @@ object AutofillHelper {
                     addInlineAutofillValue(
                         context,
                         autofillId,
+                        inlinePresentationSpec,
                         password.label,
-                        null,
-                        inlinePresentationSpec
+                        null
                     )
                 }
                 helper.passwordAutofillIds.forEach { autofillId ->
                     addInlineAutofillValue(
                         context,
                         autofillId,
+                        inlinePresentationSpec,
                         password.label,
-                        null,
-                        inlinePresentationSpec
+                        null
                     )
                 }
-                setAuthentication(buildIntent(context, 1005+datasetIdx, AutofillData.FromId(id=password.id, structure=helper.structure)))
+                setAuthentication(buildIntent(
+                    context, 
+                    1005+intentIdx, 
+                    AutofillData.FromId(id=password.id, structures=helper.structures)
+                ))
             }.build()
         } else {
             Dataset.Builder().apply {
@@ -147,18 +165,18 @@ object AutofillHelper {
                     addInlineAutofillValue(
                         context,
                         autofillId,
+                        inlinePresentationSpec,
                         password?.label,
-                        password?.username,
-                        inlinePresentationSpec
+                        password?.username
                     )
                 }
                 helper.passwordAutofillIds.forEach { autofillId ->
                     addInlineAutofillValue(
                         context,
                         autofillId,
+                        inlinePresentationSpec,
                         password?.label,
-                        password?.password,
-                        inlinePresentationSpec
+                        password?.password
                     )
                 }
                 intent?.let { setAuthentication(it) }
@@ -168,11 +186,11 @@ object AutofillHelper {
 
     private fun buildPresentationDataset(
         context: Context,
-        password: PasswordAutofillData?,
         helper: AssistStructureParser,
+        password: PasswordAutofillData?,
         intent: IntentSender? = null,
         needsAppLock: Boolean = false,
-        datasetIdx: Int
+        intentIdx: Int
     ): Dataset {
         // build redacted dataset when app lock is needed
         return if (needsAppLock && password?.id != null) {
@@ -183,7 +201,11 @@ object AutofillHelper {
                 helper.passwordAutofillIds.forEach { autofillId ->
                     addAutofillValue(context, autofillId, password.label, null)
                 }
-                setAuthentication(buildIntent(context, 1005+datasetIdx, AutofillData.FromId(id=password.id, structure=helper.structure)))
+                setAuthentication(buildIntent(
+                    context, 
+                    1005+intentIdx, 
+                    AutofillData.FromId(id=password.id, structures=helper.structures)
+                ))
             }.build()
         } else {
             Dataset.Builder().apply {
@@ -242,9 +264,9 @@ object AutofillHelper {
     private fun Dataset.Builder.addInlineAutofillValue(
         context: Context,
         autofillId: AutofillId,
+        inlinePresentationSpec: InlinePresentationSpec,
         label: String?,
         value: String?,
-        inlinePresentationSpec: InlinePresentationSpec,
     ) {
         val autofillLabel = label ?: context.getString(R.string.app_name)
 
@@ -319,5 +341,5 @@ object AutofillHelper {
     }
 
     private const val AUTOFILL_INTENT_ID = "com.hegocre.nextcloudpasswords.intents.autofill"
-    const val USERNAME = "username"
+    const val SEARCH_HINT = "search_hint"
 }
