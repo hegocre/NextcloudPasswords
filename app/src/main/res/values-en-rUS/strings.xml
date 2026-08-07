@@ -64,6 +64,7 @@
     <string name="password_attr_security_status">Security status</string>
     <string name="content_description_folder_icon">Folder icon</string>
     <string name="new_password">New password</string>
+    <string name="more">More</string>
     <string name="menu">Menu</string>
     <string name="action_clear_search_query">Clear search query</string>
     <string name="action_generate_password">Generate password</string>
@@ -131,4 +132,7 @@
     <string name="preference_order_by_date_asc">Oldest first</string>
     <string name="preference_order_by_date_desc">Newest first</string>
     <string name="order_by_preference_title">Order content by</string>
+    <string name="offer_credential_saving_preference_title">Save credentials</string>
+    <string name="offer_credential_saving_preference_subtitle">Offer to save new or updated credentials</string>
+    <string name="select_password_to_update_toast">Select a password to update it, or create a new one</string>
 </resources>
