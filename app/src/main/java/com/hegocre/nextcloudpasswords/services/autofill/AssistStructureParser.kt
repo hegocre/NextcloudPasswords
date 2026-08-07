@@ -91,7 +91,12 @@ class AssistStructureParser(assistStructures: List<AssistStructure>) {
         }
 
         node.webDomain?.let { webDomain ->
-            webDomains[webDomain] = webDomains.getOrDefault(webDomain, 0) + 1
+            val webScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                node.webScheme?.let { "$it://" } ?: ""
+            } else {
+                ""
+            }
+            webDomains["$webScheme$webDomain"] = webDomains.getOrDefault("$webScheme$webDomain", 0) + 1
         }
 
         // Parse child
