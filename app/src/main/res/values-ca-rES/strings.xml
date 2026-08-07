@@ -132,4 +132,7 @@
     <string name="preference_order_by_date_asc">Més antic primer</string>
     <string name="preference_order_by_date_desc">Més recent primer</string>
     <string name="order_by_preference_title">Ordenar el contingut per</string>
+    <string name="offer_credential_saving_preference_title">Desar contrasenyes</string>
+    <string name="offer_credential_saving_preference_subtitle">Oferir desar les contrasenyes noves o actualitzades</string>
+    <string name="select_password_to_update_toast">Seleccioneu una contrasenya per actualitzar-la, o creeu-ne una de nova</string>
 </resources>
