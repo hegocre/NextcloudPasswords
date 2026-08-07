@@ -220,7 +220,14 @@ fun NextcloudPasswordsApp(
                     exit = scaleOut(),
                 ) {
                     FloatingActionButton(
-                        onClick = { showAddElementDialog = true },
+                        onClick = {
+                            if (autofillData is AutofillData.IsSave) {
+                                navController.navigate("${NCPScreen.PasswordEdit.name}/none")
+                            } else {
+                                showAddElementDialog = true
+                            }
+
+                        },
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Add,

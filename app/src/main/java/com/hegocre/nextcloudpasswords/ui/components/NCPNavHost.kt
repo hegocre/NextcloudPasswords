@@ -27,7 +27,6 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +59,7 @@ import com.hegocre.nextcloudpasswords.utils.sha1Hash
 import com.hegocre.nextcloudpasswords.utils.AutofillData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
 @ExperimentalMaterial3Api
@@ -241,12 +241,23 @@ fun NCPNavHost(
                                     onRefresh = { passwordsViewModel.sync() },
                                 ) {
                                     if (filteredPasswordList.isNullOrEmpty()) {
-                                        // TODO: open automatically a new password or the only updatable password if isSave
-                                        //if (sessionOpen && autofillData != null && autofillData.isSave())
-                                        //    navController.navigate("${NCPScreen.PasswordEdit.name}/")
-                                        if (searchQuery.isBlank()) NoContentText()
-                                        else NoResultsText()
+                                        if (sessionOpen && autofillData != null && autofillData.isSave()) {
+                                            LaunchedEffect(Unit) {
+                                                navController.navigate("${NCPScreen.PasswordEdit.name}/")
+                                            }
+                                        }
+                                        else {
+                                            if (searchQuery.isBlank()) NoContentText()
+                                            else NoResultsText()
+                                        }
                                     } else {
+                                        LaunchedEffect(Unit) {
+                                            if (autofillData?.isSave() == true) {
+                                                withContext(Dispatchers.Main) {
+                                                    Toast.makeText(context, R.string.select_password_to_update_toast, Toast.LENGTH_LONG).show()
+                                                }
+                                            }
+                                        }
                                         MixedLazyColumn(
                                             passwords = filteredPasswordList,
                                             onPasswordClick = onPasswordClick,
@@ -504,11 +515,11 @@ fun NCPNavHost(
                                                     url = autofillData.saveData.url
                                                 } else {
                                                     // prioritize existing label and url fields
-                                                    label = if(label.isNullOrBlank()) autofillData.saveData.label else label
-                                                    url = if(url.isNullOrBlank()) autofillData.saveData.url else url
+                                                    label = label.ifBlank { autofillData.saveData.label }
+                                                    url = url.ifBlank { autofillData.saveData.url }
                                                     // prioritize new username and password fields
-                                                    username = if(autofillData.saveData.username.isNullOrBlank()) username else autofillData.saveData.username
-                                                    password = if(autofillData.saveData.password.isNullOrBlank()) password else autofillData.saveData.password
+                                                    username = autofillData.saveData.username.ifBlank { username }
+                                                    password = autofillData.saveData.password.ifBlank { password }
                                                 }
                                             }
                                             is AutofillData.ChoosePwd -> {
