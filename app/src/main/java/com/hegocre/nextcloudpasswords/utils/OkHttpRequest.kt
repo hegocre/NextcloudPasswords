@@ -17,6 +17,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URL
@@ -32,7 +34,8 @@ import kotlinx.coroutines.launch
  */
 class OkHttpRequest private constructor() {
     var allowInsecureRequests = false
-    private val initLock = java.lang.Object()
+    private val initLock = ReentrantLock()
+    private val initCondition = initLock.newCondition()
     @Volatile private var initializing = false
 
     private var secureClient = OkHttpClient.Builder()
@@ -46,9 +49,9 @@ class OkHttpRequest private constructor() {
              if (allowInsecureRequests) return insecureClient
 
              if (initializing) {
-                 synchronized(initLock) {
+                 initLock.withLock {
                      while (initializing) {
-                         try { initLock.wait() } catch (_: InterruptedException) {}
+                         try { initCondition.await() } catch (_: InterruptedException) {}
                      }
                  }
              }
@@ -87,10 +90,10 @@ class OkHttpRequest private constructor() {
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .build()
 
-            synchronized(initLock) {
+            initLock.withLock {
                 secureClient = newClient
                 initializing = false
-                initLock.notifyAll()
+                initCondition.signalAll()
             }
             return
         }
@@ -127,9 +130,9 @@ class OkHttpRequest private constructor() {
                 Log.e("OkHttpRequest", "Failed to initialize SSL context with client certificate alias: $alias", e)
                 PreferencesManager.getInstance(context).setClientCertAlias(null)
             } finally {
-                initializing = false
-                synchronized(initLock) {
-                    initLock.notifyAll()
+                initLock.withLock {
+                    initializing = false
+                    initCondition.signalAll()
                 }
             }
         }
