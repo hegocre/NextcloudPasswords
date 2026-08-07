@@ -11,9 +11,11 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
-import coil.Coil
-import coil.ImageLoader
-import coil.disk.DiskCache
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.disk.DiskCache
+import coil3.disk.directory
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.ApiController
@@ -88,9 +90,17 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        Coil.setImageLoader {
+        SingletonImageLoader.setSafe {
             ImageLoader.Builder(this)
-                .okHttpClient { OkHttpRequest.getInstance().client }
+                .components {
+                    add(
+                        OkHttpNetworkFetcherFactory(
+                            callFactory = {
+                                OkHttpRequest.getInstance().client
+                            }
+                        )
+                    )
+                }
                 .diskCache {
                     DiskCache.Builder()
                         .directory(this.cacheDir.resolve("image_cache"))

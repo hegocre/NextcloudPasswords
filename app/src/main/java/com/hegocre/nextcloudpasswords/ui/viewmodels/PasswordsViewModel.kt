@@ -19,8 +19,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
+import coil3.compose.rememberAsyncImagePainter
+import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.request.error
+import coil3.request.fallback
+import coil3.request.placeholder
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.ApiController
 import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
@@ -76,9 +82,8 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
     val masterPasswordInvalid: StateFlow<Boolean>
         get() = _masterPasswordInvalid.asStateFlow()
 
-    private val _clientDeauthorized = MutableLiveData(false)
     val clientDeauthorized: LiveData<Boolean>
-        get() = _clientDeauthorized
+        field = MutableLiveData(false)
 
     private val apiController = ApiController.getInstance(application)
 
@@ -149,7 +154,7 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
             } catch (_: PWDv1ChallengeMasterKeyNeededException) {
                 _needsMasterPassword.emit(true)
             } catch (_: ClientDeauthorizedException) {
-                _clientDeauthorized.postValue(true)
+                clientDeauthorized.postValue(true)
             } catch (ex: Exception) {
                 when (ex) {
                     is PWDv1ChallengeMasterKeyInvalidException, is PWDv1ChallengePasswordException -> {
@@ -298,8 +303,11 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         return rememberAsyncImagePainter(
             ImageRequest.Builder(context).apply {
                 data(requestUrl)
-                addHeader("OCS-APIRequest", "true")
-                addHeader("Authorization", Credentials.basic(server.username, server.password))
+                val headers = NetworkHeaders.Builder()
+                    .set("OCS-APIRequest", "true")
+                    .set("Authorization", Credentials.basic(server.username, server.password))
+                    .build()
+                httpHeaders(headers)
                 crossfade(true)
 
                 val tintColor = MaterialTheme.colorScheme.primary.toArgb()
@@ -326,8 +334,11 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         return rememberAsyncImagePainter(
             model = ImageRequest.Builder(context).apply {
                 data(requestUrl)
-                addHeader("OCS-APIRequest", "true")
-                addHeader("Authorization", Credentials.basic(server.username, server.password))
+                val headers = NetworkHeaders.Builder()
+                    .set("OCS-APIRequest", "true")
+                    .set("Authorization", Credentials.basic(server.username, server.password))
+                    .build()
+                httpHeaders(headers)
                 crossfade(true)
 
                 val tintColor = MaterialTheme.colorScheme.primary.toArgb()

@@ -132,7 +132,6 @@ fun NextcloudPasswordsApp(
                                             it.label
                                     } ?: stringResource(currentScreen.title)
                                 }
-                                else -> ""
                             },
                             userAvatar = { size ->
                                 Image(

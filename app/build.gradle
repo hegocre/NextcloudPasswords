@@ -89,8 +89,9 @@ dependencies {
     implementation 'com.goterl:lazysodium-android:5.2.0@aar'
     implementation 'net.java.dev.jna:jna:5.19.1@aar'
 
-    implementation 'org.commonmark:commonmark:0.29.0'
-    implementation 'io.coil-kt:coil-compose:2.7.0'
+    implementation 'org.commonmark:commonmark:0.30.0'
+    implementation 'io.coil-kt.coil3:coil-compose:3.5.0'
+    implementation 'io.coil-kt.coil3:coil-network-okhttp:3.5.0'
 
     //Compose dependencies
     implementation platform('androidx.compose:compose-bom:2026.06.01')
@@ -131,6 +132,6 @@ dependencies {
 // Compiler flag to use experimental Compose APIs
 tasks.withType(KotlinCompile).configureEach {
     compilerOptions {
-        freeCompilerArgs.addAll("-opt-in=kotlin.RequiresOptIn", "-Xjvm-default=all-compatibility")
+        freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
     }
 }
