@@ -91,14 +91,18 @@ fun NCPNavHost(
         initialValue = ListDecryptionState(isLoading = true),
         key1 = passwords, key2 = keychain
     ) {
-        value = ListDecryptionState(decryptedList = passwords?.decryptPasswords(keychain) ?: emptyList())
+        value = passwords?.let {
+            ListDecryptionState(decryptedList = it.decryptPasswords(keychain))
+        } ?: ListDecryptionState(isLoading = true)
     }
 
     val foldersDecryptionState by produceState(
         initialValue = ListDecryptionState(isLoading = true),
         key1 = folders, key2 = keychain
     ) {
-        value = ListDecryptionState(decryptedList = folders?.decryptFolders(keychain) ?: emptyList())
+        value = folders?.let {
+            ListDecryptionState(decryptedList = it.decryptFolders(keychain))
+        } ?: ListDecryptionState(isLoading = true)
     }
 
     val baseFolderName = stringResource(R.string.top_level_folder_name)
