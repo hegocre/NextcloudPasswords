@@ -24,7 +24,6 @@ import com.hegocre.nextcloudpasswords.utils.AppLockHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -122,7 +121,7 @@ class NCPAutofillService : AutofillService() {
                     if (intent != null) callback.onSuccess(intent)
                     else callback.onFailure("Unable to complete Save Request")
                 } catch (e: CancellationException) {
-                    throw e 
+                    throw e
                 } catch (e: Throwable) {
                     callback.onFailure("Error handling save request: ${e.message}")
                 }
@@ -142,7 +141,7 @@ class NCPAutofillService : AutofillService() {
             return null
 
         val helper = AssistStructureParser(listOf(request.fillContexts.last().structure))
-        val delayed_helper = AssistStructureParser(request.fillContexts.map { it.structure })
+        val delayedHelper = AssistStructureParser(request.fillContexts.map { it.structure })
 
         // Do not autofill this application
         if (helper.packageName == packageName) return null
@@ -187,7 +186,7 @@ class NCPAutofillService : AutofillService() {
         val needsAuth = hasAppLock.first() && isLocked.value
 
         // use username from any of the past contexts as candidate for saving
-        val candidateUsername = delayed_helper.usernameAutofillContent.firstOrNull { !it.isNullOrBlank() }
+        val candidateUsername = delayedHelper.usernameAutofillContent.firstOrNull { !it.isNullOrBlank() }
 
         return buildFillResponse(
             filteredList,
@@ -200,7 +199,7 @@ class NCPAutofillService : AutofillService() {
         )
     }
 
-    private suspend fun buildFillResponse(
+    private fun buildFillResponse(
         passwords: List<Password>,
         helper: AssistStructureParser,
         request: FillRequest,
@@ -298,7 +297,7 @@ class NCPAutofillService : AutofillService() {
         Log.d(TAG, "Button to conclude in app added to FillResponse")
         
         // set Save Info, with an optional bundle if delaying the save
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && PreferencesManager.getInstance(this).getOfferCredentialSaving()) {
             AutofillHelper.buildSaveInfo(helper, searchHint)?.let { pair ->
                 builder.setSaveInfo(pair.first) 
                 pair.second?.let { bundle ->
@@ -318,7 +317,7 @@ class NCPAutofillService : AutofillService() {
             return null
             
         val helper = AssistStructureParser(listOf(request.fillContexts.last().structure))
-        val delayed_helper = AssistStructureParser(request.fillContexts.map { it.structure })
+        val delayedHelper = AssistStructureParser(request.fillContexts.map { it.structure })
 
         // Do not autofill this application
         if (helper.packageName == packageName) return null
@@ -327,8 +326,8 @@ class NCPAutofillService : AutofillService() {
         val searchHint = helper.webDomain ?: getAppLabel(helper.packageName)
 
         // Get the most recent username and password among the past contexts
-        val username: String = delayed_helper.usernameAutofillContent.firstOrNull { !it.isNullOrBlank() } ?: ""
-        val password: String = delayed_helper.passwordAutofillContent.firstOrNull { !it.isNullOrBlank() } ?: ""
+        val username: String = delayedHelper.usernameAutofillContent.firstOrNull { !it.isNullOrBlank() } ?: ""
+        val password: String = delayedHelper.passwordAutofillContent.firstOrNull { !it.isNullOrBlank() } ?: ""
         
         if (password.isBlank()) {
             throw IllegalArgumentException("Blank password, cannot save")
@@ -364,7 +363,7 @@ class NCPAutofillService : AutofillService() {
                 packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
 
             packageManager.getApplicationLabel(app).toString()
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (_: PackageManager.NameNotFoundException) {
             ""
         }
     }

@@ -123,6 +123,12 @@ class PreferencesManager private constructor(context: Context) {
     fun setUseInlineAutofill(value: Boolean): Boolean =
         _encryptedSharedPrefs.edit().putBoolean("USE_INLINE_AUTOFILL", value).commit()
 
+    fun getOfferCredentialSaving(): Boolean =
+        _encryptedSharedPrefs.getBoolean("OFFER_CREDENTIAL_SAVING", true)
+
+    fun setOfferCredentialSaving(value: Boolean): Boolean =
+        _encryptedSharedPrefs.edit().putBoolean("OFFER_CREDENTIAL_SAVING", value).commit()
+
     fun getPasswordGenerationOptions(): String? =
         _encryptedSharedPrefs.getString(
             "PASSWORD_GENERATION_OPTIONS",

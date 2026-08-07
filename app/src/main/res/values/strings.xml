@@ -131,4 +131,6 @@
     <string name="preference_order_by_date_asc">Oldest first</string>
     <string name="preference_order_by_date_desc">Newest first</string>
     <string name="order_by_preference_title">Order content by</string>
+    <string name="offer_credential_saving_preference_title">Save credentials</string>
+    <string name="offer_credential_saving_preference_subtitle">Offer to save new or updated credentials</string>
 </resources>

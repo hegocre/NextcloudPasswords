@@ -429,6 +429,24 @@ fun NCPSettingsScreen(
                                 enabled = autofillEnabled
                             )
                         }
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            var offerCredentialSaving by remember { mutableStateOf(preferencesManager.getOfferCredentialSaving()) }
+
+                            SwitchPreference(
+                                checked = offerCredentialSaving,
+                                onCheckedChange = { enabled ->
+                                    scope.launch(Dispatchers.IO) {
+                                        if (preferencesManager.setOfferCredentialSaving(enabled)) {
+                                            offerCredentialSaving = enabled
+                                        }
+                                    }
+                                },
+                                title = { Text(text = stringResource(id = R.string.offer_credential_saving_preference_title)) },
+                                subtitle = { Text(text = stringResource(id = R.string.offer_credential_saving_preference_subtitle)) },
+                                enabled = autofillEnabled
+                            )
+                        }
                     }
                 }
             }
