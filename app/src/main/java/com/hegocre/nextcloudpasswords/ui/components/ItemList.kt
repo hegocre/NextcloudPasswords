@@ -108,9 +108,9 @@ fun MixedLazyColumn(
             }
         }
         passwords?.let {
-            items(items = it, key = { password -> password.id }) { folder ->
+            items(items = it, key = { password -> password.id }) { password ->
                 PasswordRow(
-                    password = folder,
+                    password = password,
                     shouldShowIcon = shouldShowIcon,
                     onPasswordClick = onPasswordClick,
                     onPasswordLongClick = onPasswordLongClick,

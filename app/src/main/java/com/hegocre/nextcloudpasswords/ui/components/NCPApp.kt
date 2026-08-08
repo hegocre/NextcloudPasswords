@@ -123,14 +123,18 @@ fun NextcloudPasswordsApp(
                             username = server.username,
                             serverAddress = server.url,
                             title = when (currentScreen) {
-                                NCPScreen.Passwords, NCPScreen.Favorites -> stringResource(currentScreen.title)
+                                NCPScreen.Passwords -> stringResource(currentScreen.title) +
+                                        (passwordsViewModel.totalPasswordCount.value?.let { " ($it)" } ?: "")
+                                NCPScreen.Favorites -> stringResource(currentScreen.title) +
+                                        (passwordsViewModel.totalFavoritePasswordCount.value?.let { " ($it)" } ?: "")
                                 NCPScreen.Folders -> {
-                                    passwordsViewModel.visibleFolder.value?.let {
+                                    (passwordsViewModel.visibleFolder.value?.let {
                                         if (it.id == FoldersApi.DEFAULT_FOLDER_UUID)
                                             stringResource(currentScreen.title)
                                         else
                                             it.label
-                                    } ?: stringResource(currentScreen.title)
+                                    } ?: stringResource(currentScreen.title)) +
+                                            (passwordsViewModel.visibleFolderPasswordCount.value?.let { " ($it)" } ?: "")
                                 }
                             },
                             userAvatar = { size ->

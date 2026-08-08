@@ -113,6 +113,13 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
     var visibleFolder = mutableStateOf<Folder?>(null)
         private set
 
+    var totalPasswordCount = mutableStateOf<Int?>(null)
+        private set
+    var totalFavoritePasswordCount = mutableStateOf<Int?>(null)
+        private set
+    var visibleFolderPasswordCount = mutableStateOf<Int?>(null)
+        private set
+
     init {
         val screenLockFilter = IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_OFF)
@@ -203,6 +210,18 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun setVisibleFolder(folder: Folder?) {
         visibleFolder.value = folder
+    }
+
+    fun setTotalPasswordCount(count: Int?) {
+        totalPasswordCount.value = count
+    }
+
+    fun setTotalFavoritePasswordCount(count: Int?) {
+        totalFavoritePasswordCount.value = count
+    }
+
+    fun setVisibleFolderPasswordCount(count: Int?) {
+        visibleFolderPasswordCount.value = count
     }
 
     fun createPassword(newPassword: NewPassword): Deferred<Boolean> {

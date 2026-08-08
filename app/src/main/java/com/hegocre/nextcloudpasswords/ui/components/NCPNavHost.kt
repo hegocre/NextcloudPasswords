@@ -87,6 +87,11 @@ fun NCPNavHost(
     val serverSettings by passwordsViewModel.serverSettings.observeAsState(initial = ServerSettings())
     val sessionOpen by passwordsViewModel.sessionOpen.collectAsState()
 
+    LaunchedEffect(passwords) {
+        passwordsViewModel.setTotalPasswordCount(passwords?.size)
+        passwordsViewModel.setTotalFavoritePasswordCount(passwords?.filter { it.favorite }?.size)
+    }
+
     val passwordsDecryptionState by produceState(
         initialValue = ListDecryptionState(isLoading = true),
         key1 = passwords, key2 = keychain
@@ -164,6 +169,11 @@ fun NCPNavHost(
             }
         }
     }
+
+    val filteredFavoritePasswords = remember(filteredPasswordList) {
+        filteredPasswordList?.filter { it.favorite }
+    }
+
     val filteredFolderList = remember(foldersDecryptionState.decryptedList, searchQuery, orderBy) {
         foldersDecryptionState.decryptedList?.filter {
             !it.hidden && !it.trashed && it.label.lowercase().contains(searchQuery.lowercase())
@@ -175,6 +185,10 @@ fun NCPNavHost(
                 else -> sortedBy { it.label.lowercase() }
             }
         }
+    }
+
+    val folderPasswordCounts = remember(passwordsDecryptionState.decryptedList) {
+        folderPasswordCounts(passwordsDecryptionState.decryptedList ?: emptyList())
     }
 
     NavHost(
@@ -275,9 +289,6 @@ fun NCPNavHost(
                 }
 
                 composable(NCPScreen.Favorites.name) {
-                    val filteredFavoritePasswords = remember(filteredPasswordList) {
-                        filteredPasswordList?.filter { it.favorite }
-                    }
                     NCPNavHostComposable(
                         modalSheetState = modalSheetState,
                         searchVisibility = searchVisibility,
@@ -322,6 +333,9 @@ fun NCPNavHost(
                         searchVisibility = searchVisibility,
                         closeSearch = closeSearch
                     ) {
+                        LaunchedEffect(folderPasswordCounts) {
+                            passwordsViewModel.setVisibleFolderPasswordCount(folderPasswordCounts[FoldersApi.DEFAULT_FOLDER_UUID])
+                        }
                         val filteredPasswordsParentFolder = remember(filteredPasswordList) {
                             filteredPasswordList?.filter {
                                 it.folder == FoldersApi.DEFAULT_FOLDER_UUID
@@ -331,9 +345,6 @@ fun NCPNavHost(
                             filteredFolderList?.filter {
                                 it.parent == FoldersApi.DEFAULT_FOLDER_UUID
                             }
-                        }
-                        val folderPasswordCounts = remember(passwordsDecryptionState.decryptedList) {
-                            folderPasswordCounts(passwordsDecryptionState.decryptedList ?: emptyList())
                         }
                         when {
                             foldersDecryptionState.isLoading || passwordsDecryptionState.isLoading -> {
@@ -393,6 +404,9 @@ fun NCPNavHost(
                 ) { entry ->
                     val folderUuid =
                         entry.arguments?.getString("folder_uuid") ?: FoldersApi.DEFAULT_FOLDER_UUID
+                    LaunchedEffect(folderPasswordCounts) {
+                        passwordsViewModel.setVisibleFolderPasswordCount(folderPasswordCounts[folderUuid])
+                    }
                     val filteredPasswordsSelectedFolder = remember(filteredPasswordList) {
                         filteredPasswordList?.filter {
                             it.folder == folderUuid
@@ -402,9 +416,6 @@ fun NCPNavHost(
                         filteredFolderList?.filter {
                             it.parent == folderUuid
                         }
-                    }
-                    val folderPasswordCounts = remember(passwordsDecryptionState.decryptedList) {
-                        folderPasswordCounts(passwordsDecryptionState.decryptedList ?: emptyList())
                     }
                     NCPNavHostComposable(
                         modalSheetState = modalSheetState,
