@@ -27,7 +27,9 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -59,7 +61,6 @@ import com.hegocre.nextcloudpasswords.utils.sha1Hash
 import com.hegocre.nextcloudpasswords.utils.AutofillData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
 @ExperimentalMaterial3Api
@@ -256,21 +257,19 @@ fun NCPNavHost(
                                 ) {
                                     if (filteredPasswordList.isNullOrEmpty()) {
                                         if (sessionOpen && autofillData != null && autofillData.isSave()) {
-                                            LaunchedEffect(Unit) {
+                                            var hasNavigated by rememberSaveable { mutableStateOf(false) }
+                                            if (!hasNavigated) {
+                                                hasNavigated = true
                                                 navController.navigate("${NCPScreen.PasswordEdit.name}/")
                                             }
                                         }
-                                        else {
-                                            if (searchQuery.isBlank()) NoContentText()
-                                            else NoResultsText()
-                                        }
+                                        if (searchQuery.isBlank()) NoContentText()
+                                        else NoResultsText()
                                     } else {
-                                        LaunchedEffect(Unit) {
-                                            if (autofillData?.isSave() == true) {
-                                                withContext(Dispatchers.Main) {
-                                                    Toast.makeText(context, R.string.select_password_to_update_toast, Toast.LENGTH_LONG).show()
-                                                }
-                                            }
+                                        var hasShownToast by rememberSaveable { mutableStateOf(false) }
+                                        if (!hasShownToast && autofillData?.isSave() == true) {
+                                            hasShownToast = true
+                                            Toast.makeText(context, R.string.select_password_to_update_toast, Toast.LENGTH_LONG).show()
                                         }
                                         MixedLazyColumn(
                                             passwords = filteredPasswordList,
