@@ -1,0 +1,9 @@
+- Offer to save credentials (thanks to @difanta)
+- Support for mTLS protected servers (thanks to @ThomasMoulin-hub)
+- Mark copied secret custom fields as private (thanks to @MiMoHo)
+- Show total password count
+- Show password count on folders (thanks to @MiMoHo)
+- Trigger app lock after inactivity
+- Add Quick Settings Tile to quickly open the app
+- Internal improvements and library updates
+- Updated translations
