@@ -132,4 +132,5 @@
     <string name="preference_order_by_date_asc">Ältestes zuerst</string>
     <string name="preference_order_by_date_desc">Neueste zuerst</string>
     <string name="order_by_preference_title">Inhalt sortieren nach</string>
+    <string name="offer_credential_saving_preference_title">Anmeldedaten speichern</string>
 </resources>
