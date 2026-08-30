@@ -154,6 +154,11 @@ class ApiController private constructor(context: Context) {
                         "API Controller",
                         "Bad response on session request, user ${server.username}"
                     )
+
+                    Error.API_AUTH_ERROR -> Log.e(
+                        "API Controller",
+                        "Auth error on session request, user ${server.username}"
+                    )
                 }
             }
             return@withContext false
