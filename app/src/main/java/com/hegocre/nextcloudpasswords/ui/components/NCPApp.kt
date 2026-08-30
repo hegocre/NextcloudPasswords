@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -305,7 +306,12 @@ fun NextcloudPasswordsApp(
                 )
             }
 
+            val shares by passwordsViewModel.shares.observeAsState()
             if (openBottomSheet) {
+                val shareInfo = remember (shares, passwordsViewModel.visiblePassword.value) {
+                    shares?.find { it.password == passwordsViewModel.visiblePassword.value?.first?.id }
+                }
+
                 ModalBottomSheet(
                     onDismissRequest = { openBottomSheet = false },
                     contentWindowInsets = { WindowInsets.navigationBars },
@@ -313,6 +319,7 @@ fun NextcloudPasswordsApp(
                 ) {
                     PasswordItem(
                         passwordInfo = passwordsViewModel.visiblePassword.value,
+                        shareInfo = shareInfo,
                         onEditPassword = if (sessionOpen) {
                             {
                                 coroutineScope.launch {
