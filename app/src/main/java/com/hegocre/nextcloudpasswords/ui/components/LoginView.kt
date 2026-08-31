@@ -1,11 +1,15 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.http.SslError
+import android.os.Build
 import android.security.KeyChain
+import android.util.LruCache
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.SslErrorHandler
@@ -68,6 +72,12 @@ import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import android.webkit.ClientCertRequest
+import android.webkit.WebResourceResponse
+import androidx.core.content.ContextCompat
+import com.hegocre.nextcloudpasswords.utils.isDeviceLocalAddress
+import java.io.ByteArrayInputStream
+import java.net.InetAddress
+import java.net.UnknownHostException
 
 @Composable
 fun NCPLoginScreen(
@@ -239,6 +249,20 @@ fun NCPWebLoginScreen(
 
         var skipTlsValidation by rememberSaveable { mutableStateOf(false) }
 
+        var showLocalNetworkAccessDialog by rememberSaveable { mutableStateOf(false) }
+
+        var loginWebView by remember { mutableStateOf<WebView?>(null) }
+
+        val localNetworkPermissionLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            if (isGranted) {
+                loginWebView?.loadUrl(url)
+            } else {
+                context.findActivity()?.finish()
+            }
+        }
+
         val (title, setTitle) = rememberSaveable {
             mutableStateOf(url)
         }
@@ -251,8 +275,43 @@ fun NCPWebLoginScreen(
             Runtime.getRuntime().exit(0)
         }
 
+        val hostCache = LruCache<String, Boolean>(100)
+
         val webViewClient = remember(skipTlsValidation) {
             object : WebViewClient() {
+
+                override fun shouldInterceptRequest(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): WebResourceResponse? {
+                    if (Build.VERSION.SDK_INT < 37) return super.shouldInterceptRequest(view, request)
+
+                    val host = request?.url?.host ?: return super.shouldInterceptRequest(view, request)
+
+                    try {
+                        var isLocal = hostCache.get(host)
+
+                        if (isLocal == null) {
+                            // Only resolve if not in cache
+                            val ips = InetAddress.getAllByName(host)
+                            isLocal = ips.any { it.isDeviceLocalAddress() || it.isLinkLocalAddress }
+                            hostCache.put(host, isLocal)
+                        }
+
+                        if (isLocal && ContextCompat.checkSelfPermission(context, "android.permission.ACCESS_LOCAL_NETWORK") != PackageManager.PERMISSION_GRANTED) {
+                            showLocalNetworkAccessDialog = true
+
+                            val errorStream = ByteArrayInputStream(" ".toByteArray(Charsets.UTF_8))
+                            return WebResourceResponse("text/plain", "UTF-8", 403, "FORBIDDEN", null, errorStream)
+                        }
+                    } catch (_: UnknownHostException) {
+                        // Cache failures to avoid retrying bad domains
+                        hostCache.put(host, false)
+                    }
+
+                    return super.shouldInterceptRequest(view, request)
+                }
+
                 override fun shouldOverrideUrlLoading(
                     view: WebView?,
                     request: WebResourceRequest?
@@ -377,6 +436,8 @@ fun NCPWebLoginScreen(
                 AndroidView(
                     factory = {
                         WebView(it).apply {
+                            loginWebView = this
+
                             layoutParams = ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -437,6 +498,37 @@ fun NCPWebLoginScreen(
                     },
                     title = { Text(stringResource(id = R.string.dialog_invalid_certificate_title)) },
                     text = { Text(text = stringResource(id = R.string.dialog_invalid_certificate_text)) }
+                )
+            }
+
+            if (showLocalNetworkAccessDialog) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showLocalNetworkAccessDialog = false
+                        context.findActivity()?.finish()
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                localNetworkPermissionLauncher.launch(Manifest.permission.ACCESS_LOCAL_NETWORK)
+                                showLocalNetworkAccessDialog = false
+                            }
+                        ) {
+                            Text(text = stringResource(id = R.string.grant_permission))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                showLocalNetworkAccessDialog = false
+                                context.findActivity()?.finish()
+                            }
+                        ) {
+                            Text(text = stringResource(id = android.R.string.cancel))
+                        }
+                    },
+                    title = { Text(stringResource(id = R.string.permission_required)) },
+                    text = { Text(text = stringResource(id = R.string.dialog_local_network_permission_message)) }
                 )
             }
         }

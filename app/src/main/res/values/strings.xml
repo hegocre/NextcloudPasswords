@@ -134,4 +134,7 @@
     <string name="offer_credential_saving_preference_title">Save credentials</string>
     <string name="offer_credential_saving_preference_subtitle">Offer to save new or updated credentials</string>
     <string name="select_password_to_update_toast">Select a password to update it, or create a new one</string>
+    <string name="grant_permission">Grant permission</string>
+    <string name="permission_required">Permission required</string>
+    <string name="dialog_local_network_permission_message">The instance you are trying to access is on your local network. Starting from Android 17, you need to grant permission to the this app to access it. Do you want to proceed?</string>
 </resources>
