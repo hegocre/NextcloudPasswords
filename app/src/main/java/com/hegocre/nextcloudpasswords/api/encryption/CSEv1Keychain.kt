@@ -6,7 +6,6 @@ import com.goterl.lazysodium.interfaces.SecretBox
 import com.hegocre.nextcloudpasswords.BuildConfig
 import com.hegocre.nextcloudpasswords.api.exceptions.SodiumDecryptionException
 import com.hegocre.nextcloudpasswords.utils.LazySodiumUtils
-import okio.internal.commonToUtf8String
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -77,7 +76,7 @@ data class CSEv1Keychain(
                 )
             ) throw SodiumDecryptionException("Could not open box")
 
-            return message.commonToUtf8String()
+            return String(message, Charsets.UTF_8)
         }
 
         /**
