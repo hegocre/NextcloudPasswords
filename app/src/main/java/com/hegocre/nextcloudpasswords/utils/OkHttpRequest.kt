@@ -2,8 +2,11 @@ package com.hegocre.nextcloudpasswords.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import android.security.KeyChain
+import androidx.core.content.ContextCompat
 import java.security.KeyStore
 import java.security.cert.X509Certificate
 import javax.net.ssl.KeyManagerFactory
@@ -26,6 +29,9 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.Dns
+import okhttp3.Interceptor
+import java.net.InetAddress
 
 /**
  * Class to manage the [OkHttpRequest] requests, and make them using always the same client, as suggested
@@ -38,11 +44,26 @@ class OkHttpRequest private constructor() {
     private val initCondition = initLock.newCondition()
     @Volatile private var initializing = false
 
+    private class LocalNetworkDns(private val context: Context) : Dns {
+        override fun lookup(hostname: String): List<InetAddress> {
+            val ips = Dns.SYSTEM.lookup(hostname)
+
+            if (Build.VERSION.SDK_INT >= 37) {
+                val isLocal = ips.any { it.isDeviceLocalAddress() || it.isLinkLocalAddress }
+                if (isLocal && ContextCompat.checkSelfPermission(context, "android.permission.ACCESS_LOCAL_NETWORK") != PackageManager.PERMISSION_GRANTED) {
+                    throw LocalNetworkAccessPermissionRequiredException()
+                }
+            }
+
+            return ips
+        }
+    }
+
     private var secureClient = OkHttpClient.Builder()
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
-    private val insecureClient: OkHttpClient
+    private var insecureClient: OkHttpClient
 
     val client: OkHttpClient
         get() {
@@ -82,16 +103,42 @@ class OkHttpRequest private constructor() {
     }
 
     fun initClient(context: Context) {
+        val localIpInterceptor = Interceptor { chain ->
+            val request = chain.request()
+            if (Build.VERSION.SDK_INT < 37) {
+                return@Interceptor chain.proceed(request)
+            }
+
+            val host = request.url.host
+            Log.d("IP", host)
+
+            val isIpAddress = android.net.InetAddresses.isNumericAddress(host)
+
+            if (isIpAddress) {
+                val ip = InetAddress.getByName(host)
+                val isLocal = ip.isDeviceLocalAddress() || ip.isLinkLocalAddress
+                Log.d("IP", "IsLocal: $isLocal")
+                if (isLocal && ContextCompat.checkSelfPermission(context, "android.permission.ACCESS_LOCAL_NETWORK") != PackageManager.PERMISSION_GRANTED) {
+                    throw LocalNetworkAccessPermissionRequiredException()
+                }
+            }
+            chain.proceed(request)
+        }
+
+        insecureClient = insecureClient.newBuilder()
+            .addInterceptor(localIpInterceptor)
+            .dns(LocalNetworkDns(context))
+            .build()
+
+        var newSecureClient = secureClient.newBuilder()
+            .addInterceptor(localIpInterceptor)
+            .dns(LocalNetworkDns(context))
+
         val alias = PreferencesManager.getInstance(context).getClientCertAlias()
 
         if (alias == null) {
-            val newClient = OkHttpClient.Builder()
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
-                .build()
-
             initLock.withLock {
-                secureClient = newClient
+                secureClient = newSecureClient.build()
                 initializing = false
                 initCondition.signalAll()
             }
@@ -121,9 +168,7 @@ class OkHttpRequest private constructor() {
                     val x509TrustManager = trustManagers.firstOrNull { it is X509TrustManager } as? X509TrustManager
 
                     if (x509TrustManager != null) {
-                        secureClient = secureClient.newBuilder()
-                            .sslSocketFactory(sslContext.socketFactory, x509TrustManager)
-                            .build()
+                        newSecureClient = newSecureClient.sslSocketFactory(sslContext.socketFactory, x509TrustManager)
                     }
                 }
             } catch (e: Exception) {
@@ -131,6 +176,7 @@ class OkHttpRequest private constructor() {
                 PreferencesManager.getInstance(context).setClientCertAlias(null)
             } finally {
                 initLock.withLock {
+                    secureClient = newSecureClient.build()
                     initializing = false
                     initCondition.signalAll()
                 }
@@ -269,6 +315,8 @@ class OkHttpRequest private constructor() {
 
     companion object {
         private var instance: OkHttpRequest? = null
+
+        class LocalNetworkAccessPermissionRequiredException : Exception()
 
         val JSON = "application/json; charset=utf-8".toMediaTypeOrNull()
 

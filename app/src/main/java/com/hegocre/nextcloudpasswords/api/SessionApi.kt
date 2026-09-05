@@ -43,6 +43,8 @@ class SessionApi private constructor(private var server: Server) {
                     e.printStackTrace()
                 }
                 return Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+            } catch (e: OkHttpRequest.Companion.LocalNetworkAccessPermissionRequiredException) {
+                throw e
             } catch (e: Exception) {
                 if (BuildConfig.DEBUG) {
                     e.printStackTrace()
@@ -64,6 +66,8 @@ class SessionApi private constructor(private var server: Server) {
                 Result.Success(PWDv1Challenge.fromJson(body))
             } else Result.Error(Error.API_BAD_RESPONSE)
 
+        } catch (e: OkHttpRequest.Companion.LocalNetworkAccessPermissionRequiredException) {
+            throw e
         } catch (e: SocketTimeoutException) {
             if (BuildConfig.DEBUG) {
                 e.printStackTrace()

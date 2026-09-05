@@ -116,7 +116,8 @@ class ApiController private constructor(context: Context) {
      */
     @Throws(
         PWDv1ChallengeMasterKeyNeededException::class,
-        PWDv1ChallengeMasterKeyInvalidException::class
+        PWDv1ChallengeMasterKeyInvalidException::class,
+        OkHttpRequest.Companion.LocalNetworkAccessPermissionRequiredException::class
     )
     suspend fun openSession(masterPassword: String?): Boolean = withContext(Dispatchers.Default) {
         decryptCSEv1Keychain(

@@ -47,6 +47,7 @@ import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.utils.AppLockHelper
+import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -93,6 +94,10 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
     private val _showSessionOpenError = MutableStateFlow(false)
     val showSessionOpenError: StateFlow<Boolean>
         get() = _showSessionOpenError.asStateFlow()
+
+    private val _showLocalNetworkAccessDialog = MutableStateFlow(false)
+    val showLocalNetworkAccessDialog: StateFlow<Boolean>
+        get() = _showLocalNetworkAccessDialog.asStateFlow()
 
     val csEv1Keychain: LiveData<CSEv1Keychain?>
         get() = apiController.csEv1Keychain
@@ -144,14 +149,14 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
             application.registerReceiver(screenOffReceiver, screenLockFilter)
         }
 
-        if (!sessionOpen.value)
-            openSession(masterPassword.value)
+        openSession(masterPassword.value)
     }
 
     private fun openSession(password: String?) {
         viewModelScope.launch {
             _isRefreshing.emit(true)
             try {
+                apiController.closeSession()
                 if (apiController.openSession(password)) {
                     sync()
                     _showSessionOpenError.emit(true)
@@ -162,7 +167,11 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                 _needsMasterPassword.emit(true)
             } catch (_: ClientDeauthorizedException) {
                 clientDeauthorized.postValue(true)
-            } catch (ex: Exception) {
+            } catch (_: OkHttpRequest.Companion.LocalNetworkAccessPermissionRequiredException) {
+                _showLocalNetworkAccessDialog.emit(true)
+                _showSessionOpenError.emit(true)
+            }
+            catch (ex: Exception) {
                 when (ex) {
                     is PWDv1ChallengeMasterKeyInvalidException, is PWDv1ChallengePasswordException -> {
                         _needsMasterPassword.emit(true)
@@ -374,6 +383,12 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
                 error(accountDrawable)
             }.build()
         )
+    }
+
+    fun dismissLocalNetworkAccessDialog() {
+        viewModelScope.launch {
+            _showLocalNetworkAccessDialog.emit(false)
+        }
     }
 
     override fun onCleared() {
