@@ -1,0 +1,9 @@
+- Angebot zum Speichern von Anmeldedaten (Dank an @difanta)
+- Unterstützung für mTLS geschützte Server (Dank an @ThomasMoulin-Hub)
+- Kopierte geheime benutzerdefinierte Felder als privat markieren (Dank an @MiMoHo)
+- Gesamtzahl des Passworts anzeigen
+- Anzahl der Passwörter in Ordnern anzeigen (Dank an @MiMoHo)
+- Sperre nach Inaktivität der App auslösen
+- Schnelleinstellungen hinzufügen um die App schnell zu öffnen
+- Interne Verbesserungen und Bibliotheksupdates
+- Übersetzungen aktualisiert
