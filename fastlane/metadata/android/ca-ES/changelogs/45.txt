@@ -1,0 +1,1 @@
+- Es gestiona el permís ACCESS_LOCAL_NETWORK a Android 17
