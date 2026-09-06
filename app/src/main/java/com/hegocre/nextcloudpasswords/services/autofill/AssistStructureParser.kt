@@ -49,9 +49,15 @@ class AssistStructureParser(assistStructures: List<AssistStructure>) {
     init {
         // parse the structures from the most recent one
         assistStructures.reversed().forEach { assistStructure ->
-            for (i in 0 until assistStructure.windowNodeCount) {
-                val windowNode = assistStructure.getWindowNodeAt(i)
-                windowNode.rootViewNode?.let { parseNode(it) }
+            try {
+                for (i in 0 until assistStructure.windowNodeCount) {
+                    val windowNode = assistStructure.getWindowNodeAt(i)
+                    windowNode.rootViewNode?.let { parseNode(it) }
+                }
+            } catch (_: SecurityException) {
+                // Package UID mismatch, skipping
+            } catch (_: IllegalStateException) {
+                // Target app probably died, skipping
             }
         }
         if (usernameAutofillData.isEmpty())

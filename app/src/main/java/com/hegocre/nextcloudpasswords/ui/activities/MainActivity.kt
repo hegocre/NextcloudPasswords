@@ -54,13 +54,19 @@ class MainActivity : FragmentActivity() {
         val passwordsViewModel by viewModels<PasswordsViewModel>()
 
         val autofillData: AutofillData? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                intent.getParcelableExtra(
-                    NCPAutofillService.AUTOFILL_DATA,
-                    AutofillData::class.java
-                )
-            else
-                @Suppress("DEPRECATION") intent.getParcelableExtra(NCPAutofillService.AUTOFILL_DATA)
+            try {
+                intent.setExtrasClassLoader(AutofillData::class.java.classLoader)
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                    intent.getParcelableExtra(
+                        NCPAutofillService.AUTOFILL_DATA,
+                        AutofillData::class.java
+                    )
+                else
+                    @Suppress("DEPRECATION") intent.getParcelableExtra(NCPAutofillService.AUTOFILL_DATA)
+            } catch (_: RuntimeException) {
+                null
+            }
         } else {
             null
         }
