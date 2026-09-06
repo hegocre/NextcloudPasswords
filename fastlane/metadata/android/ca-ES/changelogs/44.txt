@@ -1,0 +1,9 @@
+- Oferir desar credencials (gràcies a @difanta)
+- Suport per instàncies protegides amb mTLS (gràcies a @ThomasMoulin-hub)
+- Es marquen els camps personalitzats secrets copiats com a privats (gràcies a @MiMoHo)
+- Es mostra el recompte total de contrasenyes
+- Es mostra el recompte de contrasenyes a les carpetes (gràcies a @MiHoHo)
+- Es bloqueja l'aplicació després d'un temps d'inactivitat
+- S'ha afegit una rajola de configuració ràpida per obrir l'aplicació
+- Millores internes i actualització de llibreries
+- Traduccions actualitzades
