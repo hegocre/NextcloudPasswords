@@ -198,6 +198,8 @@ fun NCPNavHost(
         modifier = modifier,
         enterTransition = { fadeIn(animationSpec = tween(300)) },
         exitTransition = { fadeOut(animationSpec = tween(300)) },
+        predictivePopEnterTransition = { fadeIn(animationSpec = tween(300)) },
+        predictivePopExitTransition = { fadeOut(animationSpec = tween(300)) },
     ) {
         when (autofillData) {
             is AutofillData.FromId -> {
