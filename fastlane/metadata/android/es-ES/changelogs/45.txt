@@ -1,0 +1,1 @@
+- Manejar el permiso ACCESS_LOCAL_NETWORK en Android 17

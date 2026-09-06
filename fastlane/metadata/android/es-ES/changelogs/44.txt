@@ -1,0 +1,9 @@
+- Ofrecer guardar credenciales (gracias a @difanta)
+- Soporte para servidores protegidos por mTLS (gracias a @ThomasMoulin-hub)
+- Marcar los campos personalizados secretos copiados como privados (gracias a @MiMoHo)
+- Mostrar recuento total de contraseña
+- Mostrar recuento de contraseñas en carpetas (gracias a @MiMoho)
+- Bloquear app tras inactividad
+- Agregar mosaico de configuración rápida para abrir rápidamente la aplicación
+- Mejoras internas y actualizaciones de librerías
+- Traducciones actualizadas
