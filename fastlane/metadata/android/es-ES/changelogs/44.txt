@@ -1,9 +1,9 @@
 - Ofrecer guardar credenciales (gracias a @difanta)
-- Support for mTLS protected servers (thanks to @ThomasMoulin-hub)
-- Mark copied secret custom fields as private (thanks to @MiMoHo)
-- Show total password count
-- Show password count on folders (thanks to @MiMoHo)
-- Trigger app lock after inactivity
-- Add Quick Settings Tile to quickly open the app
-- Internal improvements and library updates
-- Updated translations
+- Soporte para servidores protegidos por mTLS (gracias a @ThomasMoulin-hub)
+- Marcar los campos personalizados secretos copiados como privados (gracias a @MiMoHo)
+- Mostrar recuento total de contraseña
+- Mostrar recuento de contraseñas en carpetas (gracias a @MiMoho)
+- Bloquear app tras inactividad
+- Agregar mosaico de configuración rápida para abrir rápidamente la aplicación
+- Mejoras internas y actualizaciones de librerías
+- Traducciones actualizadas
