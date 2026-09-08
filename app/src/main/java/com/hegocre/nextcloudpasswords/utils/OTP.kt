@@ -1,5 +1,7 @@
 package com.hegocre.nextcloudpasswords.utils
 
+import android.net.Uri
+import androidx.core.net.toUri
 import dev.turingcomplete.kotlinonetimepassword.HmacAlgorithm
 import dev.turingcomplete.kotlinonetimepassword.HmacOneTimePasswordConfig
 import dev.turingcomplete.kotlinonetimepassword.HmacOneTimePasswordGenerator
@@ -19,10 +21,10 @@ data class OTP(
     val type: String = Type.TOTP,
     val algorithm: String = Algorithm.SHA1,
     val digits: Int = 6,
-    val counter: Int = 0,
+    val counter: Long = 0,
     val period: Int = 30,
-    //val issuer: String? = null,
-    //val accountName: String? = null,
+    val issuer: String? = null,
+    val accountName: String? = null,
 ) {
     fun getCurrent(): Pair<String?, Long?> {
         val secret = Base32().decode(secret)
@@ -52,7 +54,7 @@ data class OTP(
                 secret = secret,
                 config = config
             )
-            return Pair(generator.generate(counter.toLong()), null)
+            return Pair(generator.generate(counter), null)
         }
 
         return Pair(null, null)
@@ -80,7 +82,63 @@ data class OTP(
         }
 
         fun fromUrl(url: String): OTP {
-            return OTP(secret = url)
+            val uri = url.toUri()
+
+            if (uri.scheme?.equals("otpauth", ignoreCase = true) != true) {
+                throw IllegalArgumentException("Invalid OTP URL")
+            }
+
+            val type = when (uri.host?.lowercase()) {
+                "totp" -> Type.TOTP
+                "hotp" -> Type.HOTP
+                else -> throw IllegalArgumentException("Invalid OTP Type")
+            }
+
+            val label = uri.encodedPath?.removePrefix("/") ?: ""
+            val labelParts = label.split(":", limit = 2).map { Uri.decode(it).trim() }
+            val labelIssuer = labelParts.getOrNull(1)?.let { labelParts[0] }
+            val accountName = (labelParts.getOrNull(1) ?: labelParts[0]).let { it.ifBlank { null } }
+
+            val secret = uri.getQueryParameter("secret")
+                ?: throw IllegalArgumentException("Missing required 'secret' parameter")
+
+            if (!Base32().isInAlphabet(secret)) {
+                throw IllegalArgumentException("Invalid 'secret' parameter")
+            }
+
+            val issuer = uri.getQueryParameter("issuer") ?: labelIssuer
+
+            val algorithm = when(uri.getQueryParameter("algorithm")?.lowercase()) {
+                "sha1" -> Algorithm.SHA1
+                "sha256" -> Algorithm.SHA256
+                "sha512" -> Algorithm.SHA512
+                null -> Algorithm.SHA1
+                else -> throw IllegalArgumentException("Invalid OTP Algorithm")
+            }
+
+            val digits = uri.getQueryParameter("digits")?.toIntOrNull()
+                ?.takeIf { it in 6..9 }
+
+            val counter = uri.getQueryParameter("counter")?.toLongOrNull()
+                ?.takeUnless { it < 0 }
+
+            if (type == Type.HOTP && counter == null) {
+                throw IllegalArgumentException("HOTP requires a 'counter' parameter")
+            }
+
+            val period = uri.getQueryParameter("period")?.toIntOrNull()
+                ?.takeIf { it > 0 }
+
+            return OTP(
+                secret = secret,
+                type = type,
+                algorithm = algorithm,
+                digits = digits ?: 6,
+                counter = counter ?: 0L,
+                period = period ?: 30,
+                issuer = issuer,
+                accountName = accountName
+            )
         }
 
     }

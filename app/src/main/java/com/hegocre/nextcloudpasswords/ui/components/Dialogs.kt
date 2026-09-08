@@ -1,5 +1,7 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -18,6 +20,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -76,6 +81,8 @@ import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.OTP
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
+import io.github.g00fy2.quickie.QRResult
+import io.github.g00fy2.quickie.ScanQRCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
@@ -404,11 +411,48 @@ fun EditOtpDialog(
             tonalElevation = 6.dp,
         ) {
             Column(modifier = Modifier.padding(all = 24.dp)) {
-                Text(
-                    text = "OTP",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
+                Row (modifier = Modifier.padding(bottom = 8.dp), verticalAlignment = CenterVertically) {
+                    val scanQrCodeLauncher = rememberLauncherForActivityResult(ScanQRCode()) { result ->
+                        when (result) {
+                            is QRResult.QRSuccess -> {
+                                val otpUri = result.content.rawValue
+                                if (otpUri != null) {
+                                    Log.d("QR", otpUri)
+                                    try {
+                                        val otp = OTP.fromUrl(otpUri)
+                                        setSecret(otp.secret)
+                                        setType(otp.type)
+                                        setAlgorithm(otp.algorithm)
+                                        setDigits(otp.digits.toString())
+                                        setCounter(otp.counter.toString())
+                                        setPeriod(otp.period.toString())
+                                    } catch (e: IllegalArgumentException) {
+                                        Log.d("QR", "${e.message}")
+                                    }
+                                }
+                            }
+                            else -> {
+                                //Error
+                            }
+                        }
+                    }
+
+                    Text(
+                        text = "OTP",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+
+                    IconButton(
+                        onClick = {
+                            scanQrCodeLauncher.launch(null)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QrCode,
+                            contentDescription = "QR Code"
+                        )
+                    }
+                }
 
                 Column(
                     modifier = Modifier
@@ -1104,5 +1148,13 @@ fun ListPreferenceDialogPreview() {
 fun GeneratePasswordDialogPreview() {
     NextcloudPasswordsTheme {
         PasswordGenerationDialog(onGenerate = { _, _, _ -> })
+    }
+}
+
+@Preview
+@Composable
+fun EditOtpDialogPreview() {
+    NextcloudPasswordsTheme {
+        EditOtpDialog(onSaveClick = {}, onDeleteClick = {})
     }
 }
