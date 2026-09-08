@@ -50,6 +50,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
@@ -429,102 +430,118 @@ fun EditOtpDialog(
                         } else null
                     )
 
-                    ExposedDropdownMenuBox(
-                        expanded = typeMenuExpanded,
-                        onExpandedChange = { typeMenuExpanded = !typeMenuExpanded },
-                        modifier = Modifier.padding(bottom = 0.dp, top = 16.dp)
-                    ) {
-                        OutlinedTextField(
-                            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-                            value = type.uppercase(),
-                            onValueChange = {},
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuExpanded) },
-                            label = { Text(text = "Type") },
-                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-                        )
+                    var showAdvancedOptions by rememberSaveable { mutableStateOf(false) }
 
-                        ExposedDropdownMenu(
+                    Row (modifier = Modifier
+                        .padding(top = 16.dp, bottom = 8.dp)
+                        .clickable(onClick = { showAdvancedOptions = !showAdvancedOptions })
+                    ) {
+                        Text(text = "Show advanced options")
+
+                        Icon(
+                            imageVector = if (showAdvancedOptions) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Toggle advanced"
+                        )
+                    }
+
+                    if (showAdvancedOptions) {
+                        ExposedDropdownMenuBox(
                             expanded = typeMenuExpanded,
-                            onDismissRequest = { typeMenuExpanded = false }
+                            onExpandedChange = { typeMenuExpanded = !typeMenuExpanded },
+                            modifier = Modifier.padding(bottom = 0.dp, top = 16.dp)
                         ) {
-                            types.forEach { type ->
-                                DropdownMenuItem(
-                                    text = { Text(text = type.uppercase()) },
-                                    onClick = {
-                                        setType(type)
-                                        typeMenuExpanded = false
-                                    },
-                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                                )
+                            OutlinedTextField(
+                                modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                                value = type.uppercase(),
+                                onValueChange = {},
+                                readOnly = true,
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuExpanded) },
+                                label = { Text(text = "Type") },
+                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                            )
+
+                            ExposedDropdownMenu(
+                                expanded = typeMenuExpanded,
+                                onDismissRequest = { typeMenuExpanded = false }
+                            ) {
+                                types.forEach { type ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = type.uppercase()) },
+                                        onClick = {
+                                            setType(type)
+                                            typeMenuExpanded = false
+                                        },
+                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                    )
+                                }
                             }
                         }
-                    }
 
-                    ExposedDropdownMenuBox(
-                        expanded = algorithmMenuExpanded,
-                        onExpandedChange = { algorithmMenuExpanded = !algorithmMenuExpanded },
-                        modifier = Modifier.padding(bottom = 0.dp, top = 16.dp)
-                    ) {
-                        OutlinedTextField(
-                            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-                            value = algorithm.uppercase(),
-                            onValueChange = {},
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuExpanded) },
-                            label = { Text(text = "Algorithm") },
-                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-                        )
-
-                        ExposedDropdownMenu(
+                        ExposedDropdownMenuBox(
                             expanded = algorithmMenuExpanded,
-                            onDismissRequest = { algorithmMenuExpanded = false }
+                            onExpandedChange = { algorithmMenuExpanded = !algorithmMenuExpanded },
+                            modifier = Modifier.padding(bottom = 0.dp, top = 16.dp)
                         ) {
-                            algorithms.forEach { algorithm ->
-                                DropdownMenuItem(
-                                    text = { Text(text = algorithm.uppercase()) },
-                                    onClick = {
-                                        setAlgorithm(algorithm)
-                                        algorithmMenuExpanded = false
-                                    },
-                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                                )
+                            OutlinedTextField(
+                                modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                                value = algorithm.uppercase(),
+                                onValueChange = {},
+                                readOnly = true,
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuExpanded) },
+                                label = { Text(text = "Algorithm") },
+                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                            )
+
+                            ExposedDropdownMenu(
+                                expanded = algorithmMenuExpanded,
+                                onDismissRequest = { algorithmMenuExpanded = false }
+                            ) {
+                                algorithms.forEach { algorithm ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = algorithm.uppercase()) },
+                                        onClick = {
+                                            setAlgorithm(algorithm)
+                                            algorithmMenuExpanded = false
+                                        },
+                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                    )
+                                }
                             }
                         }
-                    }
 
-                    OutlinedTextField(
-                        modifier = Modifier.padding(bottom = 0.dp, top = 16.dp),
-                        value = digits,
-                        onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) setDigits(it) },
-                        singleLine = true,
-                        maxLines = 1,
-                        label = { Text(text = "Digits") },
-                        placeholder = { Text(text = "6") }
-                    )
-
-                    if (type == OTP.Companion.Type.HOTP) {
                         OutlinedTextField(
-                            modifier = Modifier.padding(bottom = 8.dp, top = 16.dp),
-                            value = counter,
-                            onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) setCounter(it) },
+                            modifier = Modifier.padding(bottom = 0.dp, top = 16.dp),
+                            value = digits,
+                            onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) setDigits(it) },
                             singleLine = true,
                             maxLines = 1,
-                            label = { Text(text = "Counter") },
-                            placeholder = { Text(text = "0") }
+                            label = { Text(text = "Digits") },
+                            placeholder = { Text(text = "6") }
                         )
-                    }
 
-                    if (type == OTP.Companion.Type.TOTP) {
-                        OutlinedTextField(
-                            modifier = Modifier.padding(bottom = 8.dp, top = 16.dp),
-                            value = period,
-                            onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) setPeriod(it) },
-                            singleLine = true,
-                            maxLines = 1,
-                            label = { Text(text = "Period") },
-                            placeholder = { Text(text = "30") }
-                        )
+                        if (type == OTP.Companion.Type.HOTP) {
+                            OutlinedTextField(
+                                modifier = Modifier.padding(bottom = 8.dp, top = 16.dp),
+                                value = counter,
+                                onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) setCounter(it) },
+                                singleLine = true,
+                                maxLines = 1,
+                                label = { Text(text = "Counter") },
+                                placeholder = { Text(text = "0") }
+                            )
+                        }
+
+                        if (type == OTP.Companion.Type.TOTP) {
+                            OutlinedTextField(
+                                modifier = Modifier.padding(bottom = 8.dp, top = 16.dp),
+                                value = period,
+                                onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) setPeriod(it) },
+                                singleLine = true,
+                                maxLines = 1,
+                                label = { Text(text = "Period") },
+                                placeholder = { Text(text = "30") }
+                            )
+                        }
                     }
                 }
 
