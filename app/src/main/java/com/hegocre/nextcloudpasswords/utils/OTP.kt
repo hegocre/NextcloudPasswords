@@ -85,3 +85,15 @@ data class OTP(
 
     }
 }
+
+fun String.formatOtp(chunkSize: Int? = null): String {
+    val digitsOnly = this.filter { it.isDigit() }
+    val n = digitsOnly.length
+    val size = chunkSize ?: when {
+        n % 4 == 0 && n % 3 != 0 -> 4
+        n % 3 == 0 -> 3
+        else -> 3
+    }
+
+    return digitsOnly.chunked(size).joinToString(" ")
+}

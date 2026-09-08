@@ -385,7 +385,7 @@ fun EditablePasswordView(
 
         item (key = "password_custom_${OTP.CUSTOM_FIELD_LABEL}") {
             OutlinedClickableTextField(
-                value = otp?.secret ?: "Set OTP",
+                value = otp?.secret ?: "",
                 label = "OTP",
                 onClick = {
                     showOtpDialog = true

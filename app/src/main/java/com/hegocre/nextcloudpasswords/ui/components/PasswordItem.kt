@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -38,13 +39,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -68,6 +66,7 @@ import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
 import com.hegocre.nextcloudpasswords.utils.OTP
 import com.hegocre.nextcloudpasswords.utils.copyToClipboard
+import com.hegocre.nextcloudpasswords.utils.formatOtp
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import org.commonmark.node.Document
@@ -285,13 +284,13 @@ fun PasswordItemContent(
 
                     var currentOtp by remember { mutableStateOf(otp.getCurrent()) }
                     currentOtp.first?.let { code ->
-                        PasswordOtpField(text = code, label = "OTP", progress)
+                        PasswordOtpField(otp = code, label = "OTP", progress)
                         currentOtp.second?.let { endTimeInMillis ->
                             LaunchedEffect(endTimeInMillis) {
                                 while (System.currentTimeMillis() < endTimeInMillis) {
                                     val remaining = endTimeInMillis - System.currentTimeMillis()
                                     progress = 1f - (remaining.toFloat() / (otp.period.toFloat() * 1000f))
-                                    delay(timeMillis = 1L)
+                                    delay(timeMillis = 50L)
                                 }
                                 currentOtp = otp.getCurrent()
                             }
@@ -545,7 +544,7 @@ fun PasswordTextField(
 
 @Composable
 fun PasswordOtpField(
-    text: String,
+    otp: String,
     label: String,
     progress: Float?,
     modifier: Modifier = Modifier,
@@ -555,7 +554,7 @@ fun PasswordOtpField(
     ListItem(
         headlineContent = {
             Text(
-                text = text,
+                text = otp.formatOtp(),
                 maxLines = 1,
                 fontFamily = fontFamily,
                 modifier = Modifier
@@ -582,8 +581,13 @@ fun PasswordOtpField(
                 progress?.let {
                     CircularProgressIndicator(
                         progress = { it },
-                        modifier = Modifier.padding(end = 16.dp).width(24.dp).align(CenterVertically),
-                        trackColor = Color.Transparent
+                        modifier = Modifier
+                            .align(CenterVertically)
+                            .padding(end = 16.dp)
+                            .width(20.dp)
+                            .height(20.dp),
+                        trackColor = Color.Transparent,
+                        strokeWidth = 2.dp
                     )
                 }
 
@@ -591,7 +595,7 @@ fun PasswordOtpField(
                 val copiedText = stringResource(R.string.copied)
 
                 IconButton(onClick = {
-                    context.copyToClipboard(text, isSensitive = true)
+                    context.copyToClipboard(otp, isSensitive = true)
                     Toast.makeText(
                         context,
                         String.format(copiedText, "OTP"),
@@ -651,7 +655,7 @@ fun PasswordItemPreview() {
                     notes = "# This is a note\n\nIt is very important that this is read by all __means__\n\n" +
                             "## Subsection \n\n This is also important.\n\n" +
                             "## Another subsection\n\n### Even deeper\n\n Some text\nSome more text",
-                    customFields = "",
+                    customFields = "[{\"label\":\"client.ios.otp\",\"type\":\"data\",\"value\":\"{\\\"secret\\\": \\\"hello\\\"}\"}]",
                     status = 0,
                     statusCode = "GOOD",
                     hash = "",

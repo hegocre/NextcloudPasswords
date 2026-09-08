@@ -381,9 +381,9 @@ fun EditOtpDialog(
     val (secret, setSecret) = remember { mutableStateOf(currentOtp.secret) }
     val (type, setType) = remember { mutableStateOf(currentOtp.type) }
     val (algorithm, setAlgorithm) = remember { mutableStateOf(currentOtp.algorithm) }
-    val (digits, setDigits) = remember { mutableIntStateOf(currentOtp.digits) }
-    val (counter, setCounter) = remember { mutableIntStateOf(currentOtp.counter) }
-    val (period, setPeriod) = remember { mutableIntStateOf(currentOtp.period) }
+    val (digits, setDigits) = remember { mutableStateOf(currentOtp.digits.toString()) }
+    val (counter, setCounter) = remember { mutableStateOf(currentOtp.counter.toString()) }
+    val (period, setPeriod) = remember { mutableStateOf(currentOtp.period.toString()) }
 
     var typeMenuExpanded by remember { mutableStateOf(false) }
     var algorithmMenuExpanded by remember { mutableStateOf(false) }
@@ -495,32 +495,35 @@ fun EditOtpDialog(
 
                     OutlinedTextField(
                         modifier = Modifier.padding(bottom = 0.dp, top = 16.dp),
-                        value = digits.toString(),
-                        onValueChange = { if (it.toIntOrNull() != null) setDigits(it.toInt()) },
+                        value = digits,
+                        onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) setDigits(it) },
                         singleLine = true,
                         maxLines = 1,
                         label = { Text(text = "Digits") },
+                        placeholder = { Text(text = "6") }
                     )
 
                     if (type == OTP.Companion.Type.HOTP) {
                         OutlinedTextField(
                             modifier = Modifier.padding(bottom = 8.dp, top = 16.dp),
-                            value = counter.toString(),
-                            onValueChange = { if (it.toIntOrNull() != null) setCounter(it.toInt()) },
+                            value = counter,
+                            onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) setCounter(it) },
                             singleLine = true,
                             maxLines = 1,
                             label = { Text(text = "Counter") },
+                            placeholder = { Text(text = "0") }
                         )
                     }
 
                     if (type == OTP.Companion.Type.TOTP) {
                         OutlinedTextField(
                             modifier = Modifier.padding(bottom = 8.dp, top = 16.dp),
-                            value = period.toString(),
-                            onValueChange = { if (it.toIntOrNull() != null) setPeriod(it.toInt()) },
+                            value = period,
+                            onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) setPeriod(it) },
                             singleLine = true,
                             maxLines = 1,
                             label = { Text(text = "Period") },
+                            placeholder = { Text(text = "30") }
                         )
                     }
                 }
@@ -531,7 +534,15 @@ fun EditOtpDialog(
                         if (secret.isBlank()) {
                             showEmptyError = true
                         } else {
-                            onSaveClick(OTP(secret, type, algorithm, digits, counter, period))
+                            onSaveClick(
+                                OTP(secret,
+                                    type,
+                                    algorithm,
+                                    digits.toIntOrNull() ?: 6,
+                                    counter.toIntOrNull() ?: 0,
+                                    period.toIntOrNull() ?: 30
+                                )
+                            )
                         }
                     },
                     modifier = Modifier
