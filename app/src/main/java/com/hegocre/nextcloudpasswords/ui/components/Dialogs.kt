@@ -73,6 +73,7 @@ import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.RequestedPassword
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.utils.OTP
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.job
@@ -346,6 +347,191 @@ fun AddCustomFieldDialog(
                             showEmptyError = true
                         } else {
                             onAddClick(type, label)
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(horizontal = 0.dp)
+                ) {
+                    Text(text = stringResource(android.R.string.ok))
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditOtpDialog(
+    onSaveClick: (OTP) -> Unit,
+    onDismissRequest: (() -> Unit)? = null,
+    currentOtp: OTP = OTP(secret = "")
+) {
+    val types = listOf(
+        OTP.Companion.Type.TOTP,
+        OTP.Companion.Type.HOTP
+    )
+
+    val algorithms = listOf(
+        OTP.Companion.Algorithm.SHA1,
+        OTP.Companion.Algorithm.SHA256,
+        OTP.Companion.Algorithm.SHA512
+    )
+
+    val (secret, setSecret) = remember { mutableStateOf(currentOtp.secret) }
+    val (type, setType) = remember { mutableStateOf(currentOtp.type) }
+    val (algorithm, setAlgorithm) = remember { mutableStateOf(currentOtp.algorithm) }
+    val (digits, setDigits) = remember { mutableIntStateOf(currentOtp.digits) }
+    val (counter, setCounter) = remember { mutableIntStateOf(currentOtp.counter) }
+    val (period, setPeriod) = remember { mutableIntStateOf(currentOtp.period) }
+
+    var typeMenuExpanded by remember { mutableStateOf(false) }
+    var algorithmMenuExpanded by remember { mutableStateOf(false) }
+
+    var showEmptyError by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    Dialog(
+        onDismissRequest = { onDismissRequest?.invoke() },
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            contentColor = contentColorFor(backgroundColor = MaterialTheme.colorScheme.surface),
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+        ) {
+            Column(modifier = Modifier.padding(all = 24.dp)) {
+                Text(
+                    text = "OTP",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .verticalScroll(
+                            rememberScrollState()
+                        )
+                ) {
+                    OutlinedTextField(
+                        value = secret,
+                        onValueChange = setSecret,
+                        singleLine = true,
+                        maxLines = 1,
+                        label = { Text(text = "Secret") },
+                        isError = showEmptyError && secret.isBlank(),
+                        supportingText = if (showEmptyError && secret.isBlank()) {
+                            {
+                                Text(text = stringResource(id = R.string.error_field_cannot_be_empty))
+                            }
+                        } else null
+                    )
+
+                    ExposedDropdownMenuBox(
+                        expanded = typeMenuExpanded,
+                        onExpandedChange = { typeMenuExpanded = !typeMenuExpanded },
+                        modifier = Modifier.padding(bottom = 0.dp, top = 16.dp)
+                    ) {
+                        OutlinedTextField(
+                            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                            value = type.uppercase(),
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuExpanded) },
+                            label = { Text(text = "Type") },
+                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = typeMenuExpanded,
+                            onDismissRequest = { typeMenuExpanded = false }
+                        ) {
+                            types.forEach { type ->
+                                DropdownMenuItem(
+                                    text = { Text(text = type.uppercase()) },
+                                    onClick = {
+                                        setType(type)
+                                        typeMenuExpanded = false
+                                    },
+                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                )
+                            }
+                        }
+                    }
+
+                    ExposedDropdownMenuBox(
+                        expanded = algorithmMenuExpanded,
+                        onExpandedChange = { algorithmMenuExpanded = !algorithmMenuExpanded },
+                        modifier = Modifier.padding(bottom = 0.dp, top = 16.dp)
+                    ) {
+                        OutlinedTextField(
+                            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                            value = algorithm.uppercase(),
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuExpanded) },
+                            label = { Text(text = "Algorithm") },
+                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = algorithmMenuExpanded,
+                            onDismissRequest = { algorithmMenuExpanded = false }
+                        ) {
+                            algorithms.forEach { algorithm ->
+                                DropdownMenuItem(
+                                    text = { Text(text = algorithm.uppercase()) },
+                                    onClick = {
+                                        setAlgorithm(algorithm)
+                                        algorithmMenuExpanded = false
+                                    },
+                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                )
+                            }
+                        }
+                    }
+
+                    OutlinedTextField(
+                        modifier = Modifier.padding(bottom = 0.dp, top = 16.dp),
+                        value = digits.toString(),
+                        onValueChange = { if (it.toIntOrNull() != null) setDigits(it.toInt()) },
+                        singleLine = true,
+                        maxLines = 1,
+                        label = { Text(text = "Digits") },
+                    )
+
+                    if (type == OTP.Companion.Type.HOTP) {
+                        OutlinedTextField(
+                            modifier = Modifier.padding(bottom = 8.dp, top = 16.dp),
+                            value = counter.toString(),
+                            onValueChange = { if (it.toIntOrNull() != null) setCounter(it.toInt()) },
+                            singleLine = true,
+                            maxLines = 1,
+                            label = { Text(text = "Counter") },
+                        )
+                    }
+
+                    if (type == OTP.Companion.Type.TOTP) {
+                        OutlinedTextField(
+                            modifier = Modifier.padding(bottom = 8.dp, top = 16.dp),
+                            value = period.toString(),
+                            onValueChange = { if (it.toIntOrNull() != null) setPeriod(it.toInt()) },
+                            singleLine = true,
+                            maxLines = 1,
+                            label = { Text(text = "Period") },
+                        )
+                    }
+                }
+
+
+                TextButton(
+                    onClick = {
+                        if (secret.isBlank()) {
+                            showEmptyError = true
+                        } else {
+                            onSaveClick(OTP(secret, type, algorithm, digits, counter, period))
                         }
                     },
                     modifier = Modifier

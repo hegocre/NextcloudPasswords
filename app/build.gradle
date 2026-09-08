@@ -116,6 +116,9 @@ dependencies {
 
     implementation 'com.materialkolor:material-kolor:5.0.1'
 
+    implementation 'dev.turingcomplete:kotlin-onetimepassword:3.0.0'
+    implementation 'commons-codec:commons-codec:1.22.1'
+
     testImplementation 'junit:junit:4.13.2'
 
     androidTestImplementation 'androidx.arch.core:core-testing:2.2.0'

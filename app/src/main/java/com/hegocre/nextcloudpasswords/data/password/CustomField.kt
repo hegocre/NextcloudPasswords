@@ -30,5 +30,6 @@ data class CustomField(
         const val TYPE_URL = "url"
         const val TYPE_FILE = "file"
         const val TYPE_DATA = "data"
+
     }
 }

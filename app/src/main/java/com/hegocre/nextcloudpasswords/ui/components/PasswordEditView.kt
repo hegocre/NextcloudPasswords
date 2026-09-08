@@ -35,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -67,6 +68,7 @@ import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
 import com.hegocre.nextcloudpasswords.utils.isValidEmail
 import com.hegocre.nextcloudpasswords.utils.isValidURL
 import com.hegocre.nextcloudpasswords.utils.AutofillData
+import com.hegocre.nextcloudpasswords.utils.OTP
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
@@ -166,6 +168,9 @@ fun EditablePasswordView(
     var showFolderDialog by rememberSaveable {
         mutableStateOf(false)
     }
+    var showOtpDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
     var showFieldErrors by rememberSaveable {
         mutableStateOf(false)
     }
@@ -195,6 +200,15 @@ fun EditablePasswordView(
                 showDiscardDialog = false
             }
         )
+    }
+
+    val otp by remember {
+        derivedStateOf {
+            editablePasswordState.customFields.find { it.label == OTP.CUSTOM_FIELD_LABEL }
+                ?.let {
+                    Json.decodeFromString<OTP>(it.value)
+                }
+        }
     }
 
     LazyColumn {
@@ -369,6 +383,20 @@ fun EditablePasswordView(
             }
         }
 
+        item (key = "password_custom_${OTP.CUSTOM_FIELD_LABEL}") {
+            OutlinedClickableTextField(
+                value = otp?.secret ?: "Set OTP",
+                label = "OTP",
+                onClick = {
+                    showOtpDialog = true
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 16.dp)
+            )
+        }
+
         item(key = "password_url") {
             OutlinedTextField(
                 value = editablePasswordState.url,
@@ -410,7 +438,7 @@ fun EditablePasswordView(
         }
 
         itemsIndexed(
-            items = editablePasswordState.customFields,
+            items = editablePasswordState.customFields.filterNot { it.label == OTP.CUSTOM_FIELD_LABEL },
             key = { index, field -> "${index}_password_custom_${field.label}" }) { index, customField ->
             var showValue by rememberSaveable {
                 mutableStateOf(customField.type != CustomField.TYPE_SECRET)
@@ -645,6 +673,31 @@ fun EditablePasswordView(
             },
             onDismissRequest = {
                 showFolderDialog = false
+            }
+        )
+    }
+
+    if (showOtpDialog) {
+        EditOtpDialog(
+            currentOtp = otp ?: OTP(""),
+            onDismissRequest = {
+                showOtpDialog = false
+            },
+            onSaveClick = { otp ->
+                val json = Json { explicitNulls = false }
+                val newOtpField = CustomField(
+                    type = CustomField.TYPE_DATA,
+                    label = OTP.CUSTOM_FIELD_LABEL,
+                    value = json.encodeToString(otp)
+                )
+                val index = editablePasswordState.customFields.indexOfFirst { it.label == OTP.CUSTOM_FIELD_LABEL }
+                if (index != -1) {
+                    editablePasswordState.customFields[index] = newOtpField
+                } else {
+                    editablePasswordState.customFields.add(newOtpField)
+                }
+
+                showOtpDialog = false
             }
         )
     }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.InlineTextContent
@@ -23,6 +24,8 @@ import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.Link
 import androidx.compose.material.icons.twotone.Password
 import androidx.compose.material.icons.twotone.Shield
+import androidx.compose.material.icons.twotone.Timelapse
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -32,12 +35,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,7 +66,9 @@ import com.hegocre.nextcloudpasswords.ui.components.markdown.MDDocument
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
+import com.hegocre.nextcloudpasswords.utils.OTP
 import com.hegocre.nextcloudpasswords.utils.copyToClipboard
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import org.commonmark.node.Document
 import org.commonmark.parser.Parser
@@ -266,6 +275,31 @@ fun PasswordItemContent(
                 )
             }
 
+            val customFieldOtp by derivedStateOf { customFields.find { it.label == OTP.CUSTOM_FIELD_LABEL } }
+            customFieldOtp?.let { otpField ->
+                item(key = "${password.id}_otp") {
+                    val otp = remember(otpField) {
+                        Json.decodeFromString<OTP>(otpField.value)
+                    }
+                    var progress by remember { mutableStateOf<Float?>(null) }
+
+                    var currentOtp by remember { mutableStateOf(otp.getCurrent()) }
+                    currentOtp.first?.let { code ->
+                        PasswordOtpField(text = code, label = "OTP", progress)
+                        currentOtp.second?.let { endTimeInMillis ->
+                            LaunchedEffect(endTimeInMillis) {
+                                while (System.currentTimeMillis() < endTimeInMillis) {
+                                    val remaining = endTimeInMillis - System.currentTimeMillis()
+                                    progress = 1f - (remaining.toFloat() / (otp.period.toFloat() * 1000f))
+                                    delay(timeMillis = 1L)
+                                }
+                                currentOtp = otp.getCurrent()
+                            }
+                        }
+                    }
+                }
+            }
+
             if (password.url.isNotBlank()) {
                 item(key = "${password.id}_url") {
                     val urlLabel = stringResource(id = R.string.password_attr_url)
@@ -323,9 +357,10 @@ fun PasswordItemContent(
                 }
             }
 
-            if (customFields.isNotEmpty()) {
+            val customFieldsNoOtp by derivedStateOf { customFields.filterNot { it.label == OTP.CUSTOM_FIELD_LABEL } }
+            if (customFieldsNoOtp.isNotEmpty()) {
                 itemsIndexed(
-                    items = customFields,
+                    items = customFieldsNoOtp,
                     key = { index, field -> "${index}_${password.id}_${field.label}" }) {_, customField ->
                     when (customField.type) {
                         CustomField.TYPE_TEXT, CustomField.TYPE_EMAIL -> {
@@ -503,6 +538,73 @@ fun PasswordTextField(
         },
         leadingContent = icon,
         trailingContent = trailingIcon,
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        modifier = modifier
+    )
+}
+
+@Composable
+fun PasswordOtpField(
+    text: String,
+    label: String,
+    progress: Float?,
+    modifier: Modifier = Modifier,
+    onClickText: (() -> Unit)? = null,
+    fontFamily: FontFamily? = null,
+) {
+    ListItem(
+        headlineContent = {
+            Text(
+                text = text,
+                maxLines = 1,
+                fontFamily = fontFamily,
+                modifier = Modifier
+                    .clickable(
+                        enabled = onClickText != null,
+                        onClick = onClickText ?: {}
+                    ),
+            )
+        },
+        overlineContent = {
+            Text(
+                text = label.uppercase(),
+                maxLines = 1
+            )
+        },
+        leadingContent = {
+            Icon(
+                imageVector = Icons.TwoTone.Timelapse,
+                contentDescription = "OTP"
+            )
+        },
+        trailingContent = {
+            Row {
+                progress?.let {
+                    CircularProgressIndicator(
+                        progress = { it },
+                        modifier = Modifier.padding(end = 16.dp).width(24.dp).align(CenterVertically),
+                        trackColor = Color.Transparent
+                    )
+                }
+
+                val context = LocalContext.current
+                val copiedText = stringResource(R.string.copied)
+
+                IconButton(onClick = {
+                    context.copyToClipboard(text, isSensitive = true)
+                    Toast.makeText(
+                        context,
+                        String.format(copiedText, "OTP"),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }) {
+                    Icon(
+                        imageVector = Icons.TwoTone.ContentCopy,
+                        contentDescription = stringResource(id = R.string.action_copy_value)
+                    )
+                }
+            }
+        },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = modifier
     )
