@@ -141,12 +141,12 @@ fun MasterPasswordDialog(
                         Checkbox(
                             checked = savePassword,
                             onCheckedChange = setSavePassword,
-                            modifier = Modifier.align(Alignment.CenterVertically)
+                            modifier = Modifier.align(CenterVertically)
                         )
                         Text(
                             text = "Save password",
                             modifier = Modifier
-                                .align(Alignment.CenterVertically)
+                                .align(CenterVertically)
                                 .pointerInput(Unit) {
                                     detectTapGestures {
                                         setSavePassword(!savePassword)
@@ -365,6 +365,7 @@ fun AddCustomFieldDialog(
 @Composable
 fun EditOtpDialog(
     onSaveClick: (OTP) -> Unit,
+    onDeleteClick: () -> Unit,
     onDismissRequest: (() -> Unit)? = null,
     currentOtp: OTP = OTP(secret = "")
 ) {
@@ -546,27 +547,33 @@ fun EditOtpDialog(
                 }
 
 
-                TextButton(
-                    onClick = {
-                        if (secret.isBlank()) {
-                            showEmptyError = true
-                        } else {
-                            onSaveClick(
-                                OTP(secret,
-                                    type,
-                                    algorithm,
-                                    digits.toIntOrNull() ?: 6,
-                                    counter.toIntOrNull() ?: 0,
-                                    period.toIntOrNull() ?: 30
+                Row (modifier = Modifier.align(Alignment.End).padding(top = 8.dp)) {
+                    TextButton(
+                        onClick = onDeleteClick,
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text(text = "Delete")
+                    }
+
+                    TextButton(
+                        onClick = {
+                            if (secret.isBlank()) {
+                                showEmptyError = true
+                            } else {
+                                onSaveClick(
+                                    OTP(secret,
+                                        type,
+                                        algorithm,
+                                        digits.toIntOrNull() ?: 6,
+                                        counter.toLongOrNull() ?: 0L,
+                                        period.toIntOrNull() ?: 30
+                                    )
                                 )
-                            )
-                        }
-                    },
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(horizontal = 0.dp)
-                ) {
-                    Text(text = stringResource(android.R.string.ok))
+                            }
+                        },
+                    ) {
+                        Text(text = stringResource(android.R.string.ok))
+                    }
                 }
             }
         }
@@ -850,7 +857,7 @@ fun ListPreferenceDialog(
                 ) {
                     items(items = options.keys.toList(), key = { it }) { option ->
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
@@ -962,7 +969,7 @@ fun PasswordGenerationDialog(
                     }
 
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
@@ -979,7 +986,7 @@ fun PasswordGenerationDialog(
                     }
 
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {

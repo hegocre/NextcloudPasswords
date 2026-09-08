@@ -698,6 +698,13 @@ fun EditablePasswordView(
                 }
 
                 showOtpDialog = false
+            },
+            onDeleteClick = {
+                val index = editablePasswordState.customFields.indexOfFirst { it.label == OTP.CUSTOM_FIELD_LABEL }
+                if (index != -1) {
+                    editablePasswordState.customFields.removeAt(index)
+                }
+                showOtpDialog = false
             }
         )
     }
