@@ -59,6 +59,7 @@ import com.hegocre.nextcloudpasswords.utils.decryptPasswords
 import com.hegocre.nextcloudpasswords.utils.encryptValue
 import com.hegocre.nextcloudpasswords.utils.sha1Hash
 import com.hegocre.nextcloudpasswords.utils.AutofillData
+import com.hegocre.nextcloudpasswords.utils.copyToClipboard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -115,6 +116,14 @@ fun NCPNavHost(
     val onPasswordClick: (Password) -> Unit = { password ->
         when (autofillData) {
             is AutofillData.ChoosePwd if replyAutofill != null -> {
+                if (PreferencesManager.getInstance(context).getCopyOTPOnAutofill()) {
+                    val otp = password.getOTP()
+                    if (otp.second != null) {
+                        otp.first?.let { otpCode ->
+                            context.copyToClipboard(otpCode, isSensitive = true)
+                        }
+                    }
+                }
                 replyAutofill(password.label, password.username, password.password)
             }
             is AutofillData.Save, is AutofillData.SaveAutofill -> {
@@ -227,6 +236,14 @@ fun NCPNavHost(
                                         filteredPasswordList
                                             .firstOrNull { it.id == autofillData.id }
                                             ?.let {
+                                                if (PreferencesManager.getInstance(context).getCopyOTPOnAutofill()) {
+                                                    val otp = it.getOTP()
+                                                    if (otp.second != null) {
+                                                        otp.first?.let { otpCode ->
+                                                            context.copyToClipboard(otpCode, isSensitive = true)
+                                                        }
+                                                    }
+                                                }
                                                 replyAutofill(it.label, it.username, it.password)
                                             } 
                                             ?: NoContentText()
