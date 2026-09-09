@@ -2,6 +2,7 @@ package com.hegocre.nextcloudpasswords.utils
 
 import android.net.Uri
 import androidx.core.net.toUri
+import com.hegocre.nextcloudpasswords.R
 import dev.turingcomplete.kotlinonetimepassword.HmacAlgorithm
 import dev.turingcomplete.kotlinonetimepassword.HmacOneTimePasswordConfig
 import dev.turingcomplete.kotlinonetimepassword.HmacOneTimePasswordGenerator
@@ -85,13 +86,13 @@ data class OTP(
             val uri = url.toUri()
 
             if (uri.scheme?.equals("otpauth", ignoreCase = true) != true) {
-                throw IllegalArgumentException("Invalid OTP URL")
+                throw OtpParseException.InvalidUrl()
             }
 
             val type = when (uri.host?.lowercase()) {
                 "totp" -> Type.TOTP
                 "hotp" -> Type.HOTP
-                else -> throw IllegalArgumentException("Invalid OTP Type")
+                else -> throw OtpParseException.InvalidType()
             }
 
             val label = uri.encodedPath?.removePrefix("/") ?: ""
@@ -100,10 +101,10 @@ data class OTP(
             val accountName = (labelParts.getOrNull(1) ?: labelParts[0]).let { it.ifBlank { null } }
 
             val secret = uri.getQueryParameter("secret")
-                ?: throw IllegalArgumentException("Missing required 'secret' parameter")
+                ?: throw OtpParseException.MissingSecret()
 
             if (!Base32().isInAlphabet(secret)) {
-                throw IllegalArgumentException("Invalid 'secret' parameter")
+                throw OtpParseException.InvalidSecret()
             }
 
             val issuer = uri.getQueryParameter("issuer") ?: labelIssuer
@@ -113,7 +114,7 @@ data class OTP(
                 "sha256" -> Algorithm.SHA256
                 "sha512" -> Algorithm.SHA512
                 null -> Algorithm.SHA1
-                else -> throw IllegalArgumentException("Invalid OTP Algorithm")
+                else -> throw OtpParseException.InvalidAlgorithm()
             }
 
             val digits = uri.getQueryParameter("digits")?.toIntOrNull()
@@ -123,7 +124,7 @@ data class OTP(
                 ?.takeUnless { it < 0 }
 
             if (type == Type.HOTP && counter == null) {
-                throw IllegalArgumentException("HOTP requires a 'counter' parameter")
+                throw OtpParseException.MissingCounter()
             }
 
             val period = uri.getQueryParameter("period")?.toIntOrNull()
@@ -142,6 +143,15 @@ data class OTP(
         }
 
     }
+}
+
+sealed class OtpParseException(val stringResId: Int) : IllegalArgumentException() {
+    class InvalidUrl(resId: Int = R.string.error_invalid_otp_url) : OtpParseException(resId)
+    class InvalidType(resId: Int = R.string.error_invalid_otp_type) : OtpParseException(resId)
+    class MissingSecret(resId: Int = R.string.error_missing_secret) : OtpParseException(resId)
+    class InvalidSecret(resId: Int = R.string.error_invalid_secret) : OtpParseException(resId)
+    class InvalidAlgorithm(resId: Int = R.string.error_invalid_algorithm) : OtpParseException(resId)
+    class MissingCounter(resId: Int = R.string.error_missing_counter) : OtpParseException(resId)
 }
 
 fun String.formatOtp(chunkSize: Int? = null): String {

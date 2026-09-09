@@ -278,21 +278,29 @@ fun PasswordItemContent(
             customFieldOtp?.let { otpField ->
                 item(key = "${password.id}_otp") {
                     val otp = remember(otpField) {
-                        Json.decodeFromString<OTP>(otpField.value)
+                        try {
+                            Json.decodeFromString<OTP>(otpField.value)
+                        } catch (_: Exception) {
+                            null
+                        }
                     }
-                    var progress by remember { mutableStateOf<Float?>(null) }
 
-                    var currentOtp by remember { mutableStateOf(otp.getCurrent()) }
-                    currentOtp.first?.let { code ->
-                        PasswordOtpField(otp = code, label = "OTP", progress)
-                        currentOtp.second?.let { endTimeInMillis ->
-                            LaunchedEffect(endTimeInMillis) {
-                                while (System.currentTimeMillis() < endTimeInMillis) {
-                                    val remaining = endTimeInMillis - System.currentTimeMillis()
-                                    progress = 1f - (remaining.toFloat() / (otp.period.toFloat() * 1000f))
-                                    delay(timeMillis = 50L)
+                    otp?.let { otp ->
+                        var currentOtp by remember { mutableStateOf(otp.getCurrent()) }
+                        currentOtp.first?.let { code ->
+                            var progress by remember { mutableStateOf<Float?>(null) }
+
+                            PasswordOtpField(otp = code, label = stringResource(R.string.otp_title), progress)
+
+                            currentOtp.second?.let { endTimeInMillis ->
+                                LaunchedEffect(endTimeInMillis) {
+                                    while (System.currentTimeMillis() < endTimeInMillis) {
+                                        val remaining = endTimeInMillis - System.currentTimeMillis()
+                                        progress = 1f - (remaining.toFloat() / (otp.period.toFloat() * 1000f))
+                                        delay(timeMillis = 50L)
+                                    }
+                                    currentOtp = otp.getCurrent()
                                 }
-                                currentOtp = otp.getCurrent()
                             }
                         }
                     }
@@ -573,7 +581,7 @@ fun PasswordOtpField(
         leadingContent = {
             Icon(
                 imageVector = Icons.TwoTone.Timelapse,
-                contentDescription = "OTP"
+                contentDescription = stringResource(R.string.otp_title)
             )
         },
         trailingContent = {
@@ -593,12 +601,13 @@ fun PasswordOtpField(
 
                 val context = LocalContext.current
                 val copiedText = stringResource(R.string.copied)
+                val otpTitle = stringResource(R.string.otp_title)
 
                 IconButton(onClick = {
                     context.copyToClipboard(otp, isSensitive = true)
                     Toast.makeText(
                         context,
-                        String.format(copiedText, "OTP"),
+                        String.format(copiedText, otpTitle),
                         Toast.LENGTH_SHORT
                     ).show()
                 }) {

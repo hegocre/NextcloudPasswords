@@ -206,7 +206,11 @@ fun EditablePasswordView(
         derivedStateOf {
             editablePasswordState.customFields.find { it.label == OTP.CUSTOM_FIELD_LABEL }
                 ?.let {
-                    Json.decodeFromString<OTP>(it.value)
+                    try {
+                        Json.decodeFromString<OTP>(it.value)
+                    } catch (_: Exception) {
+                        null
+                    }
                 }
         }
     }
@@ -386,7 +390,7 @@ fun EditablePasswordView(
         item (key = "password_custom_${OTP.CUSTOM_FIELD_LABEL}") {
             OutlinedClickableTextField(
                 value = otp?.secret ?: "",
-                label = "OTP",
+                label = stringResource(R.string.otp_title),
                 onClick = {
                     showOtpDialog = true
                 },

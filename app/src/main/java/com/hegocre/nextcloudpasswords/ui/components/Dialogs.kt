@@ -1,6 +1,6 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
-import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -65,6 +65,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -80,12 +81,14 @@ import com.hegocre.nextcloudpasswords.data.password.RequestedPassword
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.OTP
+import com.hegocre.nextcloudpasswords.utils.OtpParseException
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import io.github.g00fy2.quickie.QRResult
 import io.github.g00fy2.quickie.ScanQRCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import org.apache.commons.codec.binary.Base32
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -151,7 +154,7 @@ fun MasterPasswordDialog(
                             modifier = Modifier.align(CenterVertically)
                         )
                         Text(
-                            text = "Save password",
+                            text = stringResource(R.string.save_password),
                             modifier = Modifier
                                 .align(CenterVertically)
                                 .pointerInput(Unit) {
@@ -376,15 +379,15 @@ fun EditOtpDialog(
     onDismissRequest: (() -> Unit)? = null,
     currentOtp: OTP = OTP(secret = "")
 ) {
-    val types = listOf(
-        OTP.Companion.Type.TOTP,
-        OTP.Companion.Type.HOTP
+    val types = mapOf(
+        OTP.Companion.Type.TOTP to stringResource(R.string.otp_type_totp),
+        OTP.Companion.Type.HOTP to stringResource(R.string.otp_type_hotp)
     )
 
-    val algorithms = listOf(
-        OTP.Companion.Algorithm.SHA1,
-        OTP.Companion.Algorithm.SHA256,
-        OTP.Companion.Algorithm.SHA512
+    val algorithms = mapOf(
+        OTP.Companion.Algorithm.SHA1 to "${OTP.Companion.Algorithm.SHA1.uppercase()} (${stringResource(R.string.value_default)})",
+        OTP.Companion.Algorithm.SHA256 to OTP.Companion.Algorithm.SHA256.uppercase(),
+        OTP.Companion.Algorithm.SHA512 to OTP.Companion.Algorithm.SHA512.uppercase()
     )
 
     val (secret, setSecret) = remember { mutableStateOf(currentOtp.secret) }
@@ -397,7 +400,7 @@ fun EditOtpDialog(
     var typeMenuExpanded by remember { mutableStateOf(false) }
     var algorithmMenuExpanded by remember { mutableStateOf(false) }
 
-    var showEmptyError by rememberSaveable {
+    var showInputErrors by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -412,12 +415,13 @@ fun EditOtpDialog(
         ) {
             Column(modifier = Modifier.padding(all = 24.dp)) {
                 Row (modifier = Modifier.padding(bottom = 8.dp), verticalAlignment = CenterVertically) {
+                    val context = LocalContext.current
+                    val resources = LocalResources.current
                     val scanQrCodeLauncher = rememberLauncherForActivityResult(ScanQRCode()) { result ->
                         when (result) {
                             is QRResult.QRSuccess -> {
                                 val otpUri = result.content.rawValue
                                 if (otpUri != null) {
-                                    Log.d("QR", otpUri)
                                     try {
                                         val otp = OTP.fromUrl(otpUri)
                                         setSecret(otp.secret)
@@ -426,19 +430,20 @@ fun EditOtpDialog(
                                         setDigits(otp.digits.toString())
                                         setCounter(otp.counter.toString())
                                         setPeriod(otp.period.toString())
-                                    } catch (e: IllegalArgumentException) {
-                                        Log.d("QR", "${e.message}")
+                                    } catch (e: OtpParseException) {
+                                        Toast.makeText(context, resources.getString(e.stringResId), Toast.LENGTH_LONG).show()
                                     }
                                 }
                             }
-                            else -> {
-                                //Error
+                            is QRResult.QRError -> {
+                                Toast.makeText(context, result.exception.localizedMessage, Toast.LENGTH_LONG).show()
                             }
+                            is QRResult.QRUserCanceled, is QRResult.QRMissingPermission -> {}
                         }
                     }
 
                     Text(
-                        text = "OTP",
+                        text = stringResource(R.string.otp_title),
                         style = MaterialTheme.typography.headlineSmall
                     )
 
@@ -449,7 +454,7 @@ fun EditOtpDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.QrCode,
-                            contentDescription = "QR Code"
+                            contentDescription = stringResource(R.string.scan_qr_code)
                         )
                     }
                 }
@@ -466,11 +471,15 @@ fun EditOtpDialog(
                         onValueChange = setSecret,
                         singleLine = true,
                         maxLines = 1,
-                        label = { Text(text = "Secret") },
-                        isError = showEmptyError && secret.isBlank(),
-                        supportingText = if (showEmptyError && secret.isBlank()) {
+                        label = { Text(text = stringResource(R.string.otp_secret)) },
+                        isError = showInputErrors && (secret.isBlank() || !Base32().isInAlphabet(secret)),
+                        supportingText = if (showInputErrors && secret.isBlank()) {
                             {
                                 Text(text = stringResource(id = R.string.error_field_cannot_be_empty))
+                            }
+                        } else if (showInputErrors && !Base32().isInAlphabet(secret)) {
+                            {
+                                Text(text = stringResource(R.string.error_invalid_secret))
                             }
                         } else null
                     )
@@ -481,11 +490,11 @@ fun EditOtpDialog(
                         .padding(top = 16.dp, bottom = 8.dp)
                         .clickable(onClick = { showAdvancedOptions = !showAdvancedOptions })
                     ) {
-                        Text(text = "Show advanced options")
+                        Text(text = stringResource(R.string.show_advanced_options))
 
                         Icon(
                             imageVector = if (showAdvancedOptions) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Toggle advanced"
+                            contentDescription = stringResource(R.string.toggle_advanced_options)
                         )
                     }
 
@@ -497,11 +506,11 @@ fun EditOtpDialog(
                         ) {
                             OutlinedTextField(
                                 modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-                                value = type.uppercase(),
+                                value = types[type] ?: "",
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuExpanded) },
-                                label = { Text(text = "Type") },
+                                label = { Text(text = stringResource(R.string.otp_type)) },
                                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                             )
 
@@ -511,9 +520,9 @@ fun EditOtpDialog(
                             ) {
                                 types.forEach { type ->
                                     DropdownMenuItem(
-                                        text = { Text(text = type.uppercase()) },
+                                        text = { Text(text = type.value) },
                                         onClick = {
-                                            setType(type)
+                                            setType(type.key)
                                             typeMenuExpanded = false
                                         },
                                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
@@ -529,11 +538,11 @@ fun EditOtpDialog(
                         ) {
                             OutlinedTextField(
                                 modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-                                value = algorithm.uppercase(),
+                                value = algorithms[algorithm] ?: "",
                                 onValueChange = {},
                                 readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuExpanded) },
-                                label = { Text(text = "Algorithm") },
+                                label = { Text(text = stringResource(R.string.otp_algorithm)) },
                                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                             )
 
@@ -543,9 +552,9 @@ fun EditOtpDialog(
                             ) {
                                 algorithms.forEach { algorithm ->
                                     DropdownMenuItem(
-                                        text = { Text(text = algorithm.uppercase()) },
+                                        text = { Text(text = algorithm.value) },
                                         onClick = {
-                                            setAlgorithm(algorithm)
+                                            setAlgorithm(algorithm.key)
                                             algorithmMenuExpanded = false
                                         },
                                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
@@ -560,19 +569,33 @@ fun EditOtpDialog(
                             onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) setDigits(it) },
                             singleLine = true,
                             maxLines = 1,
-                            label = { Text(text = "Digits") },
-                            placeholder = { Text(text = "6") }
+                            label = { Text(text = stringResource(R.string.otp_digits)) },
+                            placeholder = { Text(text = "6") },
+                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                            isError = showInputErrors && (digits.toIntOrNull() ?: 6) !in 6..9,
+                            supportingText = if (showInputErrors && (digits.toIntOrNull() ?: 6) !in 6..9) {
+                                {
+                                    Text(text = stringResource(id = R.string.otp_invalid_digit_range_error))
+                                }
+                            } else null
                         )
 
                         if (type == OTP.Companion.Type.HOTP) {
                             OutlinedTextField(
                                 modifier = Modifier.padding(bottom = 8.dp, top = 16.dp),
                                 value = counter,
-                                onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) setCounter(it) },
+                                onValueChange = { if ((it.toLongOrNull() != null && it.toLong() >= 0) || it.isEmpty()) setCounter(it) },
                                 singleLine = true,
                                 maxLines = 1,
-                                label = { Text(text = "Counter") },
-                                placeholder = { Text(text = "0") }
+                                label = { Text(text = stringResource(R.string.otp_counter)) },
+                                placeholder = { Text(text = "0") },
+                                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                                isError = showInputErrors && (counter.toLongOrNull() ?: 30L) < 0,
+                                supportingText = if (showInputErrors && (counter.toLongOrNull() ?: 30L) < 0) {
+                                    {
+                                        Text(text = stringResource(id = R.string.otp_invalid_counter_error))
+                                    }
+                                } else null
                             )
                         }
 
@@ -580,29 +603,43 @@ fun EditOtpDialog(
                             OutlinedTextField(
                                 modifier = Modifier.padding(bottom = 8.dp, top = 16.dp),
                                 value = period,
-                                onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) setPeriod(it) },
+                                onValueChange = { if ((it.toIntOrNull() != null && it.toInt() >= 0) || it.isEmpty()) setPeriod(it) },
                                 singleLine = true,
                                 maxLines = 1,
-                                label = { Text(text = "Period") },
-                                placeholder = { Text(text = "30") }
+                                label = { Text(text = stringResource(R.string.otp_period)) },
+                                placeholder = { Text(text = "30") },
+                                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                                isError = showInputErrors && (period.toIntOrNull() ?: 30) < 1,
+                                supportingText = if (showInputErrors && (period.toIntOrNull() ?: 30) < 1) {
+                                    {
+                                        Text(text = stringResource(id = R.string.otp_invalid_period_error))
+                                    }
+                                } else null
                             )
                         }
                     }
                 }
 
 
-                Row (modifier = Modifier.align(Alignment.End).padding(top = 8.dp)) {
+                Row (modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(top = 8.dp)) {
                     TextButton(
                         onClick = onDeleteClick,
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        Text(text = "Delete")
+                        Text(text = stringResource(R.string.action_delete))
                     }
 
                     TextButton(
                         onClick = {
-                            if (secret.isBlank()) {
-                                showEmptyError = true
+                            if (secret.isBlank() ||
+                                !Base32().isInAlphabet(secret) ||
+                                (digits.toIntOrNull() ?: 6) !in 6..9 ||
+                                (type == OTP.Companion.Type.TOTP && (period.toIntOrNull() ?: 30) < 1) ||
+                                (type == OTP.Companion.Type.HOTP && (counter.toLongOrNull() ?: 30L) < 0)
+                            ) {
+                                showInputErrors = true
                             } else {
                                 onSaveClick(
                                     OTP(secret,
