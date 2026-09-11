@@ -221,7 +221,7 @@ class NCPAutofillService : AutofillService() {
             for ((idx, password) in passwords.withIndex()) {
                 val copyOtp = PreferencesManager.getInstance(this).getCopyOTPOnAutofill()
                 // Only copy when it is TOTP
-                val hasTOTP = password.getOTP().let { it.first != null && it.second != null }
+                val hasTOTP = copyOtp && password.getOTP().let { it.first != null && it.second != null }
 
                 builder.addDataset(
                     AutofillHelper.buildDataset(
@@ -235,7 +235,7 @@ class NCPAutofillService : AutofillService() {
                             password = password.password
                         ),
                         null,
-                        needsAuth || (hasTOTP && copyOtp),
+                        needsAuth || hasTOTP,
                         idx
                     )
                 )
