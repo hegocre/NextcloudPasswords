@@ -72,8 +72,11 @@ fun NCPNavHost(
     modifier: Modifier = Modifier,
     searchQuery: String = "",
     autofillData: AutofillData?,
-    openPasswordDetails: (Password, List<String>) -> Unit,
-    replyAutofill: ((String, String, String) -> Unit)? = null,
+    openPasswordDetails: (password: Password, folderTree: List<String>) -> Unit,
+    createPassword: (newPassword: NewPassword, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
+    updatePassword: (updatedPassword: UpdatedPassword, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
+    deletePassword: (deletedPassword: DeletedPassword, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
+    replyAutofill: ((label: String, username: String, password: String) -> Unit)? = null,
     modalSheetState: SheetState? = null,
     searchVisibility: Boolean? = null,
     closeSearch: (() -> Unit)? = null,
@@ -566,71 +569,30 @@ fun NCPNavHost(
                                     editablePasswordState = editablePasswordState,
                                     folders = foldersDecryptionState.decryptedList ?: listOf(),
                                     onSavePassword = {
-                                        val currentKeychain = keychain
-
                                         val customFields =
                                             Json.encodeToString(editablePasswordState.customFields.toList())
 
-                                        if (selectedPassword == null) {
-                                            // New password
-                                            val newPassword =
-                                                if (currentKeychain != null && serverSettings.encryptionCse != 0) {
-                                                    NewPassword(
-                                                        password = editablePasswordState.password.encryptValue(
-                                                            currentKeychain.current,
-                                                            currentKeychain
-                                                        ),
-                                                        label = editablePasswordState.label.encryptValue(
-                                                            currentKeychain.current,
-                                                            currentKeychain
-                                                        ),
-                                                        username = editablePasswordState.username.encryptValue(
-                                                            currentKeychain.current,
-                                                            currentKeychain
-                                                        ),
-                                                        url = editablePasswordState.url.encryptValue(
-                                                            currentKeychain.current,
-                                                            currentKeychain
-                                                        ),
-                                                        notes = editablePasswordState.notes.encryptValue(
-                                                            currentKeychain.current,
-                                                            currentKeychain
-                                                        ),
-                                                        customFields = customFields.encryptValue(
-                                                            currentKeychain.current,
-                                                            currentKeychain
-                                                        ),
-                                                        hash = editablePasswordState.password.sha1Hash()
-                                                            .take(serverSettings.passwordSecurityHash),
-                                                        cseType = "CSEv1r1",
-                                                        cseKey = currentKeychain.current,
-                                                        folder = editablePasswordState.folder,
-                                                        edited = 0,
-                                                        hidden = false,
-                                                        favorite = editablePasswordState.favorite
-                                                    )
-                                                } else {
-                                                    NewPassword(
-                                                        password = editablePasswordState.password,
-                                                        label = editablePasswordState.label,
-                                                        username = editablePasswordState.username,
-                                                        url = editablePasswordState.url,
-                                                        notes = editablePasswordState.notes,
-                                                        customFields = customFields,
-                                                        hash = editablePasswordState.password.sha1Hash()
-                                                            .take(serverSettings.passwordSecurityHash),
-                                                        cseType = "none",
-                                                        cseKey = "",
-                                                        folder = editablePasswordState.folder,
-                                                        edited = 0,
-                                                        hidden = false,
-                                                        favorite = editablePasswordState.favorite
-                                                    )
-                                                }
-                                            coroutineScope.launch {
-                                                if (passwordsViewModel.createPassword(newPassword)
-                                                        .await()
-                                                ) {
+                                        if (selectedPassword == null) { // New password
+                                            val newPassword = NewPassword(
+                                                password = editablePasswordState.password,
+                                                label = editablePasswordState.label,
+                                                username = editablePasswordState.username,
+                                                url = editablePasswordState.url,
+                                                notes = editablePasswordState.notes,
+                                                customFields = customFields,
+                                                hash = editablePasswordState.password.sha1Hash()
+                                                    .take(serverSettings.passwordSecurityHash),
+                                                cseType = "none",
+                                                cseKey = "",
+                                                folder = editablePasswordState.folder,
+                                                edited = 0,
+                                                hidden = false,
+                                                favorite = editablePasswordState.favorite
+                                            )
+
+                                            createPassword(
+                                                newPassword,
+                                                {
                                                     if (editablePasswordState.replyAutofill && replyAutofill != null) {
                                                         replyAutofill(
                                                             editablePasswordState.label,
@@ -640,77 +602,38 @@ fun NCPNavHost(
                                                     } else {
                                                         navController.navigateUp()
                                                     }
-                                                } else {
+                                                },
+                                                {
                                                     Toast.makeText(
                                                         context,
                                                         R.string.error_password_saving_failed,
                                                         Toast.LENGTH_LONG
                                                     ).show()
                                                 }
-                                            }
+                                            )
                                         } else {
-                                            val updatedPassword =
-                                                if (currentKeychain != null && selectedPassword.cseType == "CSEv1r1") {
-                                                    UpdatedPassword(
-                                                        id = selectedPassword.id,
-                                                        revision = selectedPassword.revision,
-                                                        password = editablePasswordState.password.encryptValue(
-                                                            currentKeychain.current,
-                                                            currentKeychain
-                                                        ),
-                                                        label = editablePasswordState.label.encryptValue(
-                                                            currentKeychain.current,
-                                                            currentKeychain
-                                                        ),
-                                                        username = editablePasswordState.username.encryptValue(
-                                                            currentKeychain.current,
-                                                            currentKeychain
-                                                        ),
-                                                        url = editablePasswordState.url.encryptValue(
-                                                            currentKeychain.current,
-                                                            currentKeychain
-                                                        ),
-                                                        notes = editablePasswordState.notes.encryptValue(
-                                                            currentKeychain.current,
-                                                            currentKeychain
-                                                        ),
-                                                        customFields = customFields.encryptValue(
-                                                            currentKeychain.current,
-                                                            currentKeychain
-                                                        ),
-                                                        hash = editablePasswordState.password.sha1Hash()
-                                                            .take(serverSettings.passwordSecurityHash),
-                                                        cseType = "CSEv1r1",
-                                                        cseKey = currentKeychain.current,
-                                                        folder = editablePasswordState.folder,
-                                                        edited = if (editablePasswordState.password == selectedPassword.password) selectedPassword.edited else 0,
-                                                        hidden = selectedPassword.hidden,
-                                                        favorite = editablePasswordState.favorite
-                                                    )
-                                                } else {
-                                                    UpdatedPassword(
-                                                        id = selectedPassword.id,
-                                                        revision = selectedPassword.revision,
-                                                        password = editablePasswordState.password,
-                                                        label = editablePasswordState.label,
-                                                        username = editablePasswordState.username,
-                                                        url = editablePasswordState.url,
-                                                        notes = editablePasswordState.notes,
-                                                        customFields = customFields,
-                                                        hash = editablePasswordState.password.sha1Hash()
-                                                            .take(serverSettings.passwordSecurityHash),
-                                                        cseType = "none",
-                                                        cseKey = "",
-                                                        folder = editablePasswordState.folder,
-                                                        edited = if (editablePasswordState.password == selectedPassword.password) selectedPassword.edited else 0,
-                                                        hidden = selectedPassword.hidden,
-                                                        favorite = editablePasswordState.favorite
-                                                    )
-                                                }
-                                            coroutineScope.launch {
-                                                if (passwordsViewModel.updatePassword(updatedPassword)
-                                                        .await()
-                                                ) {
+                                            val updatedPassword = UpdatedPassword(
+                                                id = selectedPassword.id,
+                                                revision = selectedPassword.revision,
+                                                password = editablePasswordState.password,
+                                                label = editablePasswordState.label,
+                                                username = editablePasswordState.username,
+                                                url = editablePasswordState.url,
+                                                notes = editablePasswordState.notes,
+                                                customFields = customFields,
+                                                hash = editablePasswordState.password.sha1Hash()
+                                                    .take(serverSettings.passwordSecurityHash),
+                                                cseType = "none",
+                                                cseKey = "",
+                                                folder = editablePasswordState.folder,
+                                                edited = if (editablePasswordState.password == selectedPassword.password) selectedPassword.edited else 0,
+                                                hidden = selectedPassword.hidden,
+                                                favorite = editablePasswordState.favorite
+                                            )
+
+                                            updatePassword(
+                                                updatedPassword,
+                                                {
                                                     if (editablePasswordState.replyAutofill && replyAutofill != null) {
                                                         replyAutofill(
                                                             editablePasswordState.label,
@@ -720,14 +643,15 @@ fun NCPNavHost(
                                                     } else {
                                                         navController.navigateUp()
                                                     }
-                                                } else {
+                                                },
+                                                {
                                                     Toast.makeText(
                                                         context,
                                                         R.string.error_password_saving_failed,
                                                         Toast.LENGTH_LONG
                                                     ).show()
                                                 }
-                                            }
+                                            )
                                         }
                                     },
                                     onDeletePassword = if (selectedPassword == null) null
@@ -737,19 +661,19 @@ fun NCPNavHost(
                                                 id = selectedPassword.id,
                                                 revision = selectedPassword.revision
                                             )
-                                            coroutineScope.launch {
-                                                if (passwordsViewModel.deletePassword(deletedPassword)
-                                                        .await()
-                                                ) {
+                                            deletePassword(
+                                                deletedPassword,
+                                                {
                                                     navController.navigateUp()
-                                                } else {
+                                                },
+                                                {
                                                     Toast.makeText(
                                                         context,
                                                         R.string.error_password_deleting_failed,
                                                         Toast.LENGTH_LONG
                                                     ).show()
                                                 }
-                                            }
+                                            )
                                         }
                                     },
                                     isUpdating = isUpdating,
