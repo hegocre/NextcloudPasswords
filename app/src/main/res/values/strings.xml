@@ -163,4 +163,5 @@
     <string name="otp_invalid_counter_error">The counter is invalid</string>
     <string name="save_password">Save password</string>
     <string name="error_could_not_sync_counter">Could not sync counter. Please, remember to increment your counter again when online.</string>
+    <string name="text_input_show_secret_toggle">Show secret</string>
 </resources>

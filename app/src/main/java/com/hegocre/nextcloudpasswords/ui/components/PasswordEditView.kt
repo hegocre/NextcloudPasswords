@@ -311,8 +311,6 @@ fun EditablePasswordView(
                 maxLines = 1,
                 trailingIcon = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-
-
                         if (isGenerating) {
                             CircularProgressIndicator(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -397,7 +395,9 @@ fun EditablePasswordView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
+                visualTransformation = PasswordVisualTransformation(),
+                textStyle = LocalTextStyle.current.copy(fontFamily = FontFamily(Font(R.font.dejavu_sans_mono))),
             )
         }
 

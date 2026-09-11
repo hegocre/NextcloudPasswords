@@ -67,6 +67,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -466,11 +468,13 @@ fun EditOtpDialog(
                             rememberScrollState()
                         )
                 ) {
+                    var showSecret by rememberSaveable { mutableStateOf(false) }
                     OutlinedTextField(
                         value = secret,
                         onValueChange = setSecret,
                         singleLine = true,
                         maxLines = 1,
+                        textStyle = LocalTextStyle.current.copy(fontFamily = FontFamily(Font(R.font.dejavu_sans_mono))),
                         label = { Text(text = stringResource(R.string.otp_secret)) },
                         isError = showInputErrors && (secret.isBlank() || !Base32().isInAlphabet(secret)),
                         supportingText = if (showInputErrors && secret.isBlank()) {
@@ -481,7 +485,18 @@ fun EditOtpDialog(
                             {
                                 Text(text = stringResource(R.string.error_invalid_secret))
                             }
-                        } else null
+                        } else null,
+                        visualTransformation = if (showSecret)
+                            VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            IconButton(onClick = { showSecret = !showSecret }) {
+                                Icon(
+                                    imageVector = if (showSecret)
+                                        Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                    contentDescription = stringResource(R.string.text_input_show_secret_toggle)
+                                )
+                            }
+                        }
                     )
 
                     var showAdvancedOptions by rememberSaveable { mutableStateOf(false) }
