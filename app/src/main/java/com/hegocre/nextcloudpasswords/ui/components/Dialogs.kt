@@ -556,7 +556,7 @@ fun EditOtpDialog(
                                 value = algorithms[algorithm] ?: "",
                                 onValueChange = {},
                                 readOnly = true,
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuExpanded) },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = algorithmMenuExpanded) },
                                 label = { Text(text = stringResource(R.string.otp_algorithm)) },
                                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                             )
