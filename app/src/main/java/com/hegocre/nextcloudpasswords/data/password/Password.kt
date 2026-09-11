@@ -138,7 +138,11 @@ data class Password(
             val otpField = try { Json.decodeFromString<List<CustomField>>(customFields)
                 .find { it.label == OTP.CUSTOM_FIELD_LABEL } } catch (_: Exception) { return Pair(null, null) }
             if (otpField != null) {
-                val otp = Json.decodeFromString<OTP>(otpField.value)
+                val otp = try {
+                    Json.decodeFromString<OTP>(otpField.value)
+                } catch (_: Exception) {
+                    return Pair(null, null)
+                }
                 return otp.getCurrent()
             }
         }

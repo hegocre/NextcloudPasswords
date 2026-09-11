@@ -122,9 +122,13 @@ fun PasswordItemContent(
 
     val customFields by remember {
         derivedStateOf {
-            if (password.customFields.isNotBlank()) {
-                Json.decodeFromString<List<CustomField>>(password.customFields)
-            } else {
+            try {
+                if (password.customFields.isNotBlank()) {
+                    Json.decodeFromString<List<CustomField>>(password.customFields)
+                } else {
+                    listOf()
+                }
+            } catch (_: Exception) {
                 listOf()
             }
         }
@@ -294,7 +298,9 @@ fun PasswordItemContent(
                     }
 
                     otp?.let { otpNotNull ->
-                        var currentOtp by remember(otpNotNull) { mutableStateOf(otpNotNull.getCurrent()) }
+                        var currentOtp by remember(otpNotNull) {
+                            mutableStateOf(runCatching { otpNotNull.getCurrent() }.getOrElse { Pair(null, null) })
+                        }
                         currentOtp.first?.let { code ->
                             var progress by remember { mutableStateOf<Float?>(null) }
 
