@@ -61,6 +61,10 @@ data class OTP(
         return Pair(null, null)
     }
 
+    fun getNext(): OTP {
+        return this.copy(counter = counter + 1)
+    }
+
     companion object {
         const val CUSTOM_FIELD_LABEL = "client.ios.otp"
 

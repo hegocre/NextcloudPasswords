@@ -417,6 +417,23 @@ fun NextcloudPasswordsApp(
                                 navController.navigate("${NCPScreen.PasswordEdit.name}/${passwordsViewModel.visiblePassword.value?.first?.id ?: "none"}")
                             }
                         } else null,
+                        updatePassword = {updatedPassword, onSuccess, onFailure ->
+                            coroutineScope.launch {
+                                val updatedPwd = updatedPassword.let {
+                                    val currentKeychain = keychain
+                                    if (currentKeychain != null && serverSettings.encryptionCse != 0) {
+                                        it.encrypt(currentKeychain.current, currentKeychain)
+                                    } else it
+                                }
+
+                                if (passwordsViewModel.updatePassword(updatedPwd).await()) {
+                                    onSuccess()
+                                } else {
+                                    onFailure()
+                                }
+                            }
+
+                        },
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }

@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Star
@@ -47,6 +48,7 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
@@ -60,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.Password
+import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.ui.components.markdown.MDDocument
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
@@ -76,12 +79,14 @@ import org.commonmark.parser.Parser
 fun PasswordItem(
     passwordInfo: Pair<Password, List<String>>?,
     modifier: Modifier = Modifier,
+    updatePassword: (updatedPassword: UpdatedPassword, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
     onEditPassword: (() -> Unit)? = null,
 ) {
     passwordInfo?.let { pass ->
         PasswordItemContent(
             passwordInfo = pass,
             onEditPassword = onEditPassword,
+            updatePassword = updatePassword,
             modifier = modifier
         )
     } ?: Text(
@@ -95,6 +100,7 @@ fun PasswordItem(
 fun PasswordItemContent(
     passwordInfo: Pair<Password, List<String>>,
     onEditPassword: (() -> Unit)?,
+    updatePassword: (updatedPassword: UpdatedPassword, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -277,29 +283,87 @@ fun PasswordItemContent(
             val customFieldOtp by derivedStateOf { customFields.find { it.label == OTP.CUSTOM_FIELD_LABEL } }
             customFieldOtp?.let { otpField ->
                 item(key = "${password.id}_otp") {
-                    val otp = remember(otpField) {
-                        try {
-                            Json.decodeFromString<OTP>(otpField.value)
-                        } catch (_: Exception) {
-                            null
-                        }
+                    var otp by remember(otpField) {
+                        mutableStateOf(
+                            try {
+                                Json.decodeFromString<OTP>(otpField.value)
+                            } catch (_: Exception) {
+                                null
+                            }
+                        )
                     }
 
-                    otp?.let { otp ->
-                        var currentOtp by remember { mutableStateOf(otp.getCurrent()) }
+                    otp?.let { otpNotNull ->
+                        var currentOtp by remember(otpNotNull) { mutableStateOf(otpNotNull.getCurrent()) }
                         currentOtp.first?.let { code ->
                             var progress by remember { mutableStateOf<Float?>(null) }
 
-                            PasswordOtpField(otp = code, label = stringResource(R.string.otp_title), progress)
+                            val resources = LocalResources.current
+
+                            PasswordOtpField(
+                                otp = code,
+                                label = stringResource(R.string.otp_title),
+                                progress = progress,
+                                onGenerateNext = if (currentOtp.second == null && otpNotNull.type == OTP.Companion.Type.HOTP) {
+                                    {
+                                        val newOtp = otpNotNull.getNext()
+                                        otp = newOtp
+
+                                        customFields.indexOfFirst { it.label == OTP.CUSTOM_FIELD_LABEL }.let { otpIndex ->
+                                            if (otpIndex != -1) {
+                                                val newCustomFields = customFields.toMutableList()
+                                                newCustomFields[otpIndex] = CustomField(
+                                                    label = OTP.CUSTOM_FIELD_LABEL,
+                                                    type = CustomField.TYPE_DATA,
+                                                    value = Json.encodeToString(newOtp),
+                                                )
+                                                val encodedCustomFields = Json.encodeToString(newCustomFields)
+
+                                                val updatedPassword = UpdatedPassword(
+                                                    id = password.id,
+                                                    revision = password.revision,
+                                                    password = password.password,
+                                                    label = password.label,
+                                                    username = password.username,
+                                                    url = password.url,
+                                                    notes = password.notes,
+                                                    customFields = encodedCustomFields,
+                                                    hash = password.hash,
+                                                    cseType = "none",
+                                                    cseKey = "",
+                                                    folder = password.folder,
+                                                    edited = password.edited,
+                                                    hidden = password.hidden,
+                                                    favorite = password.favorite
+                                                )
+
+                                                updatePassword(
+                                                    updatedPassword,
+                                                    {},
+                                                    {
+                                                        Toast.makeText(
+                                                            context,
+                                                            resources.getString(R.string.error_could_not_sync_counter),
+                                                            Toast.LENGTH_LONG
+                                                        ).show()
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                } else null
+                            )
 
                             currentOtp.second?.let { endTimeInMillis ->
-                                LaunchedEffect(endTimeInMillis) {
-                                    while (System.currentTimeMillis() < endTimeInMillis) {
-                                        val remaining = endTimeInMillis - System.currentTimeMillis()
-                                        progress = 1f - (remaining.toFloat() / (otp.period.toFloat() * 1000f))
-                                        delay(timeMillis = 50L)
+                                if (otpNotNull.type == OTP.Companion.Type.TOTP) {
+                                    LaunchedEffect(endTimeInMillis) {
+                                        while (System.currentTimeMillis() < endTimeInMillis) {
+                                            val remaining = endTimeInMillis - System.currentTimeMillis()
+                                            progress = 1f - (remaining.toFloat() / (otpNotNull.period.toFloat() * 1000f))
+                                            delay(timeMillis = 50L)
+                                        }
+                                        currentOtp = otpNotNull.getCurrent()
                                     }
-                                    currentOtp = otp.getCurrent()
                                 }
                             }
                         }
@@ -555,6 +619,7 @@ fun PasswordOtpField(
     otp: String,
     label: String,
     progress: Float?,
+    onGenerateNext: (() -> Unit)?,
     modifier: Modifier = Modifier,
     onClickText: (() -> Unit)? = null,
     fontFamily: FontFamily? = null,
@@ -586,6 +651,15 @@ fun PasswordOtpField(
         },
         trailingContent = {
             Row {
+                onGenerateNext?.let { onGenerateNext ->
+                    IconButton(onClick = onGenerateNext) {
+                        Icon(
+                            imageVector = Icons.Default.Autorenew,
+                            contentDescription = stringResource(id = R.string.action_copy_value)
+                        )
+                    }
+                }
+
                 progress?.let {
                     CircularProgressIndicator(
                         progress = { it },
@@ -656,37 +730,38 @@ fun PasswordItemPreview() {
             PasswordItem(
                 passwordInfo = Pair(
                     Password(
-                    id = "",
-                    label = "Nextcloud with a really long label",
-                    username = "john_doe",
-                    password = "secret_value",
-                    url = "https://nextcloud.com/",
-                    notes = "# This is a note\n\nIt is very important that this is read by all __means__\n\n" +
-                            "## Subsection \n\n This is also important.\n\n" +
-                            "## Another subsection\n\n### Even deeper\n\n Some text\nSome more text",
-                    customFields = "[{\"label\":\"client.ios.otp\",\"type\":\"data\",\"value\":\"{\\\"secret\\\": \\\"hello\\\"}\"}]",
-                    status = 0,
-                    statusCode = "GOOD",
-                    hash = "",
-                    folder = "",
-                    revision = "",
-                    share = null,
-                    shared = false,
-                    cseType = "",
-                    cseKey = "",
-                    sseType = "",
-                    client = "",
-                    hidden = false,
-                    trashed = false,
-                    favorite = true,
-                    editable = true,
-                    edited = 0,
-                    created = 0,
-                    updated = 0
+                        id = "",
+                        label = "Nextcloud with a really long label",
+                        username = "john_doe",
+                        password = "secret_value",
+                        url = "https://nextcloud.com/",
+                        notes = "# This is a note\n\nIt is very important that this is read by all __means__\n\n" +
+                                "## Subsection \n\n This is also important.\n\n" +
+                                "## Another subsection\n\n### Even deeper\n\n Some text\nSome more text",
+                        customFields = "[{\"label\":\"client.ios.otp\",\"type\":\"data\",\"value\":\"{\\\"secret\\\": \\\"hello\\\"}\"}]",
+                        status = 0,
+                        statusCode = "GOOD",
+                        hash = "",
+                        folder = "",
+                        revision = "",
+                        share = null,
+                        shared = false,
+                        cseType = "",
+                        cseKey = "",
+                        sseType = "",
+                        client = "",
+                        hidden = false,
+                        trashed = false,
+                        favorite = true,
+                        editable = true,
+                        edited = 0,
+                        created = 0,
+                        updated = 0
                     ), listOf("Second", "Home")
                 ),
                 onEditPassword = {},
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 16.dp),
+                updatePassword = { _, _, _ -> }
             )
         }
     }

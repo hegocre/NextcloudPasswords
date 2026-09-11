@@ -162,4 +162,5 @@
     <string name="otp_invalid_period_error">The period is invalid</string>
     <string name="otp_invalid_counter_error">The counter is invalid</string>
     <string name="save_password">Save password</string>
+    <string name="error_could_not_sync_counter">Could not sync counter. Please, remember to increment your counter again when online.</string>
 </resources>
