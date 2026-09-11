@@ -398,6 +398,9 @@ fun EditOtpDialog(
     val (digits, setDigits) = remember { mutableStateOf(currentOtp.digits.toString()) }
     val (counter, setCounter) = remember { mutableStateOf(currentOtp.counter.toString()) }
     val (period, setPeriod) = remember { mutableStateOf(currentOtp.period.toString()) }
+    val (issuer, setIssuer) = remember { mutableStateOf(currentOtp.issuer) }
+    val (accountName, setAccountName) = remember { mutableStateOf(currentOtp.accountName) }
+
 
     var typeMenuExpanded by remember { mutableStateOf(false) }
     var algorithmMenuExpanded by remember { mutableStateOf(false) }
@@ -432,6 +435,8 @@ fun EditOtpDialog(
                                         setDigits(otp.digits.toString())
                                         setCounter(otp.counter.toString())
                                         setPeriod(otp.period.toString())
+                                        setIssuer(otp.issuer)
+                                        setAccountName(otp.accountName)
                                     } catch (e: OtpParseException) {
                                         Toast.makeText(context, resources.getString(e.stringResId), Toast.LENGTH_LONG).show()
                                     }
@@ -662,7 +667,9 @@ fun EditOtpDialog(
                                         algorithm,
                                         digits.toIntOrNull() ?: 6,
                                         counter.toLongOrNull() ?: 0L,
-                                        period.toIntOrNull() ?: 30
+                                        period.toIntOrNull() ?: 30,
+                                        issuer,
+                                        accountName
                                     )
                                 )
                             }
