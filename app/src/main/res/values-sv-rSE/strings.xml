@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="preferences_category_search">Search</string>
+    <string name="otp_secret">Secret</string>
 </resources>
