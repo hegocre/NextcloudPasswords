@@ -1,0 +1,3 @@
+- Implement 2FA OTP codes with QR scanning
+- Interne Verbesserungen und Bibliotheksupdates
+- Übersetzungen aktualisiert
