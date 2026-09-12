@@ -164,7 +164,7 @@
     <string name="save_password">Save password</string>
     <string name="error_could_not_sync_counter">Could not sync counter. Please, remember to increment your counter again when online.</string>
     <string name="text_input_show_secret_toggle">Show secret</string>
-    <string name="generate_next_otp_htop">Generate next code</string>
+    <string name="generate_next_otp_hotp">Generate next code</string>
     <string name="error_invalid_digits">Invalid \'digits\' parameter</string>
     <string name="error_invalid_period">Invalid \'period\' parameter</string>
 </resources>

@@ -693,7 +693,7 @@ fun PasswordOtpField(
                         IconButton(onClick = onGenerateNext) {
                             Icon(
                                 imageVector = Icons.Default.Autorenew,
-                                contentDescription = stringResource(id = R.string.generate_next_otp_htop)
+                                contentDescription = stringResource(id = R.string.generate_next_otp_hotp)
                             )
                         }
                     }
