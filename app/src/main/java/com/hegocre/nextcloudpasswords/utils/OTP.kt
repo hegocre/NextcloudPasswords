@@ -11,6 +11,7 @@ import dev.turingcomplete.kotlinonetimepassword.TimeBasedOneTimePasswordGenerato
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
+import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.binary.Base32
 import java.util.concurrent.TimeUnit
 
@@ -107,7 +108,7 @@ data class OTP(
             val secret = uri.getQueryParameter("secret")
                 ?: throw OtpParseException.MissingSecret()
 
-            if (!Base32().isInAlphabet(secret)) {
+            if (!secret.isValidSecret()) {
                 throw OtpParseException.InvalidSecret()
             }
 
@@ -170,4 +171,54 @@ fun String.formatOtp(chunkSize: Int? = null): String {
     }
 
     return digitsOnly.chunked(size).joinToString(" ")
+}
+
+fun String.isValidSecret(): Boolean {
+    val normalized = this
+        .trim()
+        .replace("-", "")
+        .replace(" ", "")
+        .uppercase()
+
+    if (normalized.isEmpty()) {
+        return false
+    }
+
+    val base32Pattern = Regex("^[A-Z2-7]+=*$")
+    if (!base32Pattern.matches(normalized)) {
+        return false
+    }
+
+    val padded = padBase32(normalized)
+
+    val decoded = try {
+        val base32 = Base32()
+        if (!base32.isInAlphabet(padded)) {
+            return false
+        }
+        base32.decode(padded)
+    } catch (_: DecoderException) {
+        return false
+    } catch (_: IllegalArgumentException) {
+        return false
+    }
+
+    if (decoded.isEmpty()) {
+        return false
+    }
+    if (decoded.size < MIN_SECRET_BYTES) {
+        return false
+    }
+
+    return true
+}
+
+private const val MIN_SECRET_BYTES = 10
+
+private fun padBase32(input: String): String {
+    val stripped = input.trimEnd('=')
+    val remainder = stripped.length % 8
+    if (remainder == 0) return stripped
+    val padLength = 8 - remainder
+    return stripped + "=".repeat(padLength)
 }

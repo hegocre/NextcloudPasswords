@@ -85,6 +85,7 @@ import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.OTP
 import com.hegocre.nextcloudpasswords.utils.OtpParseException
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
+import com.hegocre.nextcloudpasswords.utils.isValidSecret
 import io.github.g00fy2.quickie.QRResult
 import io.github.g00fy2.quickie.ScanQRCode
 import kotlinx.coroutines.Dispatchers
@@ -481,12 +482,12 @@ fun EditOtpDialog(
                         maxLines = 1,
                         textStyle = LocalTextStyle.current.copy(fontFamily = FontFamily(Font(R.font.dejavu_sans_mono))),
                         label = { Text(text = stringResource(R.string.otp_secret)) },
-                        isError = showInputErrors && (secret.isBlank() || !Base32().isInAlphabet(secret)),
+                        isError = showInputErrors && !secret.isValidSecret(),
                         supportingText = if (showInputErrors && secret.isBlank()) {
                             {
                                 Text(text = stringResource(id = R.string.error_field_cannot_be_empty))
                             }
-                        } else if (showInputErrors && !Base32().isInAlphabet(secret)) {
+                        } else if (showInputErrors && !secret.isValidSecret()) {
                             {
                                 Text(text = stringResource(R.string.error_invalid_secret))
                             }
@@ -653,8 +654,7 @@ fun EditOtpDialog(
 
                     TextButton(
                         onClick = {
-                            if (secret.isBlank() ||
-                                !Base32().isInAlphabet(secret) ||
+                            if (!secret.isValidSecret() ||
                                 (digits.toIntOrNull() ?: 6) !in 6..9 ||
                                 (type == OTP.Companion.Type.TOTP && (period.toIntOrNull() ?: 30) < 1) ||
                                 (type == OTP.Companion.Type.HOTP && (counter.toLongOrNull() ?: 30L) < 0)
