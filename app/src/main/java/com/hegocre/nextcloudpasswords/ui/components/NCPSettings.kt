@@ -412,6 +412,21 @@ fun NCPSettingsScreen(
                             enabled = !autofillEnabled
                         )
 
+                        var copyOtpOnAutofill by remember { mutableStateOf(preferencesManager.getCopyOTPOnAutofill()) }
+                        SwitchPreference(
+                            checked = copyOtpOnAutofill,
+                            onCheckedChange = { copy ->
+                                scope.launch(Dispatchers.IO) {
+                                    if (preferencesManager.setCopyOTPOnAutofill(copy)) {
+                                        copyOtpOnAutofill = copy
+                                    }
+                                }
+                            },
+                            title = { Text(stringResource(R.string.copy_otp_preference_title)) },
+                            subtitle = { Text(stringResource(R.string.copy_otp_preference_subtitle)) },
+                            enabled = autofillEnabled
+                        )
+
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                             var useInlineAutofill by remember { mutableStateOf(preferencesManager.getUseInlineAutofill()) }
 

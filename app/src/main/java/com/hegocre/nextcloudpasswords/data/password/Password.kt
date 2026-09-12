@@ -10,6 +10,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import okhttp3.internal.publicsuffix.PublicSuffixDatabase
 import androidx.core.net.toUri
+import com.hegocre.nextcloudpasswords.utils.OTP
+import kotlinx.serialization.json.Json
 
 /**
  * Data class representing a
@@ -129,5 +131,21 @@ data class Password(
         } catch (_: Exception) {
             return false
         }
+    }
+
+    fun getOTP(): Pair<String?, Long?> {
+        if (customFields.isNotBlank()) {
+            val otpField = try { Json.decodeFromString<List<CustomField>>(customFields)
+                .find { it.label == OTP.CUSTOM_FIELD_LABEL } } catch (_: Exception) { return Pair(null, null) }
+            if (otpField != null) {
+                try {
+                    val otp = Json.decodeFromString<OTP>(otpField.value)
+                    return otp.getCurrent()
+                } catch (_: Exception) {
+                    return Pair(null, null)
+                }
+            }
+        }
+        return Pair(null, null)
     }
 }

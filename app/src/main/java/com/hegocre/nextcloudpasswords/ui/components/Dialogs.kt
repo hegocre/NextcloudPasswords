@@ -1,5 +1,7 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -18,6 +20,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -50,6 +55,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
@@ -59,7 +65,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -73,10 +82,16 @@ import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.RequestedPassword
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
+import com.hegocre.nextcloudpasswords.utils.OTP
+import com.hegocre.nextcloudpasswords.utils.OtpParseException
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
+import com.hegocre.nextcloudpasswords.utils.isValidSecret
+import io.github.g00fy2.quickie.QRResult
+import io.github.g00fy2.quickie.ScanQRCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import org.apache.commons.codec.binary.Base32
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -139,12 +154,12 @@ fun MasterPasswordDialog(
                         Checkbox(
                             checked = savePassword,
                             onCheckedChange = setSavePassword,
-                            modifier = Modifier.align(Alignment.CenterVertically)
+                            modifier = Modifier.align(CenterVertically)
                         )
                         Text(
-                            text = "Save password",
+                            text = stringResource(R.string.save_password),
                             modifier = Modifier
-                                .align(Alignment.CenterVertically)
+                                .align(CenterVertically)
                                 .pointerInput(Unit) {
                                     detectTapGestures {
                                         setSavePassword(!savePassword)
@@ -353,6 +368,315 @@ fun AddCustomFieldDialog(
                         .padding(horizontal = 0.dp)
                 ) {
                     Text(text = stringResource(android.R.string.ok))
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditOtpDialog(
+    onSaveClick: (OTP) -> Unit,
+    onDeleteClick: () -> Unit,
+    onDismissRequest: (() -> Unit)? = null,
+    currentOtp: OTP = OTP(secret = "")
+) {
+    val types = mapOf(
+        OTP.Companion.Type.TOTP to stringResource(R.string.otp_type_totp),
+        OTP.Companion.Type.HOTP to stringResource(R.string.otp_type_hotp)
+    )
+
+    val algorithms = mapOf(
+        OTP.Companion.Algorithm.SHA1 to "${OTP.Companion.Algorithm.SHA1.uppercase()} (${stringResource(R.string.value_default)})",
+        OTP.Companion.Algorithm.SHA256 to OTP.Companion.Algorithm.SHA256.uppercase(),
+        OTP.Companion.Algorithm.SHA512 to OTP.Companion.Algorithm.SHA512.uppercase()
+    )
+
+    val (secret, setSecret) = remember { mutableStateOf(currentOtp.secret) }
+    val (type, setType) = remember { mutableStateOf(currentOtp.type) }
+    val (algorithm, setAlgorithm) = remember { mutableStateOf(currentOtp.algorithm) }
+    val (digits, setDigits) = remember { mutableStateOf(currentOtp.digits.toString()) }
+    val (counter, setCounter) = remember { mutableStateOf(currentOtp.counter.toString()) }
+    val (period, setPeriod) = remember { mutableStateOf(currentOtp.period.toString()) }
+    val (issuer, setIssuer) = remember { mutableStateOf(currentOtp.issuer) }
+    val (accountName, setAccountName) = remember { mutableStateOf(currentOtp.accountName) }
+
+
+    var typeMenuExpanded by remember { mutableStateOf(false) }
+    var algorithmMenuExpanded by remember { mutableStateOf(false) }
+
+    var showInputErrors by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    Dialog(
+        onDismissRequest = { onDismissRequest?.invoke() },
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            contentColor = contentColorFor(backgroundColor = MaterialTheme.colorScheme.surface),
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+        ) {
+            Column(modifier = Modifier.padding(all = 24.dp)) {
+                Row (modifier = Modifier.padding(bottom = 8.dp), verticalAlignment = CenterVertically) {
+                    val context = LocalContext.current
+                    val resources = LocalResources.current
+                    val scanQrCodeLauncher = rememberLauncherForActivityResult(ScanQRCode()) { result ->
+                        when (result) {
+                            is QRResult.QRSuccess -> {
+                                val otpUri = result.content.rawValue
+                                if (otpUri != null) {
+                                    try {
+                                        val otp = OTP.fromUrl(otpUri)
+                                        setSecret(otp.secret)
+                                        setType(otp.type)
+                                        setAlgorithm(otp.algorithm)
+                                        setDigits(otp.digits.toString())
+                                        setCounter(otp.counter.toString())
+                                        setPeriod(otp.period.toString())
+                                        setIssuer(otp.issuer)
+                                        setAccountName(otp.accountName)
+                                    } catch (e: OtpParseException) {
+                                        Toast.makeText(context, resources.getString(e.stringResId), Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                            }
+                            is QRResult.QRError -> {
+                                Toast.makeText(context, result.exception.localizedMessage, Toast.LENGTH_LONG).show()
+                            }
+                            is QRResult.QRUserCanceled, is QRResult.QRMissingPermission -> {}
+                        }
+                    }
+
+                    Text(
+                        text = stringResource(R.string.otp_title),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+
+                    IconButton(
+                        onClick = {
+                            scanQrCodeLauncher.launch(null)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QrCode,
+                            contentDescription = stringResource(R.string.scan_qr_code)
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .verticalScroll(
+                            rememberScrollState()
+                        )
+                ) {
+                    var showSecret by rememberSaveable { mutableStateOf(false) }
+                    OutlinedTextField(
+                        value = secret,
+                        onValueChange = setSecret,
+                        singleLine = true,
+                        maxLines = 1,
+                        textStyle = LocalTextStyle.current.copy(fontFamily = FontFamily(Font(R.font.dejavu_sans_mono))),
+                        label = { Text(text = stringResource(R.string.otp_secret)) },
+                        isError = showInputErrors && !secret.isValidSecret(),
+                        supportingText = if (showInputErrors && secret.isBlank()) {
+                            {
+                                Text(text = stringResource(id = R.string.error_field_cannot_be_empty))
+                            }
+                        } else if (showInputErrors && !secret.isValidSecret()) {
+                            {
+                                Text(text = stringResource(R.string.error_invalid_secret))
+                            }
+                        } else null,
+                        visualTransformation = if (showSecret)
+                            VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            IconButton(onClick = { showSecret = !showSecret }) {
+                                Icon(
+                                    imageVector = if (showSecret)
+                                        Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                    contentDescription = stringResource(R.string.text_input_show_secret_toggle)
+                                )
+                            }
+                        }
+                    )
+
+                    var showAdvancedOptions by rememberSaveable { mutableStateOf(false) }
+
+                    Row (modifier = Modifier
+                        .padding(top = 16.dp, bottom = 8.dp)
+                        .clickable(onClick = { showAdvancedOptions = !showAdvancedOptions })
+                    ) {
+                        Text(text = stringResource(R.string.show_advanced_options))
+
+                        Icon(
+                            imageVector = if (showAdvancedOptions) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = stringResource(R.string.toggle_advanced_options)
+                        )
+                    }
+
+                    if (showAdvancedOptions) {
+                        ExposedDropdownMenuBox(
+                            expanded = typeMenuExpanded,
+                            onExpandedChange = { typeMenuExpanded = !typeMenuExpanded },
+                            modifier = Modifier.padding(bottom = 0.dp, top = 16.dp)
+                        ) {
+                            OutlinedTextField(
+                                modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                                value = types[type] ?: "",
+                                onValueChange = {},
+                                readOnly = true,
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeMenuExpanded) },
+                                label = { Text(text = stringResource(R.string.otp_type)) },
+                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                            )
+
+                            ExposedDropdownMenu(
+                                expanded = typeMenuExpanded,
+                                onDismissRequest = { typeMenuExpanded = false }
+                            ) {
+                                types.forEach { type ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = type.value) },
+                                        onClick = {
+                                            setType(type.key)
+                                            typeMenuExpanded = false
+                                        },
+                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                    )
+                                }
+                            }
+                        }
+
+                        ExposedDropdownMenuBox(
+                            expanded = algorithmMenuExpanded,
+                            onExpandedChange = { algorithmMenuExpanded = !algorithmMenuExpanded },
+                            modifier = Modifier.padding(bottom = 0.dp, top = 16.dp)
+                        ) {
+                            OutlinedTextField(
+                                modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                                value = algorithms[algorithm] ?: "",
+                                onValueChange = {},
+                                readOnly = true,
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = algorithmMenuExpanded) },
+                                label = { Text(text = stringResource(R.string.otp_algorithm)) },
+                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                            )
+
+                            ExposedDropdownMenu(
+                                expanded = algorithmMenuExpanded,
+                                onDismissRequest = { algorithmMenuExpanded = false }
+                            ) {
+                                algorithms.forEach { algorithm ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = algorithm.value) },
+                                        onClick = {
+                                            setAlgorithm(algorithm.key)
+                                            algorithmMenuExpanded = false
+                                        },
+                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                    )
+                                }
+                            }
+                        }
+
+                        OutlinedTextField(
+                            modifier = Modifier.padding(bottom = 0.dp, top = 16.dp),
+                            value = digits,
+                            onValueChange = { if (it.toIntOrNull() != null || it.isEmpty()) setDigits(it) },
+                            singleLine = true,
+                            maxLines = 1,
+                            label = { Text(text = stringResource(R.string.otp_digits)) },
+                            placeholder = { Text(text = "6") },
+                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                            isError = showInputErrors && (digits.toIntOrNull() ?: 6) !in 6..9,
+                            supportingText = if (showInputErrors && (digits.toIntOrNull() ?: 6) !in 6..9) {
+                                {
+                                    Text(text = stringResource(id = R.string.otp_invalid_digit_range_error))
+                                }
+                            } else null
+                        )
+
+                        if (type == OTP.Companion.Type.HOTP) {
+                            OutlinedTextField(
+                                modifier = Modifier.padding(bottom = 8.dp, top = 16.dp),
+                                value = counter,
+                                onValueChange = { if ((it.toLongOrNull() != null && it.toLong() >= 0) || it.isEmpty()) setCounter(it) },
+                                singleLine = true,
+                                maxLines = 1,
+                                label = { Text(text = stringResource(R.string.otp_counter)) },
+                                placeholder = { Text(text = "0") },
+                                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                                isError = showInputErrors && (counter.toLongOrNull() ?: 30L) < 0,
+                                supportingText = if (showInputErrors && (counter.toLongOrNull() ?: 30L) < 0) {
+                                    {
+                                        Text(text = stringResource(id = R.string.otp_invalid_counter_error))
+                                    }
+                                } else null
+                            )
+                        }
+
+                        if (type == OTP.Companion.Type.TOTP) {
+                            OutlinedTextField(
+                                modifier = Modifier.padding(bottom = 8.dp, top = 16.dp),
+                                value = period,
+                                onValueChange = { if ((it.toIntOrNull() != null && it.toInt() >= 0) || it.isEmpty()) setPeriod(it) },
+                                singleLine = true,
+                                maxLines = 1,
+                                label = { Text(text = stringResource(R.string.otp_period)) },
+                                placeholder = { Text(text = "30") },
+                                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                                isError = showInputErrors && (period.toIntOrNull() ?: 30) < 1,
+                                supportingText = if (showInputErrors && (period.toIntOrNull() ?: 30) < 1) {
+                                    {
+                                        Text(text = stringResource(id = R.string.otp_invalid_period_error))
+                                    }
+                                } else null
+                            )
+                        }
+                    }
+                }
+
+
+                Row (modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(top = 8.dp)) {
+                    TextButton(
+                        onClick = onDeleteClick,
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text(text = stringResource(R.string.action_delete))
+                    }
+
+                    TextButton(
+                        onClick = {
+                            if (!secret.isValidSecret() ||
+                                (digits.toIntOrNull() ?: 6) !in 6..9 ||
+                                (type == OTP.Companion.Type.TOTP && (period.toIntOrNull() ?: 30) < 1) ||
+                                (type == OTP.Companion.Type.HOTP && (counter.toLongOrNull() ?: 30L) < 0)
+                            ) {
+                                showInputErrors = true
+                            } else {
+                                onSaveClick(
+                                    OTP(secret,
+                                        type,
+                                        algorithm,
+                                        digits.toIntOrNull() ?: 6,
+                                        counter.toLongOrNull() ?: 0L,
+                                        period.toIntOrNull() ?: 30,
+                                        issuer,
+                                        accountName
+                                    )
+                                )
+                            }
+                        },
+                    ) {
+                        Text(text = stringResource(android.R.string.ok))
+                    }
                 }
             }
         }
@@ -636,7 +960,7 @@ fun ListPreferenceDialog(
                 ) {
                     items(items = options.keys.toList(), key = { it }) { option ->
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
@@ -748,7 +1072,7 @@ fun PasswordGenerationDialog(
                     }
 
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
@@ -765,7 +1089,7 @@ fun PasswordGenerationDialog(
                     }
 
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
@@ -883,5 +1207,13 @@ fun ListPreferenceDialogPreview() {
 fun GeneratePasswordDialogPreview() {
     NextcloudPasswordsTheme {
         PasswordGenerationDialog(onGenerate = { _, _, _ -> })
+    }
+}
+
+@Preview
+@Composable
+fun EditOtpDialogPreview() {
+    NextcloudPasswordsTheme {
+        EditOtpDialog(onSaveClick = {}, onDeleteClick = {})
     }
 }

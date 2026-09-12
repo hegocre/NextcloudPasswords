@@ -41,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,6 +60,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.FoldersApi
+import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
@@ -80,6 +82,10 @@ fun NextcloudPasswordsApp(
     val currentScreen = NCPScreen.fromRoute(
         backstackEntry.value?.destination?.route
     )
+
+    val keychain by passwordsViewModel.csEv1Keychain.observeAsState()
+    val serverSettings by passwordsViewModel.serverSettings.observeAsState(initial = ServerSettings())
+    val passwords by passwordsViewModel.passwords.observeAsState(initial = listOf())
 
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val modalSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -269,6 +275,47 @@ fun NextcloudPasswordsApp(
                     openBottomSheet = true
                 },
                 replyAutofill = replyAutofill,
+                createPassword = { newPassword, onSuccess, onFailure ->
+                    coroutineScope.launch {
+                        val newPwd = newPassword.let {
+                            val currentKeychain = keychain
+                            if (currentKeychain != null && serverSettings.encryptionCse != 0) {
+                                it.encrypt(currentKeychain.current, currentKeychain)
+                            } else it
+                        }
+
+                        if (passwordsViewModel.createPassword(newPwd).await()) {
+                            onSuccess()
+                        } else {
+                            onFailure()
+                        }
+                    }
+                },
+                updatePassword = { updatedPassword, shouldEncrypt, onSuccess, onFailure ->
+                    coroutineScope.launch {
+                        val updatedPwd = updatedPassword.let {
+                            val currentKeychain = keychain
+                            if (shouldEncrypt && currentKeychain != null) {
+                                it.encrypt(currentKeychain.current, currentKeychain)
+                            } else it
+                        }
+
+                        if (passwordsViewModel.updatePassword(updatedPwd).await()) {
+                            onSuccess()
+                        } else {
+                            onFailure()
+                        }
+                    }
+                },
+                deletePassword = { deletedPassword, onSuccess, onFailure ->
+                    coroutineScope.launch {
+                        if (passwordsViewModel.deletePassword(deletedPassword).await()) {
+                            onSuccess()
+                        } else {
+                            onFailure()
+                        }
+                    }
+                },
                 searchVisibility = searchExpanded,
                 closeSearch = {
                     searchExpanded = false
@@ -357,8 +404,21 @@ fun NextcloudPasswordsApp(
                     contentWindowInsets = { WindowInsets.navigationBars },
                     sheetState = modalSheetState
                 ) {
+                    val currentPasswordInfo = passwordsViewModel.visiblePassword.value?.let { visible ->
+                        val updatedPassword = passwords.find { it.id == visible.first.id }
+                        if (updatedPassword != null) {
+                            Pair(
+                                // Update the revision, so that multiple HOTP counter updates work
+                                visible.first.copy(
+                                    revision = updatedPassword.revision,
+                                    updated = updatedPassword.updated,
+                                ),
+                                visible.second
+                            )
+                        } else visible
+                    }
                     PasswordItem(
-                        passwordInfo = passwordsViewModel.visiblePassword.value,
+                        passwordInfo = currentPasswordInfo,
                         onEditPassword = if (sessionOpen) {
                             {
                                 coroutineScope.launch {
@@ -371,6 +431,23 @@ fun NextcloudPasswordsApp(
                                 navController.navigate("${NCPScreen.PasswordEdit.name}/${passwordsViewModel.visiblePassword.value?.first?.id ?: "none"}")
                             }
                         } else null,
+                        updatePassword = { updatedPassword, shouldEncrypt, onSuccess, onFailure ->
+                            coroutineScope.launch {
+                                val updatedPwd = updatedPassword.let {
+                                    val currentKeychain = keychain
+                                    if (shouldEncrypt && currentKeychain != null) {
+                                        it.encrypt(currentKeychain.current, currentKeychain)
+                                    } else it
+                                }
+
+                                if (passwordsViewModel.updatePassword(updatedPwd).await()) {
+                                    onSuccess()
+                                } else {
+                                    onFailure()
+                                }
+                            }
+
+                        },
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }

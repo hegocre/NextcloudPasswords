@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.InterceptPlatformTextInput
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -91,7 +93,9 @@ fun OutlinedClickableTextField(
     value: String,
     label: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    textStyle: TextStyle = LocalTextStyle.current
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -107,7 +111,9 @@ fun OutlinedClickableTextField(
                 maxLines = 1,
                 modifier = modifier,
                 readOnly = true,
-                colors = OutlinedTextFieldDefaults.colors(cursorColor = Color.Transparent)
+                colors = OutlinedTextFieldDefaults.colors(cursorColor = Color.Transparent),
+                visualTransformation = visualTransformation,
+                textStyle = textStyle
             )
         }
         Box(

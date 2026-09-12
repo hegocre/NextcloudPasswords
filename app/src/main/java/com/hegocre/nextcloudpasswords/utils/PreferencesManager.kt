@@ -123,6 +123,12 @@ class PreferencesManager private constructor(context: Context) {
     fun setUseInlineAutofill(value: Boolean): Boolean =
         _encryptedSharedPrefs.edit().putBoolean("USE_INLINE_AUTOFILL", value).commit()
 
+    fun getCopyOTPOnAutofill(): Boolean =
+        _encryptedSharedPrefs.getBoolean("COPY_OTP_ON_AUTOFILL", false)
+
+    fun setCopyOTPOnAutofill(value: Boolean): Boolean =
+        _encryptedSharedPrefs.edit().putBoolean("COPY_OTP_ON_AUTOFILL", value).commit()
+
     fun getOfferCredentialSaving(): Boolean =
         _encryptedSharedPrefs.getBoolean("OFFER_CREDENTIAL_SAVING", true)
 

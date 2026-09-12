@@ -1,5 +1,7 @@
 package com.hegocre.nextcloudpasswords.data.password
 
+import com.hegocre.nextcloudpasswords.api.encryption.CSEv1Keychain
+import com.hegocre.nextcloudpasswords.utils.encryptValue
 import kotlinx.serialization.Serializable
 
 /**
@@ -39,4 +41,17 @@ data class UpdatedPassword(
     val edited: Int,
     val hidden: Boolean,
     val favorite: Boolean,
-)
+) {
+    fun encrypt(cseKey: String, csEv1Keychain: CSEv1Keychain): UpdatedPassword {
+        return this.copy(
+            password = password.encryptValue(cseKey, csEv1Keychain),
+            label = label.encryptValue(cseKey, csEv1Keychain),
+            username = username.encryptValue(cseKey, csEv1Keychain),
+            url = url.encryptValue(cseKey, csEv1Keychain),
+            notes = notes.encryptValue(cseKey, csEv1Keychain),
+            customFields = customFields.encryptValue(cseKey, csEv1Keychain),
+            cseType = "CSEv1r1",
+            cseKey = cseKey,
+        )
+    }
+}

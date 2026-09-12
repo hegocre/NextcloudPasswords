@@ -6,13 +6,16 @@ import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Star
@@ -23,6 +26,8 @@ import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material.icons.twotone.Link
 import androidx.compose.material.icons.twotone.Password
 import androidx.compose.material.icons.twotone.Shield
+import androidx.compose.material.icons.twotone.Timelapse
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -32,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +48,7 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
@@ -55,11 +62,15 @@ import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.Password
+import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.ui.components.markdown.MDDocument
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
+import com.hegocre.nextcloudpasswords.utils.OTP
 import com.hegocre.nextcloudpasswords.utils.copyToClipboard
+import com.hegocre.nextcloudpasswords.utils.formatOtp
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import org.commonmark.node.Document
 import org.commonmark.parser.Parser
@@ -68,12 +79,14 @@ import org.commonmark.parser.Parser
 fun PasswordItem(
     passwordInfo: Pair<Password, List<String>>?,
     modifier: Modifier = Modifier,
+    updatePassword: (updatedPassword: UpdatedPassword, shouldEncrypt: Boolean, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
     onEditPassword: (() -> Unit)? = null,
 ) {
     passwordInfo?.let { pass ->
         PasswordItemContent(
             passwordInfo = pass,
             onEditPassword = onEditPassword,
+            updatePassword = updatePassword,
             modifier = modifier
         )
     } ?: Text(
@@ -87,6 +100,7 @@ fun PasswordItem(
 fun PasswordItemContent(
     passwordInfo: Pair<Password, List<String>>,
     onEditPassword: (() -> Unit)?,
+    updatePassword: (updatedPassword: UpdatedPassword, shouldEncrypt: Boolean, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -108,9 +122,13 @@ fun PasswordItemContent(
 
     val customFields by remember {
         derivedStateOf {
-            if (password.customFields.isNotBlank()) {
-                Json.decodeFromString<List<CustomField>>(password.customFields)
-            } else {
+            try {
+                if (password.customFields.isNotBlank()) {
+                    Json.decodeFromString<List<CustomField>>(password.customFields)
+                } else {
+                    listOf()
+                }
+            } catch (_: Exception) {
                 listOf()
             }
         }
@@ -266,6 +284,119 @@ fun PasswordItemContent(
                 )
             }
 
+            val customFieldOtp by derivedStateOf { customFields.find { it.label == OTP.CUSTOM_FIELD_LABEL } }
+            customFieldOtp?.let { otpField ->
+                item(key = "${password.id}_otp") {
+                    var otp by remember(otpField) {
+                        mutableStateOf(
+                            try {
+                                Json.decodeFromString<OTP>(otpField.value)
+                            } catch (_: Exception) {
+                                null
+                            }
+                        )
+                    }
+
+                    otp?.let { otpNotNull ->
+                        var currentOtp by remember(otpNotNull) {
+                            mutableStateOf(runCatching { otpNotNull.getCurrent() }.getOrElse { Pair(null, null) })
+                        }
+                        currentOtp.first?.let { code ->
+                            var progress by remember { mutableStateOf<Float?>(null) }
+                            var waitingForNewRevision by remember(password.id) { mutableStateOf(false) }
+                            var initialRevision by remember(password.id) { mutableStateOf(password.revision) }
+
+                            LaunchedEffect(password.revision) {
+                                if (password.revision != initialRevision) {
+                                    waitingForNewRevision = false
+                                    initialRevision = password.revision
+                                }
+                            }
+
+                            val resources = LocalResources.current
+
+                            PasswordOtpField(
+                                otp = code,
+                                label = stringResource(R.string.otp_title),
+                                progress = progress,
+                                isSyncing = waitingForNewRevision,
+                                onGenerateNext = if (!waitingForNewRevision && currentOtp.second == null && otpNotNull.type == OTP.Companion.Type.HOTP) {
+                                    {
+                                        waitingForNewRevision = true
+                                        initialRevision = password.revision
+                                        val newOtp = otpNotNull.getNext()
+                                        otp = newOtp
+
+                                        if (password.editable) {
+                                            customFields.indexOfFirst { it.label == OTP.CUSTOM_FIELD_LABEL }.let { otpIndex ->
+                                                if (otpIndex != -1) {
+                                                    val newCustomFields = customFields.toMutableList()
+                                                    newCustomFields[otpIndex] = CustomField(
+                                                        label = OTP.CUSTOM_FIELD_LABEL,
+                                                        type = CustomField.TYPE_DATA,
+                                                        value = Json.encodeToString(newOtp),
+                                                    )
+                                                    val encodedCustomFields = Json.encodeToString(newCustomFields)
+
+                                                    val updatedPassword = UpdatedPassword(
+                                                        id = password.id,
+                                                        revision = password.revision,
+                                                        password = password.password,
+                                                        label = password.label,
+                                                        username = password.username,
+                                                        url = password.url,
+                                                        notes = password.notes,
+                                                        customFields = encodedCustomFields,
+                                                        hash = password.hash,
+                                                        cseType = "none",
+                                                        cseKey = "",
+                                                        folder = password.folder,
+                                                        edited = password.edited,
+                                                        hidden = password.hidden,
+                                                        favorite = password.favorite
+                                                    )
+
+                                                    updatePassword(
+                                                        updatedPassword,
+                                                        password.cseType == "CSEv1r1",
+                                                        {},
+                                                        {
+                                                            waitingForNewRevision = false
+                                                            Toast.makeText(
+                                                                context,
+                                                                resources.getString(R.string.error_could_not_sync_counter),
+                                                                Toast.LENGTH_LONG
+                                                            ).show()
+                                                        }
+                                                    )
+                                                } else {
+                                                    waitingForNewRevision = false
+                                                }
+                                            }
+                                        } else {
+                                            waitingForNewRevision = false
+                                        }
+                                    }
+                                } else null
+                            )
+
+                            currentOtp.second?.let { endTimeInMillis ->
+                                if (otpNotNull.type == OTP.Companion.Type.TOTP) {
+                                    LaunchedEffect(endTimeInMillis) {
+                                        while (System.currentTimeMillis() < endTimeInMillis) {
+                                            val remaining = endTimeInMillis - System.currentTimeMillis()
+                                            progress = 1f - (remaining.toFloat() / (otpNotNull.period.toFloat() * 1000f))
+                                            delay(timeMillis = 50L)
+                                        }
+                                        currentOtp = otpNotNull.getCurrent()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             if (password.url.isNotBlank()) {
                 item(key = "${password.id}_url") {
                     val urlLabel = stringResource(id = R.string.password_attr_url)
@@ -323,9 +454,10 @@ fun PasswordItemContent(
                 }
             }
 
-            if (customFields.isNotEmpty()) {
+            val customFieldsNoOtp by derivedStateOf { customFields.filterNot { it.label == OTP.CUSTOM_FIELD_LABEL } }
+            if (customFieldsNoOtp.isNotEmpty()) {
                 itemsIndexed(
-                    items = customFields,
+                    items = customFieldsNoOtp,
                     key = { index, field -> "${index}_${password.id}_${field.label}" }) {_, customField ->
                     when (customField.type) {
                         CustomField.TYPE_TEXT, CustomField.TYPE_EMAIL -> {
@@ -509,6 +641,102 @@ fun PasswordTextField(
 }
 
 @Composable
+fun PasswordOtpField(
+    otp: String,
+    label: String,
+    progress: Float?,
+    onGenerateNext: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    isSyncing: Boolean = false,
+    onClickText: (() -> Unit)? = null,
+    fontFamily: FontFamily? = null,
+) {
+    ListItem(
+        headlineContent = {
+            Text(
+                text = otp.formatOtp(),
+                maxLines = 1,
+                fontFamily = fontFamily,
+                modifier = Modifier
+                    .clickable(
+                        enabled = onClickText != null,
+                        onClick = onClickText ?: {}
+                    ),
+            )
+        },
+        overlineContent = {
+            Text(
+                text = label.uppercase(),
+                maxLines = 1
+            )
+        },
+        leadingContent = {
+            Icon(
+                imageVector = Icons.TwoTone.Timelapse,
+                contentDescription = stringResource(R.string.otp_title)
+            )
+        },
+        trailingContent = {
+            Row {
+                if (isSyncing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(CenterVertically)
+                            .padding(end = 16.dp)
+                            .width(20.dp)
+                            .height(20.dp),
+                        trackColor = Color.Transparent,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    onGenerateNext?.let { onGenerateNext ->
+                        IconButton(onClick = onGenerateNext) {
+                            Icon(
+                                imageVector = Icons.Default.Autorenew,
+                                contentDescription = stringResource(id = R.string.generate_next_otp_hotp)
+                            )
+                        }
+                    }
+                }
+
+                progress?.let {
+                    CircularProgressIndicator(
+                        progress = { it },
+                        modifier = Modifier
+                            .align(CenterVertically)
+                            .padding(end = 16.dp)
+                            .width(20.dp)
+                            .height(20.dp),
+                        trackColor = Color.Transparent,
+                        strokeWidth = 2.dp
+                    )
+                }
+
+                val context = LocalContext.current
+                val copiedText = stringResource(R.string.copied)
+                val otpTitle = stringResource(R.string.otp_title)
+
+                IconButton(onClick = {
+                    context.copyToClipboard(otp, isSensitive = true)
+                    Toast.makeText(
+                        context,
+                        String.format(copiedText, otpTitle),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }) {
+                    Icon(
+                        imageVector = Icons.TwoTone.ContentCopy,
+                        contentDescription = stringResource(id = R.string.action_copy_value)
+                    )
+                }
+            }
+        },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        modifier = modifier
+    )
+}
+
+@Composable
 fun PasswordMarkdownField(
     markdown: String,
     modifier: Modifier = Modifier,
@@ -541,37 +769,38 @@ fun PasswordItemPreview() {
             PasswordItem(
                 passwordInfo = Pair(
                     Password(
-                    id = "",
-                    label = "Nextcloud with a really long label",
-                    username = "john_doe",
-                    password = "secret_value",
-                    url = "https://nextcloud.com/",
-                    notes = "# This is a note\n\nIt is very important that this is read by all __means__\n\n" +
-                            "## Subsection \n\n This is also important.\n\n" +
-                            "## Another subsection\n\n### Even deeper\n\n Some text\nSome more text",
-                    customFields = "",
-                    status = 0,
-                    statusCode = "GOOD",
-                    hash = "",
-                    folder = "",
-                    revision = "",
-                    share = null,
-                    shared = false,
-                    cseType = "",
-                    cseKey = "",
-                    sseType = "",
-                    client = "",
-                    hidden = false,
-                    trashed = false,
-                    favorite = true,
-                    editable = true,
-                    edited = 0,
-                    created = 0,
-                    updated = 0
+                        id = "",
+                        label = "Nextcloud with a really long label",
+                        username = "john_doe",
+                        password = "secret_value",
+                        url = "https://nextcloud.com/",
+                        notes = "# This is a note\n\nIt is very important that this is read by all __means__\n\n" +
+                                "## Subsection \n\n This is also important.\n\n" +
+                                "## Another subsection\n\n### Even deeper\n\n Some text\nSome more text",
+                        customFields = "[{\"label\":\"client.ios.otp\",\"type\":\"data\",\"value\":\"{\\\"secret\\\": \\\"hello\\\"}\"}]",
+                        status = 0,
+                        statusCode = "GOOD",
+                        hash = "",
+                        folder = "",
+                        revision = "",
+                        share = null,
+                        shared = false,
+                        cseType = "",
+                        cseKey = "",
+                        sseType = "",
+                        client = "",
+                        hidden = false,
+                        trashed = false,
+                        favorite = true,
+                        editable = true,
+                        edited = 0,
+                        created = 0,
+                        updated = 0
                     ), listOf("Second", "Home")
                 ),
                 onEditPassword = {},
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 16.dp),
+                updatePassword = { _, _, _, _ -> }
             )
         }
     }
