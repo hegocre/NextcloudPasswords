@@ -315,46 +315,48 @@ fun PasswordItemContent(
                                         val newOtp = otpNotNull.getNext()
                                         otp = newOtp
 
-                                        customFields.indexOfFirst { it.label == OTP.CUSTOM_FIELD_LABEL }.let { otpIndex ->
-                                            if (otpIndex != -1) {
-                                                val newCustomFields = customFields.toMutableList()
-                                                newCustomFields[otpIndex] = CustomField(
-                                                    label = OTP.CUSTOM_FIELD_LABEL,
-                                                    type = CustomField.TYPE_DATA,
-                                                    value = Json.encodeToString(newOtp),
-                                                )
-                                                val encodedCustomFields = Json.encodeToString(newCustomFields)
+                                        if (password.editable) {
+                                            customFields.indexOfFirst { it.label == OTP.CUSTOM_FIELD_LABEL }.let { otpIndex ->
+                                                if (otpIndex != -1) {
+                                                    val newCustomFields = customFields.toMutableList()
+                                                    newCustomFields[otpIndex] = CustomField(
+                                                        label = OTP.CUSTOM_FIELD_LABEL,
+                                                        type = CustomField.TYPE_DATA,
+                                                        value = Json.encodeToString(newOtp),
+                                                    )
+                                                    val encodedCustomFields = Json.encodeToString(newCustomFields)
 
-                                                val updatedPassword = UpdatedPassword(
-                                                    id = password.id,
-                                                    revision = password.revision,
-                                                    password = password.password,
-                                                    label = password.label,
-                                                    username = password.username,
-                                                    url = password.url,
-                                                    notes = password.notes,
-                                                    customFields = encodedCustomFields,
-                                                    hash = password.hash,
-                                                    cseType = "none",
-                                                    cseKey = "",
-                                                    folder = password.folder,
-                                                    edited = password.edited,
-                                                    hidden = password.hidden,
-                                                    favorite = password.favorite
-                                                )
+                                                    val updatedPassword = UpdatedPassword(
+                                                        id = password.id,
+                                                        revision = password.revision,
+                                                        password = password.password,
+                                                        label = password.label,
+                                                        username = password.username,
+                                                        url = password.url,
+                                                        notes = password.notes,
+                                                        customFields = encodedCustomFields,
+                                                        hash = password.hash,
+                                                        cseType = "none",
+                                                        cseKey = "",
+                                                        folder = password.folder,
+                                                        edited = password.edited,
+                                                        hidden = password.hidden,
+                                                        favorite = password.favorite
+                                                    )
 
-                                                updatePassword(
-                                                    updatedPassword,
-                                                    password.cseType == "CSEv1r1",
-                                                    {},
-                                                    {
-                                                        Toast.makeText(
-                                                            context,
-                                                            resources.getString(R.string.error_could_not_sync_counter),
-                                                            Toast.LENGTH_LONG
-                                                        ).show()
-                                                    }
-                                                )
+                                                    updatePassword(
+                                                        updatedPassword,
+                                                        password.cseType == "CSEv1r1",
+                                                        {},
+                                                        {
+                                                            Toast.makeText(
+                                                                context,
+                                                                resources.getString(R.string.error_could_not_sync_counter),
+                                                                Toast.LENGTH_LONG
+                                                            ).show()
+                                                        }
+                                                    )
+                                                }
                                             }
                                         }
                                     }
