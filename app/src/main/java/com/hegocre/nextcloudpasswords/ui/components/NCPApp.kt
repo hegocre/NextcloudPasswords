@@ -290,11 +290,11 @@ fun NextcloudPasswordsApp(
                         }
                     }
                 },
-                updatePassword = { updatedPassword, onSuccess, onFailure ->
+                updatePassword = { updatedPassword, shouldEncrypt, onSuccess, onFailure ->
                     coroutineScope.launch {
                         val updatedPwd = updatedPassword.let {
                             val currentKeychain = keychain
-                            if (currentKeychain != null && serverSettings.encryptionCse != 0) {
+                            if (shouldEncrypt && currentKeychain != null) {
                                 it.encrypt(currentKeychain.current, currentKeychain)
                             } else it
                         }
@@ -417,11 +417,11 @@ fun NextcloudPasswordsApp(
                                 navController.navigate("${NCPScreen.PasswordEdit.name}/${passwordsViewModel.visiblePassword.value?.first?.id ?: "none"}")
                             }
                         } else null,
-                        updatePassword = {updatedPassword, onSuccess, onFailure ->
+                        updatePassword = { updatedPassword, shouldEncrypt, onSuccess, onFailure ->
                             coroutineScope.launch {
                                 val updatedPwd = updatedPassword.let {
                                     val currentKeychain = keychain
-                                    if (currentKeychain != null && serverSettings.encryptionCse != 0) {
+                                    if (shouldEncrypt && currentKeychain != null) {
                                         it.encrypt(currentKeychain.current, currentKeychain)
                                     } else it
                                 }

@@ -74,7 +74,7 @@ fun NCPNavHost(
     autofillData: AutofillData?,
     openPasswordDetails: (password: Password, folderTree: List<String>) -> Unit,
     createPassword: (newPassword: NewPassword, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
-    updatePassword: (updatedPassword: UpdatedPassword, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
+    updatePassword: (updatedPassword: UpdatedPassword, shouldEncrypt: Boolean, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
     deletePassword: (deletedPassword: DeletedPassword, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
     replyAutofill: ((label: String, username: String, password: String) -> Unit)? = null,
     modalSheetState: SheetState? = null,
@@ -633,6 +633,7 @@ fun NCPNavHost(
 
                                             updatePassword(
                                                 updatedPassword,
+                                                selectedPassword.cseType == "CSEv1r1",
                                                 {
                                                     if (editablePasswordState.replyAutofill && replyAutofill != null) {
                                                         replyAutofill(

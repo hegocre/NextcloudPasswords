@@ -79,7 +79,7 @@ import org.commonmark.parser.Parser
 fun PasswordItem(
     passwordInfo: Pair<Password, List<String>>?,
     modifier: Modifier = Modifier,
-    updatePassword: (updatedPassword: UpdatedPassword, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
+    updatePassword: (updatedPassword: UpdatedPassword, shouldEncrypt: Boolean, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
     onEditPassword: (() -> Unit)? = null,
 ) {
     passwordInfo?.let { pass ->
@@ -100,7 +100,7 @@ fun PasswordItem(
 fun PasswordItemContent(
     passwordInfo: Pair<Password, List<String>>,
     onEditPassword: (() -> Unit)?,
-    updatePassword: (updatedPassword: UpdatedPassword, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
+    updatePassword: (updatedPassword: UpdatedPassword, shouldEncrypt: Boolean, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -345,6 +345,7 @@ fun PasswordItemContent(
 
                                                 updatePassword(
                                                     updatedPassword,
+                                                    password.cseType == "CSEv1r1",
                                                     {},
                                                     {
                                                         Toast.makeText(
@@ -767,7 +768,7 @@ fun PasswordItemPreview() {
                 ),
                 onEditPassword = {},
                 modifier = Modifier.padding(bottom = 16.dp),
-                updatePassword = { _, _, _ -> }
+                updatePassword = { _, _, _, _ -> }
             )
         }
     }
