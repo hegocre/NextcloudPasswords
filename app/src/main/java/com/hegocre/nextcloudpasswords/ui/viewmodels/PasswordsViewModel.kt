@@ -393,6 +393,5 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
 
     override fun onCleared() {
         apiController
-        super.onCleared()
     }
 }
