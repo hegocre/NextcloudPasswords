@@ -117,4 +117,5 @@
     <string name="action_search_everywhere">Szukaj wszędzie</string>
     <string name="contribute">Wspomóż</string>
     <string name="preferences_category_search">Wyszukaj</string>
+    <string name="otp_secret">Sekret</string>
 </resources>

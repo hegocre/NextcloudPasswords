@@ -117,4 +117,5 @@
     <string name="action_search_everywhere">Rechercher partout</string>
     <string name="contribute">Contribuer</string>
     <string name="preferences_category_search">Recherche</string>
+    <string name="otp_secret">Secret</string>
 </resources>

@@ -127,4 +127,5 @@
     <string name="use_strict_domain_matching_preference_subtitle">Şifreleri tam alan adına göre, alt alan adlarını hariç tutarak eşleştir</string>
     <string name="action_discard">Yok say</string>
     <string name="dialog_discard_changes_text">Bu ögeye yapılan değişiklikler yok sayılacak. Devam etmek istiyor musunuz?</string>
+    <string name="otp_secret">Gizli</string>
 </resources>

@@ -125,4 +125,5 @@
     <string name="preferences_category_search">Otsing</string>
     <string name="use_strict_domain_matching_preference_title">Range domeeni sobitamine</string>
     <string name="use_strict_domain_matching_preference_subtitle">Sobita paroole nende terve domeeniga, välja arvatud alamdomeenid</string>
+    <string name="otp_secret">Saladus</string>
 </resources>
