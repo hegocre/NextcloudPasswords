@@ -303,6 +303,15 @@ fun PasswordItemContent(
                         }
                         currentOtp.first?.let { code ->
                             var progress by remember { mutableStateOf<Float?>(null) }
+                            var waitingForNewRevision by remember(password.id) { mutableStateOf(false) }
+                            var initialRevision by remember(password.id) { mutableStateOf(password.revision) }
+
+                            LaunchedEffect(password.revision) {
+                                if (password.revision != initialRevision) {
+                                    waitingForNewRevision = false
+                                    initialRevision = password.revision
+                                }
+                            }
 
                             val resources = LocalResources.current
 
@@ -310,8 +319,11 @@ fun PasswordItemContent(
                                 otp = code,
                                 label = stringResource(R.string.otp_title),
                                 progress = progress,
-                                onGenerateNext = if (currentOtp.second == null && otpNotNull.type == OTP.Companion.Type.HOTP) {
+                                isSyncing = waitingForNewRevision,
+                                onGenerateNext = if (!waitingForNewRevision && currentOtp.second == null && otpNotNull.type == OTP.Companion.Type.HOTP) {
                                     {
+                                        waitingForNewRevision = true
+                                        initialRevision = password.revision
                                         val newOtp = otpNotNull.getNext()
                                         otp = newOtp
 
@@ -349,6 +361,7 @@ fun PasswordItemContent(
                                                         password.cseType == "CSEv1r1",
                                                         {},
                                                         {
+                                                            waitingForNewRevision = false
                                                             Toast.makeText(
                                                                 context,
                                                                 resources.getString(R.string.error_could_not_sync_counter),
@@ -356,8 +369,12 @@ fun PasswordItemContent(
                                                             ).show()
                                                         }
                                                     )
+                                                } else {
+                                                    waitingForNewRevision = false
                                                 }
                                             }
+                                        } else {
+                                            waitingForNewRevision = false
                                         }
                                     }
                                 } else null
@@ -630,6 +647,7 @@ fun PasswordOtpField(
     progress: Float?,
     onGenerateNext: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    isSyncing: Boolean = false,
     onClickText: (() -> Unit)? = null,
     fontFamily: FontFamily? = null,
 ) {
@@ -660,12 +678,24 @@ fun PasswordOtpField(
         },
         trailingContent = {
             Row {
-                onGenerateNext?.let { onGenerateNext ->
-                    IconButton(onClick = onGenerateNext) {
-                        Icon(
-                            imageVector = Icons.Default.Autorenew,
-                            contentDescription = stringResource(id = R.string.generate_next_otp_htop)
-                        )
+                if (isSyncing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(CenterVertically)
+                            .padding(end = 16.dp)
+                            .width(20.dp)
+                            .height(20.dp),
+                        trackColor = Color.Transparent,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    onGenerateNext?.let { onGenerateNext ->
+                        IconButton(onClick = onGenerateNext) {
+                            Icon(
+                                imageVector = Icons.Default.Autorenew,
+                                contentDescription = stringResource(id = R.string.generate_next_otp_htop)
+                            )
+                        }
                     }
                 }
 

@@ -85,6 +85,7 @@ fun NextcloudPasswordsApp(
 
     val keychain by passwordsViewModel.csEv1Keychain.observeAsState()
     val serverSettings by passwordsViewModel.serverSettings.observeAsState(initial = ServerSettings())
+    val passwords by passwordsViewModel.passwords.observeAsState(initial = listOf())
 
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val modalSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -403,8 +404,21 @@ fun NextcloudPasswordsApp(
                     contentWindowInsets = { WindowInsets.navigationBars },
                     sheetState = modalSheetState
                 ) {
+                    val currentPasswordInfo = passwordsViewModel.visiblePassword.value?.let { visible ->
+                        val updatedPassword = passwords.find { it.id == visible.first.id }
+                        if (updatedPassword != null) {
+                            Pair(
+                                // Update the revision, so that multiple HOTP counter updates work
+                                visible.first.copy(
+                                    revision = updatedPassword.revision,
+                                    updated = updatedPassword.updated,
+                                ),
+                                visible.second
+                            )
+                        } else visible
+                    }
                     PasswordItem(
-                        passwordInfo = passwordsViewModel.visiblePassword.value,
+                        passwordInfo = currentPasswordInfo,
                         onEditPassword = if (sessionOpen) {
                             {
                                 coroutineScope.launch {
