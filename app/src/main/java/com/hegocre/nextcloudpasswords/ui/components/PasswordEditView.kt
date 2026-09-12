@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Casino
@@ -441,9 +441,9 @@ fun EditablePasswordView(
             )
         }
 
-        itemsIndexed(
-            items = editablePasswordState.customFields.filterNot { it.label == OTP.CUSTOM_FIELD_LABEL },
-            key = { index, field -> "${index}_password_custom_${field.label}" }) { index, customField ->
+        items(
+            items = editablePasswordState.customFields.withIndex().filterNot { it.value.label == OTP.CUSTOM_FIELD_LABEL },
+            key = { field -> "${field.index}_password_custom_${field.value.label}" }) { (index, customField) ->
             var showValue by rememberSaveable {
                 mutableStateOf(customField.type != CustomField.TYPE_SECRET)
             }
@@ -452,8 +452,7 @@ fun EditablePasswordView(
                 value = customField.value,
                 onValueChange = { newText ->
                     val newElement = editablePasswordState.customFields[index].copy(value = newText)
-                    editablePasswordState.customFields.removeAt(index)
-                    editablePasswordState.customFields.add(index, newElement)
+                    editablePasswordState.customFields[index] = newElement
                 },
                 textStyle = if (customField.type == CustomField.TYPE_SECRET)
                     LocalTextStyle.current.copy(fontFamily = FontFamily(Font(R.font.dejavu_sans_mono)))
