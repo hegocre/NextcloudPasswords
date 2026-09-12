@@ -137,8 +137,8 @@
     <string name="grant_permission">Grant permission</string>
     <string name="permission_required">Permission required</string>
     <string name="dialog_local_network_permission_message">The instance you are trying to access is on your local network. Starting from Android 17, you need to grant permission to the this app to access it. Do you want to proceed?</string>
-    <string name="copy_otp_preference_title">Copy OTP</string>
-    <string name="copy_otp_preference_subtitle">Copy the current code when autofilling a password with OTP</string>
+    <string name="copy_otp_preference_title">Copy TOTP</string>
+    <string name="copy_otp_preference_subtitle">Copy the current code when autofilling a password with Time-Based OTP</string>
     <string name="error_invalid_otp_url">Invalid OTP URL</string>
     <string name="error_invalid_otp_type">Invalid OTP type</string>
     <string name="error_missing_secret">Missing required \'secret\' parameter </string>
