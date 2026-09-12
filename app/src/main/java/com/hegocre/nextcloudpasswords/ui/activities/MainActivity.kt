@@ -158,20 +158,24 @@ class MainActivity : FragmentActivity() {
         password: PasswordAutofillData,
         structures: List<AssistStructure>
     ) {
-        val dataset = AutofillHelper.buildDataset(
-            this, 
-            AssistStructureParser(structures),
-            null, 
-            password, 
-            null,
-            false
-        )
+        try {
+            val dataset = AutofillHelper.buildDataset(
+                this,
+                AssistStructureParser(structures),
+                null,
+                password,
+                null,
+                false
+            )
 
-        val replyIntent = Intent().apply {
-            putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, dataset)
+            val replyIntent = Intent().apply {
+                putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, dataset)
+            }
+
+            setResult(RESULT_OK, replyIntent)
+        } catch (_: IllegalStateException) {
+            setResult(RESULT_CANCELED)
         }
-
-        setResult(RESULT_OK, replyIntent)
 
         finish()
     }

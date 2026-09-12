@@ -110,14 +110,12 @@ class OkHttpRequest private constructor() {
             }
 
             val host = request.url.host
-            Log.d("IP", host)
 
             val isIpAddress = android.net.InetAddresses.isNumericAddress(host)
 
             if (isIpAddress) {
                 val ip = InetAddress.getByName(host)
                 val isLocal = ip.isDeviceLocalAddress() || ip.isLinkLocalAddress
-                Log.d("IP", "IsLocal: $isLocal")
                 if (isLocal && ContextCompat.checkSelfPermission(context, "android.permission.ACCESS_LOCAL_NETWORK") != PackageManager.PERMISSION_GRANTED) {
                     throw LocalNetworkAccessPermissionRequiredException()
                 }
@@ -316,7 +314,7 @@ class OkHttpRequest private constructor() {
     companion object {
         private var instance: OkHttpRequest? = null
 
-        class LocalNetworkAccessPermissionRequiredException : Exception()
+        class LocalNetworkAccessPermissionRequiredException : IOException()
 
         val JSON = "application/json; charset=utf-8".toMediaTypeOrNull()
 
