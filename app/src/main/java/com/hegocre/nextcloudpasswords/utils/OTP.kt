@@ -121,8 +121,8 @@ data class OTP(
                 else -> throw OtpParseException.InvalidAlgorithm()
             }
 
-            val digits = uri.getQueryParameter("digits")?.toIntOrNull()
-                ?.takeIf { it in 6..9 }
+            val digits = (uri.getQueryParameter("digits") ?: "6").toIntOrNull()
+                ?.takeIf { it in 6..9 } ?: throw OtpParseException.InvalidDigits()
 
             val counter = uri.getQueryParameter("counter")?.toLongOrNull()
                 ?.takeUnless { it < 0 }
@@ -131,16 +131,16 @@ data class OTP(
                 throw OtpParseException.MissingCounter()
             }
 
-            val period = uri.getQueryParameter("period")?.toIntOrNull()
-                ?.takeIf { it > 0 }
+            val period = (uri.getQueryParameter("period") ?: "30").toIntOrNull()
+                ?.takeIf { it > 0 } ?: throw OtpParseException.InvalidPeriod()
 
             return OTP(
                 secret = secret,
                 type = type,
                 algorithm = algorithm,
-                digits = digits ?: 6,
+                digits = digits,
                 counter = counter ?: 0L,
-                period = period ?: 30,
+                period = period,
                 issuer = issuer,
                 accountName = accountName
             )
@@ -156,6 +156,8 @@ sealed class OtpParseException(val stringResId: Int) : IllegalArgumentException(
     class InvalidSecret(resId: Int = R.string.error_invalid_secret) : OtpParseException(resId)
     class InvalidAlgorithm(resId: Int = R.string.error_invalid_algorithm) : OtpParseException(resId)
     class MissingCounter(resId: Int = R.string.error_missing_counter) : OtpParseException(resId)
+    class InvalidDigits(resId: Int = R.string.error_invalid_digits) : OtpParseException(resId)
+    class InvalidPeriod(resId: Int = R.string.error_invalid_period) : OtpParseException(resId)
 }
 
 fun String.formatOtp(chunkSize: Int? = null): String {
