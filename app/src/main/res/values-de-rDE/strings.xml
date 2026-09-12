@@ -135,4 +135,8 @@
     <string name="offer_credential_saving_preference_title">Anmeldedaten speichern</string>
     <string name="offer_credential_saving_preference_subtitle">Neue oder aktualisierte Anmeldedaten speichern</string>
     <string name="select_password_to_update_toast">Wählen Sie ein Passwort zum Aktualisieren oder erstellen Sie ein neues</string>
+    <string name="grant_permission">Berechtigung erteilen</string>
+    <string name="permission_required">Berechtigung erforderlich</string>
+    <string name="dialog_local_network_permission_message">Die Instanz, auf die Sie zugreifen möchten, ist in Ihrem lokalen Netzwerk. Beginnend mit Android 17 müssen Sie der App Berechtigungen erteilen, um darauf zuzugreifen. Möchten Sie fortfahren?</string>
+    <string name="otp_secret">Geheim</string>
 </resources>
