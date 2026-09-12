@@ -138,4 +138,5 @@
     <string name="grant_permission">Conceder permiso</string>
     <string name="permission_required">Permiso requerido</string>
     <string name="dialog_local_network_permission_message">La instancia a la que intenta acceder está en su red local. A partir de Android 17, necesita conceder permiso a esta aplicación para acceder a ella. ¿Desea continuar?</string>
+    <string name="otp_secret">Secreto</string>
 </resources>
