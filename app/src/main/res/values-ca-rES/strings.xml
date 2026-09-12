@@ -138,4 +138,5 @@
     <string name="grant_permission">Atorgar permís</string>
     <string name="permission_required">Cal permís</string>
     <string name="dialog_local_network_permission_message">La instància a què esteu intentant accedir es troba a la xarxa local. A partir d\'Android 17, cal atorgar permís a l\'aplicació per accedir-hi. Voleu continuar?</string>
+    <string name="otp_secret">Secret</string>
 </resources>
