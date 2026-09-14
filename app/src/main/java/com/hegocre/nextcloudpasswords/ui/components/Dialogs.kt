@@ -1,7 +1,10 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import android.app.Activity
+import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -80,18 +83,16 @@ import com.hegocre.nextcloudpasswords.api.FoldersApi
 import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.RequestedPassword
+import com.hegocre.nextcloudpasswords.ui.activities.ScannerActivity
 import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.OTP
 import com.hegocre.nextcloudpasswords.utils.OtpParseException
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import com.hegocre.nextcloudpasswords.utils.isValidSecret
-import io.github.g00fy2.quickie.QRResult
-import io.github.g00fy2.quickie.ScanQRCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import org.apache.commons.codec.binary.Base32
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -423,10 +424,13 @@ fun EditOtpDialog(
                 Row (modifier = Modifier.padding(bottom = 8.dp), verticalAlignment = CenterVertically) {
                     val context = LocalContext.current
                     val resources = LocalResources.current
-                    val scanQrCodeLauncher = rememberLauncherForActivityResult(ScanQRCode()) { result ->
-                        when (result) {
-                            is QRResult.QRSuccess -> {
-                                val otpUri = result.content.rawValue
+
+                    val scanQrCodeLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.StartActivityForResult()
+                    ) { result ->
+                        when (result.resultCode) {
+                            Activity.RESULT_OK -> {
+                                val otpUri = result.data?.getStringExtra("SCAN_RESULT")
                                 if (otpUri != null) {
                                     try {
                                         val otp = OTP.fromUrl(otpUri)
@@ -443,10 +447,12 @@ fun EditOtpDialog(
                                     }
                                 }
                             }
-                            is QRResult.QRError -> {
-                                Toast.makeText(context, result.exception.localizedMessage, Toast.LENGTH_LONG).show()
+                            Activity.RESULT_CANCELED -> {
+                                val scannerException = result.data?.getStringExtra("EXCEPTION")
+                                if (scannerException != null) {
+                                    Toast.makeText(context, scannerException, Toast.LENGTH_LONG).show()
+                                }
                             }
-                            is QRResult.QRUserCanceled, is QRResult.QRMissingPermission -> {}
                         }
                     }
 
@@ -457,7 +463,7 @@ fun EditOtpDialog(
 
                     IconButton(
                         onClick = {
-                            scanQrCodeLauncher.launch(null)
+                            scanQrCodeLauncher.launch(Intent(context, ScannerActivity::class.java))
                         }
                     ) {
                         Icon(

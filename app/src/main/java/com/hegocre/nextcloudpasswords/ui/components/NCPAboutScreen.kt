@@ -418,10 +418,16 @@ val licenses = listOf(
     ),
     LicenseNotice(
         name = "MaterialKolor",
-        copyright = "Copyright (c) 2023 Jordon de Hoog",
+        copyright = "Copyright (C) 2023 Jordon de Hoog",
         licenseName = "MIT License",
         licenseUrl = "https://github.com/jordond/MaterialKolor/blob/main/LICENSE"
     ),
+    LicenseNotice(
+        name = "ZXing-C++",
+        copyright = "Copyright (C) 2020 Axel Waggershauser",
+        licenseName = "Apache License 2.0",
+        licenseUrl = "https://github.com/zxing-cpp/zxing-cpp/blob/master/LICENSE"
+    )
 )
 
 @Preview
