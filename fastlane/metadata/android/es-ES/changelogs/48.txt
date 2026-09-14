@@ -1,0 +1,3 @@
+- Implementados códigos de segundo factor de autenticación con escaneo QR
+- Mejoras internas y actualizaciones de librerías
+- Traducciones actualizadas

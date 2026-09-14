@@ -1,0 +1,3 @@
+- Implementats codis de segon factor d'autenticació amb escaneig de QR
+- Millores internes i actualització de llibreries
+- Traduccions actualitzades
