@@ -168,4 +168,5 @@
     <string name="generate_next_otp_hotp">Generar siguiente código</string>
     <string name="error_invalid_digits">Parámetro \'digits\' inválido</string>
     <string name="error_invalid_period">Parámetro \'period\' inválido</string>
+    <string name="error_no_camera_permission">Permiso de cámara no concedido</string>
 </resources>
