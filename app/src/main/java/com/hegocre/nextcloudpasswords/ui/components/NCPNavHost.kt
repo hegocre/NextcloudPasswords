@@ -187,6 +187,10 @@ fun NCPNavHost(
         filteredPasswordList?.filter { it.favorite }
     }
 
+    val filteredOtpPasswords = remember(filteredPasswordList) {
+        filteredPasswordList?.filter { it.getOTP().first != null }
+    }
+
     val filteredFolderList = remember(foldersDecryptionState.decryptedList, searchQuery, orderBy) {
         foldersDecryptionState.decryptedList?.filter {
             !it.hidden && !it.trashed && it.label.lowercase().contains(searchQuery.lowercase())
@@ -407,6 +411,50 @@ fun NCPNavHost(
                                                     navController.navigate("${NCPScreen.FolderEdit.name}/${it.id}")
                                             },
                                             getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                composable(NCPScreen.OTP.name) {
+                    NCPNavHostComposable(
+                        modalSheetState = modalSheetState,
+                        searchVisibility = searchVisibility,
+                        closeSearch = closeSearch
+                    ) {
+                        when {
+                            passwordsDecryptionState.isLoading -> {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                }
+                            }
+                            passwordsDecryptionState.decryptedList != null -> {
+
+                                LaunchedEffect(Unit) {
+                                    passwordsViewModel.setVisibleFolder(null)
+                                }
+
+                                PullToRefreshBody(
+                                    isRefreshing = isRefreshing,
+                                    onRefresh = { passwordsViewModel.sync() },
+                                ) {
+                                    if (filteredOtpPasswords?.isEmpty() == true) {
+                                        if (searchQuery.isBlank())
+                                            NoContentText()
+                                        else
+                                            NoResultsText { navController.navigate(NCPScreen.Passwords.name) }
+                                    } else {
+                                        OTPLazyColumn(
+                                            passwords = filteredOtpPasswords,
+                                            onPasswordLongClick = {
+                                                if (sessionOpen && (autofillData == null || autofillData.isSave()) && it.editable)
+                                                    navController.navigate("${NCPScreen.PasswordEdit.name}/${it.id}")
+                                            },
+                                            getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) },
+                                            updatePassword = updatePassword
                                         )
                                     }
                                 }

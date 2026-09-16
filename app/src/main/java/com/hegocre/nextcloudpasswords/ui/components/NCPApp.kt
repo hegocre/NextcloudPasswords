@@ -50,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -65,6 +66,8 @@ import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.viewmodels.PasswordsViewModel
 import com.hegocre.nextcloudpasswords.utils.AutofillData
+import com.hegocre.nextcloudpasswords.utils.PreferencesManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,6 +79,10 @@ fun NextcloudPasswordsApp(
     replyAutofill: ((String, String, String) -> Unit)? = null
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    val showOTPTab by PreferencesManager.getInstance(context).getShowOTPTab()
+        .collectAsState(false, context = Dispatchers.IO)
 
     val navController = rememberNavController()
     val backstackEntry = navController.currentBackStackEntryAsState()
@@ -157,6 +164,7 @@ fun NextcloudPasswordsApp(
                                     } ?: stringResource(currentScreen.title)) +
                                             (passwordsViewModel.visibleFolderPasswordCount.value?.let { " ($it)" } ?: "")
                                 }
+                                NCPScreen.OTP -> stringResource(currentScreen.title)
                             },
                             userAvatar = { size ->
                                 Image(
@@ -221,7 +229,9 @@ fun NextcloudPasswordsApp(
                             exit = slideOutVertically(targetOffsetY = { (it + navigationHeight) })
                         ) {
                             NCPBottomNavigation(
-                                allScreens = NCPScreen.entries.filter { !it.hidden },
+                                allScreens = NCPScreen.entries.filter {
+                                    !it.hidden && !(it.name == NCPScreen.OTP.name && !showOTPTab)
+                                },
                                 currentScreen = currentScreen,
                                 onScreenSelected = { screen ->
                                     navController.navigate(screen.name) {

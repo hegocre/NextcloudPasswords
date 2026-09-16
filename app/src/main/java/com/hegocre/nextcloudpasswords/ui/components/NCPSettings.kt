@@ -147,6 +147,19 @@ fun NCPSettingsScreen(
                         title = { Text(stringResource(R.string.show_icons_preference_title)) },
                         subtitle = { Text(stringResource(R.string.show_icons_preference_subtitle)) }
                     )
+
+                    val showOTPTab by preferencesManager.getShowOTPTab()
+                        .collectAsState(initial = false, context = Dispatchers.IO)
+                    SwitchPreference(
+                        checked = showOTPTab,
+                        onCheckedChange = { show ->
+                            scope.launch(Dispatchers.IO) {
+                                preferencesManager.setShowOTPTab(show)
+                            }
+                        },
+                        title = { Text(stringResource(R.string.show_otp_tab_preference_title)) },
+                        subtitle = { Text(stringResource(R.string.show_otp_tab_preference_subtitle)) }
+                    )
                 }
 
                 PreferencesCategory(title = { Text(stringResource(R.string.preferences_category_search)) }) {

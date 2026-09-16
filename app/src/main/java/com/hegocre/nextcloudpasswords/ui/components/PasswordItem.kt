@@ -46,6 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -385,7 +386,7 @@ fun PasswordItemContent(
                                     LaunchedEffect(endTimeInMillis) {
                                         while (System.currentTimeMillis() < endTimeInMillis) {
                                             val remaining = endTimeInMillis - System.currentTimeMillis()
-                                            progress = 1f - (remaining.toFloat() / (otpNotNull.period.toFloat() * 1000f))
+                                            progress = (remaining.toFloat() / (otpNotNull.period.toFloat() * 1000f))
                                             delay(timeMillis = 50L)
                                         }
                                         currentOtp = otpNotNull.getCurrent()
@@ -703,12 +704,13 @@ fun PasswordOtpField(
                     CircularProgressIndicator(
                         progress = { it },
                         modifier = Modifier
+                            .scale(scaleX = -1f, scaleY = 1f)
                             .align(CenterVertically)
                             .padding(end = 16.dp)
                             .width(20.dp)
                             .height(20.dp),
                         trackColor = Color.Transparent,
-                        strokeWidth = 2.dp
+                        strokeWidth = 10.dp
                     )
                 }
 
@@ -716,7 +718,7 @@ fun PasswordOtpField(
                 val copiedText = stringResource(R.string.copied)
                 val otpTitle = stringResource(R.string.otp_title)
 
-                IconButton(onClick = {
+                IconButton(modifier = Modifier.padding(start = 8.dp), onClick = {
                     context.copyToClipboard(otp, isSensitive = true)
                     Toast.makeText(
                         context,
