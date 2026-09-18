@@ -166,4 +166,7 @@
     <string name="error_could_not_sync_counter">Konnte den Zähler nicht synchronisieren. Bitte denken Sie daran, Ihren Zähler erneut zu erhöhen, wenn er online ist.</string>
     <string name="text_input_show_secret_toggle">Geheimnis anzeigen</string>
     <string name="generate_next_otp_hotp">Nächsten Code generieren</string>
+    <string name="error_invalid_digits">Ungültiger \'digits\' Parameter</string>
+    <string name="error_invalid_period">Ungültiger \'period\' Parameter</string>
+    <string name="error_no_camera_permission">Kamera-Berechtigung nicht gewährt</string>
 </resources>
