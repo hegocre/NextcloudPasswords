@@ -168,4 +168,6 @@
     <string name="error_invalid_digits">Invalid \'digits\' parameter</string>
     <string name="error_invalid_period">Invalid \'period\' parameter</string>
     <string name="error_no_camera_permission">Camera permission not granted</string>
+    <string name="show_otp_tab_preference_title">Show OTP Tab</string>
+    <string name="show_otp_tab_preference_subtitle">Show the OTP tab in the navigation bar</string>
 </resources>

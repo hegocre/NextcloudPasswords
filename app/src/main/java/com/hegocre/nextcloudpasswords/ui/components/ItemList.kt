@@ -1,33 +1,47 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.twotone.Security
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -35,19 +49,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.data.folder.Folder
+import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.Password
+import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.statusBreached
 import com.hegocre.nextcloudpasswords.ui.theme.statusGood
 import com.hegocre.nextcloudpasswords.ui.theme.statusWeak
+import com.hegocre.nextcloudpasswords.utils.OTP
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
+import com.hegocre.nextcloudpasswords.utils.copyToClipboard
+import com.hegocre.nextcloudpasswords.utils.formatOtp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.serialization.json.Json
 
 data class ListDecryptionState<T>(
     val decryptedList: List<T>? = null,
@@ -121,6 +144,48 @@ fun MixedLazyColumn(
     }
 }
 
+@Composable
+fun OTPLazyColumn(
+    updatePassword: (updatedPassword: UpdatedPassword, shouldEncrypt: Boolean, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
+    passwords: List<Password>? = null,
+    onPasswordLongClick: ((Password) -> Unit)? = null,
+    getPainterForUrl: (@Composable (String) -> Painter)? = null,
+) {
+    val context = LocalContext.current
+    val shouldShowIcon by PreferencesManager.getInstance(context).getShowIcons()
+        .collectAsState(initial = false, context = Dispatchers.IO)
+    val listState = rememberLazyListState()
+    val knobRatio by remember {
+        derivedStateOf { (10f / (passwords?.size ?: 0)).coerceIn(0f, 1f) }
+    }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .then(
+                if (knobRatio == 1f) Modifier else Modifier.scrollbar(
+                    state = listState,
+                    horizontal = false,
+                    visibleAlpha = 0.5f,
+                    fixedKnobRatio = knobRatio,
+                    knobCornerRadius = 0.dp
+                )
+            ),
+        state = listState
+    ) {
+        passwords?.let {
+            items(items = it, key = { password -> password.id }) { password ->
+                PasswordOTPRow(
+                    password = password,
+                    shouldShowIcon = shouldShowIcon,
+                    onPasswordLongClick = onPasswordLongClick,
+                    getPainterForUrl = getPainterForUrl,
+                    updatePassword = updatePassword
+                )
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PasswordRow(
@@ -185,6 +250,227 @@ fun PasswordRow(
             }
         } else null,
     )
+}
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PasswordOTPRow(
+    password: Password,
+    modifier: Modifier = Modifier,
+    updatePassword: (updatedPassword: UpdatedPassword, shouldEncrypt: Boolean, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
+    shouldShowIcon: Boolean = false,
+    onPasswordLongClick: ((Password) -> Unit)? = null,
+    getPainterForUrl: (@Composable (String) -> Painter)? = null
+) {
+    val context = LocalContext.current
+
+    val customFields by remember {
+        derivedStateOf {
+            try {
+                if (password.customFields.isNotBlank()) {
+                    Json.decodeFromString<List<CustomField>>(password.customFields)
+                } else {
+                    listOf()
+                }
+            } catch (_: Exception) {
+                listOf()
+            }
+        }
+    }
+
+    val customFieldOtp by remember {
+        derivedStateOf { customFields.find { it.label == OTP.CUSTOM_FIELD_LABEL } }
+    }
+
+    var waitingForNewRevision by remember(password.id) { mutableStateOf(false) }
+    var initialRevision by remember(password.id) { mutableStateOf(password.revision) }
+
+    LaunchedEffect(password.revision) {
+        if (password.revision != initialRevision) {
+            waitingForNewRevision = false
+            initialRevision = password.revision
+        }
+    }
+
+    customFieldOtp?.let { otpField ->
+        var otp by remember(otpField) {
+            mutableStateOf(
+                try {
+                    Json.decodeFromString<OTP>(otpField.value)
+                } catch (_: Exception) {
+                    null
+                }
+            )
+        }
+
+        otp?.let { otpNotNull ->
+            var currentOtp by remember(otpNotNull) {
+                mutableStateOf(runCatching { otpNotNull.getCurrent() }.getOrElse { Pair(null, null) })
+            }
+            currentOtp.first?.let { code ->
+                var progress by remember { mutableStateOf<Float?>(null) }
+                var waitingForNewRevision by remember(password.id) { mutableStateOf(false) }
+                var initialRevision by remember(password.id) { mutableStateOf(password.revision) }
+
+                LaunchedEffect(password.revision) {
+                    if (password.revision != initialRevision) {
+                        waitingForNewRevision = false
+                        initialRevision = password.revision
+                    }
+                }
+
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = "${password.label} (${password.username})",
+                            style = LocalTextStyle.current.copy(fontSize = 12.sp, lineHeight = 20.sp)
+                        )
+                    },
+                    supportingContent = {
+                        Text(
+                            text = code.formatOtp(),
+                            maxLines = 1,
+                            style = LocalTextStyle.current.copy(fontSize = 24.sp)
+                        )
+                    },
+                    leadingContent = if (shouldShowIcon) {
+                        {
+                            getPainterForUrl?.let {
+                                Image(
+                                    painter = getPainterForUrl(password.url.ifBlank { password.label }),
+                                    modifier = Modifier
+                                        .size(45.dp)
+                                        .padding(all = 8.dp)
+                                        .clip(RoundedCornerShape(4.dp)),
+                                    contentDescription = stringResource(R.string.content_description_site_favicon)
+                                )
+                            }
+                        }
+                    } else null,
+                    trailingContent = {
+                        Row {
+                            if (otp?.type == OTP.Companion.Type.HOTP) {
+                                if (waitingForNewRevision) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .align(CenterVertically)
+                                            .padding(end = 16.dp)
+                                            .width(20.dp)
+                                            .height(20.dp),
+                                        trackColor = Color.Transparent,
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    val resources = LocalResources.current
+
+                                    IconButton(onClick = {
+                                        waitingForNewRevision = true
+                                        initialRevision = password.revision
+                                        val newOtp = otpNotNull.getNext()
+                                        otp = newOtp
+
+                                        if (password.editable) {
+                                            customFields.indexOfFirst { it.label == OTP.CUSTOM_FIELD_LABEL }.let { otpIndex ->
+                                                if (otpIndex != -1) {
+                                                    val newCustomFields = customFields.toMutableList()
+                                                    newCustomFields[otpIndex] = CustomField(
+                                                        label = OTP.CUSTOM_FIELD_LABEL,
+                                                        type = CustomField.TYPE_DATA,
+                                                        value = Json.encodeToString(newOtp),
+                                                    )
+                                                    val encodedCustomFields = Json.encodeToString(newCustomFields)
+
+                                                    val updatedPassword = UpdatedPassword(
+                                                        id = password.id,
+                                                        revision = password.revision,
+                                                        password = password.password,
+                                                        label = password.label,
+                                                        username = password.username,
+                                                        url = password.url,
+                                                        notes = password.notes,
+                                                        customFields = encodedCustomFields,
+                                                        hash = password.hash,
+                                                        cseType = "none",
+                                                        cseKey = "",
+                                                        folder = password.folder,
+                                                        edited = password.edited,
+                                                        hidden = password.hidden,
+                                                        favorite = password.favorite
+                                                    )
+
+                                                    updatePassword(
+                                                        updatedPassword,
+                                                        password.cseType == "CSEv1r1",
+                                                        {},
+                                                        {
+                                                            waitingForNewRevision = false
+                                                            Toast.makeText(
+                                                                context,
+                                                                resources.getString(R.string.error_could_not_sync_counter),
+                                                                Toast.LENGTH_LONG
+                                                            ).show()
+                                                        }
+                                                    )
+                                                } else {
+                                                    waitingForNewRevision = false
+                                                }
+                                            }
+                                        } else {
+                                            waitingForNewRevision = false
+                                        }
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Autorenew,
+                                            contentDescription = stringResource(id = R.string.generate_next_otp_hotp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            progress?.let {
+                                CircularProgressIndicator(
+                                    progress = { it },
+                                    modifier = Modifier
+                                        .scale(scaleX = -1f, scaleY = 1f)
+                                        .align(CenterVertically)
+                                        .padding(horizontal = 14.dp)
+                                        .width(20.dp)
+                                        .height(20.dp),
+                                    trackColor = Color.Transparent,
+                                    strokeWidth = 10.dp
+                                )
+                            }
+                        }
+                    },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = modifier
+                        .combinedClickable(
+                            onClick = {
+                                context.copyToClipboard(code, isSensitive = true)
+                            },
+                            onLongClick = {
+                                onPasswordLongClick?.invoke(password)
+                            }
+                        )
+                        .padding(vertical = 4.dp)
+                )
+
+                currentOtp.second?.let { endTimeInMillis ->
+                    if (otpNotNull.type == OTP.Companion.Type.TOTP) {
+                        LaunchedEffect(endTimeInMillis) {
+                            while (System.currentTimeMillis() < endTimeInMillis) {
+                                val remaining = endTimeInMillis - System.currentTimeMillis()
+                                progress = (remaining.toFloat() / (otpNotNull.period.toFloat() * 1000f))
+                                delay(timeMillis = 50L)
+                            }
+                            currentOtp = otpNotNull.getCurrent()
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
