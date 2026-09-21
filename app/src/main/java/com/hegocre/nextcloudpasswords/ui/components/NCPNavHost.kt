@@ -106,6 +106,12 @@ fun NCPNavHost(
         } ?: ListDecryptionState(isLoading = true)
     }
 
+    LaunchedEffect(passwordsDecryptionState) {
+        passwordsViewModel.setOTPPasswordCount(
+            passwordsDecryptionState.decryptedList?.count { it.getOTP().first != null }
+        )
+    }
+
     val foldersDecryptionState by produceState(
         initialValue = ListDecryptionState(isLoading = true),
         key1 = folders, key2 = keychain
@@ -189,6 +195,7 @@ fun NCPNavHost(
 
     val filteredOtpPasswords = remember(filteredPasswordList) {
         filteredPasswordList?.filter { it.getOTP().first != null }
+            ?.sortedBy { "${it.label.lowercase()}${it.username.lowercase()}" }
     }
 
     val filteredFolderList = remember(foldersDecryptionState.decryptedList, searchQuery, orderBy) {

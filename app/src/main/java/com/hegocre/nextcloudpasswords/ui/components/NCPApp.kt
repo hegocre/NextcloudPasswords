@@ -164,7 +164,8 @@ fun NextcloudPasswordsApp(
                                     } ?: stringResource(currentScreen.title)) +
                                             (passwordsViewModel.visibleFolderPasswordCount.value?.let { " ($it)" } ?: "")
                                 }
-                                NCPScreen.OTP -> stringResource(currentScreen.title)
+                                NCPScreen.OTP -> stringResource(currentScreen.title) +
+                                        (passwordsViewModel.totalOTPPasswordCount.value?.let { " ($it)" } ?: "")
                             },
                             userAvatar = { size ->
                                 Image(
