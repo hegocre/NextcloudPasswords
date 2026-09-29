@@ -1,1 +1,1 @@
-- Switch from quickie to ZXing-C++
+- Wechsel von quickie zu ZXing-C++
