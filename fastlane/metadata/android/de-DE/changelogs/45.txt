@@ -1,1 +1,1 @@
-- Handle ACCESS_LOCAL_NETWORK permission on Android 17
+- ACCESS_LOCAL_NETWORK Berechtigung auf Android 17
