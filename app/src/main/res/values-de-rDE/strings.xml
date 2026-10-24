@@ -169,4 +169,6 @@
     <string name="error_invalid_digits">Ungültiger \'digits\' Parameter</string>
     <string name="error_invalid_period">Ungültiger \'period\' Parameter</string>
     <string name="error_no_camera_permission">Kamera-Berechtigung nicht gewährt</string>
+    <string name="show_otp_tab_preference_title">OTP-Reiter anzeigen</string>
+    <string name="show_otp_tab_preference_subtitle">OTP-Reiter in der Navigationsleiste anzeigen</string>
 </resources>
