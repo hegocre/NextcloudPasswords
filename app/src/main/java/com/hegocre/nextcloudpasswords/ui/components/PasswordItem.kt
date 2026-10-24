@@ -710,7 +710,7 @@ fun PasswordOtpField(
                             .width(20.dp)
                             .height(20.dp),
                         trackColor = Color.Transparent,
-                        strokeWidth = 10.dp
+                        strokeWidth = 3.dp
                     )
                 }
 
