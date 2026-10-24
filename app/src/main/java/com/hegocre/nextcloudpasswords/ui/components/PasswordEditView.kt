@@ -96,15 +96,15 @@ class EditablePasswordState(originalPassword: Password?) {
             return false
         if (!url.isValidURL())
             return false
-        for (customField in customFields) {
-            when (customField.type) {
+        for ((_, type, value) in customFields) {
+            when (type) {
                 CustomField.TYPE_URL -> {
-                    if (!customField.value.isValidURL())
+                    if (!value.isValidURL())
                         return false
                 }
 
                 CustomField.TYPE_EMAIL -> {
-                    if (!customField.value.isValidEmail())
+                    if (!value.isValidEmail())
                         return false
                 }
             }

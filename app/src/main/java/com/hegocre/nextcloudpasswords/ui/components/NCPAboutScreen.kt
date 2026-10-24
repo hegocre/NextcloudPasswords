@@ -1,6 +1,5 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -229,7 +228,7 @@ fun NCPAboutScreen(
                                         .padding(vertical = 12.dp, horizontal = 16.dp),
                                 )
 
-                                for (author in authors) {
+                                for ((key, value) in authors) {
                                     AboutTextField(
                                         icon = {
                                             Icon(
@@ -237,8 +236,8 @@ fun NCPAboutScreen(
                                                 contentDescription = stringResource(id = R.string.author)
                                             )
                                         },
-                                        primaryText = { Text(text = author.key) },
-                                        onClick = { uriHandler.openUri(author.value) }
+                                        primaryText = { Text(text = key) },
+                                        onClick = { uriHandler.openUri(value) }
                                     )
                                 }
 
@@ -268,7 +267,6 @@ fun NCPAboutScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AboutTextField(
     modifier: Modifier = Modifier,

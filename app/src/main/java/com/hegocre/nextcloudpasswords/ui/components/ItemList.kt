@@ -3,7 +3,6 @@ package com.hegocre.nextcloudpasswords.ui.components
 import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Row
@@ -186,7 +185,6 @@ fun OTPLazyColumn(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PasswordRow(
     password: Password,
@@ -253,7 +251,6 @@ fun PasswordRow(
 }
 
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PasswordOTPRow(
     password: Password,
@@ -473,7 +470,6 @@ fun PasswordOTPRow(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FolderRow(
     folder: Folder,

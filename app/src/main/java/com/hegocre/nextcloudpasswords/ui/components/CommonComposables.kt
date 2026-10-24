@@ -17,7 +17,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.InterceptPlatformTextInput
@@ -87,7 +86,6 @@ fun OutlinedTextFieldWithCaption(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun OutlinedClickableTextField(
     value: String,
