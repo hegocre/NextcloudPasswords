@@ -146,7 +146,7 @@ fun NextcloudPasswordsApp(
                 .imePadding(),
             topBar = {
                 if (autofillData == null || autofillData is AutofillData.ChoosePwd) {
-                    if (currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit) {
+                    if (currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit && currentScreen != NCPScreen.TrashedPasswords) {
                         NCPSearchTopBar(
                             username = server.username,
                             serverAddress = server.url,
@@ -184,6 +184,9 @@ fun NextcloudPasswordsApp(
                             onSearchCloseClick = {
                                 searchExpanded = false
                                 setSearchQuery("")
+                            },
+                            onTrashedPasswordsClick = {
+                                navController.navigate(NCPScreen.TrashedPasswords.name)
                             },
                             onLogoutClick = { showLogOutDialog = true },
                             scrollBehavior = scrollBehavior
@@ -225,7 +228,8 @@ fun NextcloudPasswordsApp(
                             WindowInsets.navigationBars.getBottom(LocalDensity.current)
                         AnimatedVisibility(
                             visible = currentScreen != NCPScreen.PasswordEdit
-                                    && currentScreen != NCPScreen.FolderEdit,
+                                    && currentScreen != NCPScreen.FolderEdit
+                                    && currentScreen != NCPScreen.TrashedPasswords,
                             enter = slideInVertically(initialOffsetY = { (it + navigationHeight) }),
                             exit = slideOutVertically(targetOffsetY = { (it + navigationHeight) })
                         ) {
@@ -251,7 +255,8 @@ fun NextcloudPasswordsApp(
             floatingActionButton = {
                 AnimatedVisibility(
                     visible = currentScreen != NCPScreen.PasswordEdit &&
-                            currentScreen != NCPScreen.FolderEdit && sessionOpen,
+                            currentScreen != NCPScreen.FolderEdit && sessionOpen
+                            && currentScreen != NCPScreen.TrashedPasswords,
                     enter = scaleIn(),
                     exit = scaleOut(),
                 ) {

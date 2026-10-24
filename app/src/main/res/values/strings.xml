@@ -170,4 +170,6 @@
     <string name="error_no_camera_permission">Camera permission not granted</string>
     <string name="show_otp_tab_preference_title">Show OTP Tab</string>
     <string name="show_otp_tab_preference_subtitle">Show the OTP tab in the navigation bar</string>
+    <string name="deleted_passwords">Deleted passwords</string>
+    <string name="restore_password">Restore password</string>
 </resources>

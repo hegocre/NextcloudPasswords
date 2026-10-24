@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
@@ -105,6 +106,7 @@ fun NCPSearchTopBar(
     searchQuery: String = "",
     setSearchQuery: (String) -> Unit = {},
     autofillData: AutofillData? = null,
+    onTrashedPasswordsClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     searchExpanded: Boolean = false,
     onSearchClick: () -> Unit = {},
@@ -126,6 +128,7 @@ fun NCPSearchTopBar(
                     serverAddress = serverAddress,
                     title = title,
                     onSearchClick = onSearchClick,
+                    onTrashedPasswordsClick = onTrashedPasswordsClick,
                     onLogoutClick = onLogoutClick,
                     scrollBehavior = scrollBehavior,
                     showMenu = autofillData == null,
@@ -143,6 +146,7 @@ fun TitleAppBar(
     serverAddress: String,
     title: String,
     onSearchClick: () -> Unit,
+    onTrashedPasswordsClick: () -> Unit,
     onLogoutClick: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior,
     showMenu: Boolean,
@@ -176,6 +180,7 @@ fun TitleAppBar(
                         menuExpanded = menuExpanded,
                         userAvatar = userAvatar,
                         onDismissRequest = { menuExpanded = false },
+                        onTrashedPasswordsClick = onTrashedPasswordsClick,
                         onLogoutClick = onLogoutClick
                     )
                 }
@@ -262,6 +267,7 @@ fun PopupAppMenu(
     menuExpanded: Boolean,
     userAvatar: @Composable (Dp) -> Unit,
     onDismissRequest: () -> Unit,
+    onTrashedPasswordsClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -350,6 +356,30 @@ fun PopupAppMenu(
                                 }
                             }
                         }
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                        DropdownMenuItem(
+                            onClick = {
+                                onTrashedPasswordsClick()
+                                onDismissRequest()
+                            },
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.deleted_passwords),
+                                    modifier = Modifier.padding(end = 16.dp)
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Delete,
+                                    contentDescription = stringResource(id = R.string.deleted_passwords),
+                                    modifier = Modifier
+                                        .padding(end = 8.dp)
+                                        .padding(start = 16.dp)
+                                )
+                            }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 

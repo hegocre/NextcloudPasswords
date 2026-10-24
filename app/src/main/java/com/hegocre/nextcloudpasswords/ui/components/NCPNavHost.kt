@@ -189,6 +189,19 @@ fun NCPNavHost(
         }
     }
 
+    val trashedPasswordList = remember(passwordsDecryptionState.decryptedList, orderBy) {
+        passwordsDecryptionState.decryptedList?.filter {
+            !it.hidden && it.trashed
+        }?.run {
+            return@run when (orderBy) {
+                PreferencesManager.ORDER_BY_TITLE_DESCENDING -> sortedByDescending { it.label.lowercase() }
+                PreferencesManager.ORDER_BY_DATE_ASCENDING -> sortedBy { it.edited }
+                PreferencesManager.ORDER_BY_DATE_DESCENDING -> sortedByDescending { it.edited }
+                else -> sortedBy { it.label.lowercase() }
+            }
+        }
+    }
+
     val filteredFavoritePasswords = remember(filteredPasswordList) {
         filteredPasswordList?.filter { it.favorite }
     }
@@ -890,6 +903,38 @@ fun NCPNavHost(
                                     },
                                     isUpdating = isUpdating,
                                 )
+                            }
+                        }
+                    }
+                }
+
+                composable(NCPScreen.TrashedPasswords.name) {
+                    NCPNavHostComposable(
+                        modalSheetState = modalSheetState,
+                        searchVisibility = searchVisibility,
+                        closeSearch = closeSearch
+                    ) {
+                        when {
+                            passwordsDecryptionState.isLoading -> {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                }
+                            }
+                            passwordsDecryptionState.decryptedList != null -> {
+                                PullToRefreshBody(
+                                    isRefreshing = isRefreshing,
+                                    onRefresh = { passwordsViewModel.sync() },
+                                ) {
+                                    if (trashedPasswordList?.isEmpty() == true) {
+                                        NoContentText()
+                                    } else {
+                                        MixedLazyColumn(
+                                            passwords = trashedPasswordList,
+                                            onPasswordClick = onPasswordClick,
+                                            getPainterForUrl = { passwordsViewModel.getPainterForUrl(url = it) }
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

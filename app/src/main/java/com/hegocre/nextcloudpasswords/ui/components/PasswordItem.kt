@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.RestoreFromTrash
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.AlternateEmail
@@ -177,12 +178,21 @@ fun PasswordItemContent(
                     .weight(1f)
             )
             if (password.editable) {
-                onEditPassword?.let {
-                    IconButton(onClick = it) {
+                if (password.trashed) {
+                    IconButton(onClick = {}) {
                         Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(id = R.string.action_edit_password),
+                            imageVector = Icons.Default.RestoreFromTrash,
+                            contentDescription = stringResource(id = R.string.restore_password),
                         )
+                    }
+                } else {
+                    onEditPassword?.let {
+                        IconButton(onClick = it) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = stringResource(id = R.string.action_edit_password),
+                            )
+                        }
                     }
                 }
             }

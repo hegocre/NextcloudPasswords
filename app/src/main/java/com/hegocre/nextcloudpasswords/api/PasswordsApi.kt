@@ -75,6 +75,59 @@ class PasswordsApi private constructor(private var server: Server) {
     }
 
     /**
+     * Sends a request to the api to list all the user trashed passwords. If the user uses CSE, a
+     * session code needs to be provided in order for the request to succeed.
+     *
+     * @param sessionCode Code of the current session, only needed if CSE enabled.
+     * @return A result with a list of passwords if success, or with an error code otherwise
+     */
+    suspend fun listTrashed(
+        sessionCode: String? = null,
+    ): Result<List<Password>> {
+        return try {
+            val apiResponse = withContext(Dispatchers.IO) {
+                OkHttpRequest.getInstance().post(
+                    sUrl = server.url + FIND_URL,
+                    sessionCode = sessionCode,
+                    username = server.username,
+                    password = server.password,
+                    body = "{ \"criteria\": { \"trashed\": true } }",
+                    mediaType = OkHttpRequest.JSON
+                )
+            }
+
+            val code = apiResponse.code
+            val body = withContext(Dispatchers.IO) { apiResponse.body.string() }
+            withContext(Dispatchers.IO) {
+                apiResponse.close()
+            }
+
+            if (code != 200) {
+                return Result.Error(Error.API_BAD_RESPONSE)
+            }
+
+            withContext(Dispatchers.Default) {
+                Result.Success(Json.decodeFromString(body))
+            }
+        } catch (e: SocketTimeoutException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
+            Result.Error(Error.API_TIMEOUT)
+        } catch (e: SSLHandshakeException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
+            Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+        } catch (e: Exception) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
+            Result.Error(Error.UNKNOWN)
+        }
+    }
+
+    /**
      * Sends a request to the api to create a new password. If the user uses CSE, the
      * password needs to be encrypted.
      *
@@ -231,6 +284,7 @@ class PasswordsApi private constructor(private var server: Server) {
 
     companion object {
         private const val LIST_URL = "/index.php/apps/passwords/api/1.0/password/list"
+        private const val FIND_URL = "/index.php/apps/passwords/api/1.0/password/find"
         private const val CREATE_URL = "/index.php/apps/passwords/api/1.0/password/create"
         private const val UPDATE_URL = "/index.php/apps/passwords/api/1.0/password/update"
         private const val DELETE_URL = "/index.php/apps/passwords/api/1.0/password/delete"

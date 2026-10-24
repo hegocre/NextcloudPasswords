@@ -25,10 +25,11 @@ class PasswordController private constructor(context: Context) {
     suspend fun syncPasswords() {
         withContext(Dispatchers.IO) {
             val result = apiController.listPasswords()
-            if (result is Result.Success) {
+            val trashedResult = apiController.listTrashedPasswords()
+            if (result is Result.Success && trashedResult is Result.Success) {
                 val savedPasswordsSet =
                     passwordDatabase.passwordDao.fetchAllPasswordsId().toHashSet()
-                for (password in result.data) {
+                for (password in result.data.plus(trashedResult.data)) {
                     val oldRevision = passwordDatabase.passwordDao.getPasswordRevision(password.id)
                     if (oldRevision == null || oldRevision != password.revision) {
                         passwordDatabase.passwordDao.insertPassword(password)

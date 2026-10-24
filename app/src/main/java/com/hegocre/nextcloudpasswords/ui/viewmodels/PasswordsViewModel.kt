@@ -51,6 +51,7 @@ import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -206,9 +207,14 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         if (sessionOpen.value) {
             viewModelScope.launch {
                 _isRefreshing.emit(true)
-                PasswordController.getInstance(getApplication()).syncPasswords()
-                FolderController.getInstance(getApplication()).syncFolders()
-                _isRefreshing.emit(false)
+                try {
+                    coroutineScope {
+                        launch { PasswordController.getInstance(getApplication()).syncPasswords() }
+                        launch { FolderController.getInstance(getApplication()).syncFolders() }
+                    }
+                } finally {
+                    _isRefreshing.emit(false)
+                }
             }
         } else {
             openSession(masterPassword.value)

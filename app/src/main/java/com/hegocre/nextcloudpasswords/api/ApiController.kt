@@ -248,6 +248,17 @@ class ApiController private constructor(context: Context) {
     }
 
     /**
+     * Gets a list of the user trashed passwords via the [PasswordsApi] class. This can only be
+     * called when a session is open, otherwise an error is thrown.
+     *
+     * @return A result with the list of trashed passwords if success, or an error code otherwise.
+     */
+    suspend fun listTrashedPasswords(): Result<List<Password>> {
+        if (!sessionOpen.value) return Result.Error(Error.API_NO_SESSION)
+        return passwordsApi.listTrashed(sessionCode)
+    }
+
+    /**
      * Gets a list of the user folders via the [FoldersApi] class. This can only be called when a session
      * is open, otherwise an error is thrown.
      *

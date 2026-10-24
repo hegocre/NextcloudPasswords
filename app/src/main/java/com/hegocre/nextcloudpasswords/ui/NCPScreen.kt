@@ -2,6 +2,7 @@ package com.hegocre.nextcloudpasswords.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Folder
@@ -51,6 +52,12 @@ enum class NCPScreen(
         selectedIcon = Icons.Default.Edit,
         unselectedIcon = Icons.Default.Edit,
         hidden = true
+    ),
+    TrashedPasswords(
+        title = R.string.deleted_passwords,
+        selectedIcon = Icons.Default.Delete,
+        unselectedIcon = Icons.Default.Delete,
+        hidden = true
     );
 
     companion object {
@@ -62,6 +69,7 @@ enum class NCPScreen(
                 PasswordEdit.name -> PasswordEdit
                 FolderEdit.name -> FolderEdit
                 OTP.name -> OTP
+                TrashedPasswords.name -> TrashedPasswords
                 null -> Passwords
                 else -> throw IllegalArgumentException("Route $route is not recognized.")
             }
