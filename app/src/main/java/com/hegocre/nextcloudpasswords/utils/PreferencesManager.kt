@@ -155,6 +155,9 @@ class PreferencesManager private constructor(context: Context) {
 
     suspend fun setStartScreen(value: String) = setPreference(PreferenceKeys.START_SCREEN, value)
 
+    fun getShowOTPTab(): Flow<Boolean> = getPreference(PreferenceKeys.SHOW_OTP_TAB, false)
+    suspend fun setShowOTPTab(value: Boolean) = setPreference(PreferenceKeys.SHOW_OTP_TAB, value)
+
     fun getAppTheme(): Flow<String> = getPreference(PreferenceKeys.APP_THEME, NCPTheme.SYSTEM)
     suspend fun setAppTheme(value: String) = setPreference(PreferenceKeys.APP_THEME, value)
 
@@ -232,6 +235,7 @@ class PreferencesManager private constructor(context: Context) {
             val SEARCH_BY_USERNAME = booleanPreferencesKey("SEARCH_BY_USERNAME")
             val USE_STRICT_URL_MATCHING = booleanPreferencesKey("USE_STRICT_URL_MATCHING")
             val ORDER_BY = stringPreferencesKey("ORDER_BY")
+            val SHOW_OTP_TAB = booleanPreferencesKey("SHOW_OTP_TAB")
         }
     }
 }

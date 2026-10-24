@@ -5,9 +5,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Timelapse
 import androidx.compose.material.icons.outlined.VpnKey
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.hegocre.nextcloudpasswords.R
@@ -33,6 +35,11 @@ enum class NCPScreen(
         selectedIcon = Icons.Filled.Folder,
         unselectedIcon = Icons.Outlined.Folder
     ),
+    OTP(
+        title = R.string.otp_title,
+        selectedIcon = Icons.Filled.Timelapse,
+        unselectedIcon = Icons.Outlined.Timelapse
+    ),
     PasswordEdit(
         title = R.string.action_edit_password,
         selectedIcon = Icons.Default.Edit,
@@ -54,6 +61,7 @@ enum class NCPScreen(
                 Folders.name -> Folders
                 PasswordEdit.name -> PasswordEdit
                 FolderEdit.name -> FolderEdit
+                OTP.name -> OTP
                 null -> Passwords
                 else -> throw IllegalArgumentException("Route $route is not recognized.")
             }

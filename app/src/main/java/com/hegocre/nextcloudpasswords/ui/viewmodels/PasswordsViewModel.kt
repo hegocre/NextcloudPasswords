@@ -124,6 +124,8 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         private set
     var visibleFolderPasswordCount = mutableStateOf<Int?>(null)
         private set
+    var totalOTPPasswordCount = mutableStateOf<Int?>(null)
+        private set
 
     init {
         val screenLockFilter = IntentFilter().apply {
@@ -231,6 +233,10 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun setVisibleFolderPasswordCount(count: Int?) {
         visibleFolderPasswordCount.value = count
+    }
+
+    fun setOTPPasswordCount(count: Int?) {
+        totalOTPPasswordCount.value = count
     }
 
     fun createPassword(newPassword: NewPassword): Deferred<Boolean> {
