@@ -93,8 +93,8 @@ fun NCPNavHost(
     val sessionOpen by passwordsViewModel.sessionOpen.collectAsState()
 
     LaunchedEffect(passwords) {
-        passwordsViewModel.setTotalPasswordCount(passwords?.size)
-        passwordsViewModel.setTotalFavoritePasswordCount(passwords?.filter { it.favorite }?.size)
+        passwordsViewModel.setTotalPasswordCount(passwords?.filter { !it.hidden && !it.trashed }?.size)
+        passwordsViewModel.setTotalFavoritePasswordCount(passwords?.filter { !it.hidden && !it.trashed && it.favorite }?.size)
     }
 
     val passwordsDecryptionState by produceState(
@@ -108,7 +108,7 @@ fun NCPNavHost(
 
     LaunchedEffect(passwordsDecryptionState) {
         passwordsViewModel.setOTPPasswordCount(
-            passwordsDecryptionState.decryptedList?.count { it.getOTP().first != null }
+            passwordsDecryptionState.decryptedList?.count { !it.hidden && !it.trashed && it.getOTP().first != null }
         )
     }
 
