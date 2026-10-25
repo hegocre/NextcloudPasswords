@@ -38,6 +38,8 @@
     <string name="action_delete_password">Eliminar contrasenya</string>
     <string name="error_password_deleting_failed">No s\'ha pogut eliminar la contrasenya. Si us plau, intenteu-ho de nou</string>
     <string name="dialog_delete_element_text">Aquest element serà eliminat. Si us plau, confirmeu aquesta acció</string>
+    <string name="dialog_permanently_delete_element_text">Aquest element serà permanentment eliminat. Si us plau, confirmeu aquesta acció</string>
+    <string name="dialog_restore_element_text">Aquest element serà restaurat. Si us plau, confirmeu aquesta acció</string>
     <string name="action_delete">Eliminar</string>
     <string name="password_attr_notes">Notes</string>
     <string name="copied">%s copiat</string>
@@ -169,4 +171,10 @@
     <string name="error_invalid_digits">Paràmetre \'digits\' invàlid</string>
     <string name="error_invalid_period">Paràmetre \'period\' invàlid</string>
     <string name="error_no_camera_permission">No s\'ha atorgat el permís de càmera</string>
+    <string name="show_otp_tab_preference_title">Mostrar la pestanya de 2FA</string>
+    <string name="show_otp_tab_preference_subtitle">Mostrar la pestanya de l\'autenticador a la barra de navegació</string>
+    <string name="deleted_passwords">Contrasenyes eliminades</string>
+    <string name="restore_password">Restaurar contrasenya</string>
+    <string name="permanently_delete_password">Eliminar contrasenya permanentment</string>
+    <string name="action_restore">Restaurar</string>
 </resources>
