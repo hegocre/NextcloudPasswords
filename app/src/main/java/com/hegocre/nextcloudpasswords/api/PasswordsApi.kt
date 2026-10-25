@@ -282,12 +282,64 @@ class PasswordsApi private constructor(private var server: Server) {
         }
     }
 
+    /**
+     * Sends a request to the api to restore a trashed password.
+     *
+     * @param deletedPassword The [DeletedPassword] object of the password to be restored.
+     * @param sessionCode Code of the current session, only needed if CSE enabled.
+     * @return A result if success, or an error code otherwise
+     */
+    suspend fun restore(
+        deletedPassword: DeletedPassword,
+        sessionCode: String? = null
+    ): Result<Unit> {
+        return try {
+            val apiResponse = withContext(Dispatchers.IO) {
+                OkHttpRequest.getInstance().patch(
+                    sUrl = server.url + RESTORE_URL,
+                    sessionCode = sessionCode,
+                    body = Json.encodeToString(deletedPassword),
+                    mediaType = OkHttpRequest.JSON,
+                    username = server.username,
+                    password = server.password
+                )
+            }
+
+            val code = apiResponse.code
+            withContext(Dispatchers.IO) {
+                apiResponse.close()
+            }
+
+            if (code != 200) {
+                return Result.Error(Error.API_BAD_RESPONSE)
+            }
+
+            Result.Success(Unit)
+        } catch (e: SocketTimeoutException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
+            Result.Error(Error.API_TIMEOUT)
+        } catch (e: SSLHandshakeException) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
+            Result.Error(Error.SSL_HANDSHAKE_EXCEPTION)
+        } catch (e: Exception) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace()
+            }
+            Result.Error(Error.UNKNOWN)
+        }
+    }
+
     companion object {
         private const val LIST_URL = "/index.php/apps/passwords/api/1.0/password/list"
         private const val FIND_URL = "/index.php/apps/passwords/api/1.0/password/find"
         private const val CREATE_URL = "/index.php/apps/passwords/api/1.0/password/create"
         private const val UPDATE_URL = "/index.php/apps/passwords/api/1.0/password/update"
         private const val DELETE_URL = "/index.php/apps/passwords/api/1.0/password/delete"
+        private const val RESTORE_URL = "/index.php/apps/passwords/api/1.0/password/restore"
 
         private var instance: PasswordsApi? = null
 

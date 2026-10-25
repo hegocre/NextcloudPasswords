@@ -274,8 +274,25 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
     fun deletePassword(deletedPassword: DeletedPassword): Deferred<Boolean> {
         return viewModelScope.async {
             _isUpdating.value = true
+            _isRefreshing.emit(true)
             if (!apiController.deletePassword(deletedPassword)) {
                 _isUpdating.value = false
+                _isRefreshing.emit(false)
+                return@async false
+            }
+            sync()
+            _isUpdating.value = false
+            true
+        }
+    }
+
+    fun restorePassword(deletedPassword: DeletedPassword): Deferred<Boolean> {
+        return viewModelScope.async {
+            _isRefreshing.emit(true)
+            _isUpdating.value = true
+            if (!apiController.restorePassword(deletedPassword)) {
+                _isUpdating.value = false
+                _isRefreshing.emit(false)
                 return@async false
             }
             sync()

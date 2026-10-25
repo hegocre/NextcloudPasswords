@@ -37,6 +37,8 @@
     <string name="action_delete_password">Delete password</string>
     <string name="error_password_deleting_failed">Password deleting has failed. Please, try again</string>
     <string name="dialog_delete_element_text">This element will be deleted. Please, confirm this action</string>
+    <string name="dialog_permanently_delete_element_text">This element will be permanently deleted. Please, confirm this action</string>
+    <string name="dialog_restore_element_text">This element will be restored. Please, confirm this action</string>
     <string name="action_delete">Delete</string>
     <string name="password_attr_notes">Notes</string>
     <string name="copied">%s copied</string>
@@ -172,4 +174,6 @@
     <string name="show_otp_tab_preference_subtitle">Show the OTP tab in the navigation bar</string>
     <string name="deleted_passwords">Deleted passwords</string>
     <string name="restore_password">Restore password</string>
+    <string name="permanently_delete_password">Permanently delete password</string>
+    <string name="action_restore">Restore</string>
 </resources>

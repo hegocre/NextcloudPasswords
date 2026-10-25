@@ -181,14 +181,18 @@ fun MasterPasswordDialog(
 }
 
 @Composable
-fun LogOutDialog(
-    onDismissRequest: (() -> Unit)? = null,
-    onConfirmButton: () -> Unit
+fun ConfirmationDialog(
+    title: String,
+    text: String,
+    confirmButtonText: String,
+    cancelButtonText: String,
+    onConfirmButton: () -> Unit,
+    onDismissRequest: (() -> Unit)? = null
 ) {
     AlertDialog(
         onDismissRequest = { onDismissRequest?.invoke() },
-        title = { Text(text = stringResource(R.string.action_log_out)) },
-        text = { Text(text = stringResource(R.string.dialog_log_out_text)) },
+        title = { Text(text = title) },
+        text = { Text(text = text) },
         confirmButton = {
             TextButton(
                 onClick = {
@@ -196,14 +200,29 @@ fun LogOutDialog(
                     onDismissRequest?.invoke()
                 }
             ) {
-                Text(text = stringResource(R.string.action_log_out))
+                Text(text = confirmButtonText)
             }
         },
         dismissButton = {
             TextButton(onClick = { onDismissRequest?.invoke() }) {
-                Text(text = stringResource(id = android.R.string.cancel))
+                Text(text = cancelButtonText)
             }
         }
+    )
+}
+
+@Composable
+fun LogOutDialog(
+    onDismissRequest: (() -> Unit)? = null,
+    onConfirmButton: () -> Unit
+) {
+    ConfirmationDialog(
+        title = stringResource(R.string.action_log_out),
+        text = stringResource(R.string.dialog_log_out_text),
+        confirmButtonText = stringResource(R.string.action_log_out),
+        cancelButtonText = stringResource(id = android.R.string.cancel),
+        onConfirmButton = onConfirmButton,
+        onDismissRequest = onDismissRequest
     )
 }
 
@@ -212,25 +231,43 @@ fun DeleteElementDialog(
     onDismissRequest: (() -> Unit)? = null,
     onConfirmButton: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = { onDismissRequest?.invoke() },
-        title = { Text(text = stringResource(R.string.action_delete)) },
-        text = { Text(text = stringResource(R.string.dialog_delete_element_text)) },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmButton()
-                    onDismissRequest?.invoke()
-                }
-            ) {
-                Text(text = stringResource(R.string.action_delete))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = { onDismissRequest?.invoke() }) {
-                Text(text = stringResource(id = android.R.string.cancel))
-            }
-        }
+    ConfirmationDialog(
+        title = stringResource(R.string.action_delete),
+        text = stringResource(R.string.dialog_delete_element_text),
+        confirmButtonText = stringResource(R.string.action_delete),
+        cancelButtonText = stringResource(id = android.R.string.cancel),
+        onConfirmButton = onConfirmButton,
+        onDismissRequest = onDismissRequest
+    )
+}
+
+@Composable
+fun RestoreElementDialog(
+    onDismissRequest: (() -> Unit)? = null,
+    onConfirmButton: () -> Unit
+) {
+    ConfirmationDialog(
+        title = stringResource(R.string.action_restore),
+        text = stringResource(R.string.dialog_restore_element_text),
+        confirmButtonText = stringResource(R.string.action_restore),
+        cancelButtonText = stringResource(id = android.R.string.cancel),
+        onConfirmButton = onConfirmButton,
+        onDismissRequest = onDismissRequest
+    )
+}
+
+@Composable
+fun PermanentlyDeleteElementDialog(
+    onDismissRequest: (() -> Unit)? = null,
+    onConfirmButton: () -> Unit
+) {
+    ConfirmationDialog(
+        title = stringResource(R.string.action_delete),
+        text = stringResource(R.string.dialog_permanently_delete_element_text),
+        confirmButtonText = stringResource(R.string.action_delete),
+        cancelButtonText = stringResource(id = android.R.string.cancel),
+        onConfirmButton = onConfirmButton,
+        onDismissRequest = onDismissRequest
     )
 }
 

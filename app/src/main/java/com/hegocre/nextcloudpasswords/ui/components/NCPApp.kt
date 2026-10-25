@@ -61,6 +61,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.FoldersApi
+import com.hegocre.nextcloudpasswords.data.password.DeletedPassword
 import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
@@ -445,6 +446,56 @@ fun NextcloudPasswordsApp(
                                     }
                                 }
                                 navController.navigate("${NCPScreen.PasswordEdit.name}/${passwordsViewModel.visiblePassword.value?.first?.id ?: "none"}")
+                            }
+                        } else null,
+                        onDeletePassword = if (sessionOpen) {
+                            passwordsViewModel.visiblePassword.value?.first?.let {
+                                {
+                                    coroutineScope.launch {
+                                        modalSheetState.hide()
+                                    }.invokeOnCompletion {
+                                        if (!modalSheetState.isVisible) {
+                                            openBottomSheet = false
+                                        }
+                                    }
+
+                                    coroutineScope.launch {
+                                        if (!passwordsViewModel.deletePassword(
+                                                DeletedPassword(it.id, it.revision)
+                                            ).await()) {
+                                            modalSheetState.show()
+                                        }
+                                    }.invokeOnCompletion {
+                                        if (!modalSheetState.isVisible) {
+                                            openBottomSheet = false
+                                        }
+                                    }
+                                }
+                            }
+                        } else null,
+                        onRestorePassword = if (sessionOpen) {
+                            passwordsViewModel.visiblePassword.value?.first?.let {
+                                {
+                                    coroutineScope.launch {
+                                        modalSheetState.hide()
+                                    }.invokeOnCompletion {
+                                        if (!modalSheetState.isVisible) {
+                                            openBottomSheet = false
+                                        }
+                                    }
+
+                                    coroutineScope.launch {
+                                        if (!passwordsViewModel.restorePassword(
+                                                DeletedPassword(it.id, it.revision)
+                                            ).await()) {
+                                            modalSheetState.show()
+                                        }
+                                    }.invokeOnCompletion {
+                                        if (!modalSheetState.isVisible) {
+                                            openBottomSheet = false
+                                        }
+                                    }
+                                }
                             }
                         } else null,
                         updatePassword = { updatedPassword, shouldEncrypt, onSuccess, onFailure ->

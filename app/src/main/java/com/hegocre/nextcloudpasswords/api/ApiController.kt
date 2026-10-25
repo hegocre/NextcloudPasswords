@@ -296,8 +296,9 @@ class ApiController private constructor(context: Context) {
     }
 
     /**
-     * Deletes an existing password via the [PasswordsApi] class. This can only be called when a
-     * session is open, otherwise an error is thrown.
+     * Deletes an existing password via the [PasswordsApi] class. If the password is already
+     * in the trash, it is permanently deleted. This can only be called when a session is
+     * open, otherwise an error is thrown.
      *
      * @param deletedPassword [DeletedPassword] object to be deleted.
      * @return A boolean stating whether the password was successfully deleted.
@@ -305,6 +306,19 @@ class ApiController private constructor(context: Context) {
     suspend fun deletePassword(deletedPassword: DeletedPassword): Boolean {
         if (!sessionOpen.value) return false
         val result = passwordsApi.delete(deletedPassword, sessionCode)
+        return result is Result.Success
+    }
+
+    /**
+     * Restores a trashed password via the [PasswordsApi] class. This can only be called when a
+     * session is open, otherwise an error is thrown.
+     *
+     * @param deletedPassword [DeletedPassword] object to be restored.
+     * @return A boolean stating whether the password was successfully restored.
+     */
+    suspend fun restorePassword(deletedPassword: DeletedPassword): Boolean {
+        if (!sessionOpen.value) return false
+        val result = passwordsApi.restore(deletedPassword, sessionCode)
         return result is Result.Success
     }
 
