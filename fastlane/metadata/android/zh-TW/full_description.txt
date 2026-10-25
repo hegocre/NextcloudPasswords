@@ -1,4 +1,4 @@
-這個App用於連接安裝在Nextcloud伺服器的Passwrods應用程式，並且提供友善的UI介面用於查詢與編輯密碼。 並且提供自動填入功能，在Android設備上登入變得更加容易
+這個App用於連接安裝在Nextcloud伺服器的Passwrods應用程式，並且提供友善的UI介面用於查詢與編輯密碼。並且提供自動填入功能，在Android設備上登入變得更加容易
 
 特點:
 - 在Material Design UI上顯示使用者密碼與資料夾
