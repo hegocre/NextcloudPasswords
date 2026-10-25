@@ -5,8 +5,10 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
@@ -47,6 +49,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -61,6 +64,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.FoldersApi
+import com.hegocre.nextcloudpasswords.data.password.DeletedPassword
 import com.hegocre.nextcloudpasswords.data.serversettings.ServerSettings
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
@@ -146,7 +150,7 @@ fun NextcloudPasswordsApp(
                 .imePadding(),
             topBar = {
                 if (autofillData == null || autofillData is AutofillData.ChoosePwd) {
-                    if (currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit) {
+                    if (currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit && currentScreen != NCPScreen.TrashedPasswords) {
                         NCPSearchTopBar(
                             username = server.username,
                             serverAddress = server.url,
@@ -184,6 +188,9 @@ fun NextcloudPasswordsApp(
                             onSearchCloseClick = {
                                 searchExpanded = false
                                 setSearchQuery("")
+                            },
+                            onTrashedPasswordsClick = {
+                                navController.navigate(NCPScreen.TrashedPasswords.name)
                             },
                             onLogoutClick = { showLogOutDialog = true },
                             scrollBehavior = scrollBehavior
@@ -225,9 +232,10 @@ fun NextcloudPasswordsApp(
                             WindowInsets.navigationBars.getBottom(LocalDensity.current)
                         AnimatedVisibility(
                             visible = currentScreen != NCPScreen.PasswordEdit
-                                    && currentScreen != NCPScreen.FolderEdit,
-                            enter = slideInVertically(initialOffsetY = { (it + navigationHeight) }),
-                            exit = slideOutVertically(targetOffsetY = { (it + navigationHeight) })
+                                    && currentScreen != NCPScreen.FolderEdit
+                                    && currentScreen != NCPScreen.TrashedPasswords,
+                            enter = slideInVertically(initialOffsetY = { (it + navigationHeight) }) + expandVertically(expandFrom = Alignment.Top),
+                            exit = slideOutVertically(targetOffsetY = { (it + navigationHeight) }) + shrinkVertically(shrinkTowards = Alignment.Top)
                         ) {
                             NCPBottomNavigation(
                                 allScreens = NCPScreen.entries.filter {
@@ -251,7 +259,8 @@ fun NextcloudPasswordsApp(
             floatingActionButton = {
                 AnimatedVisibility(
                     visible = currentScreen != NCPScreen.PasswordEdit &&
-                            currentScreen != NCPScreen.FolderEdit && sessionOpen,
+                            currentScreen != NCPScreen.FolderEdit && sessionOpen
+                            && currentScreen != NCPScreen.TrashedPasswords,
                     enter = scaleIn(),
                     exit = scaleOut(),
                 ) {
@@ -440,6 +449,56 @@ fun NextcloudPasswordsApp(
                                     }
                                 }
                                 navController.navigate("${NCPScreen.PasswordEdit.name}/${passwordsViewModel.visiblePassword.value?.first?.id ?: "none"}")
+                            }
+                        } else null,
+                        onDeletePassword = if (sessionOpen) {
+                            passwordsViewModel.visiblePassword.value?.first?.let {
+                                {
+                                    coroutineScope.launch {
+                                        modalSheetState.hide()
+                                    }.invokeOnCompletion {
+                                        if (!modalSheetState.isVisible) {
+                                            openBottomSheet = false
+                                        }
+                                    }
+
+                                    coroutineScope.launch {
+                                        if (!passwordsViewModel.deletePassword(
+                                                DeletedPassword(it.id, it.revision)
+                                            ).await()) {
+                                            modalSheetState.show()
+                                        }
+                                    }.invokeOnCompletion {
+                                        if (!modalSheetState.isVisible) {
+                                            openBottomSheet = false
+                                        }
+                                    }
+                                }
+                            }
+                        } else null,
+                        onRestorePassword = if (sessionOpen) {
+                            passwordsViewModel.visiblePassword.value?.first?.let {
+                                {
+                                    coroutineScope.launch {
+                                        modalSheetState.hide()
+                                    }.invokeOnCompletion {
+                                        if (!modalSheetState.isVisible) {
+                                            openBottomSheet = false
+                                        }
+                                    }
+
+                                    coroutineScope.launch {
+                                        if (!passwordsViewModel.restorePassword(
+                                                DeletedPassword(it.id, it.revision)
+                                            ).await()) {
+                                            modalSheetState.show()
+                                        }
+                                    }.invokeOnCompletion {
+                                        if (!modalSheetState.isVisible) {
+                                            openBottomSheet = false
+                                        }
+                                    }
+                                }
                             }
                         } else null,
                         updatePassword = { updatedPassword, shouldEncrypt, onSuccess, onFailure ->

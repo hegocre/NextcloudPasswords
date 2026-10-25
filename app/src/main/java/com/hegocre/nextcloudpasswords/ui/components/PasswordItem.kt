@@ -16,8 +16,10 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.RestoreFromTrash
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.AlternateEmail
@@ -82,11 +84,15 @@ fun PasswordItem(
     modifier: Modifier = Modifier,
     updatePassword: (updatedPassword: UpdatedPassword, shouldEncrypt: Boolean, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
     onEditPassword: (() -> Unit)? = null,
+    onDeletePassword: (() -> Unit)? = null,
+    onRestorePassword: (() -> Unit)? = null,
 ) {
     passwordInfo?.let { pass ->
         PasswordItemContent(
             passwordInfo = pass,
             onEditPassword = onEditPassword,
+            onDeletePassword = onDeletePassword,
+            onRestorePassword = onRestorePassword,
             updatePassword = updatePassword,
             modifier = modifier
         )
@@ -101,6 +107,8 @@ fun PasswordItem(
 fun PasswordItemContent(
     passwordInfo: Pair<Password, List<String>>,
     onEditPassword: (() -> Unit)?,
+    onDeletePassword: (() -> Unit)?,
+    onRestorePassword: (() -> Unit)?,
     updatePassword: (updatedPassword: UpdatedPassword, shouldEncrypt: Boolean, onSuccess: () -> Unit, onFailure: () -> Unit) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -134,6 +142,9 @@ fun PasswordItemContent(
             }
         }
     }
+
+    var showRestorePasswordDialog by rememberSaveable { mutableStateOf(false) }
+    var showPermanentlyDeletePasswordDialog by rememberSaveable { mutableStateOf(false) }
 
     Column(modifier = modifier) {
         Row(
@@ -177,12 +188,32 @@ fun PasswordItemContent(
                     .weight(1f)
             )
             if (password.editable) {
-                onEditPassword?.let {
-                    IconButton(onClick = it) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(id = R.string.action_edit_password),
-                        )
+                if (password.trashed) {
+                    onRestorePassword?.let {
+                        IconButton(onClick = { showRestorePasswordDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Default.RestoreFromTrash,
+                                contentDescription = stringResource(id = R.string.restore_password),
+                            )
+                        }
+                    }
+
+                    onDeletePassword?.let {
+                        IconButton(onClick = { showPermanentlyDeletePasswordDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = stringResource(id = R.string.permanently_delete_password),
+                            )
+                        }
+                    }
+                } else {
+                    onEditPassword?.let {
+                        IconButton(onClick = it) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = stringResource(id = R.string.action_edit_password),
+                            )
+                        }
                     }
                 }
             }
@@ -600,6 +631,30 @@ fun PasswordItemContent(
                 }
             }
         }
+    }
+
+    if (showRestorePasswordDialog) {
+        RestoreElementDialog (
+            onConfirmButton = {
+                showRestorePasswordDialog = false
+                onRestorePassword?.invoke()
+            },
+            onDismissRequest = {
+                showRestorePasswordDialog = false
+            }
+        )
+    }
+
+    if (showPermanentlyDeletePasswordDialog) {
+        PermanentlyDeleteElementDialog(
+            onConfirmButton = {
+                showPermanentlyDeletePasswordDialog = false
+                onDeletePassword?.invoke()
+            },
+            onDismissRequest = {
+                showPermanentlyDeletePasswordDialog = false
+            }
+        )
     }
 }
 

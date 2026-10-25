@@ -51,6 +51,7 @@ import com.hegocre.nextcloudpasswords.utils.OkHttpRequest
 import com.hegocre.nextcloudpasswords.utils.PreferencesManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -206,9 +207,14 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
         if (sessionOpen.value) {
             viewModelScope.launch {
                 _isRefreshing.emit(true)
-                PasswordController.getInstance(getApplication()).syncPasswords()
-                FolderController.getInstance(getApplication()).syncFolders()
-                _isRefreshing.emit(false)
+                try {
+                    coroutineScope {
+                        launch { PasswordController.getInstance(getApplication()).syncPasswords() }
+                        launch { FolderController.getInstance(getApplication()).syncFolders() }
+                    }
+                } finally {
+                    _isRefreshing.emit(false)
+                }
             }
         } else {
             openSession(masterPassword.value)
@@ -268,8 +274,25 @@ class PasswordsViewModel(application: Application) : AndroidViewModel(applicatio
     fun deletePassword(deletedPassword: DeletedPassword): Deferred<Boolean> {
         return viewModelScope.async {
             _isUpdating.value = true
+            _isRefreshing.emit(true)
             if (!apiController.deletePassword(deletedPassword)) {
                 _isUpdating.value = false
+                _isRefreshing.emit(false)
+                return@async false
+            }
+            sync()
+            _isUpdating.value = false
+            true
+        }
+    }
+
+    fun restorePassword(deletedPassword: DeletedPassword): Deferred<Boolean> {
+        return viewModelScope.async {
+            _isRefreshing.emit(true)
+            _isUpdating.value = true
+            if (!apiController.restorePassword(deletedPassword)) {
+                _isUpdating.value = false
+                _isRefreshing.emit(false)
                 return@async false
             }
             sync()
