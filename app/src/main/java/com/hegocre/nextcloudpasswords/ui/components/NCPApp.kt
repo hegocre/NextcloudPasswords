@@ -5,8 +5,10 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
@@ -47,6 +49,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -231,8 +234,8 @@ fun NextcloudPasswordsApp(
                             visible = currentScreen != NCPScreen.PasswordEdit
                                     && currentScreen != NCPScreen.FolderEdit
                                     && currentScreen != NCPScreen.TrashedPasswords,
-                            enter = slideInVertically(initialOffsetY = { (it + navigationHeight) }),
-                            exit = slideOutVertically(targetOffsetY = { (it + navigationHeight) })
+                            enter = slideInVertically(initialOffsetY = { (it + navigationHeight) }) + expandVertically(expandFrom = Alignment.Top),
+                            exit = slideOutVertically(targetOffsetY = { (it + navigationHeight) }) + shrinkVertically(shrinkTowards = Alignment.Top)
                         ) {
                             NCPBottomNavigation(
                                 allScreens = NCPScreen.entries.filter {
