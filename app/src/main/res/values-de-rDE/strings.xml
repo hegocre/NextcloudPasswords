@@ -38,6 +38,8 @@
     <string name="action_delete_password">Passwort löschen</string>
     <string name="error_password_deleting_failed">Löschen des Passworts fehlgeschlagen. Bitte erneut versuchen</string>
     <string name="dialog_delete_element_text">Dieses Element wird gelöscht. Bitte bestätigen Sie diese Aktion</string>
+    <string name="dialog_permanently_delete_element_text">Dieses Element wird dauerhaft gelöscht. Bitte bestätigen Sie diese Aktion</string>
+    <string name="dialog_restore_element_text">Dieses Element wird wiederhergestellt. Bitte bestätigen Sie diese Aktion</string>
     <string name="action_delete">Löschen</string>
     <string name="password_attr_notes">Notizen</string>
     <string name="copied">%s kopiert</string>
@@ -171,4 +173,8 @@
     <string name="error_no_camera_permission">Kamera-Berechtigung nicht gewährt</string>
     <string name="show_otp_tab_preference_title">OTP-Reiter anzeigen</string>
     <string name="show_otp_tab_preference_subtitle">OTP-Reiter in der Navigationsleiste anzeigen</string>
+    <string name="deleted_passwords">Gelöschte Passwörter</string>
+    <string name="restore_password">Passwort wiederherstellen</string>
+    <string name="permanently_delete_password">Passwort dauerhaft löschen</string>
+    <string name="action_restore">Wiederherstellen</string>
 </resources>
