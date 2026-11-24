@@ -587,10 +587,11 @@ fun NCPNavHost(
 
                             passwordsDecryptionState.decryptedList != null && foldersDecryptionState.decryptedList != null -> {
                                 val editablePasswordState = rememberSaveable(selectedPassword, saver = EditablePasswordState.Saver) {
-                                    EditablePasswordState(selectedPassword).apply {
-                                        if (selectedPassword == null) {
-                                            folder = passwordsViewModel.visibleFolder.value?.id ?: folder
-                                        }
+                                    EditablePasswordState(
+                                        originalPassword = selectedPassword,
+                                        defaultFolder = passwordsViewModel.visibleFolder.value?.id
+                                            ?: FoldersApi.DEFAULT_FOLDER_UUID
+                                    ).apply {
                                         when (autofillData) {
                                             is AutofillData.IsSave -> {
                                                 if (selectedPassword == null) {
@@ -774,11 +775,11 @@ fun NCPNavHost(
 
                             foldersDecryptionState.decryptedList != null -> {
                                 val editableFolderState =
-                                    rememberEditableFolderState(selectedFolder).apply {
-                                        if (selectedFolder == null) {
-                                            parent = passwordsViewModel.visibleFolder.value?.id ?: parent
-                                        }
-                                    }
+                                    rememberEditableFolderState(
+                                        folder = selectedFolder,
+                                        defaultParent = passwordsViewModel.visibleFolder.value?.id
+                                            ?: FoldersApi.DEFAULT_FOLDER_UUID
+                                    )
 
                                 EditableFolderView(
                                     editableFolderState = editableFolderState,

@@ -74,19 +74,30 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlin.reflect.KFunction3
 
-class EditablePasswordState(originalPassword: Password?) {
+class EditablePasswordState(
+    originalPassword: Password?,
+    defaultFolder: String = FoldersApi.DEFAULT_FOLDER_UUID
+) {
     var password by mutableStateOf(originalPassword?.password ?: "")
     var label by mutableStateOf(originalPassword?.label ?: "")
     var username by mutableStateOf(originalPassword?.username ?: "")
     var url by mutableStateOf(originalPassword?.url ?: "")
     var notes by mutableStateOf(originalPassword?.notes ?: "")
-    var folder by mutableStateOf(originalPassword?.folder ?: FoldersApi.DEFAULT_FOLDER_UUID)
+    var folder by mutableStateOf(originalPassword?.folder ?: defaultFolder)
     var customFields =
         if (originalPassword?.customFields?.isBlank() == true) mutableStateListOf() else
         Json.decodeFromString<List<CustomField>>(originalPassword?.customFields ?: "[]")
             .toMutableStateList()
     var favorite by mutableStateOf(originalPassword?.favorite ?: false)
     var replyAutofill = false
+    private var originalValues = editableValues()
+
+    private fun editableValues(): List<String> = listOf(
+        password, label, username, url, notes, folder,
+        Json.encodeToString(customFields.toList()), favorite.toString()
+    )
+
+    fun hasChanges(): Boolean = editableValues() != originalValues
 
     fun isValid(): Boolean {
         if (label.isBlank())
@@ -114,11 +125,7 @@ class EditablePasswordState(originalPassword: Password?) {
     companion object {
         val Saver: Saver<EditablePasswordState, *> = listSaver(
             save = {
-                listOf(
-                    it.password, it.label, it.username, it.url, it.notes,
-                    it.folder, Json.encodeToString(it.customFields.toList()),
-                    it.favorite.toString(), it.replyAutofill.toString()
-                )
+                it.editableValues() + it.replyAutofill.toString() + it.originalValues
             },
             restore = {
                 EditablePasswordState(null).apply {
@@ -132,6 +139,7 @@ class EditablePasswordState(originalPassword: Password?) {
                         Json.decodeFromString<List<CustomField>>(it[6]).toMutableStateList()
                     favorite = it[7].toBooleanStrictOrNull() ?: false
                     replyAutofill = it[8].toBooleanStrictOrNull() ?: false
+                    originalValues = it.subList(9, it.size)
                 }
             }
         )
@@ -180,7 +188,7 @@ fun EditablePasswordView(
         mutableStateOf(false)
     }
 
-    BackHandler (enabled = !confirmedDiscard) {
+    BackHandler(enabled = editablePasswordState.hasChanges() && !confirmedDiscard) {
         showDiscardDialog = true
     }
 

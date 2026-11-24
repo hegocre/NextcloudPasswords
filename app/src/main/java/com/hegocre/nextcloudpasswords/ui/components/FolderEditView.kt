@@ -43,10 +43,18 @@ import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
 
-class EditableFolderState(originalFolder: Folder?) {
+class EditableFolderState(
+    originalFolder: Folder?,
+    defaultParent: String = FoldersApi.DEFAULT_FOLDER_UUID
+) {
     var label by mutableStateOf(originalFolder?.label ?: "")
-    var parent by mutableStateOf(originalFolder?.parent ?: FoldersApi.DEFAULT_FOLDER_UUID)
+    var parent by mutableStateOf(originalFolder?.parent ?: defaultParent)
     var favorite by mutableStateOf(originalFolder?.favorite ?: false)
+    private var originalValues = editableValues()
+
+    private fun editableValues(): List<String> = listOf(label, parent, favorite.toString())
+
+    fun hasChanges(): Boolean = editableValues() != originalValues
 
     fun isValid(): Boolean {
         return label.isNotBlank()
@@ -55,15 +63,14 @@ class EditableFolderState(originalFolder: Folder?) {
     companion object {
         val Saver: Saver<EditableFolderState, *> = listSaver(
             save = {
-                listOf(
-                    it.label, it.parent, it.favorite.toString()
-                )
+                it.editableValues() + it.originalValues
             },
             restore = {
                 EditableFolderState(null).apply {
                     label = it[0]
                     parent = it[1]
                     favorite = it[2].toBooleanStrictOrNull() ?: false
+                    originalValues = it.subList(3, it.size)
                 }
             }
         )
@@ -71,9 +78,12 @@ class EditableFolderState(originalFolder: Folder?) {
 }
 
 @Composable
-fun rememberEditableFolderState(folder: Folder? = null): EditableFolderState =
+fun rememberEditableFolderState(
+    folder: Folder? = null,
+    defaultParent: String = FoldersApi.DEFAULT_FOLDER_UUID
+): EditableFolderState =
     rememberSaveable(folder, saver = EditableFolderState.Saver) {
-        EditableFolderState(folder)
+        EditableFolderState(folder, defaultParent)
     }
 
 @Composable
@@ -103,7 +113,7 @@ fun EditableFolderView(
         mutableStateOf(false)
     }
 
-    BackHandler (enabled = !confirmedDiscard) {
+    BackHandler(enabled = editableFolderState.hasChanges() && !confirmedDiscard) {
         showDiscardDialog = true
     }
 
