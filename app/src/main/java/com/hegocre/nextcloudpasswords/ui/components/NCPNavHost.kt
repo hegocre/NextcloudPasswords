@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
@@ -247,9 +246,7 @@ fun NCPNavHost(
                     ) {
                         when {
                             passwordsDecryptionState.isLoading -> {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                                }
+                                FullScreenLoadingIndicator()
                             }
                             !passwordsDecryptionState.isLoading && passwordsDecryptionState.decryptedList != null -> {
                                 PullToRefreshBody(
@@ -292,9 +289,7 @@ fun NCPNavHost(
                     ) {
                         when {
                             passwordsDecryptionState.isLoading -> {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                                }
+                                FullScreenLoadingIndicator()
                             }
                             !passwordsDecryptionState.isLoading && passwordsDecryptionState.decryptedList != null -> {
                                 PullToRefreshBody(
@@ -341,9 +336,7 @@ fun NCPNavHost(
                     ) {
                         when {
                             passwordsDecryptionState.isLoading -> {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                                }
+                                FullScreenLoadingIndicator()
                             }
                             passwordsDecryptionState.decryptedList != null -> {
                                 PullToRefreshBody(
@@ -393,9 +386,7 @@ fun NCPNavHost(
                         }
                         when {
                             foldersDecryptionState.isLoading || passwordsDecryptionState.isLoading -> {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                                }
+                                FullScreenLoadingIndicator()
                             }
                             foldersDecryptionState.decryptedList != null
                                     && passwordsDecryptionState.decryptedList != null -> {
@@ -447,9 +438,7 @@ fun NCPNavHost(
                     ) {
                         when {
                             passwordsDecryptionState.isLoading -> {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                                }
+                                FullScreenLoadingIndicator()
                             }
                             passwordsDecryptionState.decryptedList != null -> {
 
@@ -513,9 +502,7 @@ fun NCPNavHost(
                     ) {
                         when {
                             passwordsDecryptionState.isLoading -> {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                                }
+                                FullScreenLoadingIndicator()
                             }
                             passwordsDecryptionState.decryptedList != null -> {
                                 DisposableEffect(folderUuid) {
@@ -595,9 +582,7 @@ fun NCPNavHost(
                     ) {
                         when {
                             passwordsDecryptionState.isLoading || foldersDecryptionState.isLoading -> {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                                }
+                                FullScreenLoadingIndicator()
                             }
 
                             passwordsDecryptionState.decryptedList != null && foldersDecryptionState.decryptedList != null -> {
@@ -784,9 +769,7 @@ fun NCPNavHost(
                     ) {
                         when {
                             foldersDecryptionState.isLoading -> {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                                }
+                                FullScreenLoadingIndicator()
                             }
 
                             foldersDecryptionState.decryptedList != null -> {
@@ -916,9 +899,7 @@ fun NCPNavHost(
                     ) {
                         when {
                             passwordsDecryptionState.isLoading -> {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                                }
+                                FullScreenLoadingIndicator()
                             }
                             passwordsDecryptionState.decryptedList != null -> {
                                 PullToRefreshBody(

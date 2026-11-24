@@ -24,10 +24,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -114,7 +112,6 @@ fun NextcloudPasswordsApp(
     val isRefreshing by passwordsViewModel.isRefreshing.collectAsState()
 
     var showLogOutDialog by rememberSaveable { mutableStateOf(false) }
-    var showAddElementDialog by rememberSaveable { mutableStateOf(false) }
 
     val showLocalNetworkAccessDialog by passwordsViewModel.showLocalNetworkAccessDialog.collectAsState()
     val localNetworkPermissionLauncher = rememberLauncherForActivityResult(
@@ -149,7 +146,7 @@ fun NextcloudPasswordsApp(
             rememberTopAppBarState()
         )
 
-        val addElementButton: @Composable () -> Unit = {
+        val addElementButton: @Composable (menuBelowButton: Boolean) -> Unit = { menuBelowButton ->
             AnimatedVisibility(
                 visible = currentScreen != NCPScreen.PasswordEdit &&
                         currentScreen != NCPScreen.FolderEdit && sessionOpen
@@ -157,21 +154,13 @@ fun NextcloudPasswordsApp(
                 enter = scaleIn(),
                 exit = scaleOut(),
             ) {
-                FloatingActionButton(
-                    onClick = {
-                        if (autofillData is AutofillData.IsSave) {
-                            navController.navigate("${NCPScreen.PasswordEdit.name}/none")
-                        } else {
-                            showAddElementDialog = true
-                        }
-
+                AddElementButton(
+                    onPasswordAdd = { navController.navigate("${NCPScreen.PasswordEdit.name}/none") },
+                    onFolderAdd = if (autofillData is AutofillData.IsSave) null else {
+                        { navController.navigate("${NCPScreen.FolderEdit.name}/none") }
                     },
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = stringResource(id = R.string.action_create_element)
-                    )
-                }
+                    menuBelowButton = menuBelowButton
+                )
             }
         }
 
@@ -271,7 +260,7 @@ fun NextcloudPasswordsApp(
                     && currentScreen != NCPScreen.PasswordEdit
                     && currentScreen != NCPScreen.FolderEdit
                     && currentScreen != NCPScreen.TrashedPasswords,
-            primaryAction = addElementButton
+            primaryAction = { addElementButton(true) }
         ) { showsNavigationRail ->
             Scaffold(
                 modifier = Modifier
@@ -361,7 +350,7 @@ fun NextcloudPasswordsApp(
                     }
                 },
                 floatingActionButton = {
-                    if (!showsNavigationRail) addElementButton()
+                    if (!showsNavigationRail) addElementButton(false)
                 }
             ) { innerPadding ->
                 Row(modifier = Modifier.padding(innerPadding)) {
@@ -445,22 +434,6 @@ fun NextcloudPasswordsApp(
                     LogOutDialog(
                         onDismissRequest = { showLogOutDialog = false },
                         onConfirmButton = onLogOut
-                    )
-                }
-
-                if (showAddElementDialog) {
-                    AddElementDialog(
-                        onPasswordAdd = {
-                            navController.navigate("${NCPScreen.PasswordEdit.name}/none")
-                            showAddElementDialog = false
-                        },
-                        onFolderAdd = {
-                            navController.navigate("${NCPScreen.FolderEdit.name}/none")
-                            showAddElementDialog = false
-                        },
-                        onDismissRequest = {
-                            showAddElementDialog = false
-                        }
                     )
                 }
 
