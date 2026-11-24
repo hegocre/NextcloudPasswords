@@ -1,7 +1,7 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertWidthIsEqualTo
@@ -18,7 +18,8 @@ class ReadableFormWidthTest {
 
     private fun setFormInContainerOfWidth(containerWidth: Dp) {
         composeTestRule.setContent {
-            Box(modifier = Modifier.width(containerWidth)) {
+            // Required, so that the container is not clamped to a narrow screen such as a folded phone
+            Box(modifier = Modifier.requiredWidth(containerWidth)) {
                 Box(modifier = Modifier.readableFormWidth().testTag(FORM_TAG))
             }
         }
