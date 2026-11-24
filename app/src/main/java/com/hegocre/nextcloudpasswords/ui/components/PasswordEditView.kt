@@ -214,7 +214,7 @@ fun EditablePasswordView(
         }
     }
 
-    LazyColumn {
+    LazyColumn(modifier = Modifier.readableFormWidth()) {
         item(key = "top_spacer") { Spacer(modifier = Modifier.width(16.dp)) }
 
         item(key = "favorite_button") {

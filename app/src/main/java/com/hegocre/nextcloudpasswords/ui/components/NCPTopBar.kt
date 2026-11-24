@@ -104,7 +104,8 @@ fun NCPSearchTopBar(
     onLogoutClick: () -> Unit = {},
     searchExpanded: Boolean = false,
     onSearchClick: () -> Unit = {},
-    onSearchCloseClick: () -> Unit = {}
+    onSearchCloseClick: () -> Unit = {},
+    tintWhenScrolled: Boolean = true
 ) {
     Surface(
         modifier = modifier,
@@ -114,7 +115,8 @@ fun NCPSearchTopBar(
                 SearchAppBar(
                     searchQuery = searchQuery,
                     setSearchQuery = setSearchQuery,
-                    onBackPressed = onSearchCloseClick
+                    onBackPressed = onSearchCloseClick,
+                    tinted = tintWhenScrolled
                 )
             } else {
                 TitleAppBar(
@@ -126,7 +128,8 @@ fun NCPSearchTopBar(
                     onLogoutClick = onLogoutClick,
                     scrollBehavior = scrollBehavior,
                     showMenu = autofillData == null,
-                    userAvatar = userAvatar
+                    userAvatar = userAvatar,
+                    tintWhenScrolled = tintWhenScrolled
                 )
             }
         }
@@ -144,13 +147,16 @@ fun TitleAppBar(
     onLogoutClick: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior,
     showMenu: Boolean,
-    userAvatar: @Composable (Dp) -> Unit
+    userAvatar: @Composable (Dp) -> Unit,
+    tintWhenScrolled: Boolean = true
 ) {
     var menuExpanded by rememberSaveable { mutableStateOf(false) }
 
     LargeTopAppBar(
         title = { Text(text = title) },
         scrollBehavior = scrollBehavior,
+        colors = if (tintWhenScrolled) TopAppBarDefaults.topAppBarColors()
+        else TopAppBarDefaults.topAppBarColors(scrolledContainerColor = MaterialTheme.colorScheme.surface),
         windowInsets = WindowInsets.statusBars,
         actions = {
             IconButton(onClick = onSearchClick) {
@@ -187,13 +193,16 @@ fun TitleAppBar(
 fun SearchAppBar(
     searchQuery: String,
     setSearchQuery: (String) -> Unit,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    tinted: Boolean = true
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val requester = remember { FocusRequester() }
 
     Column(
-        Modifier.background(MaterialTheme.colorScheme.surfaceContainer)
+        Modifier.background(
+            if (tinted) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surface
+        )
     ) {
         Spacer(modifier = Modifier.statusBarsPadding())
         Row(

@@ -5,15 +5,10 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -49,12 +44,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -144,75 +137,95 @@ fun NextcloudPasswordsApp(
             rememberTopAppBarState()
         )
 
-        Scaffold(
-            modifier = Modifier
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .imePadding(),
-            topBar = {
-                if (autofillData == null || autofillData is AutofillData.ChoosePwd) {
-                    if (currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit && currentScreen != NCPScreen.TrashedPasswords) {
-                        NCPSearchTopBar(
-                            username = server.username,
-                            serverAddress = server.url,
-                            title = when (currentScreen) {
-                                NCPScreen.Passwords -> stringResource(currentScreen.title) +
-                                        (passwordsViewModel.totalPasswordCount.value?.let { " ($it)" } ?: "")
-                                NCPScreen.Favorites -> stringResource(currentScreen.title) +
-                                        (passwordsViewModel.totalFavoritePasswordCount.value?.let { " ($it)" } ?: "")
-                                NCPScreen.Folders -> {
-                                    (passwordsViewModel.visibleFolder.value?.let {
-                                        if (it.id == FoldersApi.DEFAULT_FOLDER_UUID)
-                                            stringResource(currentScreen.title)
-                                        else
-                                            it.label
-                                    } ?: stringResource(currentScreen.title)) +
-                                            (passwordsViewModel.visibleFolderPasswordCount.value?.let { " ($it)" } ?: "")
-                                }
-                                NCPScreen.OTP -> stringResource(currentScreen.title) +
-                                        (passwordsViewModel.totalOTPPasswordCount.value?.let { " ($it)" } ?: "")
-                            },
-                            userAvatar = { size ->
-                                Image(
-                                    painter = passwordsViewModel.getPainterForAvatar(),
-                                    contentDescription = "",
-                                    modifier = Modifier
-                                        .clip(CircleShape)
-                                        .size(size)
-                                )
-                            },
-                            searchQuery = searchQuery,
-                            setSearchQuery = setSearchQuery,
-                            autofillData = autofillData,
-                            searchExpanded = searchExpanded,
-                            onSearchClick = { searchExpanded = true },
-                            onSearchCloseClick = {
-                                searchExpanded = false
-                                setSearchQuery("")
-                            },
-                            onTrashedPasswordsClick = {
-                                navController.navigate(NCPScreen.TrashedPasswords.name)
-                            },
-                            onLogoutClick = { showLogOutDialog = true },
-                            scrollBehavior = scrollBehavior
-                        )
-                    } else {
-                        TopAppBar(
-                            title = { Text(text = stringResource(id = currentScreen.title)) },
-                            navigationIcon = {
-                                IconButton(onClick = { navController.navigateUp() }) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = stringResource(id = R.string.navigation_back)
-                                    )
-                                }
-                            }
-                        )
+        NCPNavigationSuite(
+            allScreens = NCPScreen.entries.filter {
+                !it.hidden && !(it.name == NCPScreen.OTP.name && !showOTPTab)
+            },
+            currentScreen = currentScreen,
+            onScreenSelected = { screen ->
+                navController.navigate(screen.name) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
                     }
+                    launchSingleTop = true
+                    restoreState = true
                 }
             },
-            bottomBar = {
-                if (autofillData == null || autofillData is AutofillData.ChoosePwd) {
-                    Column {
+            showNavigation = (autofillData == null || autofillData is AutofillData.ChoosePwd)
+                    && currentScreen != NCPScreen.PasswordEdit
+                    && currentScreen != NCPScreen.FolderEdit
+                    && currentScreen != NCPScreen.TrashedPasswords
+        ) { showsNavigationRail ->
+            Scaffold(
+                modifier = Modifier
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .imePadding(),
+                topBar = {
+                    if (autofillData == null || autofillData is AutofillData.ChoosePwd) {
+                        if (currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit && currentScreen != NCPScreen.TrashedPasswords) {
+                            NCPSearchTopBar(
+                                username = server.username,
+                                serverAddress = server.url,
+                                title = when (currentScreen) {
+                                    NCPScreen.Passwords -> stringResource(currentScreen.title) +
+                                            (passwordsViewModel.totalPasswordCount.value?.let { " ($it)" } ?: "")
+                                    NCPScreen.Favorites -> stringResource(currentScreen.title) +
+                                            (passwordsViewModel.totalFavoritePasswordCount.value?.let { " ($it)" } ?: "")
+                                    NCPScreen.Folders -> {
+                                        (passwordsViewModel.visibleFolder.value?.let {
+                                            if (it.id == FoldersApi.DEFAULT_FOLDER_UUID)
+                                                stringResource(currentScreen.title)
+                                            else
+                                                it.label
+                                        } ?: stringResource(currentScreen.title)) +
+                                                (passwordsViewModel.visibleFolderPasswordCount.value?.let { " ($it)" } ?: "")
+                                    }
+                                    NCPScreen.OTP -> stringResource(currentScreen.title) +
+                                            (passwordsViewModel.totalOTPPasswordCount.value?.let { " ($it)" } ?: "")
+                                },
+                                userAvatar = { size ->
+                                    Image(
+                                        painter = passwordsViewModel.getPainterForAvatar(),
+                                        contentDescription = "",
+                                        modifier = Modifier
+                                            .clip(CircleShape)
+                                            .size(size)
+                                    )
+                                },
+                                searchQuery = searchQuery,
+                                setSearchQuery = setSearchQuery,
+                                autofillData = autofillData,
+                                searchExpanded = searchExpanded,
+                                onSearchClick = { searchExpanded = true },
+                                onSearchCloseClick = {
+                                    searchExpanded = false
+                                    setSearchQuery("")
+                                },
+                                onTrashedPasswordsClick = {
+                                    navController.navigate(NCPScreen.TrashedPasswords.name)
+                                },
+                                onLogoutClick = { showLogOutDialog = true },
+                                scrollBehavior = scrollBehavior,
+                                // A tinted bar next to the untinted rail forms an L-shaped seam
+                                tintWhenScrolled = !showsNavigationRail
+                            )
+                        } else {
+                            TopAppBar(
+                                title = { Text(text = stringResource(id = currentScreen.title)) },
+                                navigationIcon = {
+                                    IconButton(onClick = { navController.navigateUp() }) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = stringResource(id = R.string.navigation_back)
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    }
+                },
+                bottomBar = {
+                    if (autofillData == null || autofillData is AutofillData.ChoosePwd) {
                         AnimatedVisibility(visible = !sessionOpen && showSessionOpenError && !isRefreshing) {
                             Surface(
                                 color = MaterialTheme.colorScheme.errorContainer,
@@ -228,298 +241,273 @@ fun NextcloudPasswordsApp(
                                 )
                             }
                         }
-                        val navigationHeight =
-                            WindowInsets.navigationBars.getBottom(LocalDensity.current)
-                        AnimatedVisibility(
-                            visible = currentScreen != NCPScreen.PasswordEdit
-                                    && currentScreen != NCPScreen.FolderEdit
-                                    && currentScreen != NCPScreen.TrashedPasswords,
-                            enter = slideInVertically(initialOffsetY = { (it + navigationHeight) }) + expandVertically(expandFrom = Alignment.Top),
-                            exit = slideOutVertically(targetOffsetY = { (it + navigationHeight) }) + shrinkVertically(shrinkTowards = Alignment.Top)
+                    }
+                },
+                floatingActionButton = {
+                    AnimatedVisibility(
+                        visible = currentScreen != NCPScreen.PasswordEdit &&
+                                currentScreen != NCPScreen.FolderEdit && sessionOpen
+                                && currentScreen != NCPScreen.TrashedPasswords,
+                        enter = scaleIn(),
+                        exit = scaleOut(),
+                    ) {
+                        FloatingActionButton(
+                            onClick = {
+                                if (autofillData is AutofillData.IsSave) {
+                                    navController.navigate("${NCPScreen.PasswordEdit.name}/none")
+                                } else {
+                                    showAddElementDialog = true
+                                }
+
+                            },
                         ) {
-                            NCPBottomNavigation(
-                                allScreens = NCPScreen.entries.filter {
-                                    !it.hidden && !(it.name == NCPScreen.OTP.name && !showOTPTab)
-                                },
-                                currentScreen = currentScreen,
-                                onScreenSelected = { screen ->
-                                    navController.navigate(screen.name) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                },
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = stringResource(id = R.string.action_create_element)
                             )
                         }
                     }
                 }
-            },
-            floatingActionButton = {
-                AnimatedVisibility(
-                    visible = currentScreen != NCPScreen.PasswordEdit &&
-                            currentScreen != NCPScreen.FolderEdit && sessionOpen
-                            && currentScreen != NCPScreen.TrashedPasswords,
-                    enter = scaleIn(),
-                    exit = scaleOut(),
-                ) {
-                    FloatingActionButton(
-                        onClick = {
-                            if (autofillData is AutofillData.IsSave) {
-                                navController.navigate("${NCPScreen.PasswordEdit.name}/none")
-                            } else {
-                                showAddElementDialog = true
+            ) { innerPadding ->
+                NCPNavHost(
+                    modifier = Modifier.padding(innerPadding),
+                    navController = navController,
+                    passwordsViewModel = passwordsViewModel,
+                    searchQuery = searchQuery,
+                    autofillData = autofillData,
+                    modalSheetState = modalSheetState,
+                    openPasswordDetails = { password, folderPath ->
+                        passwordsViewModel.setVisiblePassword(password, folderPath)
+                        keyboardController?.hide()
+                        openBottomSheet = true
+                    },
+                    replyAutofill = replyAutofill,
+                    createPassword = { newPassword, onSuccess, onFailure ->
+                        coroutineScope.launch {
+                            val newPwd = newPassword.let {
+                                val currentKeychain = keychain
+                                if (currentKeychain != null && serverSettings.encryptionCse != 0) {
+                                    it.encrypt(currentKeychain.current, currentKeychain)
+                                } else it
                             }
 
+                            if (passwordsViewModel.createPassword(newPwd).await()) {
+                                onSuccess()
+                            } else {
+                                onFailure()
+                            }
+                        }
+                    },
+                    updatePassword = { updatedPassword, shouldEncrypt, onSuccess, onFailure ->
+                        coroutineScope.launch {
+                            val updatedPwd = updatedPassword.let {
+                                val currentKeychain = keychain
+                                if (shouldEncrypt && currentKeychain != null) {
+                                    it.encrypt(currentKeychain.current, currentKeychain)
+                                } else it
+                            }
+
+                            if (passwordsViewModel.updatePassword(updatedPwd).await()) {
+                                onSuccess()
+                            } else {
+                                onFailure()
+                            }
+                        }
+                    },
+                    deletePassword = { deletedPassword, onSuccess, onFailure ->
+                        coroutineScope.launch {
+                            if (passwordsViewModel.deletePassword(deletedPassword).await()) {
+                                onSuccess()
+                            } else {
+                                onFailure()
+                            }
+                        }
+                    },
+                    searchVisibility = searchExpanded,
+                    closeSearch = {
+                        searchExpanded = false
+                        setSearchQuery("")
+                    },
+                )
+
+                if (showLogOutDialog) {
+                    LogOutDialog(
+                        onDismissRequest = { showLogOutDialog = false },
+                        onConfirmButton = onLogOut
+                    )
+                }
+
+                if (showAddElementDialog) {
+                    AddElementDialog(
+                        onPasswordAdd = {
+                            navController.navigate("${NCPScreen.PasswordEdit.name}/none")
+                            showAddElementDialog = false
                         },
+                        onFolderAdd = {
+                            navController.navigate("${NCPScreen.FolderEdit.name}/none")
+                            showAddElementDialog = false
+                        },
+                        onDismissRequest = {
+                            showAddElementDialog = false
+                        }
+                    )
+                }
+
+                if (needsMasterPassword) {
+                    val (masterPassword, setMasterPassword) = rememberSaveable {
+                        mutableStateOf("")
+                    }
+                    val (savePassword, setSavePassword) = rememberSaveable {
+                        mutableStateOf(false)
+                    }
+                    MasterPasswordDialog(
+                        masterPassword = masterPassword,
+                        setMasterPassword = setMasterPassword,
+                        savePassword = savePassword,
+                        setSavePassword = setSavePassword,
+                        onOkClick = {
+                            passwordsViewModel.setMasterPassword(masterPassword, savePassword)
+                            setMasterPassword("")
+                        },
+                        errorText = if (masterPasswordInvalid) stringResource(R.string.error_invalid_password) else "",
+                        onDismissRequest = { }
+                    )
+                }
+
+                if (showLocalNetworkAccessDialog) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            passwordsViewModel.dismissLocalNetworkAccessDialog()
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
+                                        localNetworkPermissionLauncher.launch(Manifest.permission.ACCESS_LOCAL_NETWORK)
+                                    }
+                                    passwordsViewModel.dismissLocalNetworkAccessDialog()
+                                }
+                            ) {
+                                Text(text = stringResource(id = R.string.grant_permission))
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    passwordsViewModel.dismissLocalNetworkAccessDialog()
+                                }
+                            ) {
+                                Text(text = stringResource(id = android.R.string.cancel))
+                            }
+                        },
+                        title = { Text(stringResource(id = R.string.permission_required)) },
+                        text = { Text(text = stringResource(id = R.string.dialog_local_network_permission_message)) }
+                    )
+                }
+
+                if (openBottomSheet) {
+                    ModalBottomSheet(
+                        onDismissRequest = { openBottomSheet = false },
+                        contentWindowInsets = { WindowInsets.navigationBars },
+                        sheetState = modalSheetState
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = stringResource(id = R.string.action_create_element)
+                        val currentPasswordInfo = passwordsViewModel.visiblePassword.value?.let { visible ->
+                            val updatedPassword = passwords.find { it.id == visible.first.id }
+                            if (updatedPassword != null) {
+                                Pair(
+                                    // Update the revision, so that multiple HOTP counter updates work
+                                    visible.first.copy(
+                                        revision = updatedPassword.revision,
+                                        updated = updatedPassword.updated,
+                                    ),
+                                    visible.second
+                                )
+                            } else visible
+                        }
+                        PasswordItem(
+                            passwordInfo = currentPasswordInfo,
+                            onEditPassword = if (sessionOpen) {
+                                {
+                                    coroutineScope.launch {
+                                        modalSheetState.hide()
+                                    }.invokeOnCompletion {
+                                        if (!modalSheetState.isVisible) {
+                                            openBottomSheet = false
+                                        }
+                                    }
+                                    navController.navigate("${NCPScreen.PasswordEdit.name}/${passwordsViewModel.visiblePassword.value?.first?.id ?: "none"}")
+                                }
+                            } else null,
+                            onDeletePassword = if (sessionOpen) {
+                                passwordsViewModel.visiblePassword.value?.first?.let {
+                                    {
+                                        coroutineScope.launch {
+                                            modalSheetState.hide()
+                                        }.invokeOnCompletion {
+                                            if (!modalSheetState.isVisible) {
+                                                openBottomSheet = false
+                                            }
+                                        }
+
+                                        coroutineScope.launch {
+                                            if (!passwordsViewModel.deletePassword(
+                                                    DeletedPassword(it.id, it.revision)
+                                                ).await()) {
+                                                modalSheetState.show()
+                                            }
+                                        }.invokeOnCompletion {
+                                            if (!modalSheetState.isVisible) {
+                                                openBottomSheet = false
+                                            }
+                                        }
+                                    }
+                                }
+                            } else null,
+                            onRestorePassword = if (sessionOpen) {
+                                passwordsViewModel.visiblePassword.value?.first?.let {
+                                    {
+                                        coroutineScope.launch {
+                                            modalSheetState.hide()
+                                        }.invokeOnCompletion {
+                                            if (!modalSheetState.isVisible) {
+                                                openBottomSheet = false
+                                            }
+                                        }
+
+                                        coroutineScope.launch {
+                                            if (!passwordsViewModel.restorePassword(
+                                                    DeletedPassword(it.id, it.revision)
+                                                ).await()) {
+                                                modalSheetState.show()
+                                            }
+                                        }.invokeOnCompletion {
+                                            if (!modalSheetState.isVisible) {
+                                                openBottomSheet = false
+                                            }
+                                        }
+                                    }
+                                }
+                            } else null,
+                            updatePassword = { updatedPassword, shouldEncrypt, onSuccess, onFailure ->
+                                coroutineScope.launch {
+                                    val updatedPwd = updatedPassword.let {
+                                        val currentKeychain = keychain
+                                        if (shouldEncrypt && currentKeychain != null) {
+                                            it.encrypt(currentKeychain.current, currentKeychain)
+                                        } else it
+                                    }
+
+                                    if (passwordsViewModel.updatePassword(updatedPwd).await()) {
+                                        onSuccess()
+                                    } else {
+                                        onFailure()
+                                    }
+                                }
+
+                            },
+                            modifier = Modifier.padding(bottom = 16.dp)
                         )
                     }
-                }
-            }
-        ) { innerPadding ->
-            NCPNavHost(
-                modifier = Modifier.padding(innerPadding),
-                navController = navController,
-                passwordsViewModel = passwordsViewModel,
-                searchQuery = searchQuery,
-                autofillData = autofillData,
-                modalSheetState = modalSheetState,
-                openPasswordDetails = { password, folderPath ->
-                    passwordsViewModel.setVisiblePassword(password, folderPath)
-                    keyboardController?.hide()
-                    openBottomSheet = true
-                },
-                replyAutofill = replyAutofill,
-                createPassword = { newPassword, onSuccess, onFailure ->
-                    coroutineScope.launch {
-                        val newPwd = newPassword.let {
-                            val currentKeychain = keychain
-                            if (currentKeychain != null && serverSettings.encryptionCse != 0) {
-                                it.encrypt(currentKeychain.current, currentKeychain)
-                            } else it
-                        }
-
-                        if (passwordsViewModel.createPassword(newPwd).await()) {
-                            onSuccess()
-                        } else {
-                            onFailure()
-                        }
-                    }
-                },
-                updatePassword = { updatedPassword, shouldEncrypt, onSuccess, onFailure ->
-                    coroutineScope.launch {
-                        val updatedPwd = updatedPassword.let {
-                            val currentKeychain = keychain
-                            if (shouldEncrypt && currentKeychain != null) {
-                                it.encrypt(currentKeychain.current, currentKeychain)
-                            } else it
-                        }
-
-                        if (passwordsViewModel.updatePassword(updatedPwd).await()) {
-                            onSuccess()
-                        } else {
-                            onFailure()
-                        }
-                    }
-                },
-                deletePassword = { deletedPassword, onSuccess, onFailure ->
-                    coroutineScope.launch {
-                        if (passwordsViewModel.deletePassword(deletedPassword).await()) {
-                            onSuccess()
-                        } else {
-                            onFailure()
-                        }
-                    }
-                },
-                searchVisibility = searchExpanded,
-                closeSearch = {
-                    searchExpanded = false
-                    setSearchQuery("")
-                },
-            )
-
-            if (showLogOutDialog) {
-                LogOutDialog(
-                    onDismissRequest = { showLogOutDialog = false },
-                    onConfirmButton = onLogOut
-                )
-            }
-
-            if (showAddElementDialog) {
-                AddElementDialog(
-                    onPasswordAdd = {
-                        navController.navigate("${NCPScreen.PasswordEdit.name}/none")
-                        showAddElementDialog = false
-                    },
-                    onFolderAdd = {
-                        navController.navigate("${NCPScreen.FolderEdit.name}/none")
-                        showAddElementDialog = false
-                    },
-                    onDismissRequest = {
-                        showAddElementDialog = false
-                    }
-                )
-            }
-
-            if (needsMasterPassword) {
-                val (masterPassword, setMasterPassword) = rememberSaveable {
-                    mutableStateOf("")
-                }
-                val (savePassword, setSavePassword) = rememberSaveable {
-                    mutableStateOf(false)
-                }
-                MasterPasswordDialog(
-                    masterPassword = masterPassword,
-                    setMasterPassword = setMasterPassword,
-                    savePassword = savePassword,
-                    setSavePassword = setSavePassword,
-                    onOkClick = {
-                        passwordsViewModel.setMasterPassword(masterPassword, savePassword)
-                        setMasterPassword("")
-                    },
-                    errorText = if (masterPasswordInvalid) stringResource(R.string.error_invalid_password) else "",
-                    onDismissRequest = { }
-                )
-            }
-
-            if (showLocalNetworkAccessDialog) {
-                AlertDialog(
-                    onDismissRequest = {
-                        passwordsViewModel.dismissLocalNetworkAccessDialog()
-                    },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
-                                    localNetworkPermissionLauncher.launch(Manifest.permission.ACCESS_LOCAL_NETWORK)
-                                }
-                                passwordsViewModel.dismissLocalNetworkAccessDialog()
-                            }
-                        ) {
-                            Text(text = stringResource(id = R.string.grant_permission))
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(
-                            onClick = {
-                                passwordsViewModel.dismissLocalNetworkAccessDialog()
-                            }
-                        ) {
-                            Text(text = stringResource(id = android.R.string.cancel))
-                        }
-                    },
-                    title = { Text(stringResource(id = R.string.permission_required)) },
-                    text = { Text(text = stringResource(id = R.string.dialog_local_network_permission_message)) }
-                )
-            }
-
-            if (openBottomSheet) {
-                ModalBottomSheet(
-                    onDismissRequest = { openBottomSheet = false },
-                    contentWindowInsets = { WindowInsets.navigationBars },
-                    sheetState = modalSheetState
-                ) {
-                    val currentPasswordInfo = passwordsViewModel.visiblePassword.value?.let { visible ->
-                        val updatedPassword = passwords.find { it.id == visible.first.id }
-                        if (updatedPassword != null) {
-                            Pair(
-                                // Update the revision, so that multiple HOTP counter updates work
-                                visible.first.copy(
-                                    revision = updatedPassword.revision,
-                                    updated = updatedPassword.updated,
-                                ),
-                                visible.second
-                            )
-                        } else visible
-                    }
-                    PasswordItem(
-                        passwordInfo = currentPasswordInfo,
-                        onEditPassword = if (sessionOpen) {
-                            {
-                                coroutineScope.launch {
-                                    modalSheetState.hide()
-                                }.invokeOnCompletion {
-                                    if (!modalSheetState.isVisible) {
-                                        openBottomSheet = false
-                                    }
-                                }
-                                navController.navigate("${NCPScreen.PasswordEdit.name}/${passwordsViewModel.visiblePassword.value?.first?.id ?: "none"}")
-                            }
-                        } else null,
-                        onDeletePassword = if (sessionOpen) {
-                            passwordsViewModel.visiblePassword.value?.first?.let {
-                                {
-                                    coroutineScope.launch {
-                                        modalSheetState.hide()
-                                    }.invokeOnCompletion {
-                                        if (!modalSheetState.isVisible) {
-                                            openBottomSheet = false
-                                        }
-                                    }
-
-                                    coroutineScope.launch {
-                                        if (!passwordsViewModel.deletePassword(
-                                                DeletedPassword(it.id, it.revision)
-                                            ).await()) {
-                                            modalSheetState.show()
-                                        }
-                                    }.invokeOnCompletion {
-                                        if (!modalSheetState.isVisible) {
-                                            openBottomSheet = false
-                                        }
-                                    }
-                                }
-                            }
-                        } else null,
-                        onRestorePassword = if (sessionOpen) {
-                            passwordsViewModel.visiblePassword.value?.first?.let {
-                                {
-                                    coroutineScope.launch {
-                                        modalSheetState.hide()
-                                    }.invokeOnCompletion {
-                                        if (!modalSheetState.isVisible) {
-                                            openBottomSheet = false
-                                        }
-                                    }
-
-                                    coroutineScope.launch {
-                                        if (!passwordsViewModel.restorePassword(
-                                                DeletedPassword(it.id, it.revision)
-                                            ).await()) {
-                                            modalSheetState.show()
-                                        }
-                                    }.invokeOnCompletion {
-                                        if (!modalSheetState.isVisible) {
-                                            openBottomSheet = false
-                                        }
-                                    }
-                                }
-                            }
-                        } else null,
-                        updatePassword = { updatedPassword, shouldEncrypt, onSuccess, onFailure ->
-                            coroutineScope.launch {
-                                val updatedPwd = updatedPassword.let {
-                                    val currentKeychain = keychain
-                                    if (shouldEncrypt && currentKeychain != null) {
-                                        it.encrypt(currentKeychain.current, currentKeychain)
-                                    } else it
-                                }
-
-                                if (passwordsViewModel.updatePassword(updatedPwd).await()) {
-                                    onSuccess()
-                                } else {
-                                    onFailure()
-                                }
-                            }
-
-                        },
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
                 }
             }
         }
