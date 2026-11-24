@@ -28,6 +28,7 @@
     <string name="preferences_category_autofill_service">Autofill service</string>
     <string name="action_save">Save</string>
     <string name="action_edit_password">Edit password</string>
+    <string name="action_close_password_details">Close password details</string>
     <string name="password_folder_attr_label">Label</string>
     <string name="custom_field_label">Label</string>
     <string name="password_attr_username">Username</string>

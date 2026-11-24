@@ -1,6 +1,8 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
@@ -15,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.ui.NCPScreen
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 
@@ -27,7 +30,8 @@ private val verticalNavigationSuiteTypes = setOf(
 
 /**
  * Shows the top level screens as a bottom bar on compact windows and as a navigation rail on
- * wider ones, such as unfolded foldables and tablets. [content] is told whether the rail is shown.
+ * wider ones, such as unfolded foldables and tablets. [content] is told whether the rail is shown,
+ * in which case [primaryAction] is placed in the rail header instead of being left to [content].
  */
 @Composable
 fun NCPNavigationSuite(
@@ -36,10 +40,12 @@ fun NCPNavigationSuite(
     onScreenSelected: (NCPScreen) -> Unit,
     showNavigation: Boolean,
     modifier: Modifier = Modifier,
+    primaryAction: @Composable () -> Unit = {},
     content: @Composable (showsNavigationRail: Boolean) -> Unit
 ) {
     val navigationSuiteType =
         NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfoV2())
+    val showsNavigationRail = showNavigation && navigationSuiteType in verticalNavigationSuiteTypes
     val navigationSuiteState = rememberNavigationSuiteScaffoldState(
         initialValue = if (showNavigation) NavigationSuiteScaffoldValue.Visible
         else NavigationSuiteScaffoldValue.Hidden
@@ -70,8 +76,16 @@ fun NCPNavigationSuite(
         state = navigationSuiteState,
         // Top aligned items collide with the collapsed title bar next to the rail
         navigationItemVerticalArrangement = Arrangement.Center,
+        primaryActionContent = {
+            if (showsNavigationRail) {
+                // The rail places its header at the start edge, the items are inset by 20dp
+                Box(modifier = Modifier.padding(start = 20.dp)) {
+                    primaryAction()
+                }
+            }
+        },
     ) {
-        content(showNavigation && navigationSuiteType in verticalNavigationSuiteTypes)
+        content(showsNavigationRail)
     }
 }
 
