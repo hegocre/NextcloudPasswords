@@ -32,6 +32,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -83,7 +84,6 @@ import com.hegocre.nextcloudpasswords.data.folder.Folder
 import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.RequestedPassword
 import com.hegocre.nextcloudpasswords.ui.activities.ScannerActivity
-import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.OTP
 import com.hegocre.nextcloudpasswords.utils.OtpParseException
@@ -147,7 +147,7 @@ fun MasterPasswordDialog(
                 )
 
                 CompositionLocalProvider(
-                    LocalContentColor provides LocalContentColor.current.copy(alpha = ContentAlpha.medium)
+                    LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant
                 ) {
                     Row {
                         Checkbox(
@@ -781,9 +781,7 @@ fun SelectFolderDialog(
                                             imageVector = Icons.Filled.Folder,
                                             contentDescription = stringResource(R.string.content_description_folder_icon),
                                             colorFilter = ColorFilter.tint(
-                                                MaterialTheme.colorScheme.onSurface.copy(
-                                                    alpha = ContentAlpha.medium
-                                                )
+                                                MaterialTheme.colorScheme.onSurfaceVariant
                                             ),
                                             modifier = Modifier
                                                 .size(45.dp)

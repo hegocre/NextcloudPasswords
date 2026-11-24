@@ -48,7 +48,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -77,14 +76,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.hegocre.nextcloudpasswords.R
-import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.AutofillData
 import kotlinx.coroutines.job
-
-object AppBarDefaults {
-    val TopAppBarElevation = 4.dp
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -199,7 +193,7 @@ fun SearchAppBar(
     val requester = remember { FocusRequester() }
 
     Column(
-        Modifier.background(MaterialTheme.colorScheme.surfaceColorAtElevation(AppBarDefaults.TopAppBarElevation))
+        Modifier.background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
         Spacer(modifier = Modifier.statusBarsPadding())
         Row(
@@ -346,7 +340,7 @@ fun PopupAppMenu(
                                 )
 
                                 CompositionLocalProvider(
-                                    LocalContentColor provides LocalContentColor.current.copy(alpha = ContentAlpha.medium)
+                                    LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant
                                 ) {
                                     Text(
                                         text = serverAddress,
@@ -457,7 +451,7 @@ fun PopupAppMenu(
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                         CompositionLocalProvider(
-                            LocalContentColor provides LocalContentColor.current.copy(alpha = ContentAlpha.medium)
+                            LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant
                         ) {
                             Text(
                                 text = "${stringResource(id = R.string.app_name)} v${

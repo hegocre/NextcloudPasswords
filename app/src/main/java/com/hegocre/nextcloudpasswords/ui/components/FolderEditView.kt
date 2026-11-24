@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import com.hegocre.nextcloudpasswords.R
 import com.hegocre.nextcloudpasswords.api.FoldersApi
 import com.hegocre.nextcloudpasswords.data.folder.Folder
-import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
 import kotlinx.coroutines.android.awaitFrame
@@ -225,8 +224,7 @@ fun EditableFolderView(
                     Button(
                         onClick = { showDeleteDialog = true },
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error,
-                            disabledContentColor = MaterialTheme.colorScheme.error.copy(alpha = ContentAlpha.medium)
+                            contentColor = MaterialTheme.colorScheme.error
                         ),
                         content = {
                             Text(text = stringResource(id = R.string.action_delete_folder))

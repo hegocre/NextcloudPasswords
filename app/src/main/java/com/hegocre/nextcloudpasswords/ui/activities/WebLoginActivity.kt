@@ -7,9 +7,9 @@ import android.webkit.WebStorage
 import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.view.WindowCompat
 import com.hegocre.nextcloudpasswords.data.user.UserController
 import com.hegocre.nextcloudpasswords.ui.components.NCPWebLoginScreen
+import com.hegocre.nextcloudpasswords.utils.enableEdgeToEdgeWithoutNavigationBarScrim
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -17,7 +17,7 @@ class WebLoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdgeWithoutNavigationBarScrim()
 
         val loginUrl = intent.getStringExtra("login_url")?.let {
             var url = it
