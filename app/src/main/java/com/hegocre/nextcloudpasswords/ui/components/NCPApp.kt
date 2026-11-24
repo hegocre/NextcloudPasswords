@@ -312,8 +312,6 @@ fun NextcloudPasswordsApp(
                                 },
                                 onLogoutClick = { showLogOutDialog = true },
                                 scrollBehavior = scrollBehavior,
-                                // A tinted bar next to the untinted rail forms an L-shaped seam
-                                tintWhenScrolled = !showsNavigationRail
                             )
                         } else {
                             TopAppBar(
