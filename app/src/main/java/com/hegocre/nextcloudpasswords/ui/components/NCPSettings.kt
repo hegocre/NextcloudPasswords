@@ -105,7 +105,7 @@ fun NCPSettingsScreen(
                         NCPScreen.Folders.name to stringResource(NCPScreen.Folders.title)
                     )
 
-                    ListPreference(
+                    ButtonGroupPreference(
                         items = startViews,
                         onItemSelected = {
                             scope.launch(Dispatchers.IO) {
@@ -204,7 +204,7 @@ fun NCPSettingsScreen(
                         NCPTheme.AMOLED to stringResource(id = R.string.app_theme_black)
                     )
 
-                    ListPreference(
+                    ButtonGroupPreference(
                         items = themes,
                         selectedItem = appTheme,
                         onItemSelected = { theme ->
