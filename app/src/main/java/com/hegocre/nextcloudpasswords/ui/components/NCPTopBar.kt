@@ -250,12 +250,16 @@ fun SearchAppBar(
                     keyboardController?.hide()
                 })
             )
+            // A clear button that does nothing on an empty query reads as a broken close button
             IconButton(
-                onClick = { setSearchQuery("") }
+                onClick = { if (searchQuery.isEmpty()) onBackPressed() else setSearchQuery("") }
             ) {
                 Icon(
                     imageVector = Icons.Default.Clear,
-                    contentDescription = stringResource(id = R.string.action_clear_search_query)
+                    contentDescription = stringResource(
+                        id = if (searchQuery.isEmpty()) R.string.action_close_search
+                        else R.string.action_clear_search_query
+                    )
                 )
             }
         }

@@ -119,7 +119,6 @@ private fun NCPMaterialTheme(
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
         motionScheme = MotionScheme.expressive(),
-        shapes = Shapes,
         typography = Typography,
         content = content
     )
