@@ -45,6 +45,11 @@ fun NCPNavigationSuite(
 ) {
     val navigationSuiteType =
         NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfoV2())
+            .let {
+                // The 64dp short bar leaves its items cramped against the top edge
+                if (it == NavigationSuiteType.ShortNavigationBarCompact) NavigationSuiteType.NavigationBar
+                else it
+            }
     val showsNavigationRail = showNavigation && navigationSuiteType in verticalNavigationSuiteTypes
     val navigationSuiteState = rememberNavigationSuiteScaffoldState(
         initialValue = if (showNavigation) NavigationSuiteScaffoldValue.Visible

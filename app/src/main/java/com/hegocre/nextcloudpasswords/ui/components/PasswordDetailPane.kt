@@ -1,9 +1,14 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
@@ -38,7 +43,11 @@ fun PasswordDetailPane(
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.surfaceContainer,
         modifier = modifier
-            .padding(end = 16.dp, bottom = 16.dp)
+            .windowInsetsPadding(
+                WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.End)
+            )
+            // The top margin lines the pane up with the search field next to it
+            .padding(top = 8.dp, end = 16.dp, bottom = 16.dp)
             .width(400.dp)
             .fillMaxHeight()
     ) {

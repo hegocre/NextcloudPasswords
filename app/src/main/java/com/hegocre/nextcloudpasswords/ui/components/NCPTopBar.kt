@@ -174,7 +174,7 @@ fun SearchPillAppBar(
     Row(
         modifier = Modifier
             .windowInsetsPadding(SearchBarDefaults.windowInsets)
-            .padding(vertical = 4.dp)
+            .padding(vertical = 8.dp)
             .padding(end = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

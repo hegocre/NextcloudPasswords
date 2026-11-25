@@ -3,6 +3,7 @@ package com.hegocre.nextcloudpasswords.ui.components
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -10,12 +11,17 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.VpnKey
-import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenuPopup
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
@@ -42,15 +48,27 @@ fun AddElementButton(
     modifier: Modifier = Modifier
 ) {
     when {
-        onFolderAdd == null -> AddFloatingActionButton(onClick = onPasswordAdd, modifier = modifier)
+        onFolderAdd == null -> AddFloatingActionButton(
+            onClick = onPasswordAdd,
+            elevation = if (menuBelowButton) flatElevation() else FloatingActionButtonDefaults.elevation(),
+            modifier = modifier
+        )
         menuBelowButton -> AddElementDropdownMenu(onPasswordAdd, onFolderAdd, modifier)
         else -> AddElementFloatingActionButtonMenu(onPasswordAdd, onFolderAdd, modifier)
     }
 }
 
+// A button at the top of the screen sits on the navigation rail, where a shadow looks detached
 @Composable
-private fun AddFloatingActionButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    FloatingActionButton(onClick = onClick, modifier = modifier) {
+private fun flatElevation() = FloatingActionButtonDefaults.bottomAppBarFabElevation()
+
+@Composable
+private fun AddFloatingActionButton(
+    onClick: () -> Unit,
+    elevation: FloatingActionButtonElevation,
+    modifier: Modifier = Modifier
+) {
+    FloatingActionButton(onClick = onClick, elevation = elevation, modifier = modifier) {
         Icon(
             imageVector = Icons.Filled.Add,
             contentDescription = stringResource(id = R.string.action_create_element)
@@ -58,6 +76,7 @@ private fun AddFloatingActionButton(onClick: () -> Unit, modifier: Modifier = Mo
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AddElementDropdownMenu(
     onPasswordAdd: () -> Unit,
@@ -67,24 +86,31 @@ private fun AddElementDropdownMenu(
     var expanded by rememberSaveable { mutableStateOf(false) }
 
     Box(modifier = modifier) {
-        AddFloatingActionButton(onClick = { expanded = true })
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text(text = stringResource(id = R.string.password)) },
-                leadingIcon = { Icon(imageVector = Icons.Outlined.VpnKey, contentDescription = null) },
-                onClick = {
-                    expanded = false
-                    onPasswordAdd()
-                }
-            )
-            DropdownMenuItem(
-                text = { Text(text = stringResource(id = R.string.folder)) },
-                leadingIcon = { Icon(imageVector = Icons.Outlined.Folder, contentDescription = null) },
-                onClick = {
-                    expanded = false
-                    onFolderAdd()
-                }
-            )
+        AddFloatingActionButton(onClick = { expanded = true }, elevation = flatElevation())
+        DropdownMenuPopup(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuGroup(
+                shapes = MenuDefaults.groupShape(index = 0, count = 1),
+                modifier = Modifier.widthIn(min = MenuMinWidth)
+            ) {
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onPasswordAdd()
+                    },
+                    text = { Text(text = stringResource(id = R.string.password)) },
+                    shape = MenuDefaults.itemShape(index = 0, count = 2).shape,
+                    leadingIcon = { Icon(imageVector = Icons.Outlined.VpnKey, contentDescription = null) }
+                )
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onFolderAdd()
+                    },
+                    text = { Text(text = stringResource(id = R.string.folder)) },
+                    shape = MenuDefaults.itemShape(index = 1, count = 2).shape,
+                    leadingIcon = { Icon(imageVector = Icons.Outlined.Folder, contentDescription = null) }
+                )
+            }
         }
     }
 }
@@ -132,3 +158,6 @@ private fun AddElementFloatingActionButtonMenu(
 }
 
 private val FabMenuInset = 16.dp
+
+// Menus grow in steps of 56dp, two steps leave the short labels too cramped
+private val MenuMinWidth = 168.dp
