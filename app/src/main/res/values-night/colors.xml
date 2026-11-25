@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="autofill_menu_background">#FF2B2930</color>
+    <color name="autofill_menu_text">#FFE6E1E5</color>
+</resources>

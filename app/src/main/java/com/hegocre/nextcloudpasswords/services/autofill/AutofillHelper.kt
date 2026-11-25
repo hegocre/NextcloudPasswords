@@ -227,17 +227,7 @@ object AutofillHelper {
         label: String?,
         value: String?,
     ) {
-        val autofillLabel = label ?: context.getString(R.string.app_name)
-
-        val presentation = if (label == null) {
-            RemoteViews(context.packageName, R.layout.password_list_item).apply {
-                setTextViewText(R.id.text, autofillLabel)
-            }
-        } else {
-            RemoteViews(context.packageName, android.R.layout.simple_list_item_1).apply {
-                setTextViewText(android.R.id.text1, autofillLabel)
-            }
-        }
+        val presentation = buildMenuPresentation(context, label)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val fieldBuilder = Field.Builder()
@@ -308,15 +298,7 @@ object AutofillHelper {
             fieldBuilder.setPresentations(dialogPresentation)
             setField(autofillId, fieldBuilder.build())
         } else {
-            val presentation = if (label == null) {
-                RemoteViews(context.packageName, R.layout.password_list_item).apply {
-                    setTextViewText(R.id.text, autofillLabel)
-                }
-            } else {
-                RemoteViews(context.packageName, android.R.layout.simple_list_item_1).apply {
-                    setTextViewText(android.R.id.text1, autofillLabel)
-                }
-            }
+            val presentation = buildMenuPresentation(context, label)
 
             @Suppress("DEPRECATION")
             setValue(
@@ -325,6 +307,20 @@ object AutofillHelper {
                 presentation,
                 inlinePresentation
             )
+        }
+    }
+
+    internal fun buildMenuPresentation(context: Context, label: String?): RemoteViews {
+        val autofillLabel = label ?: context.getString(R.string.app_name)
+
+        return if (label == null) {
+            RemoteViews(context.packageName, R.layout.password_list_item).apply {
+                setTextViewText(R.id.text, autofillLabel)
+            }
+        } else {
+            RemoteViews(context.packageName, R.layout.autofill_menu_item).apply {
+                setTextViewText(R.id.text, autofillLabel)
+            }
         }
     }
 
