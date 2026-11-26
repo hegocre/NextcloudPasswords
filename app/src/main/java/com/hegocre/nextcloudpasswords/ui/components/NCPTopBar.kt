@@ -10,12 +10,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -57,14 +58,12 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -85,7 +84,7 @@ fun NCPSearchTopBar(
     username: String,
     serverAddress: String,
     modifier: Modifier = Modifier,
-    title: String = stringResource(R.string.app_name),
+    searchPlaceholder: String = stringResource(R.string.action_search),
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         rememberTopAppBarState()
     ),
@@ -105,27 +104,45 @@ fun NCPSearchTopBar(
     onSearchClick: () -> Unit = {},
     onSearchCloseClick: () -> Unit = {},
 ) {
-    Column(modifier = modifier.background(MaterialTheme.colorScheme.surface)) {
-        SearchPillAppBar(
-            searchQuery = searchQuery,
-            setSearchQuery = setSearchQuery,
-            searchExpanded = searchExpanded,
-            onSearchClick = onSearchClick,
-            onSearchCloseClick = onSearchCloseClick,
-            actions = {
-                if (autofillData == null) {
-                    AccountMenuButton(
-                        username = username,
-                        serverAddress = serverAddress,
-                        userAvatar = userAvatar,
-                        onTrashedPasswordsClick = onTrashedPasswordsClick,
-                        onLogoutClick = onLogoutClick
-                    )
+    // The status bar inset stays put, so the list never scrolls under the status bar icons
+    Column(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .windowInsetsPadding(SearchBarDefaults.windowInsets.only(WindowInsetsSides.Top))
+    ) {
+        CollapsingOnScroll(scrollBehavior = scrollBehavior) {
+            SearchPillAppBar(
+                searchQuery = searchQuery,
+                setSearchQuery = setSearchQuery,
+                searchExpanded = searchExpanded,
+                onSearchClick = onSearchClick,
+                onSearchCloseClick = onSearchCloseClick,
+                placeholder = searchPlaceholder,
+                actions = {
+                    if (autofillData == null) {
+                        AccountMenuButton(
+                            username = username,
+                            serverAddress = serverAddress,
+                            userAvatar = userAvatar,
+                            onTrashedPasswordsClick = onTrashedPasswordsClick,
+                            onLogoutClick = onLogoutClick
+                        )
+                    }
                 }
-            }
-        )
-        CollapsingTitle(title = title, scrollBehavior = scrollBehavior)
+            )
+        }
     }
+}
+
+/**
+ * The search field placeholder names the scope of the search and how many passwords it covers,
+ * since the list has no title of its own. [folderLabel] is given for a folder other than the root.
+ */
+@Composable
+fun searchPlaceholder(passwordCount: Int?, folderLabel: String? = null): String = when {
+    passwordCount == null -> stringResource(R.string.action_search)
+    folderLabel == null -> stringResource(R.string.action_search_with_count, passwordCount)
+    else -> stringResource(R.string.action_search_in_folder_with_count, folderLabel, passwordCount)
 }
 
 /**
@@ -140,6 +157,7 @@ fun SearchPillAppBar(
     searchExpanded: Boolean,
     onSearchClick: () -> Unit,
     onSearchCloseClick: () -> Unit,
+    placeholder: String = stringResource(R.string.action_search),
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -190,7 +208,9 @@ fun SearchPillAppBar(
                 searchBarState = searchBarState,
                 onSearch = { keyboardController?.hide() },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text(text = stringResource(id = R.string.action_search)) },
+                placeholder = {
+                    Text(text = placeholder, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                },
                 leadingIcon = {
                     if (searchExpanded) {
                         IconButton(onClick = onSearchCloseClick) {
@@ -203,38 +223,19 @@ fun SearchPillAppBar(
                         Icon(imageVector = Icons.Outlined.Search, contentDescription = null)
                     }
                 },
-                trailingIcon = if (searchExpanded) {
+                trailingIcon = if (searchQuery.isNotEmpty()) {
                     {
-                        ClearSearchButton(
-                            searchQuery = searchQuery,
-                            setSearchQuery = setSearchQuery,
-                            onSearchCloseClick = onSearchCloseClick
-                        )
+                        IconButton(onClick = { setSearchQuery("") }) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = stringResource(id = R.string.action_clear_search_query)
+                            )
+                        }
                     }
                 } else null
             )
         }
         actions()
-    }
-}
-
-@Composable
-private fun ClearSearchButton(
-    searchQuery: String,
-    setSearchQuery: (String) -> Unit,
-    onSearchCloseClick: () -> Unit
-) {
-    // A clear button that does nothing on an empty query reads as a broken close button
-    IconButton(
-        onClick = { if (searchQuery.isEmpty()) onSearchCloseClick() else setSearchQuery("") }
-    ) {
-        Icon(
-            imageVector = Icons.Default.Clear,
-            contentDescription = stringResource(
-                id = if (searchQuery.isEmpty()) R.string.action_close_search
-                else R.string.action_clear_search_query
-            )
-        )
     }
 }
 
@@ -250,7 +251,7 @@ private fun AccountMenuButton(
 
     Box {
         IconButton(onClick = { menuExpanded = true }) {
-            userAvatar(26.dp)
+            userAvatar(32.dp)
         }
 
         PopupAppMenu(
@@ -266,27 +267,19 @@ private fun AccountMenuButton(
 }
 
 /**
- * A large title that scrolls away under the search field, driven by [scrollBehavior] in the same
- * way as the collapsing part of a large top app bar.
+ * Slides [content] up and out of view as the list scrolls, driven by [scrollBehavior] in the same
+ * way as a top app bar, so an enter always behavior brings it back on any scroll up.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CollapsingTitle(title: String, scrollBehavior: TopAppBarScrollBehavior) {
+private fun CollapsingOnScroll(
+    scrollBehavior: TopAppBarScrollBehavior,
+    content: @Composable () -> Unit
+) {
     val state = scrollBehavior.state
 
     Layout(
-        content = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 8.dp, bottom = 12.dp)
-                    .graphicsLayer { alpha = 1f - state.collapsedFraction }
-            )
-        },
+        content = content,
         modifier = Modifier
             .fillMaxWidth()
             .clipToBounds()
@@ -323,7 +316,6 @@ fun PopupAppMenu(
         }
 
     val orientation = LocalConfiguration.current.orientation
-    val screenHeight = LocalWindowInfo.current.containerSize.height.dp
 
     if (menuExpanded) {
         BasicAlertDialog(
@@ -352,12 +344,7 @@ fun PopupAppMenu(
                 Surface(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .then(
-                            if (orientation == Configuration.ORIENTATION_PORTRAIT)
-                                Modifier.fillMaxWidth()
-                            else
-                                Modifier.width(screenHeight)
-                        ),
+                        .readableFormWidth(),
                     color = MaterialTheme.colorScheme.surface,
                     shape = MaterialTheme.shapes.large
                 ) {

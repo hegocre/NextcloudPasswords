@@ -142,9 +142,18 @@ fun NextcloudPasswordsApp(
     }
 
     NextcloudPasswordsTheme {
-        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-            rememberTopAppBarState()
+        val topBarState = rememberTopAppBarState()
+        // The search field stays in place while typing, as hiding it would hide the focused input
+        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+            state = topBarState,
+            canScroll = { !searchExpanded }
         )
+        LaunchedEffect(searchExpanded, currentScreen) { topBarState.heightOffset = 0f }
+
+        val isListScreen =
+            currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit
+        val screenBackgroundColor = if (isListScreen) MaterialTheme.colorScheme.surfaceContainer
+        else MaterialTheme.colorScheme.surface
 
         val addElementButton: @Composable (menuBelowButton: Boolean) -> Unit = { menuBelowButton ->
             AnimatedVisibility(
@@ -260,6 +269,7 @@ fun NextcloudPasswordsApp(
                     && currentScreen != NCPScreen.PasswordEdit
                     && currentScreen != NCPScreen.FolderEdit
                     && currentScreen != NCPScreen.TrashedPasswords,
+            containerColor = screenBackgroundColor,
             primaryAction = { addElementButton(true) }
         ) { showsNavigationRail ->
             // The detail pane sits next to the Scaffold, so that the top bar only spans the list
@@ -269,28 +279,23 @@ fun NextcloudPasswordsApp(
                         .weight(1f)
                         .nestedScroll(scrollBehavior.nestedScrollConnection)
                         .imePadding(),
+                    containerColor = screenBackgroundColor,
                     topBar = {
                         if (autofillData == null || autofillData is AutofillData.ChoosePwd) {
                             if (currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit && currentScreen != NCPScreen.TrashedPasswords) {
                                 NCPSearchTopBar(
                                     username = server.username,
                                     serverAddress = server.url,
-                                    title = when (currentScreen) {
-                                        NCPScreen.Passwords -> stringResource(currentScreen.title) +
-                                                (passwordsViewModel.totalPasswordCount.value?.let { " ($it)" } ?: "")
-                                        NCPScreen.Favorites -> stringResource(currentScreen.title) +
-                                                (passwordsViewModel.totalFavoritePasswordCount.value?.let { " ($it)" } ?: "")
-                                        NCPScreen.Folders -> {
-                                            (passwordsViewModel.visibleFolder.value?.let {
-                                                if (it.id == FoldersApi.DEFAULT_FOLDER_UUID)
-                                                    stringResource(currentScreen.title)
-                                                else
-                                                    it.label
-                                            } ?: stringResource(currentScreen.title)) +
-                                                    (passwordsViewModel.visibleFolderPasswordCount.value?.let { " ($it)" } ?: "")
-                                        }
-                                        NCPScreen.OTP -> stringResource(currentScreen.title) +
-                                                (passwordsViewModel.totalOTPPasswordCount.value?.let { " ($it)" } ?: "")
+                                    searchPlaceholder = when (currentScreen) {
+                                        NCPScreen.Passwords -> searchPlaceholder(passwordsViewModel.totalPasswordCount.value)
+                                        NCPScreen.Favorites -> searchPlaceholder(passwordsViewModel.totalFavoritePasswordCount.value)
+                                        NCPScreen.Folders -> searchPlaceholder(
+                                            passwordCount = passwordsViewModel.visibleFolderPasswordCount.value,
+                                            folderLabel = passwordsViewModel.visibleFolder.value
+                                                ?.takeIf { it.id != FoldersApi.DEFAULT_FOLDER_UUID }
+                                                ?.label
+                                        )
+                                        NCPScreen.OTP -> searchPlaceholder(passwordsViewModel.totalOTPPasswordCount.value)
                                     },
                                     userAvatar = { size ->
                                         Image(
@@ -319,6 +324,7 @@ fun NextcloudPasswordsApp(
                             } else {
                                 TopAppBar(
                                     title = { Text(text = stringResource(id = currentScreen.title)) },
+                                    colors = TopAppBarDefaults.topAppBarColors(containerColor = screenBackgroundColor),
                                     navigationIcon = {
                                         IconButton(onClick = { navController.navigateUp() }) {
                                             Icon(

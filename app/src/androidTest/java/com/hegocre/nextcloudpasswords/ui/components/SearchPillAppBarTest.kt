@@ -1,5 +1,6 @@
 package com.hegocre.nextcloudpasswords.ui.components
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -23,7 +24,11 @@ class SearchPillAppBarTest {
     private var searchOpened = false
     private var searchClosed = false
 
-    private fun setSearchPillAppBar(query: String, searchExpanded: Boolean) {
+    private fun setSearchPillAppBar(
+        query: String,
+        searchExpanded: Boolean,
+        placeholder: String = context.getString(R.string.action_search)
+    ) {
         composeTestRule.setContent {
             NextcloudPasswordsTheme {
                 SearchPillAppBar(
@@ -31,7 +36,8 @@ class SearchPillAppBarTest {
                     setSearchQuery = { searchQuery = it },
                     searchExpanded = searchExpanded,
                     onSearchClick = { searchOpened = true },
-                    onSearchCloseClick = { searchClosed = true }
+                    onSearchCloseClick = { searchClosed = true },
+                    placeholder = placeholder
                 )
             }
         }
@@ -58,13 +64,18 @@ class SearchPillAppBarTest {
     }
 
     @Test
-    fun clearButtonClosesSearchWhenQueryIsEmpty() {
+    fun clearButtonIsHiddenWhenQueryIsEmpty() {
         setSearchPillAppBar(query = "", searchExpanded = true)
 
-        composeTestRule.onNodeWithContentDescription(context.getString(R.string.action_close_search))
-            .performClick()
+        composeTestRule.onNodeWithContentDescription(context.getString(R.string.action_clear_search_query))
+            .assertDoesNotExist()
+    }
 
-        assertTrue(searchClosed)
+    @Test
+    fun searchFieldShowsGivenPlaceholder() {
+        setSearchPillAppBar(query = "", searchExpanded = false, placeholder = "Search (230)")
+
+        composeTestRule.onNodeWithText("Search (230)").assertIsDisplayed()
     }
 
     @Test

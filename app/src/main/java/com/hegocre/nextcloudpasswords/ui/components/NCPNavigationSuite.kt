@@ -4,8 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.WideNavigationRailDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
@@ -15,6 +18,7 @@ import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,6 +44,7 @@ fun NCPNavigationSuite(
     onScreenSelected: (NCPScreen) -> Unit,
     showNavigation: Boolean,
     modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     primaryAction: @Composable () -> Unit = {},
     content: @Composable (showsNavigationRail: Boolean) -> Unit
 ) {
@@ -72,12 +77,22 @@ fun NCPNavigationSuite(
                         )
                     },
                     label = { Text(text = stringResource(screen.title)) },
-                    navigationSuiteType = navigationSuiteType
+                    navigationSuiteType = navigationSuiteType,
+                    // The bar insets its items from the top only, which leaves them low in the bar
+                    modifier = if (navigationSuiteType == NavigationSuiteType.NavigationBar) {
+                        Modifier.padding(bottom = NavigationBarItemTopInset)
+                    } else Modifier
                 )
             }
         },
         modifier = modifier,
         navigationSuiteType = navigationSuiteType,
+        // The rail blends into the list next to it, like the bar does below the list
+        navigationSuiteColors = NavigationSuiteDefaults.colors(
+            wideNavigationRailColors = WideNavigationRailDefaults.colors(containerColor = containerColor),
+            navigationRailContainerColor = containerColor
+        ),
+        containerColor = containerColor,
         state = navigationSuiteState,
         // Top aligned items collide with the collapsed title bar next to the rail
         navigationItemVerticalArrangement = Arrangement.Center,
@@ -93,6 +108,8 @@ fun NCPNavigationSuite(
         content(showsNavigationRail)
     }
 }
+
+private val NavigationBarItemTopInset = 8.dp
 
 @Preview(name = "Navigation suite preview")
 @Composable

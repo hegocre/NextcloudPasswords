@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
@@ -39,15 +40,16 @@ fun PasswordDetailPane(
     modifier: Modifier = Modifier,
     content: @Composable (contentModifier: Modifier) -> Unit
 ) {
+    // The pane runs to the bottom edge like the list next to it, so only its top corners are rounded
     Surface(
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        shape = MaterialTheme.shapes.large.copy(bottomStart = ZeroCornerSize, bottomEnd = ZeroCornerSize),
+        color = MaterialTheme.colorScheme.surface,
         modifier = modifier
             .windowInsetsPadding(
-                WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.End)
+                WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.End)
             )
             // The top margin lines the pane up with the search field next to it
-            .padding(top = 8.dp, end = 16.dp, bottom = 16.dp)
+            .padding(top = 8.dp, end = 16.dp)
             .width(400.dp)
             .fillMaxHeight()
     ) {
@@ -62,7 +64,11 @@ fun PasswordDetailPane(
                 )
             }
             // The details scroll their own content below a fixed header
-            content(Modifier.padding(bottom = 16.dp))
+            content(
+                Modifier
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+                    .padding(bottom = 16.dp)
+            )
         }
     }
 }

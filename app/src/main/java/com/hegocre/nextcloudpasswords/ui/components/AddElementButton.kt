@@ -90,6 +90,7 @@ private fun AddElementDropdownMenu(
         DropdownMenuPopup(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuGroup(
                 shapes = MenuDefaults.groupShape(index = 0, count = 1),
+                shadowElevation = MenuShadowElevation,
                 modifier = Modifier.widthIn(min = MenuMinWidth)
             ) {
                 DropdownMenuItem(
@@ -161,3 +162,7 @@ private val FabMenuInset = 16.dp
 
 // Menus grow in steps of 56dp, two steps leave the short labels too cramped
 private val MenuMinWidth = 168.dp
+
+// The light source for shadows sits above the middle of the screen, so a menu next to the rail at
+// the start edge casts its default shadow visibly sideways; a lower elevation keeps it even
+private val MenuShadowElevation = 1.dp
