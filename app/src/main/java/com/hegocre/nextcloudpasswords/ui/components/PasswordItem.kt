@@ -67,7 +67,6 @@ import com.hegocre.nextcloudpasswords.data.password.CustomField
 import com.hegocre.nextcloudpasswords.data.password.Password
 import com.hegocre.nextcloudpasswords.data.password.UpdatedPassword
 import com.hegocre.nextcloudpasswords.ui.components.markdown.MDDocument
-import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.ui.theme.favoriteColor
 import com.hegocre.nextcloudpasswords.utils.OTP
@@ -235,8 +234,7 @@ fun PasswordItemContent(
                                 contentDescription = stringResource(
                                     id = R.string.folder
                                 ),
-                                tint = MaterialTheme.colorScheme.onSurface
-                                    .copy(alpha = ContentAlpha.medium)
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     )

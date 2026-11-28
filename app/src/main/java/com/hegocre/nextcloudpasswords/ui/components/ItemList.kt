@@ -4,16 +4,24 @@ import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -46,6 +54,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -117,29 +126,36 @@ fun MixedLazyColumn(
                     knobCornerRadius = 0.dp
                 )
             ),
-        state = listState
+        state = listState,
+        contentPadding = SegmentedListPadding,
+        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
     ) {
+        val folderCount = folders?.size ?: 0
+        val rowCount = folderCount + (passwords?.size ?: 0)
         folders?.let {
-            items(items = it, key = { folder -> folder.id }) { folder ->
+            itemsIndexed(items = it, key = { _, folder -> folder.id }) { index, folder ->
                 FolderRow(
                     folder = folder,
                     passwordCount = folderPasswordCounts?.let { folderPasswordCounts[folder.id] ?: 0 },
                     onFolderClick = onFolderClick,
-                    onFolderLongClick = onFolderLongClick
+                    onFolderLongClick = onFolderLongClick,
+                    modifier = Modifier.clip(segmentedRowShape(index, rowCount))
                 )
             }
         }
         passwords?.let {
-            items(items = it, key = { password -> password.id }) { password ->
+            itemsIndexed(items = it, key = { _, password -> password.id }) { index, password ->
                 PasswordRow(
                     password = password,
                     shouldShowIcon = shouldShowIcon,
                     onPasswordClick = onPasswordClick,
                     onPasswordLongClick = onPasswordLongClick,
-                    getPainterForUrl = getPainterForUrl
+                    getPainterForUrl = getPainterForUrl,
+                    modifier = Modifier.clip(segmentedRowShape(folderCount + index, rowCount))
                 )
             }
         }
+        navigationBarSpace()
     }
 }
 
@@ -169,21 +185,37 @@ fun OTPLazyColumn(
                     knobCornerRadius = 0.dp
                 )
             ),
-        state = listState
+        state = listState,
+        contentPadding = SegmentedListPadding,
+        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
     ) {
         passwords?.let {
-            items(items = it, key = { password -> password.id }) { password ->
+            itemsIndexed(items = it, key = { _, password -> password.id }) { index, password ->
                 PasswordOTPRow(
                     password = password,
                     shouldShowIcon = shouldShowIcon,
                     onPasswordLongClick = onPasswordLongClick,
                     getPainterForUrl = getPainterForUrl,
-                    updatePassword = updatePassword
+                    updatePassword = updatePassword,
+                    modifier = Modifier.clip(segmentedRowShape(index, it.size))
                 )
             }
         }
+        navigationBarSpace()
     }
 }
+
+// Rows are drawn as one segmented group on a tinted background, as in Material 3 Expressive lists
+private val SegmentedListPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+
+// The list scrolls under the navigation bar, so its last row must still be able to clear it
+private fun LazyListScope.navigationBarSpace() {
+    item { Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars)) }
+}
+
+@Composable
+private fun segmentedRowShape(index: Int, count: Int): Shape =
+    ListItemDefaults.segmentedShapes(index = index, count = count).shape
 
 @Composable
 fun PasswordRow(
@@ -441,7 +473,9 @@ fun PasswordOTPRow(
                         }
                     },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    // The background is drawn around the extra vertical padding, so the row fills its card
                     modifier = modifier
+                        .background(MaterialTheme.colorScheme.surface)
                         .combinedClickable(
                             onClick = {
                                 context.copyToClipboard(code, isSensitive = true)

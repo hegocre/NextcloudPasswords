@@ -2,26 +2,25 @@ package com.hegocre.nextcloudpasswords.ui.components
 
 import android.content.Intent
 import android.content.res.Configuration
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -38,53 +37,46 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.hegocre.nextcloudpasswords.R
-import com.hegocre.nextcloudpasswords.ui.theme.ContentAlpha
 import com.hegocre.nextcloudpasswords.ui.theme.NextcloudPasswordsTheme
 import com.hegocre.nextcloudpasswords.utils.AutofillData
-import kotlinx.coroutines.job
-
-object AppBarDefaults {
-    val TopAppBarElevation = 4.dp
-}
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,7 +84,7 @@ fun NCPSearchTopBar(
     username: String,
     serverAddress: String,
     modifier: Modifier = Modifier,
-    title: String = stringResource(R.string.app_name),
+    searchPlaceholder: String = stringResource(R.string.action_search),
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         rememberTopAppBarState()
     ),
@@ -110,151 +102,195 @@ fun NCPSearchTopBar(
     onLogoutClick: () -> Unit = {},
     searchExpanded: Boolean = false,
     onSearchClick: () -> Unit = {},
-    onSearchCloseClick: () -> Unit = {}
+    onSearchCloseClick: () -> Unit = {},
 ) {
-    Surface(
-        modifier = modifier,
+    // The status bar inset stays put, so the list never scrolls under the status bar icons
+    Column(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .windowInsetsPadding(SearchBarDefaults.windowInsets.only(WindowInsetsSides.Top))
     ) {
-        Crossfade(targetState = searchExpanded, label = "expanded") { expanded ->
-            if (expanded) {
-                SearchAppBar(
-                    searchQuery = searchQuery,
-                    setSearchQuery = setSearchQuery,
-                    onBackPressed = onSearchCloseClick
-                )
-            } else {
-                TitleAppBar(
-                    username = username,
-                    serverAddress = serverAddress,
-                    title = title,
-                    onSearchClick = onSearchClick,
-                    onTrashedPasswordsClick = onTrashedPasswordsClick,
-                    onLogoutClick = onLogoutClick,
-                    scrollBehavior = scrollBehavior,
-                    showMenu = autofillData == null,
-                    userAvatar = userAvatar
-                )
-            }
+        CollapsingOnScroll(scrollBehavior = scrollBehavior) {
+            SearchPillAppBar(
+                searchQuery = searchQuery,
+                setSearchQuery = setSearchQuery,
+                searchExpanded = searchExpanded,
+                onSearchClick = onSearchClick,
+                onSearchCloseClick = onSearchCloseClick,
+                placeholder = searchPlaceholder,
+                actions = {
+                    if (autofillData == null) {
+                        AccountMenuButton(
+                            username = username,
+                            serverAddress = serverAddress,
+                            userAvatar = userAvatar,
+                            onTrashedPasswordsClick = onTrashedPasswordsClick,
+                            onLogoutClick = onLogoutClick
+                        )
+                    }
+                }
+            )
         }
     }
 }
 
+/**
+ * The search field placeholder names the scope of the search and how many passwords it covers,
+ * since the list has no title of its own. [folderLabel] is given for a folder other than the root.
+ */
+@Composable
+fun searchPlaceholder(passwordCount: Int?, folderLabel: String? = null): String = when {
+    passwordCount == null -> stringResource(R.string.action_search)
+    folderLabel == null -> stringResource(R.string.action_search_with_count, passwordCount)
+    else -> stringResource(R.string.action_search_in_folder_with_count, folderLabel, passwordCount)
+}
+
+/**
+ * An always visible search field that filters the content below it as the user types, instead of
+ * opening a separate results view. [searchExpanded] is true while the user is searching.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TitleAppBar(
-    username: String,
-    serverAddress: String,
-    title: String,
+fun SearchPillAppBar(
+    searchQuery: String,
+    setSearchQuery: (String) -> Unit,
+    searchExpanded: Boolean,
     onSearchClick: () -> Unit,
-    onTrashedPasswordsClick: () -> Unit,
-    onLogoutClick: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior,
-    showMenu: Boolean,
-    userAvatar: @Composable (Dp) -> Unit
+    onSearchCloseClick: () -> Unit,
+    placeholder: String = stringResource(R.string.action_search),
+    actions: @Composable RowScope.() -> Unit = {}
 ) {
-    var menuExpanded by rememberSaveable { mutableStateOf(false) }
-
-    LargeTopAppBar(
-        title = { Text(text = title) },
-        scrollBehavior = scrollBehavior,
-        windowInsets = WindowInsets.statusBars,
-        actions = {
-            IconButton(onClick = onSearchClick) {
-                Icon(
-                    imageVector = Icons.Outlined.Search,
-                    contentDescription = stringResource(id = R.string.action_search)
-                )
-            }
-            if (showMenu) {
-                Box {
-                    IconButton(
-                        onClick = { menuExpanded = true },
-                        modifier = Modifier.padding(end = 8.dp)
-                    ) {
-                        userAvatar(26.dp)
-                    }
-
-                    PopupAppMenu(
-                        username = username,
-                        serverAddress = serverAddress,
-                        menuExpanded = menuExpanded,
-                        userAvatar = userAvatar,
-                        onDismissRequest = { menuExpanded = false },
-                        onTrashedPasswordsClick = onTrashedPasswordsClick,
-                        onLogoutClick = onLogoutClick
-                    )
-                }
-            }
-        },
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    val searchBarState = rememberSearchBarState(
+        initialValue = if (searchExpanded) SearchBarValue.Expanded else SearchBarValue.Collapsed
     )
+    val textFieldState = rememberTextFieldState(initialText = searchQuery)
+
+    LaunchedEffect(textFieldState) {
+        snapshotFlow { textFieldState.text.toString() }.collect { setSearchQuery(it) }
+    }
+    LaunchedEffect(searchQuery) {
+        if (textFieldState.text.toString() != searchQuery) {
+            textFieldState.setTextAndPlaceCursorAtEnd(searchQuery)
+        }
+    }
+    LaunchedEffect(searchBarState.currentValue) {
+        if (searchBarState.currentValue == SearchBarValue.Expanded) onSearchClick()
+    }
+    LaunchedEffect(searchExpanded) {
+        if (searchExpanded) {
+            searchBarState.animateToExpanded()
+        } else {
+            searchBarState.animateToCollapsed()
+            focusManager.clearFocus()
+        }
+    }
+
+    // AppBarWithSearch is not used, because it disables the keyboard in its collapsed field and
+    // expects a separate expanded results view, while search here filters the list in place
+    Row(
+        modifier = Modifier
+            .windowInsetsPadding(SearchBarDefaults.windowInsets)
+            .padding(vertical = 8.dp)
+            .padding(end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            shape = SearchBarDefaults.inputFieldShape,
+            color = SearchBarDefaults.colors().containerColor,
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 16.dp, end = 8.dp)
+        ) {
+            SearchBarDefaults.InputField(
+                textFieldState = textFieldState,
+                searchBarState = searchBarState,
+                onSearch = { keyboardController?.hide() },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = {
+                    Text(text = placeholder, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                },
+                leadingIcon = {
+                    if (searchExpanded) {
+                        IconButton(onClick = onSearchCloseClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(id = R.string.navigation_back)
+                            )
+                        }
+                    } else {
+                        Icon(imageVector = Icons.Outlined.Search, contentDescription = null)
+                    }
+                },
+                trailingIcon = if (searchQuery.isNotEmpty()) {
+                    {
+                        IconButton(onClick = { setSearchQuery("") }) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = stringResource(id = R.string.action_clear_search_query)
+                            )
+                        }
+                    }
+                } else null
+            )
+        }
+        actions()
+    }
 }
 
 @Composable
-fun SearchAppBar(
-    searchQuery: String,
-    setSearchQuery: (String) -> Unit,
-    onBackPressed: () -> Unit
+private fun AccountMenuButton(
+    username: String,
+    serverAddress: String,
+    userAvatar: @Composable (Dp) -> Unit,
+    onTrashedPasswordsClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val requester = remember { FocusRequester() }
+    var menuExpanded by rememberSaveable { mutableStateOf(false) }
 
-    Column(
-        Modifier.background(MaterialTheme.colorScheme.surfaceColorAtElevation(AppBarDefaults.TopAppBarElevation))
-    ) {
-        Spacer(modifier = Modifier.statusBarsPadding())
-        Row(
-            modifier = Modifier.height(64.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = onBackPressed
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(id = R.string.navigation_back)
-                )
-            }
+    Box {
+        IconButton(onClick = { menuExpanded = true }) {
+            userAvatar(32.dp)
+        }
 
-            LaunchedEffect(key1 = Unit) {
-                coroutineContext.job.invokeOnCompletion {
-                    if (it?.cause == null) {
-                        requester.requestFocus()
-                    }
-                }
-            }
+        PopupAppMenu(
+            username = username,
+            serverAddress = serverAddress,
+            menuExpanded = menuExpanded,
+            userAvatar = userAvatar,
+            onDismissRequest = { menuExpanded = false },
+            onTrashedPasswordsClick = onTrashedPasswordsClick,
+            onLogoutClick = onLogoutClick
+        )
+    }
+}
 
-            TextField(
-                modifier = Modifier
-                    .weight(1f)
-                    .focusRequester(requester),
-                value = searchQuery,
-                onValueChange = setSearchQuery,
-                maxLines = 1,
-                singleLine = true,
-                placeholder = { Text(text = stringResource(R.string.action_search)) },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                ),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Search,
-                ),
-                keyboardActions = KeyboardActions(onSearch = {
-                    keyboardController?.hide()
-                })
-            )
-            IconButton(
-                onClick = { setSearchQuery("") }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Clear,
-                    contentDescription = stringResource(id = R.string.action_clear_search_query)
-                )
-            }
+/**
+ * Slides [content] up and out of view as the list scrolls, driven by [scrollBehavior] in the same
+ * way as a top app bar, so an enter always behavior brings it back on any scroll up.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CollapsingOnScroll(
+    scrollBehavior: TopAppBarScrollBehavior,
+    content: @Composable () -> Unit
+) {
+    val state = scrollBehavior.state
+
+    Layout(
+        content = content,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clipToBounds()
+    ) { measurables, constraints ->
+        val placeable = measurables.single().measure(constraints.copy(minHeight = 0))
+        val expandedHeight = placeable.height.toFloat()
+        if (state.heightOffsetLimit != -expandedHeight) state.heightOffsetLimit = -expandedHeight
+
+        val height = (expandedHeight + state.heightOffset).roundToInt().coerceIn(0, placeable.height)
+        layout(constraints.maxWidth, height) {
+            placeable.placeRelative(0, height - placeable.height)
         }
     }
 }
@@ -280,7 +316,6 @@ fun PopupAppMenu(
         }
 
     val orientation = LocalConfiguration.current.orientation
-    val screenHeight = LocalWindowInfo.current.containerSize.height.dp
 
     if (menuExpanded) {
         BasicAlertDialog(
@@ -309,12 +344,7 @@ fun PopupAppMenu(
                 Surface(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .then(
-                            if (orientation == Configuration.ORIENTATION_PORTRAIT)
-                                Modifier.fillMaxWidth()
-                            else
-                                Modifier.width(screenHeight)
-                        ),
+                        .readableFormWidth(),
                     color = MaterialTheme.colorScheme.surface,
                     shape = MaterialTheme.shapes.large
                 ) {
@@ -346,7 +376,7 @@ fun PopupAppMenu(
                                 )
 
                                 CompositionLocalProvider(
-                                    LocalContentColor provides LocalContentColor.current.copy(alpha = ContentAlpha.medium)
+                                    LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant
                                 ) {
                                     Text(
                                         text = serverAddress,
@@ -457,7 +487,7 @@ fun PopupAppMenu(
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                         CompositionLocalProvider(
-                            LocalContentColor provides LocalContentColor.current.copy(alpha = ContentAlpha.medium)
+                            LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant
                         ) {
                             Text(
                                 text = "${stringResource(id = R.string.app_name)} v${
@@ -503,10 +533,12 @@ fun TopBarPreview() {
 @Composable
 fun SearchBarPreview() {
     NextcloudPasswordsTheme {
-        SearchAppBar(
+        SearchPillAppBar(
             searchQuery = "Query",
             setSearchQuery = {},
-            onBackPressed = {}
+            searchExpanded = true,
+            onSearchClick = {},
+            onSearchCloseClick = {}
         )
     }
 }

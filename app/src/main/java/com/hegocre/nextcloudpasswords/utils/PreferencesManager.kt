@@ -2,6 +2,7 @@ package com.hegocre.nextcloudpasswords.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -172,7 +173,13 @@ class PreferencesManager private constructor(context: Context) {
         setPreference(PreferenceKeys.USE_NEXTCLOUD_INSTANCE_COLOR, value)
 
     fun getUseSystemDynamicColor(): Flow<Boolean> =
-        getPreference(PreferenceKeys.USE_SYSTEM_DYNAMIC_COLOR, false)
+        preferencesData.map { preferences ->
+            resolveUseSystemDynamicColor(
+                storedValue = preferences[PreferenceKeys.USE_SYSTEM_DYNAMIC_COLOR],
+                useInstanceColor = preferences[PreferenceKeys.USE_NEXTCLOUD_INSTANCE_COLOR] ?: false,
+                isDynamicColorSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+            )
+        }
 
     suspend fun setUseSystemDynamicColor(value: Boolean) =
         setPreference(PreferenceKeys.USE_SYSTEM_DYNAMIC_COLOR, value)
@@ -189,7 +196,7 @@ class PreferencesManager private constructor(context: Context) {
     suspend fun setUseStrictUrlMatching(value: Boolean) =
         setPreference(PreferenceKeys.USE_STRICT_URL_MATCHING, value)
 
-    private fun <T> getPreference(key: Preferences.Key<T>, defaultValue: T): Flow<T> =
+    private val preferencesData: Flow<Preferences> =
         sharedPreferences.data
             .catch { exception ->
                 if (exception is IOException) {
@@ -198,9 +205,11 @@ class PreferencesManager private constructor(context: Context) {
                     throw exception
                 }
             }
-            .map { preferences ->
-                preferences[key] ?: defaultValue
-            }
+
+    private fun <T> getPreference(key: Preferences.Key<T>, defaultValue: T): Flow<T> =
+        preferencesData.map { preferences ->
+            preferences[key] ?: defaultValue
+        }
 
     private suspend fun <T> setPreference(key: Preferences.Key<T>, value: T) {
         sharedPreferences.edit { preferences ->
@@ -239,3 +248,10 @@ class PreferencesManager private constructor(context: Context) {
         }
     }
 }
+// An instance colour chosen before dynamic colour became the default must keep working,
+// because both options are mutually exclusive in settings.
+fun resolveUseSystemDynamicColor(
+    storedValue: Boolean?,
+    useInstanceColor: Boolean,
+    isDynamicColorSupported: Boolean
+): Boolean = storedValue ?: (isDynamicColorSupported && !useInstanceColor)
