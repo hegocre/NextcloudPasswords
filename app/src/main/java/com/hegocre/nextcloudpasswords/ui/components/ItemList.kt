@@ -9,12 +9,17 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -150,6 +155,7 @@ fun MixedLazyColumn(
                 )
             }
         }
+        navigationBarSpace()
     }
 }
 
@@ -195,11 +201,17 @@ fun OTPLazyColumn(
                 )
             }
         }
+        navigationBarSpace()
     }
 }
 
 // Rows are drawn as one segmented group on a tinted background, as in Material 3 Expressive lists
 private val SegmentedListPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+
+// The list scrolls under the navigation bar, so its last row must still be able to clear it
+private fun LazyListScope.navigationBarSpace() {
+    item { Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars)) }
+}
 
 @Composable
 private fun segmentedRowShape(index: Int, count: Int): Shape =

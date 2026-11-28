@@ -16,10 +16,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -31,6 +35,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -168,7 +173,10 @@ fun NextcloudPasswordsApp(
                     onFolderAdd = if (autofillData is AutofillData.IsSave) null else {
                         { navController.navigate("${NCPScreen.FolderEdit.name}/none") }
                     },
-                    menuBelowButton = menuBelowButton
+                    menuBelowButton = menuBelowButton,
+                    modifier = if (menuBelowButton) Modifier else Modifier.windowInsetsPadding(
+                        WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+                    )
                 )
             }
         }
@@ -280,6 +288,11 @@ fun NextcloudPasswordsApp(
                         .nestedScroll(scrollBehavior.nestedScrollConnection)
                         .imePadding(),
                     containerColor = screenBackgroundColor,
+                    // Lists scroll under the navigation bar and end with room for it themselves
+                    contentWindowInsets = if (isListScreen) {
+                        ScaffoldDefaults.contentWindowInsets
+                            .exclude(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+                    } else ScaffoldDefaults.contentWindowInsets,
                     topBar = {
                         if (autofillData == null || autofillData is AutofillData.ChoosePwd) {
                             if (currentScreen != NCPScreen.PasswordEdit && currentScreen != NCPScreen.FolderEdit && currentScreen != NCPScreen.TrashedPasswords) {
